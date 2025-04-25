@@ -22,12 +22,13 @@ Route::get('/tracking', function() {
     return view('userPanel.tracking');
 })->name('tracking');
 
+
 // Admin Panel Routes
 Route::get('/admin', function () {
-    return view('adminPanel.welcomeAdmin');
+    return view('adminPanel.welcomeAdmin'); 
 })->name('admin.dashboard');
 
-
-
-
-
+Route::get('/admin/training-planUnProg', function () {
+    return view('adminPanel.trainingPlanUnProg');
+})->name('admin.training-planUnProg');
+  
