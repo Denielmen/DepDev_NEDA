@@ -12,10 +12,10 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f8f9fa;
+            overflow-x: hidden;
         }
         .navbar {
-            background-color: rgb(255, 255, 255);
+            background-color:rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
         }
@@ -45,147 +45,82 @@
             padding: 12px 20px;
             font-size: 0.9rem;
         }
-        .sidebar a:hover, .sidebar a.active {
+        .sidebar a:hover {
             background-color: #004080;
         }
         .main-content {
             flex-grow: 1;
-            padding: 20px 30px;
-            background-color: white;
+            padding: 20px;
+            background-color: #f8f9fa;
         }
         .content-header {
-            margin-bottom: 25px;
-            border-bottom: 2px solid #dee2e6;
-            padding-bottom: 10px;
+            background-color: #e7f1ff;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
         .content-header h2 {
             color: #003366;
-            margin: 0;
             font-size: 1.5rem;
-            font-weight: 600;
+            margin: 0;
         }
         .search-box {
-            max-width: 300px;
-            margin-bottom: 25px;
-            margin-left: 70rem;
+            position: relative;
+            width: 300px;
         }
-        .search-box .input-group {
+        .search-box input {
+            width: 100%;
+            padding: 8px 15px;
+            padding-right: 35px;
             border: 1px solid #ced4da;
-            border-radius: 4px;
-            overflow: hidden;
+            border-radius: 5px;
+            background-color: white;
         }
-        .search-box .form-control {
-            border: none;
-            box-shadow: none;
-            font-size: 0.9rem;
-        }
-        .search-box .btn {
-            border: none;
-            background-color: #f8f9fa;
+        .search-box .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             color: #6c757d;
         }
-        .search-box .btn:hover {
-            background-color: #e9ecef;
-            color: #003366;
+        .training-table {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .program-section {
-            margin-bottom: 20px;
-        }
-        .program-header {
+        .training-table th {
             background-color: #003366;
             color: white;
-            padding: 8px 15px;
-            display: inline-block;
             font-weight: 500;
-            border-radius: 4px 0 0 4px;
+            padding: 12px 15px;
         }
-        .program-value {
-            display: inline-block;
-            padding: 8px 15px;
-            font-weight: 500;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-left: none;
-            border-radius: 0 4px 4px 0;
-        }
-        .table-responsive {
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .table {
-            margin-bottom: 0;
-        }
-        .table th {
-            background-color: #f8f9fa;
-            color: #003366;
-            font-weight: 600;
-            border: 1px solid #dee2e6;
-            padding: 10px;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-        .table td {
-            padding: 10px;
-            border: 1px solid #dee2e6;
-            font-size: 0.9rem;
+        .training-table td {
+            padding: 12px 15px;
             vertical-align: middle;
         }
-        .table thead tr:first-child th {
-            border-top: none;
-        }
-        .table thead tr:last-child th {
-            border-bottom: 2px solid #dee2e6;
-        }
-        .status-implemented {
-            color: #28a745;
-            font-weight: 500;
-        }
-        .border-end {
-            border-right: 2px solid #dee2e6 !important;
-        }
-        .ratings-section th {
-            text-align: center;
+        .training-table tr:nth-child(even) {
             background-color: #f8f9fa;
         }
-        .empty-cell {
-            background-color: #f8f9fa;
-            border-left: none !important;
-            border-right: none !important;
+        .tab-buttons {
+            display: inline-flex;
+            gap: 5px;
         }
-        .program-tabs {
-            margin-bottom: 20px;
-        }
-        .program-tab {
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            color: #003366;
+        .tab-button {
+            background-color: transparent;
+            border: none;
             padding: 8px 20px;
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
+            color: #666;
             text-decoration: none;
-            display: inline-block;
-            min-width: 120px;
-            text-align: center;
+            border-radius: 4px;
         }
-        .program-tab:first-child {
-            border-radius: 4px 0 0 4px;
-        }
-        .program-tab:last-child {
-            border-radius: 0 4px 4px 0;
-            border-left: none;
-        }
-        .program-tab.active {
-            background-color: #003366;
-            color: white;
-            border-color: #003366;
-            text-decoration: none;
-        }
-        .program-tab:hover:not(.active) {
-            background-color: #f8f9fa;
+        .tab-button:hover {
             text-decoration: none;
             color: #003366;
+        }
+        .tab-button.active {
+            background-color: #003366;
+            color: white;
         }
     </style>
 </head>
@@ -213,10 +148,10 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="{{ url('/') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="#"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
         </div>
 
         <!-- Main Content -->
@@ -225,58 +160,53 @@
                 <h2>List Of Training Plans</h2>
             </div>
 
-            <div class="search-box">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search...">
-                    <button class="btn" type="button">
-                        <i class="bi bi-search"></i>
-                    </button>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="tab-buttons">
+                    <a href="{{ route('training.profile.program') }}" class="tab-button">Program</a>
+                    <a href="{{ route('training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
+                </div>
+                <div class="search-box">
+                    <input type="text" placeholder="Search...">
+                    <i class="bi bi-search search-icon"></i>
                 </div>
             </div>
 
-            <div class="program-tabs">
-                <a href="{{ route('training.profile.program') }}" class="program-tab">Program</a>
-                <a href="{{ route('training.profile.unprogrammed') }}" class="program-tab active">Unprogrammed</a>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table">
+            <div class="training-table">
+                <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th style="min-width: 200px;">Training Title</th>
-                            <th style="min-width: 150px;">Competency</th>
-                            <th style="min-width: 150px;">Period of Implementation</th>
-                            <th style="min-width: 150px;">Provider</th>
-                            <th style="min-width: 120px;">Status</th>
-                            <th colspan="4" class="text-center" style="min-width: 400px;">Ratings</th>
+                            <th>Training Title</th>
+                            <th>Competency</th>
+                            <th>Period of Implementation</th>
+                            <th>Provider</th>
+                            <th>Status</th>
+                            <th colspan="4" class="text-center">Ratings</th>
                         </tr>
                         <tr>
-                            <th colspan="5" class="empty-cell"></th>
-                            <th colspan="2" class="text-center border-end">Participant</th>
+                            <th colspan="5"></th>
+                            <th colspan="2" class="text-center">Participant</th>
                             <th colspan="2" class="text-center">Supervisor</th>
                         </tr>
                         <tr>
-                            <th colspan="5" class="empty-cell"></th>
+                            <th colspan="5"></th>
                             <th class="text-center">Pre</th>
-                            <th class="text-center border-end">Post</th>
+                            <th class="text-center">Post</th>
                             <th class="text-center">Pre</th>
                             <th class="text-center">Post</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($trainings as $training)
                         <tr>
-                            <td>{{ $training->title }}</td>
-                            <td>{{ $training->competency }}</td>
-                            <td>{{ $training->implementation_date->format('m/d/y') }}</td>
-                            <td>{{ $training->provider }}</td>
-                            <td class="status-implemented">{{ $training->status }}</td>
-                            <td class="text-center">{{ $training->participant_pre_rating }}</td>
-                            <td class="text-center border-end">{{ $training->participant_post_rating }}</td>
-                            <td class="text-center">{{ $training->supervisor_pre_rating }}</td>
-                            <td class="text-center">{{ $training->supervisor_post_rating }}</td>
+                            <td>Project Management Fundamentals</td>
+                            <td>Project Management</td>
+                            <td>12/15/23</td>
+                            <td>PMI Philippines</td>
+                            <td>Implemented</td>
+                            <td class="text-center">3.00</td>
+                            <td class="text-center">4.00</td>
+                            <td class="text-center">3.25</td>
+                            <td class="text-center">4.25</td>
                         </tr>
-                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -285,4 +215,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+</html>
 </html>

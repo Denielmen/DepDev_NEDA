@@ -156,10 +156,10 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="#"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="#"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="#"><i class="bi bi-people me-2"></i>List of Participants</a>
-            <a href="#"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
         </div>
 
         <!-- Main Content -->
@@ -180,21 +180,27 @@
                         <div class="flex">
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <h5>Training Plan</h5>
-                                <p>Evaluate the effectiveness of completed training progress.</p>
+                                <a href="{{ route('admin.training-plan') }}" class="text-decoration-none">
+                                    <h5>Training Plan</h5>
+                                    <p>Evaluate the effectiveness of completed training progress.</p>
+                                </a>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <h5>List of Participants</h5>
-                                <p>View and plan learning activities aligned with your role.</p>
+                                <a href="#" class="text-decoration-none">
+                                    <h5>List of Participants</h5>
+                                    <p>View and plan learning activities aligned with your role.</p>
+                                </a>
                             </div>
                         </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <h5>Reports</h5>
-                                <p>Track your learning and development progress.</p>
+                                <a href="#" class="text-decoration-none">
+                                    <h5>Reports</h5>
+                                    <p>Track your learning and development progress.</p>
+                                </a>
                             </div>
                         </div>
                     </div>
