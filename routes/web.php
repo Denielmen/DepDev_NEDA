@@ -31,4 +31,28 @@ Route::get('/admin', function () {
 Route::get('/admin/training-planUnProg', function () {
     return view('adminPanel.trainingPlanUnProg');
 })->name('admin.training-planUnProg');
-  
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+
+// Public routes (accessible without login)
+
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Protected routes (require login)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->middleware(['verified'])->name('dashboard');
+     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Add route for training profile
+});
+
+require __DIR__.'/auth.php';

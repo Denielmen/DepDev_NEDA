@@ -1,11 +1,13 @@
 <?php
-
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Training extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'competency',
@@ -16,10 +18,6 @@ class Training extends Model
         'participant_pre_rating',
         'participant_post_rating',
         'supervisor_pre_rating',
-        'supervisor_post_rating'
+        'supervisor_post_rating',
     ];
-
-    protected $casts = [
-        'implementation_date' => 'date'
-    ];
-} 
+}

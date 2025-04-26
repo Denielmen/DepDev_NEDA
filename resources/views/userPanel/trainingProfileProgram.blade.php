@@ -187,6 +187,18 @@
             text-decoration: none;
             color: #003366;
         }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -205,6 +217,15 @@
                         User
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu">
+                        <!-- Logout Button -->
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item logout-btn">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -284,24 +305,5 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function switchProgram(type) {
-            // Update program value
-            document.getElementById('programType').textContent = type === 'program' ? 'Program' : 'Unprogrammed';
-            
-            // Update active tab
-            const tabs = document.querySelectorAll('.program-tab');
-            tabs.forEach(tab => {
-                if (tab.textContent.toLowerCase() === type) {
-                    tab.classList.add('active');
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
-
-            // The table content remains the same for this example
-            // You can add AJAX calls here to load different data if needed
-        }
-    </script>
 </body>
 </html>

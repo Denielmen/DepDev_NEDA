@@ -13,10 +13,9 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            
         }
         .navbar {
-            background-color:rgb(255, 255, 255);
+            background-color: rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
         }
@@ -38,7 +37,6 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
-            
         }
         .sidebar a {
             color: white;
@@ -73,8 +71,6 @@
             justify-content: center;
             align-items: center;
             gap: 300px;
-           
-            
         }
         .header h1 {
             color: #003366;
@@ -91,14 +87,6 @@
             padding: 4rem;
             position: relative;
         }
-        /* .menu-cards::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        } */
         .flex {
             display: flex;
             justify-content: center;
@@ -166,8 +154,8 @@
         <div class="main-content">
             <div class="header">
                 <div class="pic">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
-                <img src="/images/repub.png" alt="NEDA Logo">
+                    <img src="/images/neda-logo.png" alt="NEDA Logo">
+                    <img src="/images/repub.png" alt="NEDA Logo">
                 </div>
                 <h1>REPUBLIC OF THE PHILIPPINES</h1>
                 <h1>DEPARTMENT OF ECONOMY PLANNING AND DEVELOPMENT</h1>
@@ -178,20 +166,20 @@
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="flex">
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <a href="{{ route('training.profile') }}" class="text-decoration-none">
-                                    <h5>Training Profile</h5>
-                                    <p>Evaluate the effectiveness of completed training progress.</p>
-                                </a>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <a href="{{ route('training.profile.program') }}" class="text-decoration-none">
+                                        <h5>Training Profile</h5>
+                                        <p>Evaluate the effectiveness of completed training progress.</p>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <h5>Training Tracking & History</h5>
-                                <p>View and plan learning activities aligned with your role.</p>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <h5>Training Tracking & History</h5>
+                                    <p>View and plan learning activities aligned with your role.</p>
+                                </div>
                             </div>
-                        </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
@@ -205,6 +193,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></   script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
