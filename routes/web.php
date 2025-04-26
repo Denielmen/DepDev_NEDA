@@ -6,7 +6,7 @@ use App\Http\Controllers\TrainingProfileController;
 // User Panel Routes
 Route::get('/', function () {
     return view('userPanel.welcomeUser');
-});
+})->name('home');
 
 Route::get('/training-profile', function() {
     return redirect()->route('training.profile.program');
@@ -22,13 +22,38 @@ Route::get('/tracking', function() {
     return view('userPanel.tracking');
 })->name('tracking');
 
+Route::get('/training-effectiveness', function() {
+    return view('userPanel.trainingEffectiveness');
+})->name('training.effectiveness');
 
 // Admin Panel Routes
-Route::get('/admin', function () {
-    return view('adminPanel.welcomeAdmin'); 
-})->name('admin.dashboard');
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Admin Home
+    Route::get('/', function () {
+        return view('adminPanel.welcomeAdmin');
+    })->name('home');
 
-Route::get('/admin/training-planUnProg', function () {
-    return view('adminPanel.trainingPlanUnProg');
-})->name('admin.training-planUnProg');
+    // Training Plan routes
+    Route::get('/training-plan', function () {
+        return view('adminPanel.trainingPlan');
+    })->name('training-plan');
+
+    Route::get('/training-plan/unprogrammed', function () {
+        return view('adminPanel.trainingPlanUnProg');
+    })->name('training-plan.unprogrammed');
+
+    Route::get('/training-plan/create', function () {
+        return view('adminPanel.trainingPlanCreate');
+    })->name('training-plan.create');
+
+    // Participants routes
+    Route::get('/participants', function () {
+        return view('adminPanel.listOfUser');
+    })->name('participants');
+
+    // Reports routes
+    Route::get('/reports', function () {
+        return view('adminPanel.report');
+    })->name('reports');
+});
   
