@@ -21,6 +21,7 @@
             width: 270px;
             padding-top: 20px;
             position: fixed;
+            top: 56px; /* Adjust for the height of the fixed navbar */
         }
         .sidebar a {
             color: white;
@@ -35,6 +36,7 @@
         .main-content {
             margin-left: 270px;
             padding: 20px;
+            margin-top: 76px; /* Adjust for the height of the fixed navbar */
         }
         .register-container {
             max-width: 800px;
