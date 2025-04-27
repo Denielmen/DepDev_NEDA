@@ -13,27 +13,20 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->string('user_id')->unique();
+            $table->string('last_name', 50);
+            $table->string('first_name', 50);
+            $table->string('mid_init', 10)->nullable();
+            $table->string('position', 100);
+            $table->string('office', 100);
+            $table->integer('years_in_position');
+            $table->integer('years_in_csc');
+            $table->string('division', 100);
+            $table->integer('salary_grade');
+            $table->string('role', 50);
+            $table->string('superior', 100)->nullable();
+            $table->string('password', 255);
             $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
         });
     }
 
