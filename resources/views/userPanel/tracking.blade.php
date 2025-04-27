@@ -35,7 +35,7 @@
         .sidebar {
             background-color: #003366;
             min-height: calc(100vh - 56px);
-            width: 255px;
+            width: 270px;
             padding-top: 20px;
         }
         .sidebar a {
