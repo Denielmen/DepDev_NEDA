@@ -74,7 +74,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 200px;  
+            gap: 300px;  
         }
         .header h1 {
             color: #003366;
