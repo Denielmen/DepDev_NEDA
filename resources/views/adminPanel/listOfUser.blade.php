@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,10 +14,9 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            
         }
         .navbar {
-            background-color:rgb(255, 255, 255);
+            background-color: rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
         }
@@ -38,7 +38,6 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
-            
         }
         .sidebar a {
             color: white;
@@ -50,7 +49,6 @@
         .sidebar a:hover {
             background-color: #004080;
         }
-        
     </style>
 </head>
 <body>
@@ -83,9 +81,48 @@
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
         </div>
 
-      
+        <!-- Main Content -->
+        <div class="main-content" style="padding: 20px; flex-grow: 1;">
+            <div class="table-container" style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                <h2 style="margin-bottom: 20px;">List of Staffs</h2>
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>User ID</th>
+                            <th>Position</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Smith</td>
+                            <td>2023035084</td>
+                            <td>Administrative</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i> Edit</button>
+                                <button class="btn btn-secondary btn-sm"><i class="bi bi-toggle-off"></i> Disable</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Jane Doe</td>
+                            <td>2024045509</td>
+                            <td>Manager</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i> Edit</button>
+                                <button class="btn btn-success btn-sm"><i class="bi bi-toggle-on"></i> Enable</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
+
+    

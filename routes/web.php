@@ -2,7 +2,11 @@
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrainingProfileController;
+use App\Http\Controllers\SearchController;
 
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+Route::get('/search/results', [SearchController::class, 'results'])->name('search.results');
+Route::get('/search/export/{format}', [SearchController::class, 'export'])->name('search.export');
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
