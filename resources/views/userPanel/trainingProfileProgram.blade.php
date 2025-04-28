@@ -101,6 +101,16 @@
         .training-table tr:nth-child(even) {
             background-color: #f8f9fa;
         }
+        .btn-info {
+            background-color: #003366;
+            border-color: #003366;
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #004080;
+            border-color: #004080;
+            color: white;
+        }
         .tab-buttons {
             display: inline-flex;
             gap: 5px;
@@ -181,11 +191,13 @@
                             <th>Provider</th>
                             <th>Status</th>
                             <th colspan="4" class="text-center">Ratings</th>
+                            <th>Action</th>
                         </tr>
                         <tr>
                             <th colspan="5"></th>
                             <th colspan="2" class="text-center">Participant</th>
                             <th colspan="2" class="text-center">Supervisor</th>
+                            <th></th>
                         </tr>
                         <tr>
                             <th colspan="5"></th>
@@ -193,20 +205,26 @@
                             <th class="text-center">Post</th>
                             <th class="text-center">Pre</th>
                             <th class="text-center">Post</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($trainings as $training)
                         <tr>
-                            <td>Business Writing</td>
-                            <td>Business Writing</td>
-                            <td>11/23/23</td>
-                            <td>NEDA Training Institute</td>
-                            <td>Implemented</td>
-                            <td class="text-center">3.50</td>
-                            <td class="text-center">4.25</td>
-                            <td class="text-center">3.75</td>
-                            <td class="text-center">4.50</td>
+                            <td>{{ $training->title }}</td>
+                            <td>{{ $training->competency }}</td>
+                            <td>{{ $training->implementation_date->format('m/d/y') }}</td>
+                            <td>{{ $training->provider }}</td>
+                            <td>{{ $training->status }}</td>
+                            <td class="text-center">{{ $training->participant_pre_rating }}</td>
+                            <td class="text-center">{{ $training->participant_post_rating }}</td>
+                            <td class="text-center">{{ $training->supervisor_pre_rating }}</td>
+                            <td class="text-center">{{ $training->supervisor_post_rating }}</td>
+                            <td>
+                                <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm btn-info">View</a>
+                            </td>
                         </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

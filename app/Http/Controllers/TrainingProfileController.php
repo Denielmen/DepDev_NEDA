@@ -18,4 +18,10 @@ class TrainingProfileController extends Controller
         $trainings = Training::where('type', 'Unprogrammed')->get();
         return view('userPanel.trainingProfileUnProgram', compact('trainings'));
     }
+
+    public function show($id)
+    {
+        $training = Training::findOrFail($id);
+        return view('userPanel.trainingProfileShow', compact('training'));
+    }
 } 
