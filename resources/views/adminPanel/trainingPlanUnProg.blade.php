@@ -45,7 +45,7 @@
             padding: 12px 20px;
             font-size: 0.9rem;
         }
-        .sidebar a:hover, .sidebar a.active  {
+        .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
         }
         .main-content {

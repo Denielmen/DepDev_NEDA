@@ -1,7 +1,15 @@
 <?php
-
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrainingProfileController;
+
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);
+
+// Login Routes (if not using Laravel Breeze or Jetstream)
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
 // User Panel Routes
 Route::get('/', function () {
@@ -43,7 +51,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     })->name('training-plan.unprogrammed');
 
     Route::get('/training-plan/create', function () {
-        return view('adminPanel.trainingPlanCreate');
+        return view('adminPanel.createTraining');
     })->name('training-plan.create');
 
     // Participants routes
