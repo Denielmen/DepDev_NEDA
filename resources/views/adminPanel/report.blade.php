@@ -13,10 +13,9 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            
         }
         .navbar {
-            background-color:rgb(255, 255, 255);
+            background-color: rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
         }
@@ -38,7 +37,9 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
-            
+            position: fixed;
+            left: 0;
+            top: 56px;
         }
         .sidebar a {
             color: white;
@@ -47,10 +48,56 @@
             padding: 12px 20px;
             font-size: 0.9rem;
         }
-        .sidebar a:hover {
+        .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
         }
-        
+        .main-content {
+            background: #e9f0fb; 
+            min-height: calc(100vh - 56px);
+            margin-left: 270px; /* Match sidebar width */
+            width: calc(100% - 270px);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.25rem;
+            box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+            padding: 1.5rem;
+        }
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px 15px 8px 35px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .search-box .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .table-container {
+            overflow-x: auto; 
+            max-height: 500px;
+        }
+        .training-table {
+            min-width: 1000px;
+        }
+        .table-header {
+            background: #002e67 !important; 
+            color: #fff !important; 
+            font-weight: bold;
+            
+        }
+        .category-header {
+            background: #133b6b !important; 
+            color: #fff  !important; 
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -74,78 +121,77 @@
         </div>
     </nav>
 
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <a href="{{ route('admin.home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
-        </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
+        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
+        <a href="{{ route('admin.reports') }}" class="active"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+    </div>
 
-        <div class="flex-grow-1 p-4" style="background: #e9f0fb; min-height: calc(100vh - 56px);">
-            <div class="bg-white rounded shadow-sm p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="mb-0">Training Reports</h2>
-                    <div>
-                        <input type="text" class="form-control d-inline-block" placeholder="Search" style="width: 200px;">
-                        <button class="btn btn-light border ms-2"><i class="bi bi-search"></i></button>
-                    </div>
+    <!-- Main Content -->
+    <div class="main-content p-4">
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">Training Reports</h2>
+                <div class="search-box">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" placeholder="Search...">
                 </div>
-                <div style="overflow-x: auto; max-height: 500px;">
-                    <table class="table table-bordered align-middle" style="min-width: 1000px;">
-                        <thead>
-                            <tr class="text-center align-middle">
-                                <th style="background: #003366; color: #fff;">Training Program</th>
-                                <th style="background: #003366; color: #fff;">Competency</th>
-                                <th style="background: #003366; color: #fff;">CY 2025</th>
-                                <th style="background: #003366; color: #fff;">CY 2026</th>
-                                <th style="background: #003366; color: #fff;">CY 2027</th>
-                                <th style="background: #003366; color: #fff;">Provider</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" style="background: #133b6b; color: #fff; font-weight: bold;">I. Foundational/Mandatory</td>
-                            </tr>
-                            <tr>
-                                <td>1. Orientation Course for New NEDAns - Batch 1</td>
-                                <td>Core Social Economic Development Planning Advocacy</td>
-                                <td>
-                                    1. Juan Dela-Cruz<br>
-                                    2. John Smith<br>
-                                    3. John Doe
-                                </td>
-                                <td>New Hires in 2025</td>
-                                <td>New Hires in 2026</td>
-                                <td>NCO</td>
-                            </tr>
-                            <tr>
-                                <td colspan="6" style="background: #133b6b; color: #fff; font-weight: bold;">II. Competency Enhancement</td>
-                            </tr>
-                            <tr>
-                                <td>1. Gross Regional Domestic Product Estimation (GRDPE) Phase 1: Concepts and Classification</td>
-                                <td>Functional - Managing Data and Information</td>
-                                <td>
-                                    1. Juan Dela-Cruz<br>
-                                    2. John Smith<br>
-                                    3. John Doe
-                                </td>
-                                <td>
-                                    1. Juan Dela-Cruz<br>
-                                    2. John Smith<br>
-                                    3. John Doe
-                                </td>
-                                <td>
-                                    1. Juan Dela-Cruz<br>
-                                    2. John Smith<br>
-                                    3. John Doe
-                                </td>
-                                <td>NCO</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            </div>
+            <div class="table-container">
+                <table class="table table-bordered align-middle training-table">
+                    <thead>
+                        <tr class="text-center align-middle">
+                            <th class="table-header">Training Program</th>
+                            <th class="table-header">Competency</th>
+                            <th class="table-header">CY 2025</th>
+                            <th class="table-header">CY 2026</th>
+                            <th class="table-header">CY 2027</th>
+                            <th class="table-header">Provider</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="category-header">I. Foundational/Mandatory</td>
+                        </tr>
+                        <tr>
+                            <td>1. Orientation Course for New NEDAns - Batch 1</td>
+                            <td>Core Social Economic Development Planning Advocacy</td>
+                            <td>
+                                1. Juan Dela-Cruz<br>
+                                2. John Smith<br>
+                                3. John Doe
+                            </td>
+                            <td>New Hires in 2025</td>
+                            <td>New Hires in 2026</td>
+                            <td>NCO</td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" class="category-header">II. Competency Enhancement</td>
+                        </tr>
+                        <tr>
+                            <td>1. Gross Regional Domestic Product Estimation (GRDPE) Phase 1: Concepts and Classification</td>
+                            <td>Functional - Managing Data and Information</td>
+                            <td>
+                                1. Juan Dela-Cruz<br>
+                                2. John Smith<br>
+                                3. John Doe
+                            </td>
+                            <td>
+                                1. Juan Dela-Cruz<br>
+                                2. John Smith<br>
+                                3. John Doe
+                            </td>
+                            <td>
+                                1. Juan Dela-Cruz<br>
+                                2. John Smith<br>
+                                3. John Doe
+                            </td>
+                            <td>NCO</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

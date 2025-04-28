@@ -55,7 +55,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     })->name('training-plan.unprogrammed');
 
     Route::get('/training-plan/create', function () {
-        return view('adminPanel.trainingPlanCreate');
+        return view('adminPanel.createTraining');
     })->name('training-plan.create');
 
     // Participants routes

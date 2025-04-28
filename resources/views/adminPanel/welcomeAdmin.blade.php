@@ -38,7 +38,7 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
-            
+            position: fixed;
         }
         .sidebar a {
             color: white;
@@ -56,13 +56,15 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            min-height: 10vh;
+            height: 92vh;
         }
         .header {
             padding: 1rem;
             text-align: center;
             background-color: #f8f9fa;
             opacity: 0.7;
+            margin-left: 270px;
+            margin-right: 0%;
         }
         .header img {
             width: 50px;
@@ -90,6 +92,8 @@
         .menu-cards {
             padding: 4rem;
             position: relative;
+            margin-left: 270px; /* Adjusted to account for the sidebar width */
+            margin-right: 0;
         }
         /* .menu-cards::before {
             content: '';
@@ -110,7 +114,7 @@
             border-radius: 15px;
             padding: 1.5rem;
             margin-bottom: 1rem;
-            box-shadow: -19px 1px 4px 1px #003366;
+            box-shadow: 0px -7px 1px 0px #003366;
             transition: transform 0.2s;
         }
         .card:hover {

@@ -9,36 +9,62 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #003366; /* Dark blue background */
+            padding: 10px;
+            text-align: center; /* This centers the text */
+            border: 1px solid #ddd;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center; /* This centers the text */
+            border: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1; /* Optional: Highlight row on hover */
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
         }
+
         .navbar {
+            background-color: rgb(255, 255, 255);
             background-color: rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
         }
+
         .navbar-brand {
             color: #003366 !important;
             font-size: 1rem;
             display: flex;
             align-items: center;
         }
+
         .navbar-brand img {
             height: 30px;
             margin-right: 10px;
         }
-        .nav-link, .user-icon, .user-menu {
-            color: black !important;
-        }
+
         .sidebar {
             background-color: #003366;
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
         }
+
         .sidebar a {
             color: white;
             text-decoration: none;
@@ -46,10 +72,64 @@
             padding: 12px 20px;
             font-size: 0.9rem;
         }
+
         .sidebar a:hover {
             background-color: #004080;
         }
     </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Select all buttons with the class 'btn-success' (Enable) and 'btn-secondary' (Disable)
+        const buttons = document.querySelectorAll("button");
+
+        buttons.forEach(button => {
+            button.addEventListener("click", function () {
+                // Check if the button is 'Enable' or 'Disable'
+                if (this.classList.contains("btn-success")) {
+                    this.classList.remove("btn-success");
+                    this.classList.add("btn-secondary");
+                    this.innerHTML = '<i class="bi bi-toggle-off"></i> Disable'; // Change text and icon
+                    this.closest("tr").querySelector(".status-indicator").classList.remove("inactive");
+                    this.closest("tr").querySelector(".status-indicator").classList.add("active");
+                } else if (this.classList.contains("btn-secondary")) {
+                    this.classList.remove("btn-secondary");
+                    this.classList.add("btn-success");
+                    this.innerHTML = '<i class="bi bi-toggle-on"></i> Enable'; // Change text and icon
+                    this.closest("tr").querySelector(".status-indicator").classList.remove("active");
+                    this.closest("tr").querySelector(".status-indicator").classList.add("inactive");
+                }
+            });
+        });
+
+        // Role filter functionality
+        const sortByDropdown = document.getElementById("sort-by");
+        const tableBody = document.querySelector(".table-container table tbody");
+
+        // Listen for dropdown selection changes
+        sortByDropdown.addEventListener("change", function () {
+            const rows = Array.from(tableBody.querySelectorAll("tr")); // Convert rows to an array
+            const selectedRole = this.value.trim(); // Get the selected option value
+
+            // Filter rows based on the selected role
+            rows.forEach(row => {
+                const roleCell = row.querySelector("td:nth-child(3)"); // Get the role column (3rd column)
+                
+                if (roleCell) { // Ensure roleCell exists
+                    const role = roleCell.textContent.trim().toLowerCase(); // Get the role text and normalize it
+
+                    // Show or hide rows based on selected role
+                    if (selectedRole === "all-role" || role === selectedRole.toLowerCase()) {
+                        row.style.display = ""; // Show row
+                    } else {
+                        row.style.display = "none"; // Hide row
+                    }
+                }
+            });
+        });
+    });
+</script>
+
 </head>
 <body>
     <!-- Navbar -->
@@ -118,7 +198,6 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
