@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -215,44 +216,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Orientation Course for...</td>
-                            <td>Core: Socio-Economic...</td>
-                            <td>07/25/22</td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-view">View</button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Edit</a></li>
-                                            <li><a class="dropdown-item" href="#">Delete</a></li>
-                                        </ul>
+                        @forelse ($trainings as $training)
+                            <tr>
+                                <td>{{ $training->title }}</td>
+                                <td>{{ $training->competency }}</td>
+                                <td>{{ $training->year->format('m/d/Y') }} -{{$endDate = $training->year->addDays(2)->format('m/d/Y ');}}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-view">View</button>
+                                        <div class="dropdown">
+                                            <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="{{ route('admin.training-plan.edit', ['id' => $training->id]) }}">Edit</a></li>
+                                                <li><a class="dropdown-item" href="#">Delete</a></li>
+                                            </ul>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Orientation Course for...</td>
-                            <td>Core: Socio-Economic...</td>
-                            <td>08/26/23</td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-view">View</button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Edit</a></li>
-                                            <li><a class="dropdown-item" href="#">Delete</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center">No training plans available.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

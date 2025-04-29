@@ -45,18 +45,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         return view('adminPanel.welcomeAdmin');
     })->name('home');
 
-    // Training Plan routes
-    Route::get('/training-plan', function () {
-        return view('adminPanel.trainingPlan');
-    })->name('training-plan');
-
-    Route::get('/training-plan/unprogrammed', function () {
-        return view('adminPanel.trainingPlanUnProg');
-    })->name('training-plan.unprogrammed');
+   
 
     Route::get('/training-plan/create', function () {
         return view('adminPanel.createTraining');
     })->name('training-plan.create');
+
+    // Training Plan routes
+    Route::get('/training-plan', [TrainingProfileController::class, 'trainingPlan'])->name('training-plan');
+    Route::get('/training-plan/edit', [TrainingProfileController::class, 'edit'])->name('training-plan.edit');
+    Route::put('/training-plan/update', [TrainingProfileController::class, 'update'])->name('training-plan.update');
+    Route::get('/training-plan/unprogrammed', function () {
+        return view('adminPanel.trainingPlanUnProg');
+    })->name('training-plan.unprogrammed');
 
     // Participants routes
     Route::get('/participants', function () {
@@ -68,4 +69,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
         return view('adminPanel.report');
     })->name('reports');
 });
-  
