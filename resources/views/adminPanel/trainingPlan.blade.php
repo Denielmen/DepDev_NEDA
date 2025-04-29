@@ -15,7 +15,7 @@
             padding: 0;
             overflow-x: hidden;
         }
-        .navbar {
+        .navbar {   
             background-color: #fff;
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
@@ -250,3 +250,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+    
