@@ -22,6 +22,26 @@ Route::get('/tracking', function() {
     return view('userPanel.tracking');
 })->name('tracking');
 
+Route::get('/effectivenessParticipant', function() {
+    return view('userPanel.trainingEffectivenessParticipant');
+})->name('effectivenessParticipant');
+
+Route::get('/role', function() {
+    return view('userPanel.chooseRole');
+})->name('chooseRole');
+
+Route::get('/effectivenessSupervisor', function() {
+    return view('userPanel.trainingEffectivenessSupervisor');
+})->name('effectivenessSupervisor');
+
+Route::get('/evalParticipant', function() {
+    return view('userPanel.evalParticipant');
+})->name('evalParticipant');
+
+Route::get('/evalSupervisor', function() {
+    return view('userPanel.evalSupervisor');
+})->name('evalSupervisor');
+
 
 // Admin Panel Routes
 Route::get('/admin', function () {
