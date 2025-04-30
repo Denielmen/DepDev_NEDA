@@ -38,7 +38,7 @@ Route::get('/training-effectiveness', function() {
 })->name('training.effectiveness');
 
 // Admin Panel Routes
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
     // Admin Home
     Route::get('/', function () {
         return view('adminPanel.welcomeAdmin');
@@ -61,6 +61,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/participants', function () {
         return view('adminPanel.listOfUser');
     })->name('participants');
+
+    Route::get('/participants/{id}', function ($id) {
+        return view('adminPanel.userInfo');
+    })->name('participants.info');
+
+    Route::get('/participants/{id}/unprogrammed', function ($id) {
+        return view('adminPanel.userInfoUnprog');
+    })->name('participants.info.unprogrammed');
 
     // Reports routes
     Route::get('/reports', function () {
