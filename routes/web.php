@@ -26,6 +26,9 @@ Route::get('/training-profile/program', [TrainingProfileController::class, 'prog
 Route::get('/training-profile/unprogrammed', [TrainingProfileController::class, 'unprogrammed'])
     ->name('training.profile.unprogrammed');
 
+Route::get('/training-profile/program/{id}', [TrainingProfileController::class, 'show'])
+    ->name('training.profile.show');
+
 Route::get('/tracking', function() {
     return view('userPanel.tracking');
 })->name('tracking');
