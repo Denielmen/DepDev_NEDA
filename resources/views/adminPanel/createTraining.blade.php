@@ -52,7 +52,7 @@
             background-color: #004080;
         }
         .main-content {
-            background:  #f8f9fa;
+            background-color: rgb(187, 219, 252);
             min-height: calc(100vh - 56px);
             margin-left: 270px;
             width: calc(100% - 270px);
@@ -67,6 +67,7 @@
             font-size: 1.5rem;
             margin-bottom: 0;
             color: #003366 ;
+            font-weight: bold;
         }
         .training-card {
             background: #fff;
