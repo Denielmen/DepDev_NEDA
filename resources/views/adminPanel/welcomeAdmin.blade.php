@@ -192,7 +192,7 @@
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <a href="#" class="text-decoration-none">
+                                <a href="{{ route('admin.participants')}}" class="text-decoration-none">
                                     <h5>List of Participants</h5>
                                     <p>View and plan learning activities aligned with your role.</p>
                                 </a>
@@ -201,7 +201,7 @@
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <a href="#" class="text-decoration-none">
+                                <a href="{{ route('admin.reports')}}" class="text-decoration-none">
                                     <h5>Reports</h5>
                                     <p>Track your learning and development progress.</p>
                                 </a>
