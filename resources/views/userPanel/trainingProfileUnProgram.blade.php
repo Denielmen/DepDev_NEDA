@@ -52,6 +52,7 @@
             flex-grow: 1;
             padding: 20px;
             background-color: #f8f9fa;
+            background-color: rgb(187, 219, 252);   
         }
         .content-header {
             background-color: #e7f1ff;
@@ -63,6 +64,7 @@
             color: #003366;
             font-size: 1.5rem;
             margin: 0;
+            font-weight: bold;
         }
         .search-box {
             position: relative;
@@ -175,24 +177,20 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Training Title</th>
-                            <th>Competency</th>
-                            <th>Period of Implementation</th>
-                            <th>Provider</th>
-                            <th>Status</th>
-                            <th colspan="4" class="text-center">Ratings</th>
+                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
+                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
+                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
+                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
+                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
+                            <th colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Participant Ratings</th>
+                            <th colspan="2" style="background-color: #003366; color: white; text-align: center;">Supervisor Ratings</th>
                         </tr>
                         <tr>
                             <th colspan="5"></th>
-                            <th colspan="2" class="text-center">Participant</th>
-                            <th colspan="2" class="text-center">Supervisor</th>
-                        </tr>
-                        <tr>
-                            <th colspan="5"></th>
-                            <th class="text-center">Pre</th>
-                            <th class="text-center">Post</th>
-                            <th class="text-center">Pre</th>
-                            <th class="text-center">Post</th>
+                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white; border-left: 2px solid white;">Pre</th>
+                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
+                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
+                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366;">Post</th>
                         </tr>
                     </thead>
                     <tbody>

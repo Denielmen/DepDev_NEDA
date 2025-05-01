@@ -15,7 +15,6 @@
             padding: 0;
             overflow-x: hidden;
             background-color: rgb(187, 219, 252);
-
         }
 
         .navbar {

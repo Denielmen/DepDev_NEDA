@@ -225,10 +225,6 @@
         </div>
         <!-- Main Content -->
         <div class="main-content">
-            <a href="#" class="back-button">
-                <i class="bi bi-arrow-left me-2"></i>
-                Back
-            </a>
 
             <div class="form-container">
                 <div class="form-title">

@@ -51,6 +51,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
+            background-color: rgb(187, 219, 252);
         }
         .form-container {
             background-color: #fff;
@@ -75,7 +76,7 @@
             margin: -20px -20px 20px -20px;
             border-radius: 8px 8px 0 0;
             color: #003366;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
         }
         .form-group {
@@ -155,11 +156,6 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <a href="#" class="back-button">
-                <i class="bi bi-arrow-left me-2"></i>
-                Back
-            </a>
-
             <div class="form-container">
                 <div class="form-title">
                     Status Learning and Development Intervention
