@@ -19,6 +19,12 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingProfileUnProgram', compact('trainings'));
     }
 
+    public function show($id)
+    {
+        $training = Training::findOrFail($id);
+        return view('userPanel.trainingProfileShow', compact('training'));
+    }
+
  public function edit(Request $request)
  {
      $trainingID = $request-> query('id');
