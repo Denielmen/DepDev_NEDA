@@ -109,7 +109,7 @@
         </ul>
         <div class="d-flex justify-content-between mt-3">
             <a href="{{ route('training.profile.program') }}" class="btn btn-back">Back</a>
-            <a href="{{ route('training.effectiveness') }}" class="btn btn-back">Pre-Evaluation</a>
+            <a href="{{ route('training.effectivenesss') }}" class="btn btn-back">Pre-Evaluation</a>
         </div>
     </div>
 </body>
