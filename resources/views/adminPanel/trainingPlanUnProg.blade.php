@@ -51,7 +51,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
-            background-color: #f8f9fa;
+            background-color: rgb(187, 219, 252);
         }
         .content-header {
             background-color: #e7f1ff;
@@ -63,6 +63,7 @@
             color: #003366;
             font-size: 1.5rem;
             margin: 0;
+            font-weight: bold;
         }
         .search-box {
             position: relative;

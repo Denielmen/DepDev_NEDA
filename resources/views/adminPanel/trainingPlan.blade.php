@@ -13,6 +13,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            background-color: rgb(187, 219, 252);
         }
         .navbar {
             background-color: #fff;
@@ -51,7 +52,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
-            background-color: #f8f9fa;
+            background-color: rgb(187, 219, 252);
         }
         .content-header {
             background-color: #e7f1ff;
@@ -62,6 +63,7 @@
         .content-header h2 {
             color: #003366;
             font-size: 1.5rem;
+            font-weight: bold;
             margin: 0;
         }
         .search-box {

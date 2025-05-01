@@ -85,7 +85,8 @@
             background: #fff; 
             min-height: calc(100vh - 56px);
             margin-left: 270px; /* Match sidebar width */
-            width: calc(100% - 270px);;
+            width: calc(100% - 270px);
+            background-color: rgb(187, 219, 252);
         }
         .list-title{
             background-color: #e7f1ff;
@@ -100,6 +101,7 @@
             color: #003366;
             font-size: 1.5rem;
             margin: 0;
+            font-weight: bold;
         }
         .user-card {
             background: #fff;

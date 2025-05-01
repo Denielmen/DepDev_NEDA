@@ -56,12 +56,19 @@
             min-height: calc(100vh - 56px);
             margin-left: 270px; /* Match sidebar width */
             width: calc(100% - 270px);
+            background-color: rgb(187, 219, 252);
         }
         .content-card {
             background-color: white;
             border-radius: 0.25rem;
             box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
             padding: 1.5rem;
+        }
+        .content-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #003366;
+            font-weight: bold;
         }
         .search-box {
             position: relative;
