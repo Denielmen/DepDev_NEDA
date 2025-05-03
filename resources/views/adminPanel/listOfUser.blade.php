@@ -36,6 +36,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            padding-top: 60px;
         }
 
         .navbar {
@@ -73,9 +74,10 @@
             font-size: 0.9rem;
         }
         .sidebar a.active, .sidebar a:focus {
-            background-color: #e7f1ff;
+            background-color: #004080;
+            /* background-color: #e7f1ff;
             color: #003366;
-            font-weight: bold;
+            font-weight: bold; */
         }
         .sidebar a:hover {
             background-color: #004080;
@@ -139,13 +141,14 @@
         }
         .search-box input {
             width: 100%;
-            padding: 8px 15px 8px 35px;
+            padding: 8px 15px; 
+            padding-right: 35px;
             border: 1px solid #ced4da;
             border-radius: 5px;
         }
         .search-box .search-icon {
             position: absolute;
-            left: 10px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: #6c757d;
@@ -302,7 +305,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
@@ -326,8 +329,8 @@
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Report</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
