@@ -79,6 +79,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
+            background-color: rgb(187, 219, 252);
         }
 
         .form-container {
@@ -103,35 +104,25 @@
         .roles {
             display: flex;
             flex-direction: column;
-            /* Stack the text-role and choicebox vertically */
             align-items: center;
-            /* Center items horizontally */
             gap: 20px;
-            /* Add spacing between the text-role and choicebox */
-            padding: 15px;
-            /* Reduce padding to make it smaller */
+            padding: 75px;
             border-radius: 10px;
             background-color: #f8f9fa;
             border: 1px solid black;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-width: 800px;
-            /* Limit the width of the roles container */
             margin: 0 auto;
-            /* Center the roles container horizontally */
+            
         }
 
         .choicebox {
             display: flex;
             justify-content: center;
-            /* Center the choices horizontally */
             align-items: stretch;
-            /* Ensure all choices have the same height */
             gap: 20px;
-            /* Add spacing between the choices */
             flex-wrap: wrap;
-            /* Allow choices to wrap on smaller screens */
             width: 100%;
-            /* Ensure the container spans the full width */
         }
 
         .choice {
@@ -140,19 +131,12 @@
             background-color: white;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             width: calc(50% - 20px);
-            /* Make choices take up 50% of the container with spacing */
             max-width: 300px;
-            /* Limit the maximum width of each choice */
             text-align: center;
-            /* Center text inside choices */
             display: flex;
-            /* Use Flexbox for content alignment */
             flex-direction: column;
-            /* Stack content vertically */
             justify-content: space-between;
-            /* Distribute content evenly */
             height: auto;
-            /* Allow height to adjust based on content */
             transition: box-shadow 0.3s ease;
             cursor: pointer;
         }
