@@ -172,7 +172,7 @@
                 <img src="/images/repub.png" alt="NEDA Logo">
                 </div>
                 <h1>REPUBLIC OF THE PHILIPPINES</h1>
-                <h1>DEPARTMENT OF ECONOMY PLANNING AND DEVELOPMENT</h1>
+                <h1>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT.</h1>
                 <p>Please select a course from the menu to begin your learning and development journey.</p>
             </div>
 

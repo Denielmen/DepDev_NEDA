@@ -36,7 +36,8 @@
         .main-content {
             margin-left: 270px;
             padding: 20px;
-            margin-top: 76px; /* Adjust for the height of the fixed navbar */
+            margin-top: 50px; 
+            background-color: rgb(187, 219, 252);
         }
         .register-container {
             max-width: 800px;

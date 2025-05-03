@@ -122,6 +122,10 @@
             color: #6c757d;
             font-size: 0.8rem;
         }
+        input[type="date"] {
+            width: 160px;
+            min-width: 0;
+        }
     </style>
 </head>
 <body>
@@ -158,7 +162,7 @@
         <div class="main-content">
             <div class="form-container">
                 <div class="form-title">
-                    Status Learning and Development Intervention
+                    Status of Learning and Development Intervention
                 </div>
 
                 <form action="#" method="POST" enctype="multipart/form-data">
@@ -201,19 +205,34 @@
                         <input type="text" class="form-control" name="provider" required>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Upload Learning Materials, etc...</label>
-                        <div class="upload-box">
-                            <i class="bi bi-upload mb-2"></i>
-                            <div>Upload Files</div>
-                            <small class="text-muted">Ex. JPEG, PNG, GIF and etc.</small>
-                        </div>
-                    </div>
+                    <div class="row mb-3 align-items-stretch">
+    <div class="col-md-6 form-group d-flex flex-column justify-content-center" style="height: 220px;">
+        <label class="form-label">Upload Learning Materials, etc...</label>
+        <div class="upload-box h-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 140px;">
+            <i class="bi bi-upload mb-2" style="font-size: 2rem;"></i>
+            <div>Upload Files</div>
+            <small class="text-muted">Ex. JPEG, PNG, PDF and etc.</small>
+        </div>
+    </div>
+    <div class="col-md-6 form-group d-flex flex-column justify-content-center" style="height: 220px;">
+        <label for="learning_note" class="form-label">Description and Links:</label>
+        <textarea class="form-control flex-grow-1" id="learning_note" name="learning_note" rows="6" placeholder="Add a links or description..." style="min-height: 140px;"></textarea>
+    </div>
+</div>
 
                     <div class="text-center mt-4">
                         <button type="submit" class="btn-save">Save</button>
                     </div>
                 </form>
+
+                @isset($learning_note)
+                <div class="mt-4">
+                    <label class="form-label">Note/Description (with clickable links):</label>
+                    <div style="background:#f8f9fa; border-radius:4px; padding:12px;">
+                        {!! preg_replace('/(https?:\/\/[^\s]+)/', '<a href="$1" target="_blank">$1</a>', e($learning_note)) !!}
+                    </div>
+                </div>
+                @endisset
             </div>
         </div>
     </div>

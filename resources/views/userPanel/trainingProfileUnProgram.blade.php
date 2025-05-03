@@ -164,7 +164,7 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="tab-buttons">
-                    <a href="{{ route('training.profile.program') }}" class="tab-button">Program</a>
+                    <a href="{{ route('training.profile.program') }}" class="tab-button">Programmed</a>
                     <a href="{{ route('training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
                 <div class="search-box">
