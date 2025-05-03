@@ -186,7 +186,7 @@
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
         <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Participants</a>
+        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
     </div>
 
@@ -245,7 +245,7 @@
         <div class="program-tabs">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => request()->route('id')]) }}">Program</a>
+                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => request()->route('id')]) }}">Programmed</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => request()->route('id')]) }}">Unprogrammed</a>
