@@ -13,7 +13,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            
+            padding-top: 60px; /* Adjust this value based on your navbar height */
         }
         .navbar {
             background-color:rgb(255, 255, 255);
@@ -136,7 +136,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
@@ -161,7 +161,7 @@
             <a href="#" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="#"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
         </div>
 
         <!-- Main Content -->
@@ -172,7 +172,7 @@
                 <img src="/images/repub.png" alt="NEDA Logo">
                 </div>
                 <h1>REPUBLIC OF THE PHILIPPINES</h1>
-                <h1>DEPARTMENT OF ECONOMY PLANNING AND DEVELOPMENT</h1>
+                <h1>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT.</h1>
                 <p>Please select a course from the menu to begin your learning and development journey.</p>
             </div>
 
@@ -190,6 +190,7 @@
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
+                                <a href="{{ route('tracking') }}" class="text-decoration-none">
                                 <h5>Training Tracking & History</h5>
                                 <p>View and plan learning activities aligned with your role.</p>
                             </div>
@@ -197,8 +198,10 @@
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <h5>Training Effectiveness</h5>
-                                <p>Track your learning and development progress.</p>
+                                <a href="{{ route('training.effectivenesss') }}" class="text-decoration-none">
+                                    <h5>Training Effectiveness</h5>
+                                    <p>Track your learning and development progress.</p>
+                                </a>
                             </div>
                         </div>
                     </div>

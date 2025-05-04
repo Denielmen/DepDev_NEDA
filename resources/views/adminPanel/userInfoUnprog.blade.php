@@ -12,7 +12,7 @@
             padding: 0;
             overflow-x: hidden;
             padding-top: 56px;
-            background-color: rgb(182, 216, 249);
+            background-color: rgb(187, 219, 252);
         }
         .navbar {
             background-color: rgb(255, 255, 255);
@@ -132,15 +132,19 @@
             margin-bottom: 5px;
         }
         .program-tabs .nav-link {
-            color: #fff !important;
+            color: #bdbdbd !important;
             /* background-color: white; */
             /* border: 1px solid #003366; */
             margin-right: 5px;
             border-radius: 5px;
         }
+        .program-tabs .nav-link:hover {
+            color: #003366 !important;
+            background-color: white;
+        }
         .program-tabs .nav-link.active {
             background-color: #003366;
-            color: white;
+            color: white !important;
         }
         .btn-outline-primary {
             color: #003366;
@@ -182,7 +186,7 @@
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
         <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Participants</a>
+        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
     </div>
 
@@ -241,7 +245,7 @@
         <div class="program-tabs">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.participants.info', ['id' => request()->route('id')]) }}">Program</a>
+                    <a class="nav-link" href="{{ route('admin.participants.info', ['id' => request()->route('id')]) }}">Programmed</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link active" href="{{ route('admin.participants.info.unprogrammed', ['id' => request()->route('id')]) }}">Unprogrammed</a>

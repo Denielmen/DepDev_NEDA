@@ -38,9 +38,18 @@ Route::get('/tracking', function() {
     return view('userPanel.tracking');
 })->name('tracking');
 
-Route::get('/training-effectiveness', function() {
-    return view('userPanel.trainingEffectiveness');
-})->name('training.effectiveness');
+Route::get('/training-effectivenesss', function() {
+    return view('userPanel.trainingEffectivenesss');
+})->name('training.effectivenesss');
+
+Route::get('/evalParticipant', function() { 
+    return view('userPanel.evalParticipant');
+})->name('evalParticipant');
+
+Route::get('/evalSupervisor', function() {
+    return view('userPanel.evalSupervisor');
+})->name('evalSupervisor');
+
 
 // Admin Panel Routes
 Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {

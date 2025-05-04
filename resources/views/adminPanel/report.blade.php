@@ -13,6 +13,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            padding-top: 60px; /* Adjust this value based on your navbar height */
         }
         .navbar {
             background-color: rgb(255, 255, 255);
@@ -56,6 +57,7 @@
             min-height: calc(100vh - 56px);
             margin-left: 270px; /* Match sidebar width */
             width: calc(100% - 270px);
+            background-color: rgb(187, 219, 252);
         }
         .content-card {
             background-color: white;
@@ -63,19 +65,26 @@
             box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
             padding: 1.5rem;
         }
+        .content-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #003366;
+            font-weight: bold;
+        }
         .search-box {
             position: relative;
             width: 300px;
         }
         .search-box input {
             width: 100%;
-            padding: 8px 15px 8px 35px;
+            padding: 8px 15px; 
+            padding-right: 35px;
             border: 1px solid #ced4da;
             border-radius: 5px;
         }
         .search-box .search-icon {
             position: absolute;
-            left: 10px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: #6c757d;
@@ -102,7 +111,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
@@ -125,7 +134,7 @@
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
         <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
+        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
         <a href="{{ route('admin.reports') }}" class="active"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
     </div>
 
