@@ -339,7 +339,8 @@
             <div class="list-title"><h2>List of Staffs</h2></div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <button class="new-user-btn"><i class="bi bi-person-plus-fill"></i> + NEW USER</button>
+                  <a href="{{ route('register') }}">  <button class="new-user-btn"><i class="bi bi-person-plus-fill"></i> + NEW USER</button>
+                  </a>
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" placeholder="Search...">
