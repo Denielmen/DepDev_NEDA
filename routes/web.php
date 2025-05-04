@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrainingProfileController;
 use App\Http\Controllers\SearchController;
@@ -14,7 +15,7 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
-
+Route::post('/login', [LoginController::class, 'login']); // For POST requests
 // User Panel Routes
 Route::get('/', function () {
     return view('userPanel.welcomeUser');
