@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrainingProfileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\TrainingController;
 
 
     // Route to view user accounts
@@ -43,19 +44,11 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
             return view('adminPanel.welcomeAdmin');
         })->name('home');
 
-        Route::get('/training-plan', function () {
-            return view('adminPanel.trainingPlan');
-        })->name('training-plan');
-
-        Route::get('/training-planUnProg', function () {
-            return view('adminPanel.trainingPlanUnProg');
-        })->name('training-planUnProg');
+        Route::resource('training-plan', TrainingController::class);
+        Route::get('training-plan/unprogrammed', [TrainingController::class, 'unprogrammed'])
+            ->name('training-plan.unprogrammed');
     });
 
-    // Dashboard and Profile Routes
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->middleware(['verified'])->name('dashboard');
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
