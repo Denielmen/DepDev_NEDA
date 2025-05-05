@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,10 +20,14 @@
     }
 
     .navbar {
-      background-color: #ffffff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background-color: rgb(255, 255, 255);
       padding: 0.5rem 1rem;
       box-shadow: 1px 3px 3px 0px #737373;
-      z-index: 1000;
     }
 
     .navbar-brand {
@@ -38,13 +43,15 @@
     }
 
     .sidebar {
-      background-color: #003366;
-      min-height: calc(100vh - 56px);
+      position: fixed;
+      top: 56px;
+      left: 0;
       width: 270px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+      background-color: #003366;
       padding-top: 20px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
+      z-index: 999;/
     }
 
     .sidebar a {
@@ -60,10 +67,9 @@
     }
 
     .main-content {
-      flex-grow: 1;
+      margin-left: 290px;
+      margin-top: 76px;
       padding: 20px;
-      margin-left: 0;
-      margin-right: 0;
     }
 
     .evaluation-container {
@@ -121,10 +127,11 @@
       margin: 20px 0;
     }
 
-    th, td {
+    th,
+    td {
       padding: 10px;
       border: 1px solid #ccc;
-      text-align: center;
+      text-align: left;
     }
 
     .text-left {
@@ -152,7 +159,9 @@
       margin-right: 8px;
     }
 
-    textarea, select, input[type="text"] {
+    textarea,
+    select,
+    input[type="text"] {
       width: 100%;
       padding: 8px;
       font-size: 14px;
@@ -160,11 +169,6 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       resize: vertical;
-    }
-
-    .section-title {
-      font-weight: bold;
-      margin-top: 20px;
     }
 
     .submit-button {
@@ -187,19 +191,26 @@
       background: #001540;
     }
 
+    .instruction-container {
+      margin-top: 10px;
+    }
+
     @media (max-width: 768px) {
       .d-flex {
         flex-direction: column;
       }
+
       .sidebar {
         width: 100%;
         min-height: auto;
         padding: 10px;
       }
+
       .main-content {
         margin: 0;
         padding: 10px;
       }
+
       .evaluation-container {
         padding: 1rem;
       }
@@ -209,186 +220,175 @@
 
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid d-flex justify-content-between align-items-center">
-    <a class="navbar-brand" href="#">
-      <img src="/images/neda-logo.png" alt="NEDA Logo">
-      DEPDEV Learning and Development Database System Region VII
-    </a>
-    <div class="d-flex align-items-center">
-      <i class="bi bi-bell-fill me-3"></i>
-      <div class="dropdown">
-        <div class="user-menu" data-bs-toggle="dropdown">
-          <i class="bi bi-person-circle"></i> User
-          <i class="bi bi-chevron-down ms-1"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
-
-<!-- Sidebar + Main Content -->
-<div class="d-flex">
-
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <a href="#"><i class="bi bi-house-door me-2"></i>Home</a>
-    <a href="#"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-    <a href="#"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-    <a href="#"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-  </div>
-
-  <!-- Main Content -->
-  <div class="main-content">
-
-    <!-- Back Button -->
-    <div class="back-button">
-      <a href="{{ route('effectivenessParticipant') }}" class="btn-back-minimal">
-        <i class="bi bi-arrow-left me-2"></i> Back
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <a class="navbar-brand" href="#">
+        <img src="/images/neda-logo.png" alt="NEDA Logo">
+        DEPDEV Learning and Development Database System Region VII
       </a>
+      <div class="d-flex align-items-center">
+        <i class="bi bi-bell-fill me-3"></i>
+        <div class="dropdown">
+          <div class="user-menu" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i> User
+            <i class="bi bi-chevron-down ms-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar + Main Content -->
+  <div class="d-flex">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <a href="#"><i class="bi bi-house-door me-2"></i>Home</a>
+      <a href="#"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+      <a href="#"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+      <a href="#"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
     </div>
 
-    <div class="evaluation-container">
-      <div class="evaluation-header">
-        <img src="{{ asset('images/neda-logo.png') }}" alt="NEDA Logo" class="neda-logo">
-        <h4>Republic of the Philippines</h4>
-        <h5>NATIONAL ECONOMIC AND DEVELOPMENT AUTHORITY</h5>
-        <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
-        <p>(For Supervisor)</p>
+    <!-- Main Content -->
+    <div class="main-content">
+
+      <!-- Back Button -->
+      <div class="back-button">
+        <a href="{{ route('effectivenessParticipant') }}" class="btn-back-minimal">
+          <i class="bi bi-arrow-left me-2"></i> Back
+        </a>
       </div>
 
-      <form method="POST" action="{{ route('effectivenessSupervisor') }}" class="evaluation-form">
-        @csrf
-
-        <div class="section-title">A. Learning Goals/Objectives</div>
-        <table>
-          <tr>
-            <td class="text-left">How satisfied are you in the learner’s achievement of his/her learning goals/objectives as specified in his/her learner’s profile.</td>
-            <th>Ratings</th>
-          </tr>
-          <tr>
-            <td></td>
-            <td>
-              <div class="rating-options">
-                <label>1</label><input type="radio" name="learningGoals" value="1">
-                <label>2</label><input type="radio" name="learningGoals" value="2">
-                <label>3</label><input type="radio" name="learningGoals" value="3">
-                <label>4</label><input type="radio" name="learningGoals" value="4">
-              </div>
-            </td>
-          </tr>
-        </table>
-
-        <div><strong>Please tick the circle which best describes your evaluation of the program.</strong></div>
-
-        <div class="section-title">B. Participants’ Work Performance</div>
-        <table>
-          <tr>
-            <td class="text-left"></td>
-            <th>Ratings</th>
-          </tr>
-          <tr>
-            <td class="text-left">1. The employee applied the learnings gained from this course.</td>
-            <td>
-              <div class="rating-options">
-                <label>1</label><input type="radio" name="performance1" value="1">
-                <label>2</label><input type="radio" name="performance1" value="2">
-                <label>3</label><input type="radio" name="performance1" value="3">
-                <label>4</label><input type="radio" name="performance1" value="4">
-                <label>Na</label><input type="radio" name="performance1" value="Na">
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-left">2. The employee’s quality of work improved.</td>
-            <td>
-              <div class="rating-options">
-                <label>1</label><input type="radio" name="performance2" value="1">
-                <label>2</label><input type="radio" name="performance2" value="2">
-                <label>3</label><input type="radio" name="performance2" value="3">
-                <label>4</label><input type="radio" name="performance2" value="4">
-                <label>Na</label><input type="radio" name="performance2" value="Na">
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-left">3. The proficiency level of the employee on this course increased.</td>
-            <td>
-              <div class="rating-options">
-                <label>1</label><input type="radio" name="performance3" value="1">
-                <label>2</label><input type="radio" name="performance3" value="2">
-                <label>3</label><input type="radio" name="performance3" value="3">
-                <label>4</label><input type="radio" name="performance3" value="4">
-                <label>Na</label><input type="radio" name="performance3" value="Na">
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-left">4. The employee’s overall work performance improved.</td>
-            <td>
-              <div class="rating-options">
-                <label>1</label><input type="radio" name="performance4" value="1">
-                <label>2</label><input type="radio" name="performance4" value="2">
-                <label>3</label><input type="radio" name="performance4" value="3">
-                <label>4</label><input type="radio" name="performance4" value="4">
-                <label>Na</label><input type="radio" name="performance4" value="Na">
-              </div>
-            </td>
-          </tr>
-        </table>
-
-        <div class="form-group">
-          <label for="workPerformanceChanges"><strong>Describe changes in work performance:</strong></label>
-          <textarea name="workPerformanceChanges" rows="5"></textarea>
+      <div class="evaluation-container">
+        <div class="evaluation-header">
+          <img src="{{ asset('images/neda-logo.png') }}" alt="NEDA Logo" class="neda-logo">
+          <h4>Republic of the Philippines</h4>
+          <h5>NATIONAL ECONOMIC AND DEVELOPMENT AUTHORITY</h5>
+          <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
+          <p>(For Supervisor)</p>
         </div>
 
-        <div class="section-title">C. Learner’s Proficiency Level</div>
-        <table>
-          <tr>
-            <td class="text-left">Proficiency level of subordinate after this course:</td>
-            <th>Ratings</th>
-          </tr>
-          <tr>
-            <td></td>
-            <td>
-              <div class="rating-options">
-                <label>1</label><input type="radio" name="proficiencyLevel" value="1">
-                <label>2</label><input type="radio" name="proficiencyLevel" value="2">
-                <label>3</label><input type="radio" name="proficiencyLevel" value="3">
-                <label>4</label><input type="radio" name="proficiencyLevel" value="4">
-              </div>
-            </td>
-          </tr>
-        </table>
+        <form method="POST" action="{{ route('effectivenessSupervisor') }}" class="evaluation-form">
+          @csrf
+          <label for="courseTitle">Course Title:</label>
+          <select id="courseTitle" name="courseTitle" required>
+            <option value="">Select Course</option>
+            <option value="course1">Course 1</option>
+            <option value="course2">Course 2</option>
+          </select>
 
-        <div class="section-title">D. Comments/Recommendation</div>
-        <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
-          <strong>I will initiate the participation of other staff to this course.</strong>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="initiateParticipation" id="yesParticipation" value="Yes">
-            <label class="form-check-label" for="yesParticipation">Yes</label>
+
+          <div class="instruction-container">
+            <p><strong>Please tick the circle which describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied, (3) Satisfied, <br>(2) Dissatisfied, (1) Very Dissatisfied.</p>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="initiateParticipation" id="noParticipation" value="No">
-            <label class="form-check-label" for="noParticipation">No</label>
+
+          <table>
+            <tr>
+              <th style="width: 60%;">A. Learning Goals/Objectives</th>
+              <th colspan="4" style="text-align: center; width: 20%;">Rating</th>
+            </tr>
+            <tr>
+              <td>How satisfied are you in the learner’s achievement of his/her learning goals/objectives as specified in his/her learner’s profile.</td>
+              <td class="rating-cell">1<input type="radio" name="learningGoals" value="1" required></td>
+              <td class="rating-cell">2<input type="radio" name="learningGoals" value="2"></td>
+              <td class="rating-cell">3<input type="radio" name="learningGoals" value="3"></td>
+              <td class="rating-cell">4<input type="radio" name="learningGoals" value="4"></td>
+            </tr>
+          </table>
+
+          <div><strong>Please tick the circle which best describes your evaluation of the program. You have 5 choices to choose from: </strong>(4) Strongly agree, (3) Agree, <br>(2) Disagree, (1) Strongly Disagree, (Na) Not Applicable.</div>
+
+          <table>
+            <tr>
+              <th style="width: 60%;">B. Participants’ Work Performance (To be determined within one
+                performance rating period) </th>
+              <th colspan="5" style="text-align: center; width: 20%;">Rating</th>
+            </tr>
+            <tr>
+              <td>1. The employee applied the learning’s gained from this course.</td>
+              <td class="rating-cell">1<input type="radio" name="performance1" value="1" required></td>
+              <td class="rating-cell">2<input type="radio" name="performance1" value="2"></td>
+              <td class="rating-cell">3<input type="radio" name="performance1" value="3"></td>
+              <td class="rating-cell">4<input type="radio" name="performance1" value="4"></td>
+              <td class="rating-cell">NA<input type="radio" name="performance1" value="5"></td>
+            </tr>
+            <tr>
+              <td>2. The employee’s quality of work improved.</td>
+              <td class="rating-cell">1<input type="radio" name="performance2" value="1" required></td>
+              <td class="rating-cell">2<input type="radio" name="performance2" value="2"></td>
+              <td class="rating-cell">3<input type="radio" name="performance2" value="3"></td>
+              <td class="rating-cell">4<input type="radio" name="performance2" value="4"></td>
+              <td class="rating-cell">NA<input type="radio" name="performance2" value="5"></td>
+            </tr>
+            <tr>
+              <td>3. The proficiency level of the employee on this course increased.</td>
+              <td class="rating-cell">1<input type="radio" name="performance3" value="1" required></td>
+              <td class="rating-cell">2<input type="radio" name="performance3" value="2"></td>
+              <td class="rating-cell">3<input type="radio" name="performance3" value="3"></td>
+              <td class="rating-cell">4<input type="radio" name="performance3" value="4"></td>
+              <td class="rating-cell">NA<input type="radio" name="performance3" value="5"></td>
+            </tr>
+            <tr>
+              <td>4. The employee’s overall work performance increase/improved.</td>
+              <td class="rating-cell">1<input type="radio" name="performance4" value="1" required></td>
+              <td class="rating-cell">2<input type="radio" name="performance4" value="2"></td>
+              <td class="rating-cell">3<input type="radio" name="performance4" value="3"></td>
+              <td class="rating-cell">4<input type="radio" name="performance4" value="4"></td>
+              <td class="rating-cell">NA<input type="radio" name="performance4" value="5"></td>
+            </tr>
+          </table>
+
+          <div class="form-group">
+            <label for="workPerformanceChanges"><strong>To support your your training, please describe changes in work performance as a result of
+                attendance to this training. if employee’s work performance did not change, please cite possible
+                reasons and what support is needed in order for the employee’s to apply acquired knowledge and skills.</strong></label>
+            <textarea name="workPerformanceChanges" placeholder="Describe any changes..." rows="4"></textarea>
           </div>
-        </div>
 
-        <div class="section-title">E. Comments/Suggestions on the Training Program</div>
-        <textarea name="trainingSuggestions" rows="4"></textarea>
+          <table>
+            <tr>
+              <th style="width: 60%;">C. Learner’s Proficiency Level</th>
+              <th colspan="4" style="text-align: center; width: 20%;">Rating</th>
 
-        <div class="submit-button">
-          <button type="submit">Submit</button>
-        </div>
+            </tr>
+            <tr>
+              <td>In a scale 1-4 (4 is being the highest ), please tick the circle which describes the proficiency level of your subordinate after participation in this course.</td>
+              <td class="rating-cell"><input type="radio" name="proficiencyLevel" value="1" required>1</td>
+              <td class="rating-cell"><input type="radio" name="proficiencyLevel" value="2">2</td>
+              <td class="rating-cell"><input type="radio" name="proficiencyLevel" value="3">3</td>
+              <td class="rating-cell"><input type="radio" name="proficiencyLevel" value="4">4</td>
+            </tr>
+          </table>
 
-      </form>
+          <div class="section-title">D. Comments/Recommendation</div>
+          <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
+            <strong>I will initiate the participation of other staff to this course.</strong>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="initiateParticipation" id="yesParticipation" value="Yes">
+              <label class="form-check-label" for="yesParticipation">Yes</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="initiateParticipation" id="noParticipation" value="No">
+              <label class="form-check-label" for="noParticipation">No</label>
+            </div>
+          </div>
+
+          <div class="section-title">E. Comments/Suggestions on the Training Program</div>
+          <textarea name="trainingSuggestions" placeholder="Comment your suggestions here..." rows="4"></textarea>
+
+          <div class="submit-button">
+            <button type="submit">Submit</button>
+          </div>
+
+        </form>
+      </div>
+
     </div>
-
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
+
 </html>
