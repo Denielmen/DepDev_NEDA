@@ -9,13 +9,13 @@ class TrainingProfileController extends Controller
 {
     public function program()
     {
-        $trainings = Training::where('type', 'Program')->get();
+        $trainings = Training::where('type', 'Program')->paginate(10);
         return view('userPanel.trainingProfileProgram', compact('trainings'));
     }
 
     public function unprogrammed()
     {
-        $trainings = Training::where('type', 'Unprogrammed')->get();
+        $trainings = Training::where('type', 'Unprogrammed')->paginate(10);
         return view('userPanel.trainingProfileUnProgram', compact('trainings'));
     }
 

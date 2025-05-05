@@ -45,6 +45,7 @@ Route::get('/evalSupervisor', function() {
     return view('userPanel.evalSupervisor');
 })->name('evalSupervisor');
 
+Route::get('/training/{id}/export', [TrainingProfileController::class, 'export'])->name('training.export');
 
 // Admin Panel Routes
 Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
