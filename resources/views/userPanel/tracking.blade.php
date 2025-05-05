@@ -35,7 +35,7 @@
         .sidebar {
             background-color: #003366;
             min-height: calc(100vh - 56px);
-            width: 255px;
+            width: 270px;
             padding-top: 20px;
         }
         .sidebar a {
@@ -51,6 +51,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
+            background-color: rgb(187, 219, 252);
         }
         .form-container {
             background-color: #fff;
@@ -75,7 +76,7 @@
             margin: -20px -20px 20px -20px;
             border-radius: 8px 8px 0 0;
             color: #003366;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
         }
         .form-group {
@@ -121,6 +122,10 @@
             color: #6c757d;
             font-size: 0.8rem;
         }
+        input[type="date"] {
+            width: 160px;
+            min-width: 0;
+        }
     </style>
 </head>
 <body>
@@ -150,34 +155,49 @@
             <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}" class="active"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <a href="#" class="back-button">
-                <i class="bi bi-arrow-left me-2"></i>
-                Back
-            </a>
-
             <div class="form-container">
                 <div class="form-title">
-                    Status Learning and Development Intervention
+                    Status of Learning and Development Intervention
                 </div>
 
                 <form action="#" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
                         <div class="col-md-6 form-group">
-                            <label class="form-label">Title of Training:</label>
+                            <label class="form-label">Title of the Training:</label>
                             <input type="text" class="form-control" name="training_title" required>
                         </div>
+                        
                         <div class="col-md-6 form-group">
+                            <label class="form-label">Aligned Training:</label>
+                            <select id="alignedTraining" name="courseTitle" class="form-control" required>
+                                <option value="" disabled selected>Select a course</option>
+                                <option value="Course 1">Course 1</option>
+                                <option value="Course 2">Course 2</option>
+                                <option value="Course 3">Course 3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 form-group">
                             <label class="form-label">Competency:</label>
                             <input type="text" class="form-control" name="competency" required>
                         </div>
+                        <div class="col-md-3 form-group">
+                            <label class="form-label">Role:</label>
+                            <select id="role" name="role" class="form-control" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="Course 1">Participant</option>
+                                <option value="Course 2">Resource Person</option>
+                        
+                            </select>
+                        </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label class="form-label">No. of Hours:</label>
@@ -205,19 +225,34 @@
                         <input type="text" class="form-control" name="provider" required>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Upload Learning Materials, etc...</label>
-                        <div class="upload-box">
-                            <i class="bi bi-upload mb-2"></i>
-                            <div>Upload Files</div>
-                            <small class="text-muted">Ex. JPEG, PNG, GIF and etc.</small>
-                        </div>
-                    </div>
+                    <div class="row mb-3 align-items-stretch">
+    <div class="col-md-6 form-group d-flex flex-column justify-content-center" style="height: 220px;">
+        <label class="form-label">Upload Learning Materials, etc...</label>
+        <div class="upload-box h-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 140px;">
+            <i class="bi bi-upload mb-2" style="font-size: 2rem;"></i>
+            <div>Upload Files</div>
+            <small class="text-muted">Ex. JPEG, PNG, PDF and etc.</small>
+        </div>
+    </div>
+    <div class="col-md-6 form-group d-flex flex-column justify-content-center" style="height: 220px;">
+        <label for="learning_note" class="form-label">Description and Links:</label>
+        <textarea class="form-control flex-grow-1" id="learning_note" name="learning_note" rows="6" placeholder="Add a links or description..." style="min-height: 140px;"></textarea>
+    </div>
+</div>
 
                     <div class="text-center mt-4">
                         <button type="submit" class="btn-save">Save</button>
                     </div>
                 </form>
+
+                @isset($learning_note)
+                <div class="mt-4">
+                    <label class="form-label">Note/Description (with clickable links):</label>
+                    <div style="background:#f8f9fa; border-radius:4px; padding:12px;">
+                        {!! preg_replace('/(https?:\/\/[^\s]+)/', '<a href="$1" target="_blank">$1</a>', e($learning_note)) !!}
+                    </div>
+                </div>
+                @endisset
             </div>
         </div>
     </div>
@@ -242,4 +277,4 @@
         }
     </script>
 </body>
-</html> 
+</html>

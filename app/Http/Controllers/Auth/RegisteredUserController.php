@@ -1,6 +1,4 @@
-<?php
-
-namespace App\Http\Controllers\Auth;
+<?php namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -35,10 +33,11 @@ class RegisteredUserController extends Controller
             'salary_grade' => 'required|integer',
             'role' => 'required|string|max:50',
             'superior' => 'nullable|string|max:100',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Create the user
-        User::create([
+        // Create the user in the database
+        $user = User::create([
             'last_name' => $request->last_name,
             'first_name' => $request->first_name,
             'mid_init' => $request->mid_init,
@@ -50,7 +49,12 @@ class RegisteredUserController extends Controller
             'salary_grade' => $request->salary_grade,
             'role' => $request->role,
             'superior' => $request->superior,
-            'password' => Hash::make('defaultpassword'), // Replace with actual password logic
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Update the user_id to include the prefix and the user's ID
+        $user->update([
+            'user_id' => 'DepDev_' . $user->id,
         ]);
 
         return redirect()->route('login')->with('status', 'Registration successful. Please log in.');

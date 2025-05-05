@@ -13,7 +13,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            
+            padding-top: 60px; /* Adjust this value based on your navbar height */
         }
         .navbar {
             background-color:rgb(255, 255, 255);
@@ -38,7 +38,7 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
-            
+            position: fixed;
         }
         .sidebar a {
             color: white;
@@ -47,8 +47,9 @@
             padding: 12px 20px;
             font-size: 0.9rem;
         }
-        .sidebar a:hover {
+        .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
         .main-content {
             flex-grow: 1;
@@ -56,13 +57,15 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            min-height: 10vh;
+            height: 92vh;
         }
         .header {
             padding: 1rem;
             text-align: center;
             background-color: #f8f9fa;
             opacity: 0.7;
+            margin-left: 270px;
+            margin-right: 0%;
         }
         .header img {
             width: 50px;
@@ -90,6 +93,8 @@
         .menu-cards {
             padding: 4rem;
             position: relative;
+            margin-left: 270px; /* Adjusted to account for the sidebar width */
+            margin-right: 0;
         }
         /* .menu-cards::before {
             content: '';
@@ -110,7 +115,7 @@
             border-radius: 15px;
             padding: 1.5rem;
             margin-bottom: 1rem;
-            box-shadow: -19px 1px 4px 1px #003366;
+            box-shadow: 0px -7px 1px 0px #003366;
             transition: transform 0.2s;
         }
         .card:hover {
@@ -134,7 +139,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
@@ -158,7 +163,7 @@
         <div class="sidebar">
             <a href="{{ route('admin.home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
         </div>
 
@@ -170,7 +175,7 @@
                 <img src="/images/repub.png" alt="NEDA Logo">
                 </div>
                 <h1>REPUBLIC OF THE PHILIPPINES</h1>
-                <h1>DEPARTMENT OF ECONOMY PLANNING AND DEVELOPMENT</h1>
+                <h1>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT.</h1>
                 <p>Please select a course from the menu to begin your learning and development journey.</p>
             </div>
 
@@ -188,7 +193,7 @@
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <a href="#" class="text-decoration-none">
+                                <a href="{{ route('admin.participants')}}" class="text-decoration-none">
                                     <h5>List of Participants</h5>
                                     <p>View and plan learning activities aligned with your role.</p>
                                 </a>
@@ -197,7 +202,7 @@
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
-                                <a href="#" class="text-decoration-none">
+                                <a href="{{ route('admin.reports')}}" class="text-decoration-none">
                                     <h5>Reports</h5>
                                     <p>Track your learning and development progress.</p>
                                 </a>

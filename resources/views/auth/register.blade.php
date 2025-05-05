@@ -15,13 +15,33 @@
             overflow-x: hidden;
             background-color: #f8f9fa;
         }
+        .navbar {
+            position: fixed; /* Fix the navbar at the top */
+            top: 0;
+            left: 0;
+            width: 100%; /* Ensure the navbar spans the full width */
+            z-index: 1030; /* Ensure it stays above other elements */
+            background-color: rgb(255, 255, 255);
+            padding: 0.5rem 1rem;
+            box-shadow: 1px 3px 3px 0px #737373;
+        }
+        .navbar-brand {
+            color: #003366 !important;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .navbar-brand img {
+            height: 30px;
+            margin-right: 10px;
+        }
         .sidebar {
             background-color: #003366;
-            min-height: 100vh;
+            min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
             position: fixed;
-            top: 56px; /* Adjust for the height of the fixed navbar */
+            top: 56px;
         }
         .sidebar a {
             color: white;
@@ -30,13 +50,13 @@
             padding: 12px 20px;
             font-size: 0.9rem;
         }
-        .sidebar a:hover {
+        .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
         }
         .main-content {
             margin-left: 270px;
             padding: 20px;
-            margin-top: 76px; /* Adjust for the height of the fixed navbar */
+            margin-top: 56px;
         }
         .register-container {
             max-width: 800px;
@@ -59,14 +79,6 @@
             font-size: 0.9rem;
             color: #666;
         }
-        .form-group-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .form-group-row .form-control {
-            flex: 1;
-        }
         .btn-register {
             background-color: #003366;
             color: white;
@@ -82,14 +94,14 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo" style="height: 30px;">
+                <img src="/images/neda-logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development System
             </a>
             <div class="d-flex align-items-center">
-                <i class="bi bi-bell-fill me-3 text-secondary"></i>
+                <i class="bi bi-bell-fill me-3 user-icon"></i>
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>
@@ -103,10 +115,10 @@
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <a href="#"><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="#"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-        <a href="#"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-        <a href="#"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+        <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
+        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
+        <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
     </div>
 
     <!-- Main Content -->
@@ -124,70 +136,82 @@
                 @csrf
 
                 <!-- Name Fields -->
-                <div class="form-group-row">
-                    <div>
+                <div class="row mb-3">
+                    <div class="col">
                         <label for="last_name" class="form-label">Last Name</label>
                         <input type="text" id="last_name" name="last_name" class="form-control" value="{{ old('last_name') }}" required>
                     </div>
-                    <div>
+                    <div class="col">
                         <label for="first_name" class="form-label">First Name</label>
                         <input type="text" id="first_name" name="first_name" class="form-control" value="{{ old('first_name') }}" required>
                     </div>
-                    <div>
+                    <div class="col">
                         <label for="mid_init" class="form-label">Middle Initial</label>
                         <input type="text" id="mid_init" name="mid_init" class="form-control" value="{{ old('mid_init') }}">
                     </div>
                 </div>
 
                 <!-- Position and Office -->
-                <div class="form-group-row">
-                    <div>
+                <div class="row mb-3">
+                    <div class="col">
                         <label for="position" class="form-label">Position</label>
                         <input type="text" id="position" name="position" class="form-control" value="{{ old('position') }}" required>
                     </div>
-                    <div>
+                    <div class="col">
                         <label for="office" class="form-label">Office</label>
                         <input type="text" id="office" name="office" class="form-control" value="{{ old('office') }}" required>
                     </div>
                 </div>
 
                 <!-- Years in Position and CSC -->
-                <div class="form-group-row">
-                    <div>
+                <div class="row mb-3">
+                    <div class="col">
                         <label for="years_in_position" class="form-label">Years in Position</label>
                         <input type="number" id="years_in_position" name="years_in_position" class="form-control" value="{{ old('years_in_position') }}" required>
                     </div>
-                    <div>
+                    <div class="col">
                         <label for="years_in_csc" class="form-label">Years in CSC</label>
                         <input type="number" id="years_in_csc" name="years_in_csc" class="form-control" value="{{ old('years_in_csc') }}" required>
                     </div>
                 </div>
 
                 <!-- Division and Salary Grade -->
-                <div class="form-group-row">
-                    <div>
+                <div class="row mb-3">
+                    <div class="col">
                         <label for="division" class="form-label">Division</label>
                         <input type="text" id="division" name="division" class="form-control" value="{{ old('division') }}" required>
                     </div>
-                    <div>
+                    <div class="col">
                         <label for="salary_grade" class="form-label">Salary Grade</label>
                         <input type="number" id="salary_grade" name="salary_grade" class="form-control" value="{{ old('salary_grade') }}" required>
                     </div>
                 </div>
 
                 <!-- Role and Superior -->
-                <div class="form-group-row">
-                    <div>
+                <div class="row mb-3">
+                    <div class="col">
                         <label for="role" class="form-label">Role</label>
-                        <select id="role" name="role" class="form-control">
+                        <select id="role" name="role" class="form-control" required>
                             <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>Admin</option>
                             <option value="User" {{ old('role') == 'User' ? 'selected' : '' }}>User</option>
                         </select>
                     </div>
-                    <div>
+                    <div class="col">
                         <label for="superior" class="form-label">Superior</label>
                         <input type="text" id="superior" name="superior" class="form-control" value="{{ old('superior') }}" placeholder="Lastname, Firstname, MI">
                     </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label for="password_confirmation" class="form-label">Confirm Password</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
                 </div>
 
                 <!-- Submit Button -->
