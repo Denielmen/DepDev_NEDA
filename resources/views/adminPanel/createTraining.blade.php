@@ -50,6 +50,7 @@
         }
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
         .main-content {
             background-color: rgb(187, 219, 252);
@@ -79,6 +80,27 @@
         }
         .training-card h4 {
             font-weight: bold;
+        }
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-range input[type="date"] {
+            width: 150px;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .date-range span {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -125,21 +147,12 @@
                             <label for="title" class="form-label">Title/Area:</label>
                             <input type="text" class="form-control" id="title" name="title">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4 form-group">
                             <label class="form-label">Three-Year Period:</label>
-                            <div class="row g-2 align-items-center">
-                                <div class="col-auto">
-                                    <label for="from" class="form-label mb-0">From:</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="text" class="form-control" id="from" name="from" style="width: 80px;">
-                                </div>
-                                <div class="col-auto">
-                                    <label for="to" class="form-label mb-0">To:</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="text" class="form-control" id="to" name="to" style="width: 80px;">
-                                </div>
+                            <div class="date-range">
+                                <input type="date" class="form-control" name="date_from" id="date_from" required onchange="updateDateTo()">
+                                <span>To:</span>
+                                <input type="date" class="form-control" name="date_to" id="date_to" required readonly>
                             </div>
                         </div>
                     </div>
@@ -187,13 +200,73 @@
                     </div>
                     <div class="text-end">
                         <button type="button" class="btn btn-secondary me-2">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Participant</button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#participantModal">Add Participant</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Participant List Modal -->
+    <div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="participantModalLabel">List of Participants</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Position</th>
+                                    <th>Department</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($users as $user)
+                                <tr>
+                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->position }}</td>
+                                    <td>{{ $user->department }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Add</button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+        function updateDateTo() {
+            const dateFromInput = document.getElementById('date_from');
+            const dateToInput = document.getElementById('date_to');
+            
+            if (dateFromInput.value) {
+                const dateFrom = new Date(dateFromInput.value);
+                const dateTo = new Date(dateFrom);
+                dateTo.setFullYear(dateFrom.getFullYear() + 3);
+                
+                // Format the date to YYYY-MM-DD
+                const formattedDate = dateTo.toISOString().split('T')[0];
+                dateToInput.value = formattedDate;
+            } else {
+                dateToInput.value = '';
+            }
+        }
+    </script>
 </body>
 </html>

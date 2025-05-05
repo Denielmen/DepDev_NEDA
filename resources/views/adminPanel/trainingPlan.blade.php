@@ -50,6 +50,7 @@
         }
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
         .main-content {
             flex-grow: 1;
@@ -220,6 +221,18 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($trainings as $training)
+                        <tr>
+                            <td>{{ $training->title }}</td>
+                            <td>{{ $training->competency }}</td>
+                            <td>{{ $training->implementation_date->format('m/d/y') }}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view">View</a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
                         @forelse ($trainings as $training)
                             <tr>
                                 <td>{{ $training->title }}</td>

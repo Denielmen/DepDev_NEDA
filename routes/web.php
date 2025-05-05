@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrainingProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\TrainingController;
 
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/search/results', [SearchController::class, 'results'])->name('search.results');
@@ -50,6 +51,7 @@ Route::get('/evalSupervisor', function() {
     return view('userPanel.evalSupervisor');
 })->name('evalSupervisor');
 
+Route::get('/training/{id}/export', [TrainingProfileController::class, 'export'])->name('training.export');
 
 // Admin Panel Routes
 Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
@@ -59,9 +61,20 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
     })->name('home');
 
    
+    // Training Plan routes
+    Route::get('training-plan', function () {
+        $trainings = \App\Models\Training::where('type', 'Program')->get();
+        return view('adminPanel.trainingPlan', compact('trainings'));
+    })->name('training-plan');
 
-    Route::get('/training-plan/create', function () {
-        return view('adminPanel.createTraining');
+    Route::get('training-plan/unprogrammed', function () {
+        $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
+        return view('adminPanel.trainingPlanUnProg', compact('trainings'));
+    })->name('training-plan.unprogrammed');
+
+    Route::get('training-plan/create', function () {
+        $users = \App\Models\User::all();
+        return view('adminPanel.createTraining', compact('users'));
     })->name('training-plan.create');
 
     // Training Plan routes
@@ -72,17 +85,34 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         return view('adminPanel.trainingPlanUnProg');
     })->name('training-plan.unprogrammed');
 
-    // Participants routes
+    Route::get('training-plan/{id}', function ($id) {
+        $training = \App\Models\Training::findOrFail($id);
+        return view('adminPanel.trainingView', compact('training'));
+    })->name('training.view');
+
+    Route::get('training-plan/unprogrammed/{id}', function ($id) {
+        $training = \App\Models\Training::findOrFail($id);
+        return view('adminPanel.trainingViewUnprog', compact('training'));
+    })->name('training.view.unprogrammed');
+
+    
+
+     // Participants routes
     Route::get('/participants', function () {
-        return view('adminPanel.listOfUser');
+        $users = \App\Models\User::all();
+        return view('adminPanel.listOfUser', compact('users'));
     })->name('participants');
 
     Route::get('/participants/{id}', function ($id) {
-        return view('adminPanel.userInfo');
+        $user = \App\Models\User::findOrFail($id);
+        $programmedTrainings = \App\Models\Training::where('type', 'Program')->get();
+        return view('adminPanel.userInfo', compact('user', 'programmedTrainings'));
     })->name('participants.info');
 
     Route::get('/participants/{id}/unprogrammed', function ($id) {
-        return view('adminPanel.userInfoUnprog');
+        $user = \App\Models\User::findOrFail($id);
+        $unprogrammedTrainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
+        return view('adminPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
     })->name('participants.info.unprogrammed');
 
     // Reports routes

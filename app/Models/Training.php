@@ -16,6 +16,13 @@ class Training extends Model
         'dev_target',
         'performance_goal',
         'objective',
+        'status',
+        'type',
+        'participant_pre_rating',
+        'participant_post_rating',
+        'supervisor_pre_rating',
+        'supervisor_post_rating',
+        'hours'
     ];
 
     protected $casts = [

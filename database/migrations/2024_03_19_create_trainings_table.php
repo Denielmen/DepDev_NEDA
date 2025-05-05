@@ -12,9 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('competency');
-            $table->date('year');
-            $table->decimal('budget', 10, 2)->nullable();
-            $table->integer('hours')->nullable();
+            $table->date('implementation_date');
+            $table->integer('No. of Hours')->nullable();
             $table->string('provider')->nullable();
             $table->text('dev_target')->nullable();
             $table->text('performance_goal')->nullable();
