@@ -75,6 +75,7 @@
         }
         .sidebar a.active, .sidebar a:focus {
             background-color: #004080;
+            font-weight: bold;
             /* background-color: #e7f1ff;
             color: #003366;
             font-weight: bold; */
@@ -130,6 +131,7 @@
             font-size: 0.95rem;
             letter-spacing: 1px;
             margin-bottom: 10px;
+            text-decoration: none;
         }
         .new-user-btn:hover {
             background: #c6e0ff;
@@ -205,33 +207,31 @@
             background: #fff;
             color: #003366;
             border-radius: 4px;
-            padding: 3px 10px;
+            padding: 5px 12px;
             font-size: 0.95rem;
             margin-right: 4px;
             transition: background 0.2s, color 0.2s;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .action-btn:last-child {
             margin-right: 0;
         }
-        .action-btn.edit {
-            border-color: #003366;
-        }
         .action-btn.enable {
-            border-color: #2ecc40;
-            color: #2ecc40;
+            border-color: #003366;
+            color: #003366;
         }
         .action-btn.disable {
-            border-color: #bdbdbd;
-            color: #bdbdbd;
-        }
-        .action-btn.edit:hover {
-            background: #e7f1ff;
+            border-color: #003366;
+            color: #003366;
         }
         .action-btn.enable:hover {
-            background: #eafbe7;
+            background: #e7f1ff;
         }
         .action-btn.disable:hover {
-            background: #f3f3f3;
+            background: #e7f1ff;
         }
         .action-btn.view {
             border-color: #003366;
@@ -337,7 +337,9 @@
             <div class="list-title"><h2>List of Staffs</h2></div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <button class="new-user-btn"><i class="bi bi-person-plus-fill"></i> + NEW USER</button>
+                    <a href="{{ route('register') }}" class="new-user-btn">
+                        <i class="bi bi-person-plus-fill"></i> + NEW USER
+                    </a>
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" placeholder="Search...">
@@ -349,115 +351,37 @@
                         <option value="all-role">All role</option>
                         <option value="supervisor">Supervisor</option>
                         <option value="user">User</option>
-                        <option value="admin">Admin</option>
                     </select>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Status</th>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Action</th>
+                                <th style="width: 10%;">Status</th>
+                                <th style="width: 25%;">Name</th>
+                                <th style="width: 30%;">Position</th>
+                                <th style="width: 15%;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach($users as $user)
                             <tr>
                                 <td>
-                                    <span class="status-indicator active"></span>
-                                    <span class="status-text">Active</span>
+                                    <span class="status-indicator {{ $user->is_active ? 'active' : 'inactive' }}"></span>
+                                    <span class="status-text">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                                 </td>
-                                <td>John Smith</td>
-                                <td>Administrative</td>
+                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->role }}</td>
                                 <td>
-                                    <a href="{{ route('admin.participants.info', ['id' => 1]) }}" class="action-btn view">
+                                    <a href="{{ route('admin.participants.info', ['id' => $user->id]) }}" class="action-btn view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
-                                    <button class="action-btn edit">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                    <button class="action-btn enable toggle-status">
-                                        <i class="bi bi-toggle-on"></i> Enable
+                                    <button class="action-btn {{ $user->is_active ? 'disable' : 'enable' }} toggle-status">
+                                        <i class="bi bi-toggle-{{ $user->is_active ? 'on' : 'off' }}"></i> {{ $user->is_active ? 'Disable' : 'Enable' }}
                                     </button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <span class="status-indicator inactive"></span>
-                                    <span class="status-text">Inactive</span>
-                                </td>
-                                <td>John Doe</td>
-                                <td>Administrative Assistant</td>
-                                <td>
-                                    <a href="{{ route('admin.participants.info', ['id' => 1]) }}" class="action-btn view">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                    <button class="action-btn edit">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                    <button class="action-btn enable toggle-status">
-                                        <i class="bi bi-toggle-on"></i> Enable
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span class="status-indicator inactive"></span>
-                                    <span class="status-text">Inactive</span>
-                                </td>
-                                <td>Jane Watson</td>
-                                <td>Supervisor</td>
-                                <td>
-                                    <a href="{{ route('admin.participants.info', ['id' => 1]) }}" class="action-btn view">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                    <button class="action-btn edit">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                    <button class="action-btn enable toggle-status">
-                                        <i class="bi bi-toggle-on"></i> Enable
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span class="status-indicator inactive"></span>
-                                    <span class="status-text">Inactive</span>
-                                </td>
-                                <td>Sophia Walter</td>
-                                <td>Supervisor</td>
-                                <td>
-                                    <a href="{{ route('admin.participants.info', ['id' => 1]) }}" class="action-btn view">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                    <button class="action-btn edit">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                    <button class="action-btn enable toggle-status">
-                                        <i class="bi bi-toggle-on"></i> Enable
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span class="status-indicator inactive"></span>
-                                    <span class="status-text">Inactive</span>
-                                </td>
-                                <td>Peter Parker</td>
-                                <td>User</td>
-                                <td>
-                                    <a href="{{ route('admin.participants.info', ['id' => 1]) }}" class="action-btn view">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                    <button class="action-btn edit">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                    <button class="action-btn enable toggle-status">
-                                        <i class="bi bi-toggle-on"></i> Enable
-                                    </button>
-                                </td>
-                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

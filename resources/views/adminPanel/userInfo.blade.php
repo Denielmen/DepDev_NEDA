@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DEPDEV Learning and Development Database System Region VII</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,8 +44,6 @@
             width: 270px;
             padding-top: 20px;
             position: fixed;
-            left: 0;
-            top: 56px;
         }
         .sidebar a {
             color: white;
@@ -55,6 +54,7 @@
         }
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
         .main-content {
             margin-left: 270px;
@@ -132,19 +132,23 @@
             margin-bottom: 5px;
         }
         .program-tabs .nav-link {
-            color: #bdbdbd !important;
+            color: #d6d3d3 !important;
             /* background-color: white; */
             /* border: 1px solid #003366; */
             margin-right: 5px;
             border-radius: 5px;
-        }
-        .program-tabs .nav-link:hover {
             color: #003366 !important;
             background-color: white;
+
         }
+        /* .program-tabs .nav-link:hover {
+            color: #003366 !important;
+            background-color: white;
+        } */
         .program-tabs .nav-link.active {
             background-color: #003366;
             color: white !important;
+            font-weight: bold;
         }
         .btn-outline-primary {
             color: #003366;
@@ -158,6 +162,20 @@
             display: flex;
             align-items: center;
             gap: 5px;
+        }
+        .user-info-card.text-center {
+            padding: 25px 20px;
+        }
+        .user-info-card h4 {
+            margin-bottom: 8px;
+            font-size: 1.4rem;
+        }
+        .user-info-card p {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .user-avatar {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -192,9 +210,8 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>ID: 2023035084</h4>
-            <button class="btn btn-outline-primary" onclick="history.back()">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <button class="btn btn-outline-primary" onclick="window.location.href='{{ route('admin.participants') }}'">
                 <i class="fas fa-arrow-left"></i> Back
             </button>
         </div>
@@ -206,36 +223,42 @@
                     <div class="user-avatar">
                         <i class="fas fa-user fa-3x text-secondary"></i>
                     </div>
-                    <h4>John Smith</h4>
-                    <p class="text-muted mb-0">Administrative</p>
+                    <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
+                    <p class="text-muted mb-0">ID: {{ $user->user_id }}</p>
+                    <p class="text-muted mb-0">{{ $user->position }}</p>
                 </div>
             </div>
 
             <!-- Basic Information -->
             <div class="col-md-8">
                 <div class="user-info-card">
-                    <h5>Basic Information</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Basic Information</h5>
+                        <a href="" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-md-8">
                             <label class="form-label">Salary Grade</label>
-                            <input type="text" class="form-control" readonly>
+                            <input type="text" class="form-control" value="{{ $user->salary_grade }}" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Years in CSC</label>
-                            <input type="text" class="form-control" readonly>
+                            <input type="text" class="form-control" value="{{ $user->years_in_csc }}" readonly>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Division</label>
-                        <input type="text" class="form-control" readonly>
+                        <input type="text" class="form-control" value="{{ $user->division }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Office/Department</label>
-                        <input type="text" class="form-control" readonly>
+                        <input type="text" class="form-control" value="{{ $user->office }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Name of Superior (Last, First, MI)</label>
-                        <input type="text" class="form-control" readonly>
+                        <input type="text" class="form-control" value="{{ $user->superior }}" readonly>
                     </div>
                 </div>
             </div>
@@ -245,10 +268,10 @@
         <div class="program-tabs">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => request()->route('id')]) }}">Programmed</a>
+                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => request()->route('id')]) }}">Unprogrammed</a>
+                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Unprogrammed</a>
                 </li>
             </ul>
         </div>
@@ -261,10 +284,12 @@
                         <th>Training Title</th>
                         <th>Competency</th>
                         <th>Period of Implementation</th>
+                        <th>No. of Hours</th>
                         <th>Provider</th>
                         <th>Status</th>
                         <th colspan="2">Participant Ratings</th>
                         <th colspan="2">Supervisor Ratings</th>
+                        <th>Action</th>
                     </tr>
                     <tr>
                         <th></th>
@@ -272,25 +297,31 @@
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                         <th>Pre</th>
                         <th>Post</th>
                         <th>Pre</th>
                         <th>Post</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach($programmedTrainings as $training)
                     <tr>
-                        <td>Business Writing</td>
-                        <td>Business Writing</td>
-                        <td>11/23/13</td>
-                        <td></td>
-                        <td>Not Implemented</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>{{ $training->title }}</td>
+                        <td>{{ $training->competency }}</td>
+                        <td>{{ $training->implementation_date->format('m/d/y') }}</td>
+                        <td>{{ $training->provider }}</td>
+                        <td>{{ $training->status }}</td>
+                        <td>{{ $training->participant_pre_rating }}</td>
+                        <td>{{ $training->participant_post_rating }}</td>
+                        <td>{{ $training->supervisor_pre_rating }}</td>
+                        <td>{{ $training->supervisor_post_rating }}</td>
+                        <td>
+                            <a href="{{ route('admin.training.view', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
+                        </td>
                     </tr>
-                    <!-- Add more rows as needed -->
+                    @endforeach
                 </tbody>
             </table>
         </div>
