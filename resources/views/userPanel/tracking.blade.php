@@ -169,15 +169,35 @@
                     @csrf
                     <div class="row">
                         <div class="col-md-6 form-group">
-                            <label class="form-label">Title of Training:</label>
+                            <label class="form-label">Title of the Training:</label>
                             <input type="text" class="form-control" name="training_title" required>
                         </div>
+                        
                         <div class="col-md-6 form-group">
+                            <label class="form-label">Aligned Training:</label>
+                            <select id="alignedTraining" name="courseTitle" class="form-control" required>
+                                <option value="" disabled selected>Select a course</option>
+                                <option value="Course 1">Course 1</option>
+                                <option value="Course 2">Course 2</option>
+                                <option value="Course 3">Course 3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 form-group">
                             <label class="form-label">Competency:</label>
                             <input type="text" class="form-control" name="competency" required>
                         </div>
+                        <div class="col-md-3 form-group">
+                            <label class="form-label">Role:</label>
+                            <select id="role" name="role" class="form-control" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="Course 1">Participant</option>
+                                <option value="Course 2">Resource Person</option>
+                        
+                            </select>
+                        </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label class="form-label">No. of Hours:</label>
@@ -257,4 +277,4 @@
         }
     </script>
 </body>
-</html> 
+</html>
