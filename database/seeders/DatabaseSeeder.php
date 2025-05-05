@@ -19,8 +19,9 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-
+// gi call ang user seeder
         $this->call([
+            UserSeeder::class,
             TrainingSeeder::class,
         ]);
     }

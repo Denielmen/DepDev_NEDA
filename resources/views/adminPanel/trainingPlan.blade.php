@@ -49,6 +49,7 @@
         }
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
         .main-content {
             flex-grow: 1;
@@ -219,44 +220,18 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($trainings as $training)
                         <tr>
-                            <td>Orientation Course for...</td>
-                            <td>Core: Socio-Economic...</td>
-                            <td>07/25/22</td>
+                            <td>{{ $training->title }}</td>
+                            <td>{{ $training->competency }}</td>
+                            <td>{{ $training->implementation_date->format('m/d/y') }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-view">View</button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Edit</a></li>
-                                            <li><a class="dropdown-item" href="#">Delete</a></li>
-                                        </ul>
-                                    </div>
+                                    <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view">View</a>
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>Orientation Course for...</td>
-                            <td>Core: Socio-Economic...</td>
-                            <td>08/26/23</td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-view">View</button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Edit</a></li>
-                                            <li><a class="dropdown-item" href="#">Delete</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
