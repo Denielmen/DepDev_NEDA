@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,6 +41,7 @@
         }
 
         .navbar {
+            background-color: rgb(255, 255, 255);
             background-color: rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
@@ -340,6 +342,8 @@
                     <a href="{{ route('register') }}" class="new-user-btn">
                         <i class="bi bi-person-plus-fill"></i> + NEW USER
                     </a>
+                  <a href="{{ route('register') }}">  <button class="new-user-btn"><i class="bi bi-person-plus-fill"></i> + NEW USER</button>
+                  </a>
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" placeholder="Search...">
@@ -391,7 +395,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
 
 
  

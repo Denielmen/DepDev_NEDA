@@ -1,9 +1,14 @@
 <?php
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrainingProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TrainingController;
 
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+Route::get('/search/results', [SearchController::class, 'results'])->name('search.results');
+Route::get('/search/export/{format}', [SearchController::class, 'export'])->name('search.export');
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
@@ -11,7 +16,7 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
-
+Route::post('/login', [LoginController::class, 'login']); // For POST requests
 // User Panel Routes
 Route::get('/', function () {
     return view('userPanel.welcomeUser');
@@ -55,6 +60,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         return view('adminPanel.welcomeAdmin');
     })->name('home');
 
+   
     // Training Plan routes
     Route::get('training-plan', function () {
         $trainings = \App\Models\Training::where('type', 'Program')->get();
@@ -70,6 +76,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         $users = \App\Models\User::all();
         return view('adminPanel.createTraining', compact('users'));
     })->name('training-plan.create');
+
+    // Training Plan routes
+    Route::get('/training-plan', [TrainingProfileController::class, 'trainingPlan'])->name('training-plan');
+    Route::get('/training-plan/edit', [TrainingProfileController::class, 'edit'])->name('training-plan.edit');
+    Route::put('/training-plan/update', [TrainingProfileController::class, 'update'])->name('training-plan.update');
+    Route::get('/training-plan/unprogrammed', function () {
+        return view('adminPanel.trainingPlanUnProg');
+    })->name('training-plan.unprogrammed');
 
     Route::get('training-plan/{id}', function ($id) {
         $training = \App\Models\Training::findOrFail($id);
@@ -106,4 +120,3 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         return view('adminPanel.report');
     })->name('reports');
 });
-  

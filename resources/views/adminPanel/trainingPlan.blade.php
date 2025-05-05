@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,7 +17,7 @@
             background-color: rgb(187, 219, 252);
             padding-top: 60px; /* Adjust this value based on your navbar height */
         }
-        .navbar {
+        .navbar {   
             background-color: #fff;
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
@@ -232,6 +233,31 @@
                             </td>
                         </tr>
                         @endforeach
+                        @forelse ($trainings as $training)
+                            <tr>
+                                <td>{{ $training->title }}</td>
+                                <td>{{ $training->competency }}</td>
+                                <td>{{ $training->year->format('m/d/Y') }} -{{$endDate = $training->year->addDays(2)->format('m/d/Y ');}}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-view">View</button>
+                                        <div class="dropdown">
+                                            <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="{{ route('admin.training-plan.edit', ['id' => $training->id]) }}">Edit</a></li>
+                                                <li><a class="dropdown-item" href="#">Delete</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center">No training plans available.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -241,3 +267,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+    

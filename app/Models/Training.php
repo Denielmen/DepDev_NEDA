@@ -9,8 +9,13 @@ class Training extends Model
     protected $fillable = [
         'title',
         'competency',
-        'implementation_date',
+        'year',
+        'budget',
+        'hours',
         'provider',
+        'dev_target',
+        'performance_goal',
+        'objective',
         'status',
         'type',
         'participant_pre_rating',
@@ -21,6 +26,6 @@ class Training extends Model
     ];
 
     protected $casts = [
-        'implementation_date' => 'date'
+        'year' => 'date',
     ];
-} 
+}
