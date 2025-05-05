@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('competency');
             $table->date('implementation_date');
+            $table->integer('No. of Hours')->nullable();
             $table->string('provider')->nullable();
             $table->enum('status', ['Implemented', 'Pending', 'Cancelled'])->default('Pending');
             $table->enum('type', ['Program', 'Unprogrammed']);

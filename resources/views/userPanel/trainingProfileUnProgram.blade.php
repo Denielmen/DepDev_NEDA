@@ -177,36 +177,43 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
-                            <th colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Participant Ratings</th>
-                            <th colspan="2" style="background-color: #003366; color: white; text-align: center;">Supervisor Ratings</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">No. of Hours</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
+                            <th class="text-center" colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Participant Ratings</th>
+                            <th class="text-center" colspan="2" style="background-color: #003366; color: white; text-align: center;">Supervisor Ratings</th>
                         </tr>
                         <tr>
-                            <th colspan="5"></th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white; border-left: 2px solid white;">Pre</th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366;">Post</th>
+                            <th colspan="6"></th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366;">Post</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($trainings as $training)
                         <tr>
-                            <td>Project Management Fundamentals</td>
-                            <td>Project Management</td>
-                            <td>12/15/23</td>
-                            <td>PMI Philippines</td>
-                            <td>Implemented</td>
-                            <td class="text-center">3.00</td>
-                            <td class="text-center">4.00</td>
-                            <td class="text-center">3.25</td>
-                            <td class="text-center">4.25</td>
+                            <td class="text-center">{{ $training->title }}</td>
+                            <td class="text-center">{{ $training->competency }}</td>
+                            <td class="text-center">{{ $training->implementation_date->format('m/d/y') }}</td>
+                            <td class="text-center">{{ $training->hours }}</td>
+                            <td class="text-center">{{ $training->provider }}</td>
+                            <td class="text-center">{{ $training->status }}</td>
+                            <td class="text-center">{{ $training->participant_pre_rating }}</td>
+                            <td class="text-center">{{ $training->participant_post_rating }}</td>
+                            <td class="text-center">{{ $training->supervisor_pre_rating }}</td>
+                            <td class="text-center">{{ $training->supervisor_post_rating }}</td>
                         </tr>
+                        @endforeach
                     </tbody>
                 </table>
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $trainings->links() }}
+                </div>
             </div>
         </div>
     </div>

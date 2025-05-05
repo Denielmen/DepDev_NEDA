@@ -188,43 +188,58 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
-                            <th style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
-                            <th colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Participant Ratings</th>
-                            <th colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Supervisor Ratings</th>
-                            <th style="background-color: #003366; color: white;">Action</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">No. of Hours</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
+                            <th class="text-center" colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Participant Ratings</th>
+                            <th class="text-center" colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Supervisor Ratings</th>
+                            <th class="text-center" style="background-color: #003366; color: white;">Action</th>
                         </tr>
                         <tr>
-                            <th colspan="5"></th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white; border-left: 2px solid white;">Pre</th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
-                            <th style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
+                            <th colspan="6"></th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white; border-left: 2px solid white;">Pre</th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
+                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($trainings as $training)
                         <tr>
-                            <td>{{ $training->title }}</td>
-                            <td>{{ $training->competency }}</td>
-                            <td>{{ $training->implementation_date->format('m/d/y') }}</td>
-                            <td>{{ $training->provider }}</td>
-                            <td>{{ $training->status }}</td>
+                            <td class="text-center">{{ $training->title }}</td>
+                            <td class="text-center">{{ $training->competency }}</td>
+                            <td class="text-center">{{ $training->implementation_date->format('m/d/y') }}</td>
+                            <td class="text-center">{{ $training->hours }}</td>
+                            <td class="text-center">{{ $training->provider }}</td>
+                            <td class="text-center">{{ $training->status }}</td>
                             <td class="text-center">{{ $training->participant_pre_rating }}</td>
                             <td class="text-center">{{ $training->participant_post_rating }}</td>
                             <td class="text-center">{{ $training->supervisor_pre_rating }}</td>
                             <td class="text-center">{{ $training->supervisor_post_rating }}</td>
-                            <td>
-                                <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm btn-info">View</a>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm btn-info">View</a>
+                                    <button type="button" class="btn btn-sm btn-info dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('training.export', $training->id) }}">Export</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $trainings->links() }}
+                </div>
             </div>
         </div>
     </div>

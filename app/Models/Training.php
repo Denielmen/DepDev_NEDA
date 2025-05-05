@@ -16,7 +16,8 @@ class Training extends Model
         'participant_pre_rating',
         'participant_post_rating',
         'supervisor_pre_rating',
-        'supervisor_post_rating'
+        'supervisor_post_rating',
+        'hours'
     ];
 
     protected $casts = [
