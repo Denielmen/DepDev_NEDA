@@ -161,6 +161,10 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         // User status toggle route
         Route::patch('/users/{user}/toggle-status', [App\Http\Controllers\Admin\AccountController::class, 'toggleStatus'])
             ->name('toggleUserStatus');
+
+        // View user info routes
+        Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('viewUserInfo');
+        Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('viewUserInfoUnprog');
     });
 });
 
