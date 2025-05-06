@@ -287,22 +287,8 @@
                         <th>No. of Hours</th>
                         <th>Provider</th>
                         <th>Status</th>
-                        <th colspan="2">Participant Ratings</th>
-                        <th colspan="2">Supervisor Ratings</th>
+                        <th>User Role</th>
                         <th>Action</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th>Pre</th>
-                        <th>Post</th>
-                        <th>Pre</th>
-                        <th>Post</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -311,14 +297,12 @@
                         <td>{{ $training->title }}</td>
                         <td>{{ $training->competency }}</td>
                         <td>{{ $training->implementation_date->format('m/d/y') }}</td>
+                        <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>{{ $training->status }}</td>
-                        <td>{{ $training->participant_pre_rating }}</td>
-                        <td>{{ $training->participant_post_rating }}</td>
-                        <td>{{ $training->supervisor_pre_rating }}</td>
-                        <td>{{ $training->supervisor_post_rating }}</td>
+                        <td>{{ $training->user_role }}</td>
                         <td>
-                            <a href="{{ route('admin.training.view', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
+                            <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
                     @endforeach
