@@ -249,7 +249,7 @@
                                     <span class="status-indicator {{ $user->is_active ? 'active' : 'inactive' }}"></span>
                                     <span class="status-text">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                                 </td>
-                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
                                 <td>{{ $user->role }}</td>
                                 <td>
                                     <a href="{{ route('admin.participants.info', ['id' => $user->id]) }}" class="action-btn view">

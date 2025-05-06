@@ -48,6 +48,7 @@ class TrainingProfileController extends Controller
             'performance_goal' => 'nullable|string',
             'objective' => 'nullable|string',
             'type' => 'required|in:Program,Unprogrammed',
+            'participation_type' => 'required|in:Resource Person,Participant',
         ]);
 
         $training->update($request->all());
@@ -77,12 +78,16 @@ class TrainingProfileController extends Controller
             'dev_target' => 'nullable|string',
             'performance_goal' => 'nullable|string',
             'objective' => 'nullable|string',
-            'type' => 'required|in:Program,Unprogrammed',
+            'participation_type' => 'required|in:Resource Person,Participant',
             'participants' => 'nullable|array',
             'participants.*' => 'exists:users,id'
         ]);
 
-        $training = Training::create($request->except('participants'));
+        // Create training data with type always set to Program
+        $trainingData = $request->except('participants');
+        $trainingData['type'] = 'Program';
+
+        $training = Training::create($trainingData);
 
         // Add participants if any were selected
         if ($request->has('participants')) {

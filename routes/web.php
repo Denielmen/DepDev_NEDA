@@ -104,13 +104,15 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         Route::get('/training-plan/edit', [TrainingProfileController::class, 'edit'])->name('training-plan.edit');
         Route::put('/training-plan/update', [TrainingProfileController::class, 'update'])->name('training-plan.update');
         Route::get('/training-plan/unprogrammed', function () {
-            return view('adminPanel.trainingPlanUnProg');
+            $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
+            return view('adminPanel.trainingPlanUnProg', compact('trainings'));
         })->name('training-plan.unprogrammed');
 
         // Add participant route
         Route::post('/training-plan/{training}/add-participant', [TrainingProfileController::class, 'addParticipant'])
             ->name('training-plan.add-participant');
-
+        Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+        Route::post('/register', [RegisteredUserController::class, 'store']);
         // Delete training route
         Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])
             ->name('training-plan.destroy');
@@ -130,6 +132,10 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
             $users = \App\Models\User::all();
             return view('adminPanel.listOfUser', compact('users'));
         })->name('participants');
+
+        // Add register route for admin
+        Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+        Route::post('/register', [RegisteredUserController::class, 'store']);
 
         Route::get('/participants/{id}', function ($id) {
             $user = \App\Models\User::findOrFail($id);
