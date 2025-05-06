@@ -12,12 +12,22 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('competency');
+            $table->date('period_from')->nullable();
+            $table->date('period_to')->nullable();
             $table->date('implementation_date');
-            $table->integer('No. of Hours')->nullable();
+            $table->decimal('budget', 10, 2)->nullable();
+            $table->integer('no_of_hours')->nullable();
+            $table->string('superior')->nullable();
             $table->string('provider')->nullable();
             $table->text('dev_target')->nullable();
             $table->text('performance_goal')->nullable();
             $table->text('objective')->nullable();
+            $table->enum('type', ['Program', 'Unprogrammed'])->default('Program');
+            $table->string('status')->default('Pending');
+            $table->integer('participant_pre_rating')->nullable();
+            $table->integer('participant_post_rating')->nullable();
+            $table->integer('supervisor_pre_rating')->nullable();
+            $table->integer('supervisor_post_rating')->nullable();
             $table->timestamps();
         });
     }

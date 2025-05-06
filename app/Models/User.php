@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
 class User extends Authenticatable
 {
@@ -23,12 +24,34 @@ class User extends Authenticatable
         'role',
         'superior',
         'password',
+        'is_active',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            // Get the next ID
+            $nextId = static::max('id') + 1;
+            // Generate user_id in the format DepDev_ + id
+            $user->user_id = 'DepDev_' . $nextId;
+        });
+    }
+
+    /**
+     * The trainings that belong to the user.
+     */
+    public function trainings()
+    {
+        return $this->belongsToMany(Training::class, 'training_participants')
+                    ->withTimestamps();
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -40,6 +63,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 }

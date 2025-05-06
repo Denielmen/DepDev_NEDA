@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id')->unique();
+            $table->string('user_id')->unique()->nullable();
             $table->string('last_name', 50);
             $table->string('first_name', 50);
             $table->string('mid_init', 10)->nullable();
@@ -26,17 +26,10 @@ return new class extends Migration
             $table->string('role', 50);
             $table->string('superior', 100)->nullable();
             $table->string('password', 255);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->text('payload');
-            $table->integer('last_activity');
-        });
-        
+       
     }
 
     /**
