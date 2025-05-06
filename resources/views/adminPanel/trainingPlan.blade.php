@@ -40,6 +40,9 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            position: fixed;
+            top: 56px;
+            left: 0;
         }
         .sidebar a {
             color: white;
@@ -56,6 +59,9 @@
             flex-grow: 1;
             padding: 20px;
             background-color: rgb(187, 219, 252);
+            margin-left: 270px;
+            margin-top: 36px;
+            padding-bottom: 20px;
         }
         .content-header {
             background-color: #e7f1ff;

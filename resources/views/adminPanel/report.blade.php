@@ -162,44 +162,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colspan="6" class="category-header">I. Foundational/Mandatory</td>
-                        </tr>
-                        <tr>
-                            <td>1. Orientation Course for New NEDAns - Batch 1</td>
-                            <td>Core Social Economic Development Planning Advocacy</td>
-                            <td>
-                                1. Juan Dela-Cruz<br>
-                                2. John Smith<br>
-                                3. John Doe
-                            </td>
-                            <td>New Hires in 2025</td>
-                            <td>New Hires in 2026</td>
-                            <td>NCO</td>
-                        </tr>
-                        <tr>
-                            <td colspan="6" class="category-header">II. Competency Enhancement</td>
-                        </tr>
-                        <tr>
-                            <td>1. Gross Regional Domestic Product Estimation (GRDPE) Phase 1: Concepts and Classification</td>
-                            <td>Functional - Managing Data and Information</td>
-                            <td>
-                                1. Juan Dela-Cruz<br>
-                                2. John Smith<br>
-                                3. John Doe
-                            </td>
-                            <td>
-                                1. Juan Dela-Cruz<br>
-                                2. John Smith<br>
-                                3. John Doe
-                            </td>
-                            <td>
-                                1. Juan Dela-Cruz<br>
-                                2. John Smith<br>
-                                3. John Doe
-                            </td>
-                            <td>NCO</td>
-                        </tr>
+                        @foreach($trainings as $category => $categoryTrainings)
+                            <tr>
+                                <td colspan="6" class="category-header">{{ $category }}</td>
+                            </tr>
+                            @foreach($categoryTrainings as $training)
+                                <tr>
+                                    <td>{{ $training->title }}</td>
+                                    <td>{{ $training->competency }}</td>
+                                    <td>
+                                        @foreach($training->participants_2025 as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->name }}<br>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach($training->participants_2026 as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->name }}<br>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach($training->participants_2027 as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->name }}<br>
+                                        @endforeach
+                                    </td>
+                                    <td>{{ $training->provider }}</td>
+                                </tr>
+                            @endforeach
+                        @endforeach
                     </tbody>
                 </table>
             </div>

@@ -24,8 +24,14 @@ class Training extends Model
         'supervisor_post_rating',
         'hours'
     ];
-
     protected $casts = [
         'year' => 'date',
     ];
+
+    public function participants()
+    {
+        return $this->belongsToMany(User::class, 'training_participants')
+            ->withPivot('year')
+            ->withTimestamps();
+    }
 }
