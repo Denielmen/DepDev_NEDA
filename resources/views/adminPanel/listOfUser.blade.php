@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +12,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
+<<<<<<< HEAD
+=======
 
         table {
             width: 100%;
@@ -32,11 +37,20 @@
             background-color: #f1f1f1; /* Optional: Highlight row on hover */
         }
 
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+<<<<<<< HEAD
+        }
+        .navbar {
+            background-color: rgb(255, 255, 255);
+            padding: 0.5rem 1rem;
+            box-shadow: 1px 3px 3px 0px #737373;
+        }
+=======
             padding-top: 60px;
         }
 
@@ -47,26 +61,39 @@
             box-shadow: 1px 3px 3px 0px #737373;
         }
 
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
         .navbar-brand {
             color: #003366 !important;
             font-size: 1rem;
             display: flex;
             align-items: center;
         }
+<<<<<<< HEAD
+=======
 
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
         .navbar-brand img {
             height: 30px;
             margin-right: 10px;
         }
+<<<<<<< HEAD
+        .nav-link, .user-icon, .user-menu {
+            color: black !important;
+        }
+=======
 
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
         .sidebar {
             background-color: #003366;
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+<<<<<<< HEAD
+=======
             position: fixed;
             left: 0;
             top: 56px;
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
         }
         .sidebar a {
             color: white;
@@ -75,6 +102,19 @@
             padding: 12px 20px;
             font-size: 0.9rem;
         }
+<<<<<<< HEAD
+        .sidebar a:hover {
+            background-color: #004080;
+        }
+        .sidebar a.active {
+            background-color: #004080;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+=======
         .sidebar a.active, .sidebar a:focus {
             background-color: #004080;
             font-weight: bold;
@@ -308,6 +348,7 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top">
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
@@ -329,6 +370,63 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar">
+<<<<<<< HEAD
+            <a href="{{ route('admin.home') }}" class="{{ Route::is('admin.home') ? 'active' : '' }}">
+                <i class="bi bi-house-door me-2"></i>Home
+            </a>
+            <a href="{{ route('admin.training-plan') }}" class="{{ Route::is('admin.training-plan') ? 'active' : '' }}">
+                <i class="bi bi-calendar-check me-2"></i>Training Plan
+            </a>
+            <a href="{{ route('admin.listOfUsers') }}" class="{{ Route::is('admin.listOfUsers') ? 'active' : '' }}">
+                <i class="bi bi-people me-2"></i>List of Participants
+            </a>
+            <a href="{{ route('admin.report') }}" class="{{ Route::is('admin.report') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-text me-2"></i>Reports
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" style="padding: 20px; flex-grow: 1;">
+            <div class="table-container" style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                <h2 style="margin-bottom: 20px;">List of Staffs</h2>
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>User ID</th>
+                            <th>Position</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $user)
+                            <tr>
+                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->id }}</td>
+                                <td>{{ $user->position }}</td>
+                                <td>
+                                    <a href="{{ route('admin.editUser', $user->id) }}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    @if ($user->is_active)
+                                        <a href="{{ route('admin.disableUser', $user->id) }}" class="btn btn-secondary btn-sm">
+                                            <i class="bi bi-toggle-off"></i> Disable
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.enableUser', $user->id) }}" class="btn btn-success btn-sm">
+                                            <i class="bi bi-toggle-on"></i> Enable
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+=======
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
@@ -392,9 +490,14 @@
             </div>
         </div>
     </div>
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 
 
+<<<<<<< HEAD
+
+=======
  
+>>>>>>> 12745e1b522105838428df5dc8523b959e57d04a

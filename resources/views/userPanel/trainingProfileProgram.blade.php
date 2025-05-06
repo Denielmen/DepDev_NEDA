@@ -135,6 +135,18 @@
             background-color: #003366;
             color: white;
         }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -153,6 +165,15 @@
                         User
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu">
+                        <!-- Logout Button -->
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item logout-btn">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

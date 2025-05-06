@@ -25,12 +25,33 @@ Route::get('/', function () {
 Route::get('/training-profile', function() {
     return redirect()->route('training.profile.program');
 })->name('training.profile');
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\TrainingController;
 
-Route::get('/training-profile/program', [TrainingProfileController::class, 'program'])
-    ->name('training.profile.program');
 
-Route::get('/training-profile/unprogrammed', [TrainingProfileController::class, 'unprogrammed'])
-    ->name('training.profile.unprogrammed');
+    // Route to view user accounts
+    Route::get('/admin/accounts', [App\Http\Controllers\Admin\AccountController::class, 'index'])
+        ->name('admin.accounts');
+
+// Public Routes (Accessible Without Login)
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);
+Route::get('/welcome', function () {
+    return view('welcome');
+});
+
+// Protected Routes (Require Login)
+Route::middleware(['auth'])->group(function () {   // User Panel Routes
+    Route::get('/', function () {
+        return view('userPanel.welcomeUser');
+    })->name('home');
+
+    Route::get('/training-profile/program', [TrainingProfileController::class, 'program'])
+        ->name('training.profile.program');
+
+    Route::get('/training-profile/unprogrammed', [TrainingProfileController::class, 'unprogrammed'])
+        ->name('training.profile.unprogrammed');
 
 Route::get('/training-profile/program/{id}', [TrainingProfileController::class, 'show'])
     ->name('training.profile.show');
@@ -38,6 +59,9 @@ Route::get('/training-profile/program/{id}', [TrainingProfileController::class, 
 Route::get('/tracking', function() {
     return view('userPanel.tracking');
 })->name('tracking');
+    Route::get('/tracking', function () {
+        return view('userPanel.tracking');
+    })->name('tracking');
 
 Route::get('/training-effectivenesss', function() {
     return view('userPanel.trainingEffectivenesss');
@@ -52,6 +76,9 @@ Route::get('/evalSupervisor', function() {
 })->name('evalSupervisor');
 
 Route::get('/training/{id}/export', [TrainingProfileController::class, 'export'])->name('training.export');
+    Route::get('/training-effectiveness', function () {
+        return view('userPanel.trainingEffectiveness');
+    })->name('training.effectiveness');
 
 // Admin Panel Routes
 Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
@@ -84,6 +111,18 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
     Route::get('/training-plan/unprogrammed', function () {
         return view('adminPanel.trainingPlanUnProg');
     })->name('training-plan.unprogrammed');
+    // Admin Panel Routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', function () {
+            return view('adminPanel.welcomeAdmin');
+        })->name('home');
+
+        Route::resource('training-plan', TrainingController::class);
+        Route::get('training-plan/unprogrammed', [TrainingController::class, 'unprogrammed'])
+            ->name('training-plan.unprogrammed');
+    });
+
+
 
     Route::get('training-plan/{id}', function ($id) {
         $training = \App\Models\Training::findOrFail($id);
@@ -119,4 +158,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
     Route::get('/reports', function () {
         return view('adminPanel.report');
     })->name('reports');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+require __DIR__.'/auth.php';

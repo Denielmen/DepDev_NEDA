@@ -228,42 +228,41 @@
                     </thead>
                     <tbody>
                         @foreach($trainings as $training)
+                        @foreach($trainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
                             <td>{{ $training->competency }}</td>
-                            <td>{{ $training->implementation_date->format('m/d/y') }}</td>
+                            <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/y') : 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view">View</a>
+                                    <a href="#" class="btn btn-view">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this training?')">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                         @endforeach
-                        @forelse ($trainings as $training)
-                            <tr>
-                                <td>{{ $training->title }}</td>
-                                <td>{{ $training->competency }}</td>
-                                <td>{{ $training->year->format('m/d/Y') }} -{{$endDate = $training->year->addDays(2)->format('m/d/Y ');}}</td>
-                                <td>
-                                    <div class="d-flex gap-2">
-                                        <button class="btn btn-view">View</button>
-                                        <div class="dropdown">
-                                            <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
-                                                <i class="bi bi-three-dots"></i>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li><a class="dropdown-item" href="{{ route('admin.training-plan.edit', ['id' => $training->id]) }}">Edit</a></li>
-                                                <li><a class="dropdown-item" href="#">Delete</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center">No training plans available.</td>
-                            </tr>
-                        @endforelse
                     </tbody>
                 </table>
             </div>

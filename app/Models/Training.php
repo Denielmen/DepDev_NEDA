@@ -1,11 +1,13 @@
 <?php
-
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Training extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'competency',
@@ -26,6 +28,7 @@ class Training extends Model
     ];
     protected $casts = [
         'year' => 'date',
+        'supervisor_post_rating',
     ];
 
     public function participants()
@@ -34,4 +37,5 @@ class Training extends Model
             ->withPivot('year')
             ->withTimestamps();
     }
+}
 }

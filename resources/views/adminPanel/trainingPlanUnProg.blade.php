@@ -220,11 +220,66 @@
                             <td>{{ $training->implementation_date->format('m/d/y') }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a href="{{ route('admin.training.view.unprogrammed', $training->id) }}" class="btn btn-view">View</a>
+                                    <a href="#" class="btn btn-view">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this training?')">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
-                        @endforeach
+                        <tr>
+                            <td>Project Management</td>
+                            <td>Technical: Project Planning</td>
+                            <td>10/20/23</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="#" class="btn btn-view">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this training?')">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
