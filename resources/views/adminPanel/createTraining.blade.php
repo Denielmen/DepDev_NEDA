@@ -291,15 +291,17 @@
                         </div>
                     </div>
 
+                    <input type="hidden" name="type" value="Program">
+
                     <div class="form-group row mb-3">
-                        <label for="type" class="col-md-4 col-form-label text-md-right">{{ __('Type') }}</label>
+                        <label for="participation_type" class="col-md-4 col-form-label text-md-right">{{ __('Participation Type') }}</label>
                         <div class="col-md-6">
-                            <select id="type" class="form-control @error('type') is-invalid @enderror" name="type" required>
-                                <option value="">Select Type</option>
-                                <option value="Program" {{ old('type') == 'Program' ? 'selected' : '' }}>Program</option>
-                                <option value="Unprogrammed" {{ old('type') == 'Unprogrammed' ? 'selected' : '' }}>Unprogrammed</option>
+                            <select id="participation_type" class="form-control @error('participation_type') is-invalid @enderror" name="participation_type" required>
+                                <option value="">Select Participation Type</option>
+                                <option value="Resource Person" {{ old('participation_type') == 'Resource Person' ? 'selected' : '' }}>Resource Person</option>
+                                <option value="Participant" {{ old('participation_type') == 'Participant' ? 'selected' : '' }}>Participant</option>
                             </select>
-                            @error('type')
+                            @error('participation_type')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -310,10 +312,13 @@
                     <div class="form-group row mb-3">
                         <label for="participants" class="col-md-4 col-form-label text-md-right">{{ __('Participants') }}</label>
                         <div class="col-md-6">
-                            <select id="participants" class="form-control @error('participants') is-invalid @enderror" name="participants[]" multiple>
+                            <div id="selectedParticipants" class="mb-2">
+                                <!-- Selected participants will be displayed here -->
+                            </div>
+                            <select id="participants" class="form-control @error('participants') is-invalid @enderror" name="participants[]" multiple style="display: none;">
                                 @foreach($users as $user)
                                     <option value="{{ $user->id }}" {{ in_array($user->id, old('participants', [])) ? 'selected' : '' }}>
-                                        {{ $user->name }}
+                                    {{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.
                                     </option>
                                 @endforeach
                             </select>
@@ -350,16 +355,16 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Position</th>
-                                    <th>Department</th>
+                                    <th>Division</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($users as $user)
                                 <tr>
-                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
                                     <td>{{ $user->position }}</td>
-                                    <td>{{ $user->department }}</td>
+                                    <td>{{ $user->division }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-primary add-participant-btn" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">Add</button>
                                     </td>
@@ -381,16 +386,33 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const participantsSelect = document.getElementById('participants');
+            const selectedParticipantsDiv = document.getElementById('selectedParticipants');
             const addParticipantBtns = document.querySelectorAll('.add-participant-btn');
             const doneBtn = document.getElementById('doneBtn');
             const participantModal = document.getElementById('participantModal');
             const modal = bootstrap.Modal.getInstance(participantModal) || new bootstrap.Modal(participantModal);
 
+            // Function to update the selected participants display
+            function updateSelectedParticipantsDisplay() {
+                selectedParticipantsDiv.innerHTML = '';
+                Array.from(participantsSelect.options).forEach(option => {
+                    const participantDiv = document.createElement('div');
+                    participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
+                    participantDiv.innerHTML = `
+                        <span>${option.text}</span>
+                        <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${option.value}">
+                            <i class="bi bi-x"></i> Remove
+                        </button>
+                    `;
+                    selectedParticipantsDiv.appendChild(participantDiv);
+                });
+            }
+
             // Handle Add Participant button clicks
             addParticipantBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const userId = this.dataset.userId;
-                    const userName = this.dataset.userName;
+                    const userName = this.closest('tr').querySelector('td:first-child').textContent.trim();
                     
                     // Check if user is already selected
                     const optionExists = Array.from(participantsSelect.options).some(option => option.value === userId);
@@ -406,8 +428,36 @@
                 });
             });
 
+            // Handle Remove Participant button clicks
+            selectedParticipantsDiv.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-participant')) {
+                    const button = e.target.closest('.remove-participant');
+                    const userId = button.dataset.userId;
+                    
+                    // Remove from select
+                    const option = Array.from(participantsSelect.options).find(opt => opt.value === userId);
+                    if (option) {
+                        option.remove();
+                    }
+                    
+                    // Reset the Add button in modal
+                    const addBtn = document.querySelector(`.add-participant-btn[data-user-id="${userId}"]`);
+                    if (addBtn) {
+                        addBtn.disabled = false;
+                        addBtn.textContent = 'Add';
+                        addBtn.classList.remove('btn-success');
+                        addBtn.classList.add('btn-primary');
+                    }
+                    
+                    // Update display
+                    updateSelectedParticipantsDisplay();
+                }
+            });
+
             // Handle Done button click
             doneBtn.addEventListener('click', function() {
+                // Update the display before closing the modal
+                updateSelectedParticipantsDisplay();
                 modal.hide();
             });
 
@@ -441,6 +491,10 @@
                     alert('Please fill in all required fields.');
                 }
             });
+
+            // Clear initial selections
+            participantsSelect.innerHTML = '';
+            updateSelectedParticipantsDisplay();
         });
     </script>
 </body>
