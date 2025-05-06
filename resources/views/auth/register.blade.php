@@ -13,15 +13,11 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            background-color: #f8f9fa;
+            background-color: rgb(187, 219, 252);
+            padding-top: 60px; /* Adjust this value based on your navbar height */
         }
-        .navbar {
-            position: fixed; /* Fix the navbar at the top */
-            top: 0;
-            left: 0;
-            width: 100%; /* Ensure the navbar spans the full width */
-            z-index: 1030; /* Ensure it stays above other elements */
-            background-color: rgb(255, 255, 255);
+        .navbar {   
+            background-color: #fff;
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
         }
@@ -35,6 +31,9 @@
             height: 30px;
             margin-right: 10px;
         }
+        .user-icon, .user-menu {
+            color: black !important;
+        }
         .sidebar {
             background-color: #003366;
             min-height: calc(100vh - 56px);
@@ -42,6 +41,7 @@
             padding-top: 20px;
             position: fixed;
             top: 56px;
+            left: 0;
         }
         .sidebar a {
             color: white;
@@ -52,11 +52,15 @@
         }
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
         .main-content {
-            margin-left: 270px;
+            flex-grow: 1;
             padding: 20px;
-            margin-top: 56px;
+            background-color: rgb(187, 219, 252);
+            margin-left: 270px;
+            margin-top: 36px;
+            padding-bottom: 20px;
         }
         .register-container {
             max-width: 800px;
@@ -93,19 +97,19 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+     <!-- Navbar -->
+     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
-                DEPDEV Learning and Development System
+                DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
                 <i class="bi bi-bell-fill me-3 user-icon"></i>
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>
-                        Guest
+                        Admin
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                 </div>
@@ -113,13 +117,14 @@
         </div>
     </nav>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-        <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
-    </div>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+        </div>
 
     <!-- Main Content -->
     <div class="main-content">

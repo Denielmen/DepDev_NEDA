@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,9 +14,10 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            padding-top: 60px; /* Adjust this value based on your navbar height */
         }
         .navbar {
-            background-color: rgb(255, 255, 255);
+            background-color:rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
         }
@@ -37,6 +39,9 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            position: fixed;
+            top: 56px;
+            left: 0;
         }
         .sidebar a {
             color: white;
@@ -47,13 +52,14 @@
         }
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
         .main-content {
             flex-grow: 1;
             background-image: url('/images/neda-building.jpg');
-            background-size: cover; 
-            background-position: center; 
-            background-repeat: no-repeat; 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             height: 92vh;
         }
         .header {
@@ -61,8 +67,8 @@
             text-align: center;
             background-color: #f8f9fa;
             opacity: 0.7;
-            margin-left: 270px; /* Adjusted to account for the sidebar width */
-            margin-right: 0;
+            margin-left: 270px;
+            margin-right: 0%;
         }
         .header img {
             width: 50px;
@@ -73,6 +79,8 @@
             justify-content: center;
             align-items: center;
             gap: 300px;
+           
+            
         }
         .header h1 {
             color: #003366;
@@ -88,7 +96,17 @@
         .menu-cards {
             padding: 4rem;
             position: relative;
+            margin-left: 270px; /* Adjusted to account for the sidebar width */
+            margin-right: 0;
         }
+        /* .menu-cards::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        } */
         .flex {
             display: flex;
             justify-content: center;
@@ -178,6 +196,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="card text-center">
+                                    <a href="{{ route('tracking') }}" class="text-decoration-none">
                                     <h5>Training Tracking & History</h5>
                                     <p>View and plan learning activities aligned with your role.</p>
                                 </div>
