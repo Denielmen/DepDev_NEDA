@@ -33,7 +33,6 @@ class Training extends Model
         'participant_post_rating',
         'supervisor_pre_rating',
         'supervisor_post_rating'
-        'supervisor_post_rating'
     ];
     protected $casts = [
         'period_from' => 'date',
@@ -43,7 +42,7 @@ class Training extends Model
         'participant_pre_rating' => 'integer',
         'participant_post_rating' => 'integer',
         'supervisor_pre_rating' => 'integer',
-        'supervisor_post_rating' => 'integer'
+        'supervisor_post_rating' => 'integer',
         'period_from' => 'date',
         'period_to' => 'date',
         'implementation_date' => 'date',
@@ -57,11 +56,7 @@ class Training extends Model
     /**
      * The participants that belong to the training.
      */
-    public function participants()
-    {
-        return $this->belongsToMany(User::class, 'training_participants')
-                    ->withTimestamps();
-    }
+
 
     /**
      * The participants that belong to the training.
