@@ -11,25 +11,41 @@ class Training extends Model
     protected $fillable = [
         'title',
         'competency',
-        'year',
+        'period_from',
+        'period_to',
+        'implementation_date',
         'budget',
-        'hours',
+        'no_of_hours',
+        'superior',
         'provider',
         'dev_target',
         'performance_goal',
         'objective',
-        'status',
         'type',
+        'status',
         'participant_pre_rating',
         'participant_post_rating',
         'supervisor_pre_rating',
-        'supervisor_post_rating',
-        'hours'
+        'supervisor_post_rating'
     ];
 
     protected $casts = [
-        'year' => 'date',
-        'supervisor_post_rating',
+        'period_from' => 'date',
+        'period_to' => 'date',
+        'implementation_date' => 'date',
+        'budget' => 'decimal:2',
+        'participant_pre_rating' => 'integer',
+        'participant_post_rating' => 'integer',
+        'supervisor_pre_rating' => 'integer',
+        'supervisor_post_rating' => 'integer'
     ];
-}
+
+    /**
+     * The participants that belong to the training.
+     */
+    public function participants()
+    {
+        return $this->belongsToMany(User::class, 'training_participants')
+                    ->withTimestamps();
+    }
 }

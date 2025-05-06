@@ -141,66 +141,194 @@
             </div>
             <div class="training-card">
                 <h4 class="text-center mb-4">Training Information</h4>
-                <form>
-                    <div class="row mb-3">
+                <form method="POST" action="{{ route('admin.training-plan.store') }}" id="trainingForm">
+                    @csrf
+
+                    <div class="form-group row mb-3">
+                        <label for="title" class="col-md-4 col-form-label text-md-right">{{ __('Title/Area') }}</label>
                         <div class="col-md-6">
-                            <label for="title" class="form-label">Title/Area:</label>
-                            <input type="text" class="form-control" id="title" name="title">
+                            <input id="title" type="text" class="form-control @error('title') is-invalid @enderror" name="title" value="{{ old('title') }}" required autocomplete="title" autofocus>
+                            @error('title')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
-                        <div class="col-md-4 form-group">
-                            <label class="form-label">Three-Year Period:</label>
-                            <div class="date-range">
-                                <input type="date" class="form-control" name="date_from" id="date_from" required onchange="updateDateTo()">
-                                <span>To:</span>
-                                <input type="date" class="form-control" name="date_to" id="date_to" required readonly>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency') }}</label>
+                        <div class="col-md-6">
+                            <input id="competency" type="text" class="form-control @error('competency') is-invalid @enderror" name="competency" value="{{ old('competency') }}" required autocomplete="competency">
+                            @error('competency')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From') }}</label>
+                        <div class="col-md-6">
+                            <input id="period_from" type="date" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required>
+                            @error('period_from')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="period_to" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period To') }}</label>
+                        <div class="col-md-6">
+                            <input id="period_to" type="date" class="form-control @error('period_to') is-invalid @enderror" name="period_to" value="{{ old('period_to') }}" required>
+                            @error('period_to')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="implementation_date" class="col-md-4 col-form-label text-md-right">{{ __('Implementation Date') }}</label>
+                        <div class="col-md-6">
+                            <input id="implementation_date" type="date" class="form-control @error('implementation_date') is-invalid @enderror" name="implementation_date" value="{{ old('implementation_date') }}" required>
+                            @error('implementation_date')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget (per hour)') }}</label>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input id="budget" type="number" class="form-control @error('budget') is-invalid @enderror" name="budget" value="{{ old('budget') }}" step="0.01">
                             </div>
+                            @error('budget')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row mb-3">
+                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Number of Hours') }}</label>
                         <div class="col-md-6">
-                            <label for="competency" class="form-label">Competency:</label>
-                            <input type="text" class="form-control" id="competency" name="competency">
+                            <input id="no_of_hours" type="number" class="form-control @error('no_of_hours') is-invalid @enderror" name="no_of_hours" value="{{ old('no_of_hours') }}">
+                            @error('no_of_hours')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="superior" class="col-md-4 col-form-label text-md-right">{{ __('Superior') }}</label>
                         <div class="col-md-6">
-                            <label for="year" class="form-label">Year of Implementation:</label>
-                            <input type="date" class="form-control" id="year" name="year" min="2020-01-01" max="2100-12-31" onfocus="this.showPicker && this.showPicker();">
+                            <input id="superior" type="text" class="form-control @error('superior') is-invalid @enderror" name="superior" value="{{ old('superior') }}">
+                            @error('superior')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row mb-3">
+                        <label for="provider" class="col-md-4 col-form-label text-md-right">{{ __('Learning Service Provider') }}</label>
                         <div class="col-md-6">
-                            <label for="budget" class="form-label">Budget (per hour):</label>
-                            <input type="text" class="form-control" id="budget" name="budget">
+                            <input id="provider" type="text" class="form-control @error('provider') is-invalid @enderror" name="provider" value="{{ old('provider') }}">
+                            @error('provider')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="dev_target" class="col-md-4 col-form-label text-md-right">{{ __('Development Target') }}</label>
                         <div class="col-md-6">
-                            <label for="hours" class="form-label">No. of Hours:</label>
-                            <input type="text" class="form-control" id="hours" name="hours">
+                            <textarea id="dev_target" class="form-control @error('dev_target') is-invalid @enderror" name="dev_target" rows="2">{{ old('dev_target') }}</textarea>
+                            @error('dev_target')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row mb-3">
+                        <label for="performance_goal" class="col-md-4 col-form-label text-md-right">{{ __('Performance Goal this Supports') }}</label>
                         <div class="col-md-6">
-                            <label for="superior" class="form-label">Superior:</label>
-                            <input type="text" class="form-control" id="superior" name="superior" placeholder="Last, First, MI">
+                            <textarea id="performance_goal" class="form-control @error('performance_goal') is-invalid @enderror" name="performance_goal" rows="2">{{ old('performance_goal') }}</textarea>
+                            @error('performance_goal')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="objective" class="col-md-4 col-form-label text-md-right">{{ __('Objective') }}</label>
                         <div class="col-md-6">
-                            <label for="provider" class="form-label">Learning Service Provider:</label>
-                            <input type="text" class="form-control" id="provider" name="provider">
+                            <textarea id="objective" class="form-control @error('objective') is-invalid @enderror" name="objective" rows="2">{{ old('objective') }}</textarea>
+                            @error('objective')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="dev_target" class="form-label">Development Target:</label>
-                        <textarea class="form-control" id="dev_target" name="dev_target" rows="2"></textarea>
+
+                    <div class="form-group row mb-3">
+                        <label for="type" class="col-md-4 col-form-label text-md-right">{{ __('Type') }}</label>
+                        <div class="col-md-6">
+                            <select id="type" class="form-control @error('type') is-invalid @enderror" name="type" required>
+                                <option value="">Select Type</option>
+                                <option value="Program" {{ old('type') == 'Program' ? 'selected' : '' }}>Program</option>
+                                <option value="Unprogrammed" {{ old('type') == 'Unprogrammed' ? 'selected' : '' }}>Unprogrammed</option>
+                            </select>
+                            @error('type')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="performance_goal" class="form-label">Performances Goal this Support:</label>
-                        <textarea class="form-control" id="performance_goal" name="performance_goal" rows="2"></textarea>
+
+                    <div class="form-group row mb-3">
+                        <label for="participants" class="col-md-4 col-form-label text-md-right">{{ __('Participants') }}</label>
+                        <div class="col-md-6">
+                            <select id="participants" class="form-control @error('participants') is-invalid @enderror" name="participants[]" multiple>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}" {{ in_array($user->id, old('participants', [])) ? 'selected' : '' }}>
+                                        {{ $user->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('participants')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="objective" class="form-label">Objective:</label>
-                        <textarea class="form-control" id="objective" name="objective" rows="2"></textarea>
-                    </div>
+
                     <div class="text-end">
-                        <button type="button" class="btn btn-secondary me-2">Cancel</button>
+                        <a href="{{ route('admin.training-plan') }}" class="btn btn-secondary me-2">Cancel</a>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#participantModal">Add Participant</button>
+                        <button type="submit" class="btn btn-success ms-2">Create Training</button>
                     </div>
                 </form>
             </div>
@@ -233,7 +361,7 @@
                                     <td>{{ $user->position }}</td>
                                     <td>{{ $user->department }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary">Add</button>
+                                        <button class="btn btn-sm btn-primary add-participant-btn" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">Add</button>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -243,30 +371,77 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Done</button>
+                    <button type="button" class="btn btn-primary" id="doneBtn">Done</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-      <script>
-        function updateDateTo() {
-            const dateFromInput = document.getElementById('date_from');
-            const dateToInput = document.getElementById('date_to');
-            
-            if (dateFromInput.value) {
-                const dateFrom = new Date(dateFromInput.value);
-                const dateTo = new Date(dateFrom);
-                dateTo.setFullYear(dateFrom.getFullYear() + 3);
-                
-                // Format the date to YYYY-MM-DD
-                const formattedDate = dateTo.toISOString().split('T')[0];
-                dateToInput.value = formattedDate;
-            } else {
-                dateToInput.value = '';
-            }
-        }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const participantsSelect = document.getElementById('participants');
+            const addParticipantBtns = document.querySelectorAll('.add-participant-btn');
+            const doneBtn = document.getElementById('doneBtn');
+            const participantModal = document.getElementById('participantModal');
+            const modal = bootstrap.Modal.getInstance(participantModal) || new bootstrap.Modal(participantModal);
+
+            // Handle Add Participant button clicks
+            addParticipantBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.dataset.userId;
+                    const userName = this.dataset.userName;
+                    
+                    // Check if user is already selected
+                    const optionExists = Array.from(participantsSelect.options).some(option => option.value === userId);
+                    
+                    if (!optionExists) {
+                        const option = new Option(userName, userId, true, true);
+                        participantsSelect.appendChild(option);
+                        this.disabled = true;
+                        this.textContent = 'Added';
+                        this.classList.remove('btn-primary');
+                        this.classList.add('btn-success');
+                    }
+                });
+            });
+
+            // Handle Done button click
+            doneBtn.addEventListener('click', function() {
+                modal.hide();
+            });
+
+            // Reset Add buttons when modal is hidden
+            participantModal.addEventListener('hidden.bs.modal', function() {
+                addParticipantBtns.forEach(btn => {
+                    btn.disabled = false;
+                    btn.textContent = 'Add';
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-primary');
+                });
+            });
+
+            // Form validation
+            const form = document.getElementById('trainingForm');
+            form.addEventListener('submit', function(e) {
+                const requiredFields = form.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Please fill in all required fields.');
+                }
+            });
+        });
     </script>
 </body>
 </html>
