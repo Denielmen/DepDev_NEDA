@@ -39,6 +39,8 @@
             width: 270px;
             padding-top: 20px;
             position: fixed;
+            top: 56px;
+            left: 0;
         }
         .sidebar a {
             color: white;
