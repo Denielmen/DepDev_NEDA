@@ -164,6 +164,20 @@
                         <label for="objective" class="form-label">Objective:</label>
                         <textarea class="form-control" id="objective" name="objective" rows="2">{{ $training->objective }}</textarea>
                     </div>
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-control" id="type" name="type" required>
+                            <option value="Program" {{ $training->type === 'Program' ? 'selected' : '' }}>Program</option>
+                            <option value="Unprogrammed" {{ $training->type === 'Unprogrammed' ? 'selected' : '' }}>Unprogrammed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="participation_type" class="form-label">Participation Type</label>
+                        <select class="form-control" id="participation_type" name="participation_type" required>
+                            <option value="Resource Person" {{ $training->participation_type === 'Resource Person' ? 'selected' : '' }}>Resource Person</option>
+                            <option value="Participant" {{ $training->participation_type === 'Participant' ? 'selected' : '' }}>Participant</option>
+                        </select>
+                    </div>
                     <div class="text-end">
                         <a href="{{ route('admin.training-plan') }}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">Save Changes</button>

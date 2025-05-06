@@ -13,6 +13,11 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
+        // If user is authenticated and not an admin, redirect to home
+        if (auth()->check() && auth()->user()->role !== 'Admin') {
+            return redirect()->route('home');
+        }
+        
         return view('auth.register');
     }
 
@@ -57,6 +62,12 @@ class RegisteredUserController extends Controller
             'user_id' => 'DepDev_' . $user->id,
         ]);
 
+        // If the user is authenticated (admin), redirect back to participants list
+        if (auth()->check()) {
+            return redirect()->route('admin.participants')->with('status', 'User registered successfully.');
+        }
+
+        // For guest users, redirect to login
         return redirect()->route('login')->with('status', 'Registration successful. Please log in.');
     }
 }
