@@ -58,6 +58,7 @@
 
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
 
         .back-button {

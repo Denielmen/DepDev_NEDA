@@ -18,6 +18,11 @@
         }
 
         .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
             background-color: rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
@@ -36,10 +41,15 @@
         }
 
         .sidebar {
-            background-color: #003366;
-            min-height: calc(100vh - 56px);
+            position: fixed;
+            top: 56px;
+            left: 0;
             width: 270px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            background-color: #003366;
             padding-top: 20px;
+            z-index: 999;/
         }
 
         .sidebar a {
@@ -52,13 +62,13 @@
 
         .sidebar a:hover, .sidebar a.active {
             background-color: #004080;
+            font-weight: bold;
         }
 
         .main-content {
-            flex-grow: 1;
+            margin-left: 290px;
+            margin-top: 76px;
             padding: 20px;
-            margin-left: 20px;
-            margin-right: 20px;
         }
 
         table {
@@ -67,31 +77,45 @@
             margin-top: 20px;
             margin-bottom: 20px;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ccc;
         }
-        th, td {
+
+        th,
+        td {
             padding: 10px;
             text-align: left;
             vertical-align: middle;
         }
+
         th {
             background: #f9f9f9;
             text-align: center;
+            font-weight: bold;
+            text-align: left;
         }
+       
+
         .rating-cell {
             text-align: center;
         }
-        select, textarea {
+
+        select,
+        textarea {
             width: 100%;
             padding: 8px;
             font-size: 14px;
             margin-top: 5px;
         }
+
         textarea {
             height: 80px;
             resize: vertical;
         }
+
         button {
             padding: 10px 20px;
             background: #007bff;
@@ -102,10 +126,11 @@
             display: block;
             margin: 20px auto 0;
         }
+
         button:hover {
             background: #0056b3;
         }
-        
+
 
         .back-button {
             text-decoration: none;
@@ -204,6 +229,11 @@
             background: #001540;
         }
 
+        .instruction-container {
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -268,23 +298,26 @@
                 <form method="POST" action="{{ route('training.effectivenesss') }}" class="evaluation-form">
                     @csrf
                     <label for="courseTitle">Course Title:</label>
-                    <select id="courseTitle" name="courseTitle" required>
+                    <select id="courseTitle" name="courseTitle" required style="margin-bottom: 20px;">
                         <option value="">Select Course</option>
                         <option value="course1">Course 1</option>
                         <option value="course2">Course 2</option>
                     </select>
 
-                    <p style="margin-top: 1.5rem;"><strong>A. Learning Goals/Objectives</strong></p>
+                    <div class="instruction-container">
+                        <p><strong>Please tick the circle which describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied, (3) Satisfied, <br>(2) Dissatisfied, (1) Very Dissatisfied.</p>
+                    </div>
+
                     <table>
                         <tr>
-                            <th>Question</th>
-                            <th>1</th>
-                            <th>2</th>
-                            <th>3</th>
-                            <th>4</th>
+                            <th style="width: 60%;">A. Learning Goals/Objectives</th>
+                            <th style="width: 5%; text-align: center;">1</th>
+                            <th style="width: 5%; text-align: center;">2</th>
+                            <th style="width: 5%; text-align: center;">3</th>
+                            <th style="width: 5%; text-align: center;">4</th>
                         </tr>
                         <tr>
-                            <td>How satisfied are you in the learner's achievement of your learning goals/objectives?</td>
+                            <td>How satisfied are you in the learner’s achievement of your learning goals/objectives as specified in your learner’s profile.</td>
                             <td class="rating-cell"><input type="radio" name="goals" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="goals" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="goals" value="3"></td>
@@ -292,84 +325,95 @@
                         </tr>
                     </table>
 
-                    <p><strong>B. Application of Learning</strong></p>
+                    <div class="instruction-container">
+                        <p><strong>Please tick the circle which best describes your evaluation of the program. You have 5 choices to choose from: </strong>(4) Strongly agree, (3) Agree, <br>(2) Disagree, (1) Strongly Disagree, (Na) Not Applicable</p>
+                    </div>
                     <table>
                         <tr>
-                            <th>Question</th>
-                            <th>1</th>
-                            <th>2</th>
-                            <th>3</th>
-                            <th>4</th>
+                            <th style="width: 60%;">B. Application of Learning</th>
+                            <th style="width: 4%; text-align: center;">1</th>
+                            <th style="width: 4%; text-align: center;">2</th>
+                            <th style="width: 4%; text-align: center;">3</th>
+                            <th style="width: 4%; text-align: center;">4</th>
+                            <th style="width: 4%; text-align: center;">NA</th>
                         </tr>
                         <tr>
-                            <td>I applied the learning gained from this course to my work.</td>
+                            <td>1. I applied the learning/s gained from this course to my work.</td>
                             <td class="rating-cell"><input type="radio" name="learning1" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="learning1" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="learning1" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="learning1" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
                         </tr>
                         <tr>
-                            <td>The learning gained provided me with additional knowledge and skills to perform my role and tasks assigned.</td>
+                            <td>2. The learning/s gained provided me with additional knowledge and skills to perform my role and tasks assigned.</td>
                             <td class="rating-cell"><input type="radio" name="learning2" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="learning2" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="learning2" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="learning2" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
                         </tr>
                         <tr>
-                            <td>The learning's gained contributed to making better quality and more efficient work.</td>
+                            <td>3. The learning/s gained contributed to making better quality and more efficient work.</td>
                             <td class="rating-cell"><input type="radio" name="learning3" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="learning3" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="learning3" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="learning3" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
                         </tr>
                     </table>
 
-                    <p><strong>C. Work Performance (after one performance period)</strong></p>
                     <table>
                         <tr>
-                            <th>Question</th>
-                            <th>1</th>
-                            <th>2</th>
-                            <th>3</th>
-                            <th>4</th>
+                            <th style="width: 60%;">C. Work Performance (after one performance period)</th>
+                            <th style="width: 4%; text-align: center;">1</th>
+                            <th style="width: 4%; text-align: center;">2</th>
+                            <th style="width: 4%; text-align: center;">3</th>
+                            <th style="width: 4%; text-align: center;">4</th>
+                            <th style="width: 4%; text-align: center;">NA</th>
                         </tr>
                         <tr>
-                            <td>The quality of my work improved as a result of participation in this course.</td>
+                            <td>1. The quality of my work improved as a result participation in this course.</td>
                             <td class="rating-cell"><input type="radio" name="performance1" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="performance1" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="performance1" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="performance1" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="5"></td>
                         </tr>
                         <tr>
-                            <td>My competency level increased as a result of participation in this course.</td>
+                            <td>2. My competency level increased as a result of participation in this course.</td>
                             <td class="rating-cell"><input type="radio" name="performance2" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="performance2" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="performance2" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="performance2" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="5"></td>
                         </tr>
                         <tr>
-                            <td>My overall performance increased/improved as a result of participation in this course.</td>
+                            <td>3. My overall performance increased/improved as a result of participation in this course.</td>
                             <td class="rating-cell"><input type="radio" name="performance3" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="performance3" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="performance3" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="performance3" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="5"></td>
                         </tr>
                     </table>
 
-                    <p><strong>To support your training</strong> (Describe changes in work performance):</p>
+                    <p><strong>To support your your training, please describe changes in work performance as a result of
+                            attendance to this training. if employee’s work performance did not change, please cite possible
+                            reasons and what support is needed in order for the employee’s to apply acquired knowledge and skills.</strong></p>
                     <textarea name="changes" placeholder="Describe any changes..." required></textarea>
 
-                    <p><strong>D. Learner's Proficiency Level</strong></p>
+
                     <table>
                         <tr>
-                            <th>Question</th>
-                            <th>1</th>
-                            <th>2</th>
-                            <th>3</th>
-                            <th>4</th>
+                            <th style="width: 60%;">D. Learner’s Proficiency Level</th>
+                            <th style="width: 5%; text-align: center;">1</th>
+                            <th style="width: 5%; text-align: center;">2</th>
+                            <th style="width: 5%; text-align: center;">3</th>
+                            <th style="width: 5%; text-align: center;">4</th>
                         </tr>
                         <tr>
-                            <td>Proficiency level after participation in the course.</td>
+                            <td>In a scale 1-4 (4 is being the highest ), please tick the circle which describes the proficiency level of your subordinate after participation in this course.</td>
                             <td class="rating-cell"><input type="radio" name="proficiency" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="proficiency" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="proficiency" value="3"></td>
@@ -377,7 +421,7 @@
                         </tr>
                     </table>
 
-                    <p><strong>E. Comments/Suggestions on the training program:</strong></p>
+                    <p><strong>E. Comments/Suggestions on the training program.</strong></p>
                     <textarea name="comments" placeholder="Your comments or suggestions..." required></textarea>
 
                     <button type="submit">Submit</button>
