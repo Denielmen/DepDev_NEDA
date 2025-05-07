@@ -220,7 +220,7 @@
                             <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/y') : 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a href="#" class="btn btn-view">
+                                    <a href="{{ route('admin.training.view.unprogrammed', $training->id) }}" class="btn btn-view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
                                     <div class="dropdown">

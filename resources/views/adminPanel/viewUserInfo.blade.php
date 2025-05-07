@@ -67,6 +67,8 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             padding: 32px 32px 24px 32px;
+            /* position: relative;
+            padding-right: 180px; */
         }
         .details-title {
             color: #003366;
@@ -91,56 +93,69 @@
         .details-table tr:last-child td {
             border-bottom: none;
         }
+        .top-actions {
+            
+        }
         .btn-back {
             background-color: #003366;
             color: #fff;
             border: none;
-            padding: 8px 32px;
+            padding: 8px 25px;
             border-radius: 4px;
             font-weight: 500;
-            margin-bottom: 24px;
+            margin-bottom: 15px;
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            align-self: flex-start;
-            margin-left: 20px;
+            margin-right: 900px;
+            /* gap: 5px;
+            transition: all 0.3s ease; */
         }
         .btn-back:hover {
             background-color: #004080;
             color: #fff;
+            transform: translateY(-1px);
         }
-        .action-buttons {
+        .eval-buttons {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
-            margin-top: 24px;
+            gap: 20px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
         }
-        .btn-edit, .btn-delete {
-            padding: 8px 15px;
+        .btn-eval {
+            padding: 12px 30px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-width: 180px;
+            justify-content: center;
         }
-        .btn-edit {
+        .btn-pre-eval {
             background-color: #4a90e2;
             color: white;
         }
-        .btn-edit:hover {
+        .btn-pre-eval:hover {
             background-color: #357abd;
             color: white;
+            transform: translateY(-2px);
         }
-        .btn-delete {
-            background-color: #dc3545;
+        .btn-post-eval {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
             color: white;
         }
-        .btn-delete:hover {
-            background-color: #c82333;
+        .btn-post-eval:hover {
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
             color: white;
+            transform: translateY(-2px);
+        }
+        .btn-eval i {
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -152,58 +167,110 @@
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>Training Details</h4>
-            <button class="btn btn-outline-primary" onclick="window.history.back()">
-                <i class="bi bi-arrow-left"></i> Back
-            </button>
-        </div>
-
-        <div class="info-card">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5 class="mb-3">Training Information</h5>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Training Title</label>
-                        <p>{{ $training->title }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Competency</label>
-                        <p>{{ $training->competency->name }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Period of Implementation</label>
-                        <p>{{ $training->implementation_date->format('F d, Y') }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Number of Hours</label>
-                        <p>{{ $training->no_of_hours }}</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="mb-3">Additional Details</h5>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Provider</label>
-                        <p>{{ $training->provider }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Status</label>
-                        <p>{{ $training->status }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">User Role</label>
-                        <p>{{ $training->user_role }}</p>
+            <div class="d-flex align-items-center">
+                <i class="bi bi-bell-fill me-3 user-icon"></i>
+                <div class="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i>
+                        admin
+                        <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </nav>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+        </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-actions">
+                <a href="{{ url()->previous() }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </a>
+            </div>
+            <div class="details-card">
+                <h2 class="details-title">Training Details</h2>
+                <table class="details-table">
+                    <tr>
+                        <td class="label">Title/Area:</td>
+                        <td>{{ $training->title ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Three-Year Period:</td>
+                        <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Competency:</td>
+                        <td>{{ $training->competency ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Year of Implementation:</td>
+                        <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/Y') : '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Budget (per hour):</td>
+                        <td>{{ $training->budget ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">No. of Hours:</td>
+                        <td>{{ $training->hours ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Superior:</td>
+                        <td>{{ $training->superior ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Learning Service Provider:</td>
+                        <td>{{ $training->provider ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Development Target:</td>
+                        <td>{{ $training->development_target ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Performance Goal this Support:</td>
+                        <td>{{ $training->performance_goal ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Objective:</td>
+                        <td>{{ $training->objective ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Participant Pre-Rating:</td>
+                        <td>{{ $training->participant_pre_rating ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Participant Post-Rating:</td>
+                        <td>{{ $training->participant_post_rating ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Supervisor Pre-Rating:</td>
+                        <td>{{ $training->supervisor_pre_rating ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Supervisor Post-Rating:</td>
+                        <td>{{ $training->supervisor_post_rating ?? '' }}</td>
+                    </tr>
+                </table>
+                <div class="eval-buttons">
+                    <a href="#" class="btn btn-eval btn-pre-eval">
+                        <i class="bi bi-clipboard-check"></i>
+                        Pre-Eval
+                    </a>
+                    <a href="#" class="btn btn-eval btn-post-eval">
+                        <i class="bi bi-clipboard-data"></i>
+                        Post-Eval
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html> 
