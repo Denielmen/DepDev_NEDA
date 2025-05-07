@@ -184,15 +184,8 @@
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">No. of Hours</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
-                            <th class="text-center" colspan="2" style="background-color: #003366; color: white; text-align: center; border-right: 2px solid white;">Participant Ratings</th>
-                            <th class="text-center" colspan="2" style="background-color: #003366; color: white; text-align: center;">Supervisor Ratings</th>
-                        </tr>
-                        <tr>
-                            <th colspan="6"></th>
-                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
-                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Post</th>
-                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366; border-right: 2px solid white;">Pre</th>
-                            <th class="text-center" style="background-color: #004080; color: white; text-align: center; border: 1px solid #003366;">Post</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">User Role</th>
+                            <th class="text-center" style="background-color: #003366; color: white;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -200,14 +193,14 @@
                         <tr>
                             <td class="text-center">{{ $training->title }}</td>
                             <td class="text-center">{{ $training->competency }}</td>
-                            <td class="text-center">{{ $training->implementation_date->format('m/d/y') }}</td>
-                            <td class="text-center">{{ $training->hours }}</td>
+                            <td class="text-center">{{ \Carbon\Carbon::parse($training->implementation_date)->format('m/d/y') }}</td>
+                            <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
                             <td class="text-center">{{ $training->status }}</td>
-                            <td class="text-center">{{ $training->participant_pre_rating }}</td>
-                            <td class="text-center">{{ $training->participant_post_rating }}</td>
-                            <td class="text-center">{{ $training->supervisor_pre_rating }}</td>
-                            <td class="text-center">{{ $training->supervisor_post_rating }}</td>
+                            <td class="text-center">Participant</td>
+                            <td class="text-center">
+                                <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
