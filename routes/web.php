@@ -151,7 +151,11 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
 
         // Reports routes
         Route::get('/reports', function () {
-            return view('adminPanel.report');
+            $trainings = \App\Models\Training::where('type', 'Program')
+                ->orderBy('core_competency')
+                ->get()
+                ->groupBy('core_competency');
+            return view('adminPanel.report', compact('trainings'));
         })->name('reports');
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -168,6 +168,18 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="core_competency" class="form-label">Core Competency</label>
+                        <select class="form-control" id="core_competency" name="core_competency" required>
+                            <option value="">Select Core Competency...</option>
+                            <option value="Foundational/Mandatory">Foundational/Mandatory</option>
+                            <option value="Competency Enhancement">Competency Enhancement</option>
+                            <option value="Leadership/Executive Development">Leadership/Executive Development</option>
+                            <option value="Gender and Development (GAD)-Related">Gender and Development (GAD)-Related</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+
                     <div class="form-group row mb-3">
                         <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From') }}</label>
                         <div class="col-md-6">

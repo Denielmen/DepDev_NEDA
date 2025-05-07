@@ -72,6 +72,7 @@ class TrainingProfileController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'competency' => 'required|string|max:255',
+            'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
             'implementation_date' => 'required|date',
             'no_of_hours' => 'nullable|numeric',
             'provider' => 'nullable|string|max:255',

@@ -162,9 +162,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($trainings as $category => $categoryTrainings)
+                        @foreach($trainings as $coreCompetency => $categoryTrainings)
                             <tr>
-                                <td colspan="6" class="category-header">{{ $category }}</td>
+                                <td colspan="6" class="category-header">{{ $coreCompetency }}</td>
                             </tr>
                             @foreach($categoryTrainings as $training)
                                 <tr>
