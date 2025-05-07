@@ -25,12 +25,13 @@
             font-size: 1rem;
             display: flex;
             align-items: center;
+            font-weight: bold;
         }
         .navbar-brand img {
             height: 30px;
             margin-right: 10px;
         }
-        .nav-link, .user-icon, .user-menu {
+        .nav-link, .user-menu {
             color: black !important;
         }
         .sidebar {
@@ -121,7 +122,6 @@
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
-                <i class="bi bi-bell-fill me-3 user-icon"></i>
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>
@@ -167,7 +167,11 @@
                     </tr>
                     <tr>
                         <td class="label">No. of Hours:</td>
-                        <td>{{ $training->hours ?? '' }}</td>
+                        <td>{{ $training->no_of_hours ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">User Role:</td>
+                        <td>{{ isset($user) ? $user->user_role : 'Participant' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Superior:</td>
@@ -189,10 +193,30 @@
                         <td class="label">Objective:</td>
                         <td>{{ $training->objective ?? '' }}</td>
                     </tr>
+                    @if($training->type === 'Program')
+                    <tr>
+                        <td class="label">Participant Pre Rating:</td>
+                        <td>{{ $training->participant_pre_rating ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Participant Post Rating:</td>
+                        <td>{{ $training->participant_post_rating ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Supervisor Pre Rating:</td>
+                        <td>{{ $training->supervisor_pre_rating ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Supervisor Post Rating:</td>
+                        <td>{{ $training->supervisor_post_rating ?? '' }}</td>
+                    </tr>
+                    @endif
                 </table>
                 <div class="btn-row">
                     <a href="{{ route('training.profile.program') }}" class="btn btn-back">Back</a>
+                    @if($training->type === 'Program')
                     <a href="{{ route('training.effectivenesss') }}" class="btn btn-eval">Pre-Evaluation</a>
+                    @endif
                 </div>
             </div>
         </div>

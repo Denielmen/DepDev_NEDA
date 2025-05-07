@@ -26,6 +26,7 @@
             font-size: 1rem;
             display: flex;
             align-items: center;
+            font-weight: bold;
         }
         .navbar-brand img {
             height: 30px;
@@ -39,6 +40,9 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            position: fixed;
+            top: 56px;      
+            left: 0;
         }
         .sidebar a {
             color: white;
@@ -55,6 +59,10 @@
             flex-grow: 1;
             padding: 20px;
             background-color: rgb(187, 219, 252);
+            margin-left: 270px;
+            margin-top: 50px;
+            padding-bottom: 20px;
+
         }
         .list-title {
             background-color: #e7f1ff;
@@ -188,11 +196,10 @@
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
-                <i class="bi bi-bell-fill me-3 user-icon"></i>
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>
-                        Admin HR
+                        Admin
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                 </div>
@@ -217,7 +224,7 @@
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <a href="{{ route('register') }}" class="new-user-btn">
-                        <i class="bi bi-person-plus-fill"></i> + NEW USER
+                        <i class="bi bi-person-plus-fill"></i> NEW USER
                     </a>
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
