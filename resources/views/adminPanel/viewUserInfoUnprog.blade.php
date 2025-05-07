@@ -25,6 +25,7 @@
             font-size: 1rem;
             display: flex;
             align-items: center;
+            font-weight: bold;
         }
         .navbar-brand img {
             height: 30px;
@@ -38,6 +39,9 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            position: fixed;
+            top: 56px;      
+            left: 0;
         }
         .sidebar a {
             color: white;
@@ -52,13 +56,12 @@
         }
         .main-content {
             flex-grow: 1;
-            padding: 40px 0;
+            padding: 20px;
             background-color: rgb(187, 219, 252);
-            min-height: calc(100vh - 56px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            margin-left: 270px;
+            margin-top: 50px;
+            padding-bottom: 20px;
+
         }
         .details-card {
             max-width: 1040px;
@@ -164,7 +167,6 @@
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
-                <i class="bi bi-bell-fill me-3 user-icon"></i>
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>

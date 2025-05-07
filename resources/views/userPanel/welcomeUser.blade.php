@@ -26,12 +26,13 @@
             font-size: 1rem;
             display: flex;
             align-items: center;
+            font-weight: bold;
         }
         .navbar-brand img {
             height: 30px;
             margin-right: 10px;
         }
-        .nav-link, .user-icon, .user-menu {
+        .nav-link, .user-menu {
             color: black !important;
         }
         .sidebar {
@@ -149,7 +150,6 @@
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
-                <i class="bi bi-bell-fill me-3 user-icon"></i>
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>
