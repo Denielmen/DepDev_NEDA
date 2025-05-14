@@ -6,6 +6,7 @@ use App\Http\Controllers\TrainingProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TrainingTrackingController;
 
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/search/results', [SearchController::class, 'results'])->name('search.results');
@@ -53,17 +54,16 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
     Route::get('/training-profile/program/{id}', [TrainingProfileController::class, 'show'])
         ->name('training.profile.show');
 
-    Route::get('/tracking', function() {
-        return view('userPanel.tracking');
-    })->name('tracking');
+    Route::get('/training/{id}/effectiveness/participant/{type}', [TrainingProfileController::class, 'effectivenessParticipant'])
+        ->name('training.effectiveness.participant');
+
+    Route::get('/tracking', [TrainingTrackingController::class, 'index'])->name('tracking');
 
     Route::get('/training-effectivenesss', function() {
         return view('userPanel.trainingEffectivenesss');
     })->name('training.effectivenesss');
 
-    Route::get('/evalParticipant', function() { 
-        return view('userPanel.evalParticipant');
-    })->name('evalParticipant');
+    Route::get('/evalParticipant', [\App\Http\Controllers\TrainingProfileController::class, 'evalParticipantForm'])->name('evalParticipant');
 
     Route::get('/evalSupervisor', function() {
         return view('userPanel.evalSupervisor');
@@ -74,6 +74,12 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
     Route::get('/training-effectiveness', function () {
         return view('userPanel.trainingEffectiveness');
     })->name('training.effectiveness');
+
+    Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
+        ->name('training.rate.participant');
+
+    Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
+        ->name('training.resources');
 
     // Admin Panel Routes
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
@@ -166,6 +172,8 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('viewUserInfo');
         Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('viewUserInfoUnprog');
     });
+
+    Route::post('/tracking', [TrainingTrackingController::class, 'store'])->name('tracking.store');
 });
 
 require __DIR__.'/auth.php';

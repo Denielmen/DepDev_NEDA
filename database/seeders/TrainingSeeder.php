@@ -16,7 +16,7 @@ class TrainingSeeder extends Seeder
                 'implementation_date' => '2024-06-01',
                 'no_of_hours' => 16,
                 'provider' => 'PMI Philippines',
-                'status' => 'Implemented',
+                'status' => 'Pending',
                 'type' => 'Program',
                 'participant_pre_rating' => 3.0,
                 'participant_post_rating' => 4.0,

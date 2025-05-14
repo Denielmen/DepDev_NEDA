@@ -299,9 +299,10 @@
                     @csrf
                     <label for="courseTitle">Course Title:</label>
                     <select id="courseTitle" name="courseTitle" required style="margin-bottom: 20px;">
-                        <option value="">Select Course</option>
-                        <option value="course1">Course 1</option>
-                        <option value="course2">Course 2</option>
+                        <option value="">Select Training</option>
+                        @foreach($implementedTrainings as $training)
+                            <option value="{{ $training->id }}">{{ $training->title }}</option>
+                        @endforeach
                     </select>
 
                     <div class="instruction-container">
@@ -317,7 +318,7 @@
                             <th style="width: 5%; text-align: center;">4</th>
                         </tr>
                         <tr>
-                            <td>How satisfied are you in the learner’s achievement of your learning goals/objectives as specified in your learner’s profile.</td>
+                            <td>How satisfied are you in the learner's achievement of your learning goals/objectives as specified in your learner's profile.</td>
                             <td class="rating-cell"><input type="radio" name="goals" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="goals" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="goals" value="3"></td>
@@ -399,14 +400,14 @@
                     </table>
 
                     <p><strong>To support your your training, please describe changes in work performance as a result of
-                            attendance to this training. if employee’s work performance did not change, please cite possible
-                            reasons and what support is needed in order for the employee’s to apply acquired knowledge and skills.</strong></p>
+                            attendance to this training. if employee's work performance did not change, please cite possible
+                            reasons and what support is needed in order for the employee's to apply acquired knowledge and skills.</strong></p>
                     <textarea name="changes" placeholder="Describe any changes..." required></textarea>
 
 
                     <table>
                         <tr>
-                            <th style="width: 60%;">D. Learner’s Proficiency Level</th>
+                            <th style="width: 60%;">D. Learner's Proficiency Level</th>
                             <th style="width: 5%; text-align: center;">1</th>
                             <th style="width: 5%; text-align: center;">2</th>
                             <th style="width: 5%; text-align: center;">3</th>

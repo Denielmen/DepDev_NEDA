@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Training;
 use App\Models\User;
+use App\Models\TrainingMaterial;
 use Illuminate\Http\Request;
 
 class TrainingProfileController extends Controller
 {
     public function program()
     {
-        $trainings = Training::where('type', 'Program')->paginate(10);
+        $trainings = Training::where('type', 'Program')
+            ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
+            ->orderBy('status')
+            ->paginate(10);
         return view('userPanel.trainingProfileProgram', compact('trainings'));
     }
 
@@ -24,6 +28,12 @@ class TrainingProfileController extends Controller
     {
         $training = Training::with('participants')->findOrFail($id);
         return view('userPanel.trainingProfileShow', compact('training'));
+    }
+
+    public function effectivenessParticipant($id, $type)
+    {
+        $training = Training::findOrFail($id);
+        return view('userPanel.trainingEffectivenessParticipant', compact('training', 'type'));
     }
 
     public function edit(Request $request)
@@ -133,5 +143,46 @@ class TrainingProfileController extends Controller
 
         return redirect()->route('admin.training-plan')
             ->with('success', 'Training deleted successfully.');
+    }
+
+    public function rateParticipant(Request $request, $id)
+    {
+        $request->validate([
+            'type' => 'required|in:Pre-Evaluation,Post-Evaluation',
+            'rating' => 'required|integer|min:1|max:4',
+        ]);
+        $training = Training::findOrFail($id);
+        if ($request->type === 'Pre-Evaluation') {
+            $training->participant_pre_rating = $request->rating;
+        } else {
+            $training->participant_post_rating = $request->rating;
+        }
+        $training->save();
+        return response()->json([
+            'success' => true,
+            'pre_rating' => $training->participant_pre_rating,
+            'post_rating' => $training->participant_post_rating,
+        ]);
+    }
+
+    public function resources(Request $request)
+    {
+        $query = TrainingMaterial::query();
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhere('competency', 'like', "%$search%")
+                  ->orWhere('source', 'like', "%$search%")
+                  ->orWhereDate('created_at', $search);
+            });
+        }
+        $materials = $query->orderByDesc('created_at')->get();
+        return view('userPanel.trainingResources', compact('materials'));
+    }
+
+    public function evalParticipantForm()
+    {
+        $implementedTrainings = Training::where('status', 'Implemented')->where('type', 'Program')->get();
+        return view('userPanel.evalParticipant', compact('implementedTrainings'));
     }
 } 

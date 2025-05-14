@@ -144,8 +144,8 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="hours" class="form-label">No. of Hours:</label>
-                            <input type="number" class="form-control" id="hours" name="hours" value="{{ $training->hours }}">
+                            <label for="no_of_hours" class="form-label">No. of Hours:</label>
+                            <input type="number" class="form-control" id="no_of_hours" name="no_of_hours" value="{{ $training->no_of_hours }}">
                         </div>
                         <div class="col-md-6">
                             <label for="provider" class="form-label">Learning Service Provider:</label>
