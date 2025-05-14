@@ -171,7 +171,7 @@
                     <div class="form-group row mb-3">
                         <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From') }}</label>
                         <div class="col-md-6">
-                            <input id="period_from" type="date" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required>
+                            <input id="period_from" type="date" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required onchange="setPeriodTo()">
                             @error('period_from')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -293,21 +293,6 @@
 
                     <input type="hidden" name="type" value="Program">
 
-                    <div class="form-group row mb-3">
-                        <label for="participation_type" class="col-md-4 col-form-label text-md-right">{{ __('Participation Type') }}</label>
-                        <div class="col-md-6">
-                            <select id="participation_type" class="form-control @error('participation_type') is-invalid @enderror" name="participation_type" required>
-                                <option value="">Select Participation Type</option>
-                                <option value="Resource Person" {{ old('participation_type') == 'Resource Person' ? 'selected' : '' }}>Resource Person</option>
-                                <option value="Participant" {{ old('participation_type') == 'Participant' ? 'selected' : '' }}>Participant</option>
-                            </select>
-                            @error('participation_type')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                    </div>
 
                     <div class="form-group row mb-3">
                         <label for="participants" class="col-md-4 col-form-label text-md-right">{{ __('Participants') }}</label>
@@ -496,6 +481,16 @@
             participantsSelect.innerHTML = '';
             updateSelectedParticipantsDisplay();
         });
+
+        function setPeriodTo() {
+            const fromDate = document.getElementById('period_from').value;
+            if (fromDate) {
+                const date = new Date(fromDate);
+                date.setFullYear(date.getFullYear() + 3);
+                const toDate = date.toISOString().split('T')[0];
+                document.getElementById('period_to').value = toDate;
+            }
+        }
     </script>
 </body>
 </html>

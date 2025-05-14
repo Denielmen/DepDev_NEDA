@@ -217,7 +217,7 @@
                             <th>Training Title</th>
                             <th>Competency</th>
                             <th>Period of Implementation</th>
-                            <th>Actions</th>
+                            <th>Training Details</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -219,7 +219,7 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="list-title">
-                <h2>List of Staffs</h2>
+                <h2>List of Employee's</h2>
             </div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -245,8 +245,8 @@
                             <tr>
                                 <th style="width: 10%;">Status</th>
                                 <th style="width: 25%;">Name</th>
-                                <th style="width: 30%;">Position</th>
-                                <th style="width: 15%;">Action</th>
+                                <th style="width: 25%;">Position</th>
+                                <th style="width: 20%;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -257,7 +257,7 @@
                                     <span class="status-text">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                                 </td>
                                 <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
-                                <td>{{ $user->role }}</td>
+                                <td>{{ $user->position }}</td>
                                 <td>
                                     <a href="{{ route('admin.participants.info', ['id' => $user->id]) }}" class="action-btn view">
                                         <i class="bi bi-eye"></i> View

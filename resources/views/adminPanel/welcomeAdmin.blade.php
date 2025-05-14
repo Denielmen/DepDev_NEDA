@@ -145,7 +145,7 @@
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
@@ -173,12 +173,12 @@
         <div class="main-content">
             <div class="header">
                 <div class="pic">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 <img src="/images/repub.png" alt="NEDA Logo">
                 </div>
                 <h1>REPUBLIC OF THE PHILIPPINES</h1>
-                <h1>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT.</h1>
-                <p>Please select a course from the menu to begin your learning and development journey.</p>
+                <h1>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT</h1>
+                <p>Please select a feature from the menu to begin your learning and development journey.</p>
             </div>
 
             <div class="menu-cards">
@@ -189,15 +189,15 @@
                             <div class="card text-center">
                                 <a href="{{ route('admin.training-plan') }}" class="text-decoration-none">
                                     <h5>Training Plan</h5>
-                                    <p>Evaluate the effectiveness of completed training progress.</p>
+                                    <p>Outline Training Programs for Staff Development and Growth</p>
                                 </a>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card text-center">
                                 <a href="{{ route('admin.participants')}}" class="text-decoration-none">
-                                    <h5>List of Participants</h5>
-                                    <p>View and plan learning activities aligned with your role.</p>
+                                    <h5>Employee's Profile</h5>
+                                    <p>List of all the Staff.</p>
                                 </a>
                             </div>
                         </div>
@@ -206,7 +206,7 @@
                             <div class="card text-center">
                                 <a href="{{ route('admin.reports')}}" class="text-decoration-none">
                                     <h5>Reports</h5>
-                                    <p>Track your learning and development progress.</p>
+                                    <p>View and Export Report.</p>
                                 </a>
                             </div>
                         </div>

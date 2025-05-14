@@ -163,7 +163,7 @@
                         <input type="text" id="position" name="position" class="form-control" value="{{ old('position') }}" required>
                     </div>
                     <div class="col">
-                        <label for="office" class="form-label">Office</label>
+                        <label for="office" class="form-label">Office/Department</label>
                         <input type="text" id="office" name="office" class="form-control" value="{{ old('office') }}" required>
                     </div>
                 </div>
@@ -175,7 +175,7 @@
                         <input type="number" id="years_in_position" name="years_in_position" class="form-control" value="{{ old('years_in_position') }}" required>
                     </div>
                     <div class="col">
-                        <label for="years_in_csc" class="form-label">Years in CSC</label>
+                        <label for="years_in_csc" class="form-label">Years in Goverment</label>
                         <input type="number" id="years_in_csc" name="years_in_csc" class="form-control" value="{{ old('years_in_csc') }}" required>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                 <!-- Division and Salary Grade -->
                 <div class="row mb-3">
                     <div class="col">
-                        <label for="division" class="form-label">Division</label>
+                        <label for="division" class="form-label">Division/Unit</label>
                         <input type="text" id="division" name="division" class="form-control" value="{{ old('division') }}" required>
                     </div>
                     <div class="col">
@@ -202,7 +202,7 @@
                         </select>
                     </div>
                     <div class="col">
-                        <label for="superior" class="form-label">Superior</label>
+                        <label for="superior" class="form-label">Name Of Immediate Supervisor</label>
                         <input type="text" id="superior" name="superior" class="form-control" value="{{ old('superior') }}" placeholder="Lastname, Firstname, MI">
                     </div>
                 </div>

@@ -171,17 +171,17 @@
                                     <td>{{ $training->title }}</td>
                                     <td>{{ $training->competency }}</td>
                                     <td>
-                                        @foreach($training->participants_2025 as $participant)
+                                        @foreach($training->participants ?? [] as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach($training->participants_2026 ?? [] as $participant)
                                             {{ $loop->iteration }}. {{ $participant->name }}<br>
                                         @endforeach
                                     </td>
                                     <td>
-                                        @foreach($training->participants_2026 as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->name }}<br>
-                                        @endforeach
-                                    </td>
-                                    <td>
-                                        @foreach($training->participants_2027 as $participant)
+                                        @foreach($training->participants_2027 ?? [] as $participant)
                                             {{ $loop->iteration }}. {{ $participant->name }}<br>
                                         @endforeach
                                     </td>
@@ -191,6 +191,17 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <div class="dropdown">
+                    <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-download me-2"></i>Export Report
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="exportDropdownButton">
+                        <li><a class="dropdown-item" href="#">CSV</a></li>
+                        <li><a class="dropdown-item" href="#">PDF</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
