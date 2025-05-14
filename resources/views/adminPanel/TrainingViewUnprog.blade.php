@@ -154,6 +154,10 @@
                         <td>{{ $training->competency ?? '' }}</td>
                     </tr>
                     <tr>
+                        <td class="label">Role:</td>
+                        <td>{{ }}</td>
+                    </tr>
+                    <tr>
                         <td class="label">Year of Implementation:</td>
                         <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/Y') : '' }}</td>
                     </tr>

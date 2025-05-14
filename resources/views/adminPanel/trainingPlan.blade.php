@@ -168,7 +168,7 @@
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('admin.home') }}">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
@@ -222,7 +222,7 @@
                             <th>Training Title</th>
                             <th>Competency</th>
                             <th>Period of Implementation</th>
-                            <th>Actions</th>
+                            <th>Training Details</th>
                         </tr>
                     </thead>
                     <tbody>

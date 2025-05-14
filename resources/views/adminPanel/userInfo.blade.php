@@ -233,7 +233,7 @@
             <div class="col-md-8">
                 <div class="user-info-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Basic Information</h5>
+                        <h5 class="mb-0">Employee Information</h5>
                         <a href="" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit
                         </a>
@@ -244,12 +244,12 @@
                             <input type="text" class="form-control" value="{{ $user->salary_grade }}" readonly>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Years in CSC</label>
+                            <label class="form-label">Years in Goverment</label>
                             <input type="text" class="form-control" value="{{ $user->years_in_csc }}" readonly>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Division</label>
+                        <label class="form-label">Division/Unit</label>
                         <input type="text" class="form-control" value="{{ $user->division }}" readonly>
                     </div>
                     <div class="mb-3">
@@ -257,7 +257,7 @@
                         <input type="text" class="form-control" value="{{ $user->office }}" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Name of Superior (Last, First, MI)</label>
+                        <label class="form-label">Name of Supervisor (Last, First, MI)</label>
                         <input type="text" class="form-control" value="{{ $user->superior }}" readonly>
                     </div>
                 </div>
