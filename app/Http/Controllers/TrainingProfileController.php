@@ -57,8 +57,7 @@ class TrainingProfileController extends Controller
             'dev_target' => 'nullable|string',
             'performance_goal' => 'nullable|string',
             'objective' => 'nullable|string',
-            'type' => 'required|in:Program,Unprogrammed',
-            'participation_type' => 'required|in:Resource Person,Participant',
+            'type' => 'required|in:Program,Unprogrammed'
         ]);
 
         $training->update($request->all());
@@ -88,7 +87,6 @@ class TrainingProfileController extends Controller
             'dev_target' => 'nullable|string',
             'performance_goal' => 'nullable|string',
             'objective' => 'nullable|string',
-            'participation_type' => 'required|in:Resource Person,Participant',
             'participants' => 'nullable|array',
             'participants.*' => 'exists:users,id'
         ]);

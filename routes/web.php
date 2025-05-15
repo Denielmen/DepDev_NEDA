@@ -6,6 +6,7 @@ use App\Http\Controllers\TrainingProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController; // akon gi add
 use App\Http\Controllers\TrainingTrackingController;
 
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
@@ -156,9 +157,9 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         })->name('participants.info.unprogrammed');
 
         // Reports routes
-        Route::get('/reports', function () {
-            return view('adminPanel.report');
-        })->name('reports');
+        // Route::get('/reports', function () {
+        //     return view('adminPanel.report');
+        // })->name('reports');
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -172,6 +173,8 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('viewUserInfo');
         Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('viewUserInfoUnprog');
     });
+
+    Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
 
     Route::post('/tracking', [TrainingTrackingController::class, 'store'])->name('tracking.store');
 });
