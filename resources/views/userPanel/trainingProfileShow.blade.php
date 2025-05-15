@@ -214,9 +214,6 @@
                 </table>
                 <div class="btn-row">
                     <a href="{{ route('training.profile.program') }}" class="btn btn-back">Back</a>
-                    @if($training->type === 'Program')
-                    <a href="{{ route('training.effectivenesss') }}" class="btn btn-eval">Pre-Evaluation</a>
-                    @endif
                 </div>
             </div>
         </div>

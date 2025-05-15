@@ -13,6 +13,8 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            background-color: rgb(187, 219, 252);
+            
         }
         .navbar {
             background-color:rgb(255, 255, 255);
@@ -38,6 +40,8 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            position: fixed;
+            top: 56px;
         }
         .sidebar a {
             color: white;
@@ -52,9 +56,8 @@
         }
         .main-content {
             flex-grow: 1;
-            padding: 20px;
-            background-color: #f8f9fa;
-            background-color: rgb(187, 219, 252);   
+            padding: 20px;  
+            margin-left: 270px;
         }
         .content-header {
             background-color: #e7f1ff;
@@ -150,17 +153,18 @@
 
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" style="top: 56px;">
             <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>List Of Training Plans</h2>
+                <h2>Training Profile</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -185,7 +189,7 @@
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">User Role</th>
-                            <th class="text-center" style="background-color: #003366; color: white;">Action</th>
+                            <th class="text-center" style="background-color: #003366; color: white;">Details</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -196,7 +200,9 @@
                             <td class="text-center">{{ \Carbon\Carbon::parse($training->implementation_date)->format('m/d/y') }}</td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
-                            <td class="text-center">{{ $training->status }}</td>
+                            <td class="text-center">
+                                {{ $training->status === 'Pending' ? 'Not Implemented' : $training->status }}
+                            </td>
                             <td class="text-center">Participant</td>
                             <td class="text-center">
                                 <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>

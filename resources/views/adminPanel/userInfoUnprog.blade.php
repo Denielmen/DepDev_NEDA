@@ -24,6 +24,7 @@
             left: 0;
             right: 0;
             z-index: 1030;
+            //hi there
         }
         .navbar-brand {
             color: #003366 !important;

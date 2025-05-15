@@ -202,11 +202,12 @@
 
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" style="top: 56px;">
             <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
@@ -219,14 +220,14 @@
                 <!-- Roles Container -->
                 <div class="roles">
                     <!-- Text Role -->
-                    <h1 class="text-role">Choose your role</h1>
+                    <h1 class="text-role text-center">Choose your role</h1>
                     <div class="choicebox">
                         <!-- Evaluate Card -->
                         <div class="choice" onclick="window.location.href='{{ route('evalParticipant') }}'">
                             <i class="bi bi-people-fill" style="font-size: 2rem; margin-bottom: 10px;"></i>
                             <div style="background-color: #79a7f5; padding: 15px; border-radius: 20px; text-align: left;">
-                                <h5 style="font-weight: bold;">Evaluate</h5>
-                                <p style="margin-bottom: 0; font-size: 15px">If you are a participant, click here to evaluate yourself.</p>
+                                <h5 style="font-weight: bold;">Post Evaluation</h5>
+                                <p style="margin-bottom: 0; font-size: 15px">Click here to evaluate yourself.</p>
                             </div>
                         </div>
 
@@ -235,7 +236,7 @@
                             <i class="bi bi-person-fill" style="font-size: 2rem; margin-bottom: 10px;"></i>
                             <div style="background-color: #79a7f5; padding: 15px; border-radius: 20px; text-align: left;">
                                 <h5 style="font-weight: bold;">View Evaluations</h5>
-                                <p style="margin-bottom: 0; font-size: 15px">If you are a supervisor, please click here to evaluate staff members.</p>
+                                <p style="margin-bottom: 0; font-size: 15px">Select Evaluiations to view. (Participant/Supervisor)</p>
                             </div>
                         </div>
                     </div>

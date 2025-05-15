@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,17 +96,10 @@
         .menu-cards {
             padding: 4rem;
             position: relative;
-            margin-left: 270px; /* Adjusted to account for the sidebar width */
+            margin-left: 270px; 
             margin-right: 0;
         }
-        /* .menu-cards::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        } */
+        
         .flex {
             display: flex;
             justify-content: center;
@@ -163,11 +155,12 @@
 
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <a href="#" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
+        <div class="sidebar" style="top: 56px;">
+            <a href="{{ route('home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
@@ -178,8 +171,8 @@
                     <img src="/images/repub.png" alt="NEDA Logo">
                 </div>
                 <h1>REPUBLIC OF THE PHILIPPINES</h1>
-                <h1>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT.</h1>
-                <p>Please select a course from the menu to begin your learning and development journey.</p>
+                <h1>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT</h1>
+                <p>Please select a feature from the menu to begin your learning and development journey.</p>
             </div>
 
             <div class="menu-cards">
@@ -190,7 +183,7 @@
                                 <div class="card text-center">
                                     <a href="{{ route('training.profile.program') }}" class="text-decoration-none">
                                         <h5>Training Profile</h5>
-                                        <p>Evaluate the effectiveness of completed training progress.</p>
+                                        <p>View and plan learning activities aligned with your role.</p>
                                     </a>
                                 </div>
                             </div>
@@ -198,7 +191,7 @@
                                 <div class="card text-center">
                                     <a href="{{ route('tracking') }}" class="text-decoration-none">
                                     <h5>Training Tracking & History</h5>
-                                    <p>View and plan learning activities aligned with your role.</p>
+                                    <p>Track your learning and development progress.</p>
                                 </div>
                             </div>
                         </div>
@@ -206,7 +199,7 @@
                             <div class="card text-center">
                                 <a href="{{ route('training.effectivenesss') }}" class="text-decoration-none">
                                     <h5>Training Effectiveness</h5>
-                                    <p>Track your learning and development progress.</p>
+                                    <p>Evaluate the effectiveness of completed training progress.</p>
                                 </a>
                             </div>
                         </div>

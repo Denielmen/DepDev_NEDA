@@ -7,6 +7,7 @@
     <title>Training Profile - Program</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,13 +25,12 @@
             font-size: 1rem;
             display: flex;
             align-items: center;
-            font-weight: bold;
         }
         .navbar-brand img {
             height: 30px;
             margin-right: 10px;
         }
-        .nav-link, .user-menu {
+        .nav-link, .user-icon, .user-menu {
             color: black !important;
         }
         .sidebar {
@@ -160,6 +160,7 @@
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
+                <i class="bi bi-bell-fill me-3 user-icon"></i>
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>
@@ -187,12 +188,13 @@
             <a href="{{ route('training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>List Of Training Plans</h2>
+                <h2>Training Profile</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -217,18 +219,22 @@
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">User Role</th>
-                            <th class="text-center" style="background-color: #003366; color: white;">Action</th>
+                            <th class="text-center" style="background-color: #003366; color: white;">Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($trainings as $training)
-                        <tr>
+                        <tr data-training-id="{{ $training->id }}"
+                            data-pre-rating="{{ $training->participant_pre_rating ?? '' }}"
+                            data-post-rating="{{ $training->participant_post_rating ?? '' }}">
                             <td class="text-center">{{ $training->title }}</td>
                             <td class="text-center">{{ $training->competency }}</td>
                             <td class="text-center">{{ \Carbon\Carbon::parse($training->implementation_date)->format('m/d/y') }}</td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
-                            <td class="text-center">{{ $training->status }}</td>
+                            <td class="text-center">
+                                {{ $training->status === 'Pending' ? 'Not Implemented' : $training->status }}
+                            </td>
                             <td class="text-center">Participant</td>
                             <td class="text-center">
                                 <div class="btn-group">
@@ -238,7 +244,7 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item" href="{{ route('training.export', $training->id) }}">Export</a>
+                                            <button class="dropdown-item open-eval-modal" data-training="{{ $training->id }}" data-type="Pre-Evaluation">Pre-Evaluation</button>
                                         </li>
                                     </ul>
                                 </div>
@@ -251,9 +257,136 @@
                     {{ $trainings->links() }}
                 </div>
             </div>
+            <div class="d-flex justify-content-end mt-3 mb-3">
+                <a href="{{ route('training.export', $trainings->first()->id ?? '') }}" class="btn btn-info">
+                    <i class="bi bi-download me-2"></i>Export
+                </a>
+            </div>
         </div>
     </div>
 
+    <!-- Evaluation Modal -->
+    <div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="evaluationModalLabel">Evaluation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="card mb-3">
+              <div class="card-header fw-bold">D. Learner's Proficiency Level</div>
+              <div class="card-body p-0">
+                <div id="currentRatingMsg" class="mb-2 text-primary"></div>
+                <table class="table table-bordered mb-0">
+                  <tr>
+                    <td rowspan="2" style="vertical-align: middle; width:60%">
+                      In a scale 1-4 (4 is being the highest ), please tick the circle which describes the proficiency level of your subordinate after participation in this course.
+                    </td>
+                    <th class="text-center">1</th>
+                    <th class="text-center">2</th>
+                    <th class="text-center">3</th>
+                    <th class="text-center">4</th>
+                  </tr>
+                  <tr>
+                    <td class="text-center"><input type="radio" name="proficiency_level" value="1"></td>
+                    <td class="text-center"><input type="radio" name="proficiency_level" value="2"></td>
+                    <td class="text-center"><input type="radio" name="proficiency_level" value="3"></td>
+                    <td class="text-center"><input type="radio" name="proficiency_level" value="4"></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <input type="hidden" id="modalTrainingId" value="">
+            <input type="hidden" id="modalEvalType" value="">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedRating = null;
+        document.querySelectorAll('.open-eval-modal').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var type = this.getAttribute('data-type');
+                var trainingId = this.getAttribute('data-training');
+                document.getElementById('evaluationModalLabel').textContent = type;
+                document.getElementById('modalTrainingId').value = trainingId;
+                document.getElementById('modalEvalType').value = type;
+                // Reset radio buttons
+                document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.checked = false);
+                selectedRating = null;
+                // Show current rating if exists
+                var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
+                var currentRating = '';
+                if (type === 'Pre-Evaluation') {
+                    currentRating = row.getAttribute('data-pre-rating');
+                } else {
+                    currentRating = row.getAttribute('data-post-rating');
+                }
+                var msgDiv = document.getElementById('currentRatingMsg');
+                if (currentRating && currentRating !== 'null') {
+                    msgDiv.textContent = `Your previous rating: ${currentRating}`;
+                    // Pre-select radio
+                    document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
+                        if (r.value === currentRating) r.checked = true;
+                    });
+                    selectedRating = currentRating;
+                } else {
+                    msgDiv.textContent = '';
+                }
+                var modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+                modal.show();
+            });
+        });
+        document.querySelectorAll('input[name="proficiency_level"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                selectedRating = this.value;
+            });
+        });
+        document.querySelector('#evaluationModal .btn-primary').addEventListener('click', function() {
+            var trainingId = document.getElementById('modalTrainingId').value;
+            var type = document.getElementById('modalEvalType').value;
+            if (!selectedRating) {
+                alert('Please select a proficiency level.');
+                return;
+            }
+            fetch(`/training/${trainingId}/rate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    type: type,
+                    rating: selectedRating
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the row's data attribute
+                    var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
+                    if (type === 'Pre-Evaluation') {
+                        row.setAttribute('data-pre-rating', data.pre_rating);
+                    } else {
+                        row.setAttribute('data-post-rating', data.post_rating);
+                    }
+                    // Update modal message
+                    document.getElementById('currentRatingMsg').textContent = `Your previous rating: ${selectedRating}`;
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('evaluationModal')).hide();
+                } else {
+                    alert('Failed to save rating.');
+                }
+            })
+            .catch(() => alert('Failed to save rating.'));
+        });
+    </script>
 </body>
 </html>
