@@ -203,7 +203,14 @@
                     </div>
                     <div class="col">
                         <label for="superior" class="form-label">Name Of Immediate Supervisor</label>
-                        <input type="text" id="superior" name="superior" class="form-control" value="{{ old('superior') }}" placeholder="Lastname, Firstname, MI">
+                        <select id="superior" name="superior" class="form-control">
+                            <option value="">None</option>
+                            @foreach(App\Models\User::getSuperiors() as $superior)
+                                <option value="{{ $superior->full_name }}" {{ old('superior') == $superior->full_name ? 'selected' : '' }}>
+                                    {{ $superior->full_name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

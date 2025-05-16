@@ -66,4 +66,30 @@ class User extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
+
+    /**
+     * Get all users who can be superiors (those with higher positions or admin role)
+     */
+    public static function getSuperiors()
+    {
+        return static::where('is_active', true)
+            ->where(function($query) {
+                $query->where('role', 'Admin')
+                    ->orWhere('position', 'like', '%Director%')
+                    ->orWhere('position', 'like', '%Manager%')
+                    ->orWhere('position', 'like', '%Head%')
+                    ->orWhere('position', 'like', '%Chief%');
+            })
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+    }
+
+    /**
+     * Get the user's full name
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->last_name . ', ' . $this->first_name . ($this->mid_init ? ' ' . $this->mid_init : '');
+    }
 }
