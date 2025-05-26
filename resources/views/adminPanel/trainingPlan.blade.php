@@ -208,10 +208,10 @@
                         <i class="bi bi-plus-circle"></i>
                         Create New
                     </a>
-                    <div class="search-box">
-                        <input type="text" placeholder="Search...">
-                        <i class="bi bi-search search-icon"></i>
-                    </div>
+                    <a href="{{ route('search.index') }}" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                        Advanced Search
+                    </a>
                 </div>
             </div>
 
@@ -229,7 +229,7 @@
                         @foreach($trainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
-                            <td>{{ $training->competency }}</td>
+                            <td>{{ $training->competency->name }}</td>
                             <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/y') : 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
@@ -305,6 +305,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add search functionality
+        document.querySelector('.search-box input').addEventListener('input', function(e) {
+            // Add a small delay to prevent too many requests
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+    </script>
 </body>
 </html>
     

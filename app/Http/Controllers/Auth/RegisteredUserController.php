@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
 {
@@ -31,7 +32,6 @@ class RegisteredUserController extends Controller
             'first_name' => 'required|string|max:50',
             'mid_init' => 'nullable|string|max:10',
             'position' => 'required|string|max:100',
-            'office' => 'required|string|max:100',
             'years_in_position' => 'required|integer',
             'years_in_csc' => 'required|integer',
             'division' => 'required|string|max:100',
@@ -39,6 +39,7 @@ class RegisteredUserController extends Controller
             'role' => 'required|string|max:50',
             'superior' => 'nullable|string|max:100',
             'password' => 'required|string|min:8|confirmed',
+            'is_superior_eligible' => 'boolean',
         ]);
 
         // Create the user in the database
@@ -47,7 +48,6 @@ class RegisteredUserController extends Controller
             'first_name' => $request->first_name,
             'mid_init' => $request->mid_init,
             'position' => $request->position,
-            'office' => $request->office,
             'years_in_position' => $request->years_in_position,
             'years_in_csc' => $request->years_in_csc,
             'division' => $request->division,
@@ -55,6 +55,7 @@ class RegisteredUserController extends Controller
             'role' => $request->role,
             'superior' => $request->superior,
             'password' => Hash::make($request->password),
+            'is_superior_eligible' => $request->boolean('is_superior_eligible'),
         ]);
 
         // Update the user_id to include the prefix and the user's ID

@@ -156,15 +156,11 @@
                     </div>
                 </div>
 
-                <!-- Position and Office -->
+                <!-- Position -->
                 <div class="row mb-3">
                     <div class="col">
                         <label for="position" class="form-label">Position</label>
                         <input type="text" id="position" name="position" class="form-control" value="{{ old('position') }}" required>
-                    </div>
-                    <div class="col">
-                        <label for="office" class="form-label">Office/Department</label>
-                        <input type="text" id="office" name="office" class="form-control" value="{{ old('office') }}" required>
                     </div>
                 </div>
 
@@ -211,6 +207,16 @@
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                </div>
+
+                <!-- Superior Eligibility -->
+                <div class="row mb-3">
+                    <div class="col">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="is_superior_eligible" name="is_superior_eligible" value="1" {{ old('is_superior_eligible') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_superior_eligible">Eligible for Superior Position</label>
+                        </div>
                     </div>
                 </div>
 

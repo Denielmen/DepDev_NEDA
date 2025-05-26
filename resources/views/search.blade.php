@@ -82,7 +82,7 @@
                     <!-- Keyword Filter -->
                     <div class="col-md-6">
                         <label for="keyword" class="form-label">Search Item/s</label>
-                        <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search">
+                        <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Search" value="{{ request('keyword') }}">
                     </div>
 
                     <!-- Type Filter -->
@@ -90,15 +90,16 @@
                         <label for="type" class="form-label">Type</label>
                         <select name="type" id="type" class="form-select">
                             <option value="">Select Type</option>
-                            <option value="training">Training</option>
-                            <option value="user">User</option>
+                            <option value="training" {{ request('type') == 'training' ? 'selected' : '' }}>Training</option>
+                            <option value="user" {{ request('type') == 'user' ? 'selected' : '' }}>User</option>
+                            <option value="training_material" {{ request('type') == 'training_material' ? 'selected' : '' }}>Training Material</option> {{-- Added Training Material option --}}
                         </select>
                     </div>
 
                     <!-- Year of Implementation Filter -->
                     <div class="col-md-4">
                         <label for="year" class="form-label">Year of Implementation</label>
-                        <input type="number" name="year" id="year" class="form-control" placeholder="YYYY" min="1900" max="{{ date('Y') }}">
+                        <input type="number" name="year" id="year" class="form-control" placeholder="YYYY" min="1900" max="{{ date('Y') }}" value="{{ request('year') }}">
                     </div>
                 </div>
 
@@ -111,54 +112,25 @@
                                 Select Competencies
                             </button>
                             <ul class="dropdown-menu px-3" aria-labelledby="competenciesDropdown">
-                                <li>
-                                    <div class="form-check px-3 mb-2">
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_1" id="competency_1">
-                                        <label class="form-check-label" for="competency_1">Competency 1</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="form-check px-3 mb-2">
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_2" id="competency_2">
-                                        <label class="form-check-label" for="competency_2">Competency 2</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="form-check px-3 mb-2">
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_3" id="competency_3">
-                                        <label class="form-check-label" for="competency_3">Competency 3</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="form-check px-3 mb-2">
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_4" id="competency_4">
-                                        <label class="form-check-label" for="competency_4">Competency 4</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="form-check px-3 mb-2">
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_1" id="competency_1">
-                                        <label class="form-check-label" for="competency_1">Competency 1</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="form-check px-3 mb-2">
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_2" id="competency_2">
-                                        <label class="form-check-label" for="competency_2">Competency 2</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="form-check px-3 mb-2">
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_3" id="competency_3">
-                                        <label class="form-check-label" for="competency_3">Competency 3</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="form-check px-3 mb-2">  
-                                        <input class="form-check-input" type="checkbox" name="competencies[]" value="competency_4" id="competency_4">
-                                        <label class="form-check-label" for="competency_4">Competency 4</label>
-                                    </div>
-                                </li>
+                                {{-- Example Competencies - Replace with dynamic data if available --}}
+                                @php
+                                $availableCompetencies = [
+                                    'competency_1' => 'Competency 1',
+                                    'competency_2' => 'Competency 2',
+                                    'competency_3' => 'Competency 3',
+                                    'competency_4' => 'Competency 4',
+                                ];
+                                $selectedCompetencies = request('competencies', []);
+                            @endphp
+
+                                @foreach ($availableCompetencies as $value => $label)
+                                    <li>
+                                        <div class="form-check px-3 mb-2">
+                                            <input class="form-check-input" type="checkbox" name="competencies[]" value="{{ $value }}" id="{{ $value }}" {{ in_array($value, $selectedCompetencies) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="{{ $value }}">{{ $label }}</label>
+                                        </div>
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -167,8 +139,9 @@
                 <div class="d-flex justify-content-between mt-4">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Search</button>
                     <div>
-                        <a href="{{ route('search.export', ['format' => 'pdf']) }}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
-                        <a href="{{ route('search.export', ['format' => 'excel']) }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
+                        {{-- Pass current search parameters to export links --}}
+                        <a href="{{ route('search.export', array_merge(['format' => 'pdf'], request()->query())) }}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
+                        <a href="{{ route('search.export', array_merge(['format' => 'excel'], request()->query())) }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
                     </div>
                 </div>
             </form>
@@ -180,22 +153,58 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Name</th>
+                            <th>Name/Title</th>
                             <th>Type</th>
-                            <th>Date</th>
-                            <th>Competencies</th>
+                            <th>Info</th> {{-- Column header adjusted to be more general --}}
+                            <th>Competencies/Other Info</th> {{-- Column header adjusted --}}
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Example Results -->
-                        <tr>
-                            <td>1</td>
-                            <td>Sample Training</td>
-                            <td>Training</td>
-                            <td>2025-04-27</td>
-                            <td>Competency 1, Competency 2</td>
-                        </tr>
-                        <!-- Dynamic results will be populated here -->
+                        @forelse ($results as $index => $result)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                @if ($result->search_type === 'training')
+                                    <td>{{ $result->title ?? 'N/A' }}</td>
+                                    <td>Training</td>
+                                    <td>{{ \Carbon\Carbon::parse($result->implementation_date)->format('Y-m-d') ?? 'N/A' }}</td> {{-- Use implementation_date and format it --}}
+                                    <td>
+                                        {{-- Display competency name for training --}}
+                                        @if ($result->competency ?? false) {{-- Assuming a 'competency' relationship or attribute --}}
+                                             {{ $result->competency->name ?? $result->competency ?? 'N/A' }} {{-- Access name if it's a relationship, otherwise display attribute --}}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                @elseif ($result->search_type === 'user')
+                                    <td>{{ $result->last_name.', '.$result->first_name.' '.$result->mid_init.'.' ?? 'N/A' }}</td> {{-- Construct full name --}}
+                                    <td>User</td>
+                                    <td>{{ $result->email ?? 'N/A' }}</td> {{-- Display email for user --}}
+                                    <td>
+                                        {{-- Display other relevant user info here --}}
+                                        {{ $result->position ?? 'N/A' }} - {{ $result->division ?? 'N/A' }} {{-- Example: Position and Division --}}
+                                    </td>
+                                @elseif ($result->search_type === 'training_material') {{-- Added condition for Training Material --}}
+                                    <td>{{ $result->title ?? 'N/A' }}</td> {{-- Display title --}}
+                                    <td>Training Material</td>
+                                    <td>{{ $result->file_name ?? 'N/A' }}</td> {{-- Display file name --}}
+                                    <td>
+                                        {{-- Display competency name for training material --}}
+                                        @if ($result->competency ?? false) {{-- Assuming a 'competency' relationship or attribute --}}
+                                             {{ $result->competency->name ?? $result->competency ?? 'N/A' }} {{-- Access name if it's a relationship, otherwise display attribute --}}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                @else
+                                    {{-- Handle unexpected types --}}
+                                    <td colspan="5">Unknown Result Type</td> {{-- Adjusted colspan --}}
+                                @endif
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5">No results found.</td> {{-- Adjusted colspan --}}
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

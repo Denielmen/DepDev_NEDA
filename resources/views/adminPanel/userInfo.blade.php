@@ -263,8 +263,8 @@
                         <input type="text" class="form-control" value="{{ $user->division }}" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Office/Department</label>
-                        <input type="text" class="form-control" value="{{ $user->office }}" readonly>
+                        <label class="form-label">Position</label>
+                        <input type="text" class="form-control" value="{{ $user->position }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Name of Supervisor (Last, First, MI)</label>

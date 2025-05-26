@@ -128,8 +128,15 @@
                             <input type="text" class="form-control" id="title" name="title" value="{{ $training->title }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="competency" class="form-label">Competency:</label>
-                            <input type="text" class="form-control" id="competency" name="competency" value="{{ $training->competency }}" required>
+                            <label for="competency" class="form-label">Competency</label>
+                            <select class="form-control" id="competency" name="competency_id" required>
+                                <option value="">Select Competency</option>
+                                @foreach($competencies as $competency)
+                                    <option value="{{ $competency->id }}" {{ $training->competency_id == $competency->id ? 'selected' : '' }}>
+                                        {{ $competency->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="row mb-3">
