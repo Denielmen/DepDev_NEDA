@@ -80,6 +80,31 @@ class TrainingProfileController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'competency' => 'required|string|max:255',
+            'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
+            'implementation_date' => 'required|date',
+            'no_of_hours' => 'nullable|numeric',
+            'provider' => 'nullable|string|max:255',
+            'dev_target' => 'nullable|string',
+            'performance_goal' => 'nullable|string',
+            'objective' => 'nullable|string',
+            'participation_type' => 'required|in:Resource Person,Participant',
+            'participants' => 'nullable|array',
+            'participants.*' => 'exists:users,id'
+        ]);
+
+        // Create training data with type always set to Program
+        $trainingData = $request->except('participants');
+        $trainingData['type'] = 'Program';
+
+        $training = Training::create($trainingData);
+
+        // Add participants if any were selected
+        if ($request->has('participants')) {
+            $training->participants()->attach($request->participants);
+        }
         try {
             \Log::info('Training creation request data:', $request->all());
 

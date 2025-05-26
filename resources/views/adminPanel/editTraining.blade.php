@@ -141,9 +141,22 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
+                            <label for="core_competency" class="form-label">Core Competency:</label>
+                            <select class="form-control" id="core_competency" name="core_competency" required>
+                                <option value="">Select Core Competency...</option>
+                                <option value="Foundational/Mandatory" {{ $training->core_competency === 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
+                                <option value="Competency Enhancement" {{ $training->core_competency === 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
+                                <option value="Leadership/Executive Development" {{ $training->core_competency === 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
+                                <option value="Gender and Development (GAD)-Related" {{ $training->core_competency === 'Gender and Development (GAD)-Related' ? 'selected' : '' }}>Gender and Development (GAD)-Related</option>
+                                <option value="Others" {{ $training->core_competency === 'Others' ? 'selected' : '' }}>Others</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
                             <label for="year" class="form-label">Year of Implementation:</label>
                             <input type="date" class="form-control" id="year" name="year" value="{{ $training->year }}" required>
                         </div>
+                    </div>
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="budget" class="form-label">Budget (per hour):</label>
                             <input type="number" class="form-control" id="budget" name="budget" value="{{ $training->budget }}">

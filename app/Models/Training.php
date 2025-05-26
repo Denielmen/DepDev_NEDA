@@ -84,4 +84,25 @@ class Training extends Model
     {
         return $this->hasMany(TthRecord::class);
     }
+
+    public function participants_2025()
+    {
+        return $this->belongsToMany(User::class, 'training_participants')
+            ->wherePivot('year', '2025')
+            ->withTimestamps();
+    }
+
+    public function participants_2026()
+    {
+        return $this->belongsToMany(User::class, 'training_participants')
+            ->wherePivot('year', '2026')
+            ->withTimestamps();
+    }
+
+    public function participants_2027()
+    {
+        return $this->belongsToMany(User::class, 'training_participants')
+            ->wherePivot('year', '2027')
+            ->withTimestamps();
+    }
 }
