@@ -40,11 +40,11 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
-// Protected Routes (Require Login)
+// Protected Routes (Require Login) to be delete later
 Route::middleware(['auth'])->group(function () {   // User Panel Routes
     Route::get('/', function () {
         return view('userPanel.welcomeUser');
-    })->name('home');
+    })->name('home'); 
 
     Route::get('/training-profile/program', [TrainingProfileController::class, 'program'])
         ->name('training.profile.program');
@@ -140,7 +140,7 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
             return view('adminPanel.listOfUser', compact('users'));
         })->name('participants');
 
-        // Add register route for admin
+        // Register routes for admin
         Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
         Route::post('/register', [RegisteredUserController::class, 'store']);
 

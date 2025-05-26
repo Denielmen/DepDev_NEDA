@@ -166,7 +166,7 @@
                             <tr>
                                 <td colspan="6" class="category-header">{{ $category }}</td>
                             </tr>
-                            @foreach($categoryTrainings as $training)
+                            @foreach($categoryTrainings->sortByDesc('created_at') as $training)
                                 <tr>
                                     <td>{{ $training->title }}</td>
                                     <td>{{ $training->competency }}</td>

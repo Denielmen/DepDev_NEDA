@@ -155,7 +155,7 @@
                     </tr>
                     <tr>
                         <td class="label">Role:</td>
-                        <td>{{ }}</td>
+                        <td>{{ $training->user_role ?? 'Participant' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>

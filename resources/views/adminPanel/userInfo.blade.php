@@ -96,8 +96,8 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: auto;
-            max-height: 400px;
+            overflow-y: hidden;
+            overflow-x: auto;
         }
         .table {
             margin-bottom: 0;
@@ -115,19 +115,28 @@
             vertical-align: middle;
         }
         .table th:nth-child(1), .table td:nth-child(1) {
-            min-width: 250px;
+            min-width: 270px; /* Training Title */
         }
         .table th:nth-child(2), .table td:nth-child(2) {
-            min-width: 250px;
+            min-width: 250px; /* Competency */
         }
-        .table th:nth-child(3), .table td:nth-child(3),
-        .table th:nth-child(4), .table td:nth-child(4),
-        .table th:nth-child(5), .table td:nth-child(5),
-        .table th:nth-child(6), .table td:nth-child(6),
-        .table th:nth-child(7), .table td:nth-child(7),
-        .table th:nth-child(8), .table td:nth-child(8),
-        .table th:nth-child(9), .table td:nth-child(9) {
-            min-width: 120px;
+        .table th:nth-child(3), .table td:nth-child(3) {
+            min-width: 150px; /* Period of Implementation */
+        }
+        .table th:nth-child(4), .table td:nth-child(4) {
+            min-width: 100px; /* No. of Hours */
+        }
+        .table th:nth-child(5), .table td:nth-child(5) {
+            min-width: 150px; /* Provider */
+        }
+        .table th:nth-child(6), .table td:nth-child(6) {
+            min-width: 130px; /* Status */
+        }
+        .table th:nth-child(7), .table td:nth-child(7) {
+            min-width: 200px; /* User Role */
+        }
+        .table th:nth-child(8), .table td:nth-child(8) {
+            min-width: 100px; /* Details */
         }
         .program-tabs {
             margin-bottom: 5px;
@@ -298,7 +307,7 @@
                         <th>Provider</th>
                         <th>Status</th>
                         <th>User Role</th>
-                        <th>Action</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -310,7 +319,9 @@
                         <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>{{ $training->status }}</td>
-                        <td>{{ $training->user_role }}</td>
+                        <td>
+                            {{ $training->participation_type }}
+                        </td>
                         <td>
                             <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
                         </td>

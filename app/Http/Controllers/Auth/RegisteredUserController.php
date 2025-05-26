@@ -18,6 +18,7 @@ class RegisteredUserController extends Controller
             return redirect()->route('home');
         }
         
+        // If user is admin or guest, show registration form
         return view('auth.register');
     }
 

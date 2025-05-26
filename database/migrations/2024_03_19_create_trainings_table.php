@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('performance_goal')->nullable();
             $table->text('objective')->nullable();
             $table->enum('type', ['Program', 'Unprogrammed'])->default('Program');
-            $table->string('status')->default('Pending');
+            $table->string('status')->default('Not Yet Implemented');
             $table->integer('participant_pre_rating')->nullable();
             $table->integer('participant_post_rating')->nullable();
             $table->integer('supervisor_pre_rating')->nullable();

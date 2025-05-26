@@ -99,8 +99,8 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: auto;
-            max-height: 400px;
+            overflow-y: hidden;
+            overflow-x: auto;
         }
         .table {
             margin-bottom: 0;
@@ -291,7 +291,7 @@
                         <th>Provider</th>
                         <th>Status</th>
                         <th>User Role</th>
-                        <th>Action</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -303,7 +303,11 @@
                         <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>{{ $training->status }}</td>
-                        <td>{{ $training->user_role }}</td>
+                        <td>
+                            @foreach($training->participants ?? [] as $participant)
+                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
+                            @endforeach
+                        </td>
                         <td>
                             <a href="{{ route('admin.viewUserInfoUnprog', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
                         </td>

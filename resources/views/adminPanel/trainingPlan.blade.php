@@ -226,7 +226,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($trainings as $training)
+                        @foreach($trainings->sortByDesc('created_at') as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
                             <td>{{ $training->competency }}</td>
