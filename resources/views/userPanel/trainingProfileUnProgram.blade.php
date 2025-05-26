@@ -129,6 +129,17 @@
             background-color: #003366;
             color: white;
         }
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        .dropdown-item.text-danger:hover {
+            background-color: #dc3545;
+            color: white !important;
+        }
     </style>
 </head>
 <body>
@@ -136,22 +147,22 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        User
+                        {{ auth()->user()->last_name ?? 'User' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
                                 </button>
                             </form>
                         </li>
@@ -211,7 +222,7 @@
                             <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
                             <td class="text-center">
-                                {{ $training->status === 'Pending' ? 'Not Implemented' : $training->status }}
+                                {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
                             </td>
                             <td class="text-center">Participant</td>
                             <td class="text-center">

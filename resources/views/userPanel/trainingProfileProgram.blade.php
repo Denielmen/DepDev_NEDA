@@ -38,6 +38,7 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            margin-top: 56px;
         }
         .sidebar a {
             color: white;
@@ -55,7 +56,7 @@
             padding: 20px;
             background-color: #f8f9fa;
             background-color: rgb(187, 219, 252);
-
+            margin-top: 56px;
         }
         .content-header {
             background-color: #e7f1ff;
@@ -137,42 +138,45 @@
             background-color: #003366;
             color: white;
         }
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+        .dropdown-item {
+            padding: 0.5rem 1rem;
             font-size: 0.9rem;
-            cursor: pointer;
         }
-        .logout-btn:hover {
-            background-color: #c82333;
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        .dropdown-item.text-danger:hover {
+            background-color: #dc3545;
+            color: white !important;
         }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
-                DEPDEV Learning and Development Database System Region VII
-            </a>
+    <nav class="navbar navbar-expand-lg shadow-sm" style="background-color: #fff; position: fixed; top: 0; left: 0; width: 100%; z-index: 1040;">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <i class="bi bi-bell-fill me-3 user-icon"></i>
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="/images/DEPDev_logo.png" alt="NEDA Logo" style="height: 30px; margin-right: 10px;">
+                    <span style="color: #003366; font-size: 1rem; font-weight: bold;">
+                        DEPDEV Learning and Development Database System Region VII
+                    </span>
+                </a>
+            </div>
+            <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        User
+                        {{ auth()->user()->last_name ?? 'User' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
-                    <ul class="dropdown-menu">
-                        <!-- Logout Button -->
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item logout-btn">Logout</button>
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                                </button>
                             </form>
                         </li>
                     </ul>
@@ -224,29 +228,38 @@
                     </thead>
                     <tbody>
                         @foreach($trainings as $training)
+                        @php
+                            $preEvaluated = !is_null($training->participant_pre_rating);
+                        @endphp
                         <tr data-training-id="{{ $training->id }}"
                             data-pre-rating="{{ $training->participant_pre_rating ?? '' }}"
                             data-post-rating="{{ $training->participant_post_rating ?? '' }}">
                             <td class="text-center">{{ $training->title }}</td>
                             <td class="text-center">{{ $training->competency }}</td>
-                            <td class="text-center">{{ \Carbon\Carbon::parse($training->implementation_date)->format('m/d/y') }}</td>
+                            <td class="text-center">
+                                @if($training->status === 'Implemented' && $training->tthRecords && $training->tthRecords->count())
+                                    {{ \Carbon\Carbon::parse($training->tthRecords->first()->date_to)->format('d/m/Y') }}
+                                @else
+                                    {{ \Carbon\Carbon::parse($training->implementation_date)->format('Y') }}
+                                @endif
+                            </td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
                             <td class="text-center">
-                                {{ $training->status === 'Pending' ? 'Not Implemented' : $training->status }}
+                                {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
                             </td>
                             <td class="text-center">Participant</td>
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm btn-info">View</a>
-                                    <button type="button" class="btn btn-sm btn-info dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-info btn-sm">View</a>
+                                    <button
+                                        class="btn btn-sm ms-1 open-eval-modal {{ $preEvaluated ? 'btn-success' : 'btn-warning' }}"
+                                        data-training="{{ $training->id }}"
+                                        data-type="Pre-Evaluation"
+                                        data-evaluated="{{ $preEvaluated ? '1' : '0' }}"
+                                    >
+                                        Pre-Evaluation
                                     </button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <button class="dropdown-item open-eval-modal" data-training="{{ $training->id }}" data-type="Pre-Evaluation">Pre-Evaluation</button>
-                                        </li>
-                                    </ul>
                                 </div>
                             </td>
                         </tr>
@@ -257,11 +270,13 @@
                     {{ $trainings->links() }}
                 </div>
             </div>
-            <div class="d-flex justify-content-end mt-3 mb-3">
-                <a href="{{ route('training.export', $trainings->first()->id ?? '') }}" class="btn btn-info">
-                    <i class="bi bi-download me-2"></i>Export
-                </a>
-            </div>
+            @if($trainings->count())
+                <div class="d-flex justify-content-end mt-3 mb-3">
+                    <a href="{{ route('training.export', $trainings->first()->id) }}" class="btn btn-info">
+                        <i class="bi bi-download me-2"></i>Export
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -315,11 +330,15 @@
             btn.addEventListener('click', function() {
                 var type = this.getAttribute('data-type');
                 var trainingId = this.getAttribute('data-training');
+                var evaluated = this.getAttribute('data-evaluated') === '1';
                 document.getElementById('evaluationModalLabel').textContent = type;
                 document.getElementById('modalTrainingId').value = trainingId;
                 document.getElementById('modalEvalType').value = type;
                 // Reset radio buttons
-                document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.checked = false);
+                document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
+                    r.checked = false;
+                    r.disabled = false;
+                });
                 selectedRating = null;
                 // Show current rating if exists
                 var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
@@ -339,6 +358,15 @@
                     selectedRating = currentRating;
                 } else {
                     msgDiv.textContent = '';
+                }
+                // If already evaluated, make radios readonly and hide submit
+                var submitBtn = document.querySelector('#evaluationModal .btn-primary');
+                if (evaluated) {
+                    document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = true);
+                    submitBtn.style.display = 'none';
+                } else {
+                    document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = false);
+                    submitBtn.style.display = '';
                 }
                 var modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
                 modal.show();

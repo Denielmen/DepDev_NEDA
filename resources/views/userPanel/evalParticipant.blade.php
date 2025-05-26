@@ -245,6 +245,18 @@
                 margin: 1rem;
             }
         }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        .dropdown-item.text-danger:hover {
+            background-color: #dc3545;
+            color: white !important;
+        }
     </style>
 </head>
 
@@ -253,22 +265,22 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        User
+                        {{ auth()->user()->last_name ?? 'User' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
                                 </button>
                             </form>
                         </li>
@@ -280,11 +292,12 @@
 
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" style="top: 56px;">
             <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
@@ -298,7 +311,7 @@
 
             <div class="evaluation-container">
                 <div class="evaluation-header">
-                    <img src="{{ asset('images/neda-logo.png') }}" alt="NEDA Logo" class="neda-logo">
+                    <img src="{{ asset('images/DEPDev_logo_text_center.png') }}" alt="NEDA Logo" class="neda-logo">
                     <h4>Republic of the Philippines</h4>
                     <h5>NATIONAL ECONOMIC AND DEVELOPMENT AUTHORITY</h5>
                     <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>

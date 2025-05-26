@@ -168,9 +168,13 @@
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
+<<<<<<< Updated upstream
                         Admin
+=======
+                        {{ auth()->user()->last_name ?? 'Admin' }}
+>>>>>>> Stashed changes
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                 </div>

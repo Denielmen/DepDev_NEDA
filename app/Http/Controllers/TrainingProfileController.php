@@ -11,7 +11,8 @@ class TrainingProfileController extends Controller
 {
     public function program()
     {
-        $trainings = Training::where('type', 'Program')
+        $trainings = Training::with('tthRecords')
+            ->where('type', 'Program')
             ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
             ->orderBy('status')
             ->paginate(10);

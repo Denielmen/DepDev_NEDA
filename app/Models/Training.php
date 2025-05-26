@@ -67,4 +67,9 @@ class Training extends Model
             ->withPivot('year')
             ->withTimestamps();
     }
+
+    public function tthRecords()
+    {
+        return $this->hasMany(TthRecord::class);
+    }
 }

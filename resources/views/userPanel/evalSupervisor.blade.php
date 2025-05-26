@@ -223,6 +223,18 @@
         padding: 1rem;
       }
     }
+
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+    .dropdown-item.text-danger:hover {
+        background-color: #dc3545;
+        color: white !important;
+    }
   </style>
 </head>
 
@@ -232,15 +244,26 @@
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <a class="navbar-brand" href="#">
-        <img src="/images/neda-logo.png" alt="NEDA Logo">
+        <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
         DEPDEV Learning and Development Database System Region VII
       </a>
       <div class="d-flex align-items-center">
         <div class="dropdown">
-          <div class="user-menu" data-bs-toggle="dropdown">
-            <i class="bi bi-person-circle"></i> User
+          <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
+            <i class="bi bi-person-circle"></i>
+            {{ auth()->user()->last_name ?? 'User' }}
             <i class="bi bi-chevron-down ms-1"></i>
           </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="dropdown-item logout-btn">
+                  <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                </button>
+              </form>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -250,12 +273,13 @@
   <div class="d-flex">
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" style="top: 56px;">
       <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
       <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
       <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
       <a href="{{ route('training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-  </div>
+      <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+    </div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -298,7 +322,7 @@
               <th style="width: 5%; text-align: center;">4</th>
             </tr>
             <tr>
-              <td>How satisfied are you in the learner’s achievement of his/her learning goals/objectives as specified in his/her learner’s profile.</td>
+              <td>How satisfied are you in the learner's achievement of his/her learning goals/objectives as specified in his/her learner's profile.</td>
               <td class="rating-cell"><input type="radio" name="goals" value="1" required></td>
               <td class="rating-cell"><input type="radio" name="goals" value="2"></td>
               <td class="rating-cell"><input type="radio" name="goals" value="3"></td>
@@ -311,7 +335,7 @@
           </div>
           <table>
             <tr>
-              <th style="width: 60%;">B. Participants’ Work Performance  (To be determined within one 
+              <th style="width: 60%;">B. Participants' Work Performance  (To be determined within one 
               performance rating period) </th>
               <th style="width: 4%; text-align: center;">1</th>
               <th style="width: 4%; text-align: center;">2</th>
@@ -320,7 +344,7 @@
               <th style="width: 4%; text-align: center;">NA</th>
             </tr>
             <tr>
-              <td>1. The employee applied the learning’s gained from this course.</td>
+              <td>1. The employee applied the learning's gained from this course.</td>
               <td class="rating-cell"><input type="radio" name="learning1" value="1" required></td>
               <td class="rating-cell"><input type="radio" name="learning1" value="2"></td>
               <td class="rating-cell"><input type="radio" name="learning1" value="3"></td>
@@ -328,7 +352,7 @@
               <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
             </tr>
             <tr>
-              <td>2. The employee’s quality of work improved. </td>
+              <td>2. The employee's quality of work improved. </td>
               <td class="rating-cell"><input type="radio" name="learning2" value="1" required></td>
               <td class="rating-cell"><input type="radio" name="learning2" value="2"></td>
               <td class="rating-cell"><input type="radio" name="learning2" value="3"></td>
@@ -344,7 +368,7 @@
               <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
             </tr>
             <tr>
-              <td>4. The employee’s overall work performance increase/improved.</td>
+              <td>4. The employee's overall work performance increase/improved.</td>
               <td class="rating-cell"><input type="radio" name="learning3" value="1" required></td>
               <td class="rating-cell"><input type="radio" name="learning3" value="2"></td>
               <td class="rating-cell"><input type="radio" name="learning3" value="3"></td>
@@ -355,14 +379,14 @@
 
           <div class="form-group">
             <label for="workPerformanceChanges"><strong>To support your your training, please describe changes in work performance as a result of 
-attendance to this training. if employee’s work performance did not change, please cite possible 
-reasons and what support is needed in order for the employee’s to apply acquired knowledge and skills.</strong></label>
+attendance to this training. if employee's work performance did not change, please cite possible 
+reasons and what support is needed in order for the employee's to apply acquired knowledge and skills.</strong></label>
             <textarea name="workPerformanceChanges" rows="4" placeholder="Write down the changes from your performance..."></textarea>
           </div>
 
           <table>
             <tr>
-              <th style="width: 60%;">C.  Learner’s Proficiency Level</th>
+              <th style="width: 60%;">C.  Learner's Proficiency Level</th>
               <th style="width: 5%; text-align: center;">1</th>
               <th style="width: 5%; text-align: center;">2</th>
               <th style="width: 5%; text-align: center;">3</th>
@@ -380,8 +404,8 @@ reasons and what support is needed in order for the employee’s to apply acquir
 
       
           <p><strong>To support your your training, please describe changes in work performance as a result of
-              attendance to this training. if employee’s work performance did not change, please cite possible
-              reasons and what support is needed in order for the employee’s to apply acquired knowledge and skills.</strong></p>
+              attendance to this training. if employee's work performance did not change, please cite possible
+              reasons and what support is needed in order for the employee's to apply acquired knowledge and skills.</strong></p>
           <textarea name="changes" rows="4" placeholder="Describe any changes..." required></textarea>
 
 
