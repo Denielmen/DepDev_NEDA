@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #f7f8fa;
+            background-color: rgb(187, 219, 252);
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -57,7 +57,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
-            background-color: rgb(187, 219, 252);
+            
             margin-left: 270px;
             margin-top: 50px;
             padding-bottom: 20px;
@@ -160,29 +160,23 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="{{ route('admin.home') }}">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        admin
+<<<<<<< Updated upstream
+                        Admin
+=======
+                        {{ auth()->user()->last_name ?? 'Admin' }}
+>>>>>>> Stashed changes
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -213,6 +207,14 @@
                     <tr>
                         <td class="label">Competency:</td>
                         <td>{{ $training->competency ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">User Role:</td>
+                        <td>{{ isset($user) ? $user->user_role : 'Participant' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">No. of Hours:</td>
+                        <td>{{ $training->no_of_hours ?? '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>

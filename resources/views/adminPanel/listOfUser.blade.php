@@ -197,9 +197,9 @@
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        Admin
+                        {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -243,10 +243,17 @@
                 </div>
                 <div class="d-flex justify-content-end mb-2">
                     <label for="sort-by" class="me-2">Sort by</label>
-                    <select id="sort-by" class="form-select" style="width: 120px; display: inline-block;" onchange="sortUsers()">
-                        <option value="all-role">All role</option>
-                        <option value="supervisor">Supervisor</option>
-                        <option value="user">User</option>
+                    <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers()">
+                        <option value="all">All Positions</option>
+                        <option value="Division Chief">Division Chief</option>
+                        <option value="Supervising Administrative Officer">Supervising Administrative Officer</option>
+                        <option value="Administrative Officer">Administrative Officer</option>
+                        <option value="Administrative Assistant">Administrative Assistant</option>
+                        <option value="Project Development Officer">Project Development Officer</option>
+                        <option value="Planning Officer">Planning Officer</option>
+                        <option value="Statistician">Statistician</option>
+                        <option value="Economist">Economist</option>
+                        <option value="Development Management Officer">Development Management Officer</option>
                     </select>
                 </div>
                 <div class="table-container">
@@ -260,7 +267,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($users as $user)
+                            @foreach($users->sortBy('last_name') as $user)
                             <tr>
                                 <td>
                                     <span class="status-indicator {{ $user->is_active ? 'active' : 'inactive' }}"></span>
@@ -312,13 +319,13 @@
 
         function sortUsers() {
             const select = document.getElementById('sort-by');
-            const role = select.value;
+            const position = select.value;
             const table = document.querySelector('.table-container table');
             const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
 
             tr.forEach(row => {
-                const position = row.getElementsByTagName('td')[2].textContent.toLowerCase();
-                if (role === 'all-role' || position.includes(role.toLowerCase())) {
+                const userPosition = row.getElementsByTagName('td')[2].textContent; // Position column
+                if (position === 'all' || userPosition === position) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';

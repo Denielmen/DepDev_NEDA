@@ -189,7 +189,7 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
@@ -197,7 +197,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>
-                        User
+                        {{ auth()->user()->last_name ?? 'User' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                 </div>

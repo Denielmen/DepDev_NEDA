@@ -121,11 +121,21 @@
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        Admin
+                        {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -166,7 +176,7 @@
                             <tr>
                                 <td colspan="6" class="category-header">{{ $category }}</td>
                             </tr>
-                            @foreach($categoryTrainings as $training)
+                            @foreach($categoryTrainings->sortByDesc('created_at') as $training)
                                 <tr>
                                     <td>{{ $training->title }}</td>
                                     <td>{{ $training->competency }}</td>

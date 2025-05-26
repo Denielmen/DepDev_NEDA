@@ -145,33 +145,34 @@
         .dropdown-item:hover {
             background-color: #f8f9fa;
         }
-        .dropdown-item.text-danger:hover {
-            background-color: #dc3545;
-            color: white !important;
-        }
+        
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
-                DEPDEV Learning and Development Database System Region VII
-            </a>
+    <nav class="navbar navbar-expand-lg shadow-sm" style="background-color: #fff; position: fixed; top: 0; left: 0; width: 100%; z-index: 1040;">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="/images/DEPDev_logo.png" alt="NEDA Logo" style="height: 30px; margin-right: 10px;">
+                    <span style="color: #003366; font-size: 1rem; font-weight: bold;">
+                        DEPDEV Learning and Development Database System Region VII
+                    </span>
+                </a>
+            </div>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        User
+                        {{ auth()->user()->last_name ?? 'User' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
                                 </button>
                             </form>
                         </li>
@@ -195,7 +196,7 @@
         <div class="main-content">
             <div class="header">
                 <div class="pic">
-                    <img src="/images/neda-logo.png" alt="NEDA Logo">
+                    <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                     <img src="/images/repub.png" alt="NEDA Logo">
                 </div>
                 <h1>REPUBLIC OF THE PHILIPPINES</h1>
@@ -204,30 +205,37 @@
             </div>
 
             <div class="menu-cards">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="flex">
-                            <div class="col-md-4">
-                                <div class="card text-center">
-                                    <a href="{{ route('training.profile.program') }}" class="text-decoration-none">
-                                        <h5>Training Profile</h5>
-                                        <p>View and plan learning activities aligned with your role.</p>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card text-center">
-                                    <a href="{{ route('tracking') }}" class="text-decoration-none">
-                                    <h5>Training Tracking & History</h5>
-                                    <p>Track your learning and development progress.</p>
-                                </div>
+                <div class="container d-flex justify-content-center">
+                    <div class="row w-100" style="max-width: 900px;">
+                        <div class="col-12 col-md-6 mb-4">
+                            <div class="card text-center h-100">
+                                <a href="{{ route('training.profile.program') }}" class="text-decoration-none">
+                                    <h5>Training Profile</h5>
+                                    <p>View and plan learning activities aligned with your role.</p>
+                                </a>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
+                        <div class="col-12 col-md-6 mb-4">
+                            <div class="card text-center h-100">
+                                <a href="{{ route('tracking') }}" class="text-decoration-none">
+                                    <h5>Training Tracking & History</h5>
+                                    <p>Track your learning and development progress.</p>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mb-4">
+                            <div class="card text-center h-100">
                                 <a href="{{ route('training.effectivenesss') }}" class="text-decoration-none">
                                     <h5>Training Effectiveness</h5>
-                                    <p>Evaluate the effectiveness of completed training progress.</p>
+                                    <p>Evaluate the effectiveness of completed trainings.</p>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mb-4">
+                            <div class="card text-center h-100">
+                                <a href="{{ route('training.resources') }}" class="text-decoration-none">
+                                    <h5>Training Resources</h5>
+                                    <p>Access to Training Materials.</p>
                                 </a>
                             </div>
                         </div>

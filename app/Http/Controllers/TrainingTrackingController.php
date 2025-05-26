@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Training;
 use App\Models\TrainingMaterial;
+use App\Models\TthRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -49,11 +50,23 @@ class TrainingTrackingController extends Controller
                 'status' => 'Implemented',
                 'implementation_date' => $request->input('date_from'),
             ]);
+            // Create TTH record for unprogrammed/implemented
+            TthRecord::create([
+                'training_id' => $training->id,
+                'date_from'   => $request->input('date_from'),
+                'date_to'     => $request->input('date_to'),
+            ]);
         } else {
             $training = Training::find($request->input('courseTitle'));
             if ($training && $training->status !== 'Implemented') {
                 $training->status = 'Implemented';
                 $training->save();
+                // Create TTH record for programmed/implemented
+                TthRecord::create([
+                    'training_id' => $training->id,
+                    'date_from'   => $request->input('date_from'),
+                    'date_to'     => $request->input('date_to'),
+                ]);
             }
         }
 

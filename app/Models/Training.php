@@ -79,4 +79,9 @@ class Training extends Model
                     ->withPivot('user_id')
                     ->withTimestamps();
     }
+
+    public function tthRecords()
+    {
+        return $this->hasMany(TthRecord::class);
+    }
 }

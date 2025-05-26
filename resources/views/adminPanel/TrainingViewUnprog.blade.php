@@ -121,9 +121,9 @@
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        Admin
+                        {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                 </div>
@@ -155,7 +155,7 @@
                     </tr>
                     <tr>
                         <td class="label">Role:</td>
-                        <td>{{ }}</td>
+                        <td>{{ $training->user_role ?? 'Participant' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>
