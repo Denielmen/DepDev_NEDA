@@ -222,7 +222,7 @@
                     </tr>
                     <tr>
                         <td class="label">No. of Hours:</td>
-                        <td>{{ $training->hours ?? '' }}</td>
+                        <td>{{ $training->no_of_hours ?? '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Superior:</td>
@@ -234,7 +234,7 @@
                     </tr>
                     <tr>
                         <td class="label">Development Target:</td>
-                        <td>{{ $training->development_target ?? '' }}</td>
+                        <td>{{ $training->dev_target ?? '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Performance Goal this Support:</td>

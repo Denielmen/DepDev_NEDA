@@ -341,6 +341,7 @@
                                     <th>Name</th>
                                     <th>Position</th>
                                     <th>Division</th>
+                                    <th>Role</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -350,6 +351,12 @@
                                     <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
                                     <td>{{ $user->position }}</td>
                                     <td>{{ $user->division }}</td>
+                                    <td>
+                                        <select class="form-select form-select-sm participant-role" data-user-id="{{ $user->id }}">
+                                            <option value="participant">Participant</option>
+                                            <option value="resource_person">Resource Person</option>
+                                        </select>
+                                    </td>
                                     <td>
                                         <button class="btn btn-sm btn-primary add-participant-btn" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">Add</button>
                                     </td>
@@ -383,8 +390,13 @@
                 Array.from(participantsSelect.options).forEach(option => {
                     const participantDiv = document.createElement('div');
                     participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
+                    const role = option.dataset.role || 'participant';
+                    const roleBadge = role === 'resource_person' ? 
+                        '<span class="badge bg-primary ms-2">Resource Person</span>' : 
+                        '<span class="badge bg-secondary ms-2">Participant</span>';
+                    
                     participantDiv.innerHTML = `
-                        <span>${option.text}</span>
+                        <span>${option.text} ${roleBadge}</span>
                         <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${option.value}">
                             <i class="bi bi-x"></i> Remove
                         </button>
@@ -398,12 +410,15 @@
                 btn.addEventListener('click', function() {
                     const userId = this.dataset.userId;
                     const userName = this.closest('tr').querySelector('td:first-child').textContent.trim();
+                    const roleSelect = this.closest('tr').querySelector('.participant-role');
+                    const role = roleSelect.value;
                     
                     // Check if user is already selected
                     const optionExists = Array.from(participantsSelect.options).some(option => option.value === userId);
                     
                     if (!optionExists) {
                         const option = new Option(userName, userId, true, true);
+                        option.dataset.role = role;
                         participantsSelect.appendChild(option);
                         this.disabled = true;
                         this.textContent = 'Added';
