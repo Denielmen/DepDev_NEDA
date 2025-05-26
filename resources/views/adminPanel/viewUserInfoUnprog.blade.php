@@ -170,11 +170,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-<<<<<<< Updated upstream
-                        Admin
-=======
                         {{ auth()->user()->last_name ?? 'Admin' }}
->>>>>>> Stashed changes
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                 </div>
@@ -188,6 +184,7 @@
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
