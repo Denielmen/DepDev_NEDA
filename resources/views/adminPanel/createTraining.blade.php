@@ -155,6 +155,26 @@
                 <form method="POST" action="{{ route('admin.training-plan.store') }}" id="trainingForm">
                     @csrf
 
+                    {{-- Core Competency Field --}}
+                    <div class="form-group row mb-3">
+                        <label for="core_competency" class="col-md-4 col-form-label text-md-right">{{ __('Core Competency') }}</label>
+                        <div class="col-md-6">
+                            <select class="form-control @error('core_competency') is-invalid @enderror" id="core_competency" name="core_competency" required>
+                                <option value="">Select Core Competency...</option>
+                                <option value="Foundational/Mandatory" {{ old('core_competency') == 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
+                                <option value="Competency Enhancement" {{ old('core_competency') == 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
+                                <option value="Leadership/Executive Development" {{ old('core_competency') == 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
+                                <option value="Gender and Development (GAD)-Related" {{ old('core_competency') == 'Gender and Development (GAD)-Related' ? 'selected' : '' }}>Gender and Development (GAD)-Related</option>
+                                <option value="Others" {{ old('core_competency') == 'Others' ? 'selected' : '' }}>Others</option>
+                           </select>
+                            @error('core_competency')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="form-group row mb-3">
                         <label for="title" class="col-md-4 col-form-label text-md-right">{{ __('Title/Area') }}</label>
                         <div class="col-md-6">
@@ -186,17 +206,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="core_competency" class="form-label">Core Competency</label>
-                        <select class="form-control" id="core_competency" name="core_competency" required>
-                            <option value="">Select Core Competency...</option>
-                            <option value="Foundational/Mandatory">Foundational/Mandatory</option>
-                            <option value="Competency Enhancement">Competency Enhancement</option>
-                            <option value="Leadership/Executive Development">Leadership/Executive Development</option>
-                            <option value="Gender and Development (GAD)-Related">Gender and Development (GAD)-Related</option>
-                            <option value="Others">Others</option>
-                        </select>
-                    </div>
+                   
 
                     <div class="form-group row mb-3">
                         <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From') }}</label>
@@ -338,13 +348,9 @@
                                 <!-- Selected participants will be displayed here -->
                             </div>
                             <select id="participants" class="form-control @error('participants') is-invalid @enderror" name="participants[]" multiple style="display: none;">
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ in_array($user->id, old('participants', [])) ? 'selected' : '' }}>
-                                    {{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.
-                                    </option>
-                                @endforeach
+                                {{-- Options are added via JavaScript --}}
                             </select>
-                            @error('participants')
+                             @error('participants')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -544,6 +550,7 @@
                         if (!firstInvalidField) {
                             firstInvalidField = field;
                         }
+                        console.log('Invalid field:', field.name);
                     } else {
                         field.classList.remove('is-invalid');
                     }
@@ -561,9 +568,18 @@
                 console.log('Form data:', {
                     title: formData.get('title'),
                     competency_id: formData.get('competency_id'),
+                    core_competency: formData.get('core_competency'),
                     period_from: formData.get('period_from'),
                     period_to: formData.get('period_to'),
                     implementation_date: formData.get('implementation_date'),
+                    budget: formData.get('budget'),
+                    no_of_hours: formData.get('no_of_hours'),
+                    superior: formData.get('superior'),
+                    provider: formData.get('provider'),
+                    dev_target: formData.get('dev_target'),
+                    performance_goal: formData.get('performance_goal'),
+                    objective: formData.get('objective'),
+                    type: formData.get('type'),
                     participants: Array.from(formData.getAll('participants[]')),
                     participation_types: Object.fromEntries(
                         Array.from(formData.entries())
@@ -574,7 +590,8 @@
 
                 if (isValid) {
                     console.log('Form is valid, submitting...');
-                    form.submit();
+                    // Submit the form
+                    this.submit();
                 } else {
                     console.log('Form validation failed');
                     if (firstInvalidField) {

@@ -232,7 +232,7 @@
                         <tr>
                             <th>Training Title</th>
                             <th>Competency</th>
-                            <th>Core Competency</th>
+                            <!-- <th>Core Competency</th> -->
                             <th>Period of Implementation</th>
                             <th>Training Details</th>
                         </tr>
@@ -245,7 +245,7 @@
                             <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/y') : 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view">
+                                    <!-- <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view"> -->
                                     <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view">
                                         <i class="bi bi-eye"></i> View
                                     </a>

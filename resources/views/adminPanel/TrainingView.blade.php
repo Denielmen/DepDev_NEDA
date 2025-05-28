@@ -190,7 +190,7 @@
                     </tr>
                     <tr>
                         <td class="label">Competency:</td>
-                        <td>{{ $training->competency ?? '' }}</td>
+                        <td>{{ $training->competency->name ?? '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Three-Year Period:</td>

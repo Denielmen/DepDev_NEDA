@@ -246,15 +246,9 @@
                     <label for="sort-by" class="me-2">Sort by</label>
                     <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers()">
                         <option value="all">All Positions</option>
-                        <option value="Division Chief">Division Chief</option>
-                        <option value="Supervising Administrative Officer">Supervising Administrative Officer</option>
-                        <option value="Administrative Officer">Administrative Officer</option>
-                        <option value="Administrative Assistant">Administrative Assistant</option>
-                        <option value="Project Development Officer">Project Development Officer</option>
-                        <option value="Planning Officer">Planning Officer</option>
-                        <option value="Statistician">Statistician</option>
-                        <option value="Economist">Economist</option>
-                        <option value="Development Management Officer">Development Management Officer</option>
+                        @foreach($positions as $position)
+                            <option value="{{ $position }}">{{ $position }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="table-container">

@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('trainings', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->foreignId('competency_id')->constrained('competencies');
             $table->date('period_from')->nullable();
             $table->date('period_to')->nullable();
             $table->date('implementation_date');
