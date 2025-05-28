@@ -177,6 +177,65 @@
             background-color: #dc3545;
             color: white !important;
         }
+        .submission-large {
+            min-width: 220px;
+            min-height: 120px;
+            font-size: 1.1rem;
+            padding: 18px 18px;
+            border-width: 2px;
+            margin-bottom: 10px;
+        }
+        .submission-flex {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .submission-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1 1 260px;
+            min-width: 260px;
+            max-width: 320px;
+        }
+        .submission-or {
+            align-self: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #003366;
+            margin: 0 10px;
+        }
+        .submission-btn i {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+        .submission-desc {
+            font-size: 1rem;
+            color: #6c757d;
+            text-align: center;
+            margin-bottom: 0;
+        }
+        .submission-cert-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        @media (max-width: 900px) {
+            .submission-flex {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 20px;
+            }
+            .submission-or {
+                margin: 10px 0;
+            }
+            .submission-cert-row {
+                margin-top: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -222,123 +281,154 @@
         <!-- Main Content -->
         <div class="main-content">
             <div style="max-width: 1040px; margin: 0 auto;">
-                <div class="form-container">
-                    <div class="form-title">
+            <div class="form-container">
+                <div class="form-title">
                         Training Tracking & History
-                    </div>
+                </div>
 
                     <form action="{{ route('tracking.store') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="row">
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Title of the Training:</label>
-                                <input type="text" class="form-control" name="training_title" required>
+                    @csrf
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">Title of the Training:</label>
+                            <input type="text" class="form-control" name="training_title" required>
+                        </div>
+                        
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">Aligned Training:</label>
+                            <select id="alignedTraining" name="courseTitle" class="form-control" required>
+    <option value="" disabled selected>Select aligned training</option>
+    @foreach($programmedTrainings as $training)
+        <option value="{{ $training->id }}">{{ $training->title }}</option>
+    @endforeach
+    <option value="other">Others</option>
+</select>
+<input type="text" id="otherTrainingTitle" name="other_training_title" class="form-control mt-2" style="display:none;" placeholder="Enter training title">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 form-group">
+                            <label class="form-label">Competency:</label><select id="competency" class="form-control @error('competency_id') is-invalid @enderror" name="competency_id" required>
+                     <option value="">Select Competency</option>
+                           @foreach($competencies as $competency)
+                           <option value="{{ $competency->id }}" {{ old('competency_id') == $competency->id ? 'selected' : '' }}>
+                              {{ $competency->name }}
+            </option>
+            @endforeach
+    </select>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="form-label">Role:</label>
+                            <select id="role" name="role" class="form-control" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="Course 1">Participant</option>
+                                <option value="Course 2">Resource Person</option>
+                        
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="form-label">No. of Hours:</label>
+                            <input type="text" class="form-control" name="hours" placeholder="1000hrs" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="form-label">Actual Expenses:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="number" class="form-control" name="expenses" required>
                             </div>
-                            
-                            <div class="col-md-6 form-group">
-                                <label class="form-label">Aligned Training:</label>
-                                <select id="alignedTraining" name="courseTitle" class="form-control" required>
-                                    <option value="" disabled selected>Select aligned training</option>
-                                    @foreach($programmedTrainings as $training)
-                                        <option value="{{ $training->id }}">{{ $training->title }}</option>
-                                    @endforeach
-                                    <option value="other">Others</option>
-                                </select>
-                                <input type="text" id="otherTrainingTitle" name="other_training_title" class="form-control mt-2" style="display:none;" placeholder="Enter training title">
+                        </div> 
+                        <div class="col-md-4 form-group">
+                            <label class="form-label">Date of Attendance:</label>
+                            <div class="date-range">
+                                <input type="date" class="form-control" name="date_from" id="date_from" required onchange="updateDateTo()">
+                                <span>To:</span>
+                                <input type="date" class="form-control" name="date_to" id="date_to" required readonly>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-8 form-group">
-                                <label class="form-label">Competency:</label>
-                                <input type="text" class="form-control" name="competency" required>
-                            </div>
-                            <div class="col-md-3 form-group">
-                                <label class="form-label">Role:</label>
-                                <select id="role" name="role" class="form-control" required>
-                                    <option value="" disabled selected>Select Role</option>
-                                    <option value="Course 1">Participant</option>
-                                    <option value="Course 2">Resource Person</option>
-                            
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 form-group">
-                                <label class="form-label">No. of Hours:</label>
-                                <input type="text" class="form-control" name="hours" placeholder="1000hrs" required>
-                            </div>
-                            <div class="col-md-4 form-group">
-                                <label class="form-label">Actual Expenses:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" name="expenses" required>
-                                </div>
-                            </div> 
-                            <div class="col-md-4 form-group">
-                                <label class="form-label">Date of Attendance:</label>
-                                <div class="date-range">
-                                    <input type="date" class="form-control" name="date_from" id="date_from" required onchange="updateDateTo()">
-                                    <span>To:</span>
-                                    <input type="date" class="form-control" name="date_to" id="date_to" required readonly>
-                                </div>
-                            </div>
-                        </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Conducted/Sponsored by/Learning Services Provider:</label>
-                            <input type="text" class="form-control" name="provider" required>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Conducted/Sponsored by/Learning Services Provider:</label>
+                        <input type="text" class="form-control" name="provider" required>
+                    </div>
 
                         <div class="submission-types mb-4">
                             <label class="form-label">Choose a submission type</label>
-                            <div class="d-flex gap-3">
+                            <div class="submission-flex">
                                 <!-- Upload Button -->
-                                <button type="button" class="submission-btn" id="uploadBtn">
-                                    <i class="bi bi-upload" style="font-size: 2rem;"></i>
-                                    <div>Upload</div>
-                                </button>
+                                <div class="submission-col">
+                                    <button type="button" class="submission-btn submission-large" id="uploadBtn">
+                                        <i class="bi bi-upload"></i>
+                                        <div>Upload Training Materials</div>
+                                    </button>
+                                    <div class="submission-desc">
+                                        <span>Accepted file types: <b>pdf, png, jpg, jpeg</b></span><br>
+                                        <span>Max file size: <b>50 MB</b></span>
+                                    </div>
+                                </div>
+                                <div class="submission-or">OR</div>
                                 <!-- Link Button -->
-                                <button type="button" class="submission-btn" id="linkBtn">
-                                    <i class="bi bi-link-45deg" style="font-size: 2rem;"></i>
-                                    <div>Text</div>
-                                </button>
+                                <div class="submission-col">
+                                    <button type="button" class="submission-btn submission-large" id="linkBtn">
+                                        <i class="bi bi-link-45deg"></i>
+                                        <div>Text</div>
+                                    </button>
+                                    <div class="submission-desc">
+                                        Paste link of Training Materials
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                            <!-- Certificates Button Row -->
+                            <div class="submission-cert-row">
+                                <div class="submission-col">
+                                    <button type="button" class="submission-btn submission-large" id="uploadCertBtn">
+                                        <i class="bi bi-file-earmark-medical"></i>
+                                        <div>Upload Training Certificates</div>
+                                    </button>
+                                    <div class="submission-desc">
+                                        <span>Accepted file types: <b>pdf, png, jpg, jpeg</b></span><br>
+                                        <span>Max file size: <b>50 MB</b></span>
+        </div>
+    </div>
+    </div>
+
                         <!-- Hidden actual inputs -->
-                        <input type="file" name="uploaded_file[]" id="fileInput" style="display:none;" multiple>
-                        <input type="text" name="web_url" id="linkInput" class="form-control mt-2" style="display:none;" placeholder="Paste your link here">
+                        <input type="file" name="uploaded_file[]" id="fileInput" style="display:none;" multiple accept=".pdf,.png,.jpg,.jpeg">
+                        <input type="file" name="certificate_file[]" id="certInput" style="display:none;" multiple accept=".pdf,.png,.jpg,.jpeg">
+                        <input type="text" name="web_url" id="linkInput" class="form-control mt-2" placeholder="Paste your link here">
                         <!-- File/Image Preview -->
                         <div id="filePreview" style="margin-top: 15px;"></div>
-
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn-save">Save</button>
-                        </div>
-                    </form>
-
-                    @isset($learning_note)
-                    <div class="mt-4">
-                        <label class="form-label">Note/Description (with clickable links):</label>
-                        <div style="background:#f8f9fa; border-radius:4px; padding:12px;">
-                            {!! preg_replace('/(https?:\/\/[^\s]+)/', '<a href="$1" target="_blank">$1</a>', e($learning_note)) !!}
-                        </div>
+                        <div id="certPreview" style="margin-top: 15px;"></div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn-save">Save</button>
                     </div>
-                    @endisset
+                </form>
+
+                @isset($learning_note)
+                <div class="mt-4">
+                    <label class="form-label">Note/Description (with clickable links):</label>
+                    <div style="background:#f8f9fa; border-radius:4px; padding:12px;">
+                        {!! preg_replace('/(https?:\/\/[^\s]+)/', '<a href="$1" target="_blank">$1</a>', e($learning_note)) !!}
+                    </div>
+                </div>
+                @endisset
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>;
     <script>
         function updateDateTo() {
             const dateFromInput = document.getElementById('date_from');
             const dateToInput = document.getElementById('date_to');
-            
             if (dateFromInput.value) {
                 const dateFrom = new Date(dateFromInput.value);
                 const dateTo = new Date(dateFrom);
-                dateTo.setFullYear(dateFrom.getFullYear() + 3);
-                
+                dateTo.setDate(dateFrom.getDate() + 2);
+
                 // Format the date to YYYY-MM-DD
                 const formattedDate = dateTo.toISOString().split('T')[0];
                 dateToInput.value = formattedDate;
@@ -348,21 +438,32 @@
         }
 
         // Prepare all programmed trainings as a JS object
-        const trainings = @json($programmedTrainings->keyBy('id'));
-        document.getElementById('alignedTraining').addEventListener('change', function() {
-            const selectedId = this.value;
-            if (selectedId === 'other') {
-                document.getElementById('otherTrainingTitle').style.display = 'block';
-            } else {
-                document.getElementById('otherTrainingTitle').style.display = 'none';
-                const training = trainings[selectedId];
-                if (training) {
-                    document.querySelector('input[name="competency"]').value = training.competency || '';
-                    document.querySelector('input[name="hours"]').value = training.no_of_hours || '';
-                    document.querySelector('input[name="provider"]').value = training.provider || '';
-                }
-            }
-        });
+      const trainings = @json($programmedTrainings->keyBy('id'));
+
+const alignedTraining = document.getElementById('alignedTraining');
+const otherTrainingTitle = document.getElementById('otherTrainingTitle');
+const mainTitleInput = document.querySelector('input[name="training_title"]');
+
+alignedTraining.addEventListener('change', function() {
+    const selectedId = this.value;
+    if (selectedId === 'other') {
+        otherTrainingTitle.style.display = 'block';
+        mainTitleInput.value = '';
+        mainTitleInput.readOnly = true;
+        otherTrainingTitle.value = '';
+    } else {
+        otherTrainingTitle.style.display = 'none';
+        const training = trainings[selectedId];
+        if (training) {
+            mainTitleInput.value = training.title || '';
+            mainTitleInput.readOnly = true;
+        }
+    }
+});
+
+otherTrainingTitle.addEventListener('input', function() {
+    mainTitleInput.value = this.value;
+});
 
         document.getElementById('uploadBtn').onclick = function() {
             document.getElementById('fileInput').click();
@@ -374,6 +475,10 @@
             document.getElementById('linkInput').style.display = 'block';
             this.classList.add('active');
             document.getElementById('uploadBtn').classList.remove('active');
+        };
+        document.getElementById('uploadCertBtn').onclick = function() {
+            document.getElementById('certInput').click();
+            this.classList.add('active');
         };
 
         // File/Image Preview Logic with Remove (X) Button
@@ -446,6 +551,77 @@
             const dataTransfer = new DataTransfer();
             selectedFiles.forEach(file => dataTransfer.items.add(file));
             document.getElementById('fileInput').files = dataTransfer.files;
+        }
+
+        // Certificate file preview logic (optional, similar to filePreview)
+        let selectedCertFiles = [];
+        document.getElementById('certInput').addEventListener('change', function(event) {
+            selectedCertFiles = Array.from(event.target.files);
+            renderCertPreviews();
+        });
+
+        function renderCertPreviews() {
+            const preview = document.getElementById('certPreview');
+            preview.innerHTML = '';
+            selectedCertFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const container = document.createElement('div');
+                    container.style.display = 'flex';
+                    container.style.alignItems = 'center';
+                    container.style.marginBottom = '10px';
+
+                    // X button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.style.marginRight = '10px';
+                    removeBtn.style.background = 'transparent';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.color = 'red';
+                    removeBtn.style.fontSize = '1.5rem';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.onclick = function() {
+                        selectedCertFiles.splice(index, 1);
+                        renderCertPreviews();
+                    };
+                    container.appendChild(removeBtn);
+
+                    // Image preview (if image)
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '50px';
+                        img.style.height = '50px';
+                        img.style.objectFit = 'cover';
+                        img.style.marginRight = '10px';
+                        container.appendChild(img);
+                    }
+                    // File name (with ellipsis for long names)
+                    const name = document.createElement('span');
+                    name.textContent = file.name.length > 20 ? file.name.slice(0, 10) + '...' + file.name.slice(-7) : file.name;
+                    name.style.marginRight = '10px';
+                    container.appendChild(name);
+                    // File size
+                    const size = document.createElement('span');
+                    size.textContent = Math.round(file.size / 1024) + ' KB';
+                    size.style.marginRight = '10px';
+                    container.appendChild(size);
+                    // Success icon
+                    const icon = document.createElement('span');
+                    icon.innerHTML = '<span style="color:green; font-size: 1.2rem;">&#10004;</span>';
+                    container.appendChild(icon);
+
+                    preview.appendChild(container);
+                };
+                reader.readAsDataURL(file);
+            });
+            updateCertInput();
+        }
+
+        function updateCertInput() {
+            const dataTransfer = new DataTransfer();
+            selectedCertFiles.forEach(file => dataTransfer.items.add(file));
+            document.getElementById('certInput').files = dataTransfer.files;
         }
     </script>
 </body>

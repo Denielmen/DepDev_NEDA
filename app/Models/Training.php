@@ -80,10 +80,6 @@ class Training extends Model
                     ->withTimestamps();
     }
 
-    public function tthRecords()
-    {
-        return $this->hasMany(TthRecord::class);
-    }
 
     public function participants_2025()
     {

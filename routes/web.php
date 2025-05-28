@@ -176,4 +176,6 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
     Route::post('/tracking', [TrainingTrackingController::class, 'store'])->name('tracking.store');
 });
 
+Route::get('/download-training-material/{material}', [App\Http\Controllers\TrainingProfileController::class, 'downloadMaterial'])->name('training.material.download');
+
 require __DIR__.'/auth.php';

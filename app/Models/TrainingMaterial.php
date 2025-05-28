@@ -11,12 +11,7 @@ class TrainingMaterial extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'description',
-        'file_name',
-        'file_path',
-        'competency_id',
-        'user_id'
+        'title', 'competency_id', 'user_id', 'source', 'file_path', 'link', 'type',
     ];
 
     /**
@@ -44,7 +39,7 @@ class TrainingMaterial extends Model
 
     public function competency()
     {
-        return $this->belongsTo(Competency::class);
+        return $this->belongsTo(Competency::class, 'competency_id');
     }
 
     public function training()

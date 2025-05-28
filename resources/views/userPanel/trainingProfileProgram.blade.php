@@ -237,10 +237,10 @@
                             <td class="text-center">{{ $training->title }}</td>
                             <td class="text-center">{{ $training->competency }}</td>
                             <td class="text-center">
-                                @if($training->status === 'Implemented' && $training->tthRecords && $training->tthRecords->count())
-                                    {{ \Carbon\Carbon::parse($training->tthRecords->first()->date_to)->format('d/m/Y') }}
+                                @if($training->status === 'Implemented' )
+                                    {{ \Carbon\Carbon::parse($training->first()->implementation_date_to)->format('d/m/Y') }}
                                 @else
-                                    {{ \Carbon\Carbon::parse($training->implementation_date)->format('Y') }}
+                                    {{ \Carbon\Carbon::parse($training->period_from)->format('Y') }}
                                 @endif
                             </td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
@@ -252,30 +252,21 @@
                             <td class="text-center">
                                 <div class="btn-group">
                                     <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-info btn-sm">View</a>
-                                    <button
-                                        class="btn btn-sm ms-1 open-eval-modal {{ $preEvaluated ? 'btn-success' : 'btn-warning' }}"
-                                        data-training="{{ $training->id }}"
-                                        data-type="Pre-Evaluation"
-                                        data-evaluated="{{ $preEvaluated ? '1' : '0' }}"
-                                    >
-                                        Pre-Evaluation
-                                    </button>
+                                    <button class="btn btn-sm ms-1 open-eval-modal {{ $preEvaluated ? 'btn-success' : 'btn-warning' }}" data-training="{{ $training->id }}" data-type="Pre-Evaluation" data-evaluated="{{ $preEvaluated ? '1' : '0' }}">Pre-Evaluation</button>
                                 </div>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-                <div class="d-flex justify-content-center mt-3">
-                    {{ $trainings->links() }}
-                </div>
+                
             </div>
             @if($trainings->count())
                 <div class="d-flex justify-content-end mt-3 mb-3">
                     <a href="{{ route('training.export', $trainings->first()->id) }}" class="btn btn-info">
                         <i class="bi bi-download me-2"></i>Export
                     </a>
-                </div>
+                </div>  
             @endif
         </div>
     </div>
@@ -357,7 +348,7 @@
                     });
                     selectedRating = currentRating;
                 } else {
-                    msgDiv.textContent = '';
+                    msgDiv.textContent = '';++
                 }
                 // If already evaluated, make radios readonly and hide submit
                 var submitBtn = document.querySelector('#evaluationModal .btn-primary');

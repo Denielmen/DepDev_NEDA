@@ -14,12 +14,11 @@ class TrainingProfileController extends Controller
 {
     public function program()
     {
-        $trainings = Training::with('tthRecords')
-            ->where('type', 'Program')
+        $trainings = Training::where('type', 'Program')
             ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
             ->orderBy('status')
             ->paginate(10);
-        return view('userPanel.trainingProfileProgram', compact('trainings'));
+        return view('userPanel.trainingProfileProgram', compact('trainings','competencies'));
     }
 
     public function unprogrammed()
@@ -278,7 +277,7 @@ class TrainingProfileController extends Controller
                   ->orWhereDate('created_at', $search);
             });
         }
-        $materials = $query->orderByDesc('created_at')->get();
+        $materials = $query->where('type', 'material')->orderByDesc('created_at')->get();
         return view('userPanel.trainingResources', compact('materials'));
     }
 
@@ -286,5 +285,20 @@ class TrainingProfileController extends Controller
     {
         $implementedTrainings = Training::where('status', 'Implemented')->where('type', 'Program')->get();
         return view('userPanel.evalParticipant', compact('implementedTrainings'));
+    }
+
+    public function downloadMaterial(TrainingMaterial $material)
+    {
+        if (!$material->file_path) {
+            return back()->with('error', 'No file available for download.');
+        }
+
+        $filePath = storage_path('app/public/' . $material->file_path);
+        
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        return response()->download($filePath);
     }
 } 

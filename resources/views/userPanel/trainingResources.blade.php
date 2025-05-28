@@ -190,7 +190,24 @@
                                 <td class="text-center">{{ $material->competency }}</td>
                                 <td class="text-center">{{ $material->source }}</td>
                                 <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
-                                <td class="text-center"><a href="{{ asset('storage/' . $material->file_path) }}" class="btn btn-sm btn-primary" download>Download</a></td>
+                                <td class="text-center">
+                                    <button 
+                                        class="btn btn-primary btn-sm me-1"
+                                        @if(!$material->file_path) disabled @endif
+                                        onclick="@if($material->file_path) window.location.href = '{{ route('training.material.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                        title="@if(!$material->file_path) No file available @endif"
+                                    >
+                                        <i class="fas fa-download"></i> Download File
+                                    </button>
+                                    <button 
+                                        class="btn btn-info btn-sm"
+                                        @if(!$material->link) disabled @endif
+                                        onclick="@if($material->link) window.open('{{ $material->link }}', '_blank') @else alert('There\'s no link pasted.') @endif"
+                                        title="@if(!$material->link) No link available @endif"
+                                    >
+                                        <i class="fas fa-external-link-alt"></i> Open Link
+                                    </button>
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="5" class="text-center">No training materials found.</td></tr>
