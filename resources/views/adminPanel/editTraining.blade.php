@@ -109,6 +109,7 @@
             <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
@@ -128,15 +129,35 @@
                             <input type="text" class="form-control" id="title" name="title" value="{{ $training->title }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="competency" class="form-label">Competency:</label>
-                            <input type="text" class="form-control" id="competency" name="competency" value="{{ $training->competency }}" required>
+                            <label for="competency" class="form-label">Competency</label>
+                            <select class="form-control" id="competency" name="competency_id" required>
+                                <option value="">Select Competency</option>
+                                @foreach($competencies as $competency)
+                                    <option value="{{ $competency->id }}" {{ $training->competency_id == $competency->id ? 'selected' : '' }}>
+                                        {{ $competency->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
+                            <label for="core_competency" class="form-label">Core Competency:</label>
+                            <select class="form-control" id="core_competency" name="core_competency" required>
+                                <option value="">Select Core Competency...</option>
+                                <option value="Foundational/Mandatory" {{ $training->core_competency === 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
+                                <option value="Competency Enhancement" {{ $training->core_competency === 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
+                                <option value="Leadership/Executive Development" {{ $training->core_competency === 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
+                                <option value="Gender and Development (GAD)-Related" {{ $training->core_competency === 'Gender and Development (GAD)-Related' ? 'selected' : '' }}>Gender and Development (GAD)-Related</option>
+                                <option value="Others" {{ $training->core_competency === 'Others' ? 'selected' : '' }}>Others</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
                             <label for="year" class="form-label">Year of Implementation:</label>
                             <input type="date" class="form-control" id="year" name="year" value="{{ $training->year }}" required>
                         </div>
+                    </div>
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="budget" class="form-label">Budget (per hour):</label>
                             <input type="number" class="form-control" id="budget" name="budget" value="{{ $training->budget }}">

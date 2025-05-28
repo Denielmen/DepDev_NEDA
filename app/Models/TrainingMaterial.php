@@ -4,12 +4,51 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder; // Import the Builder class
 
 class TrainingMaterial extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title', 'competency', 'source', 'file_path',
+        'title',
+        'description',
+        'file_name',
+        'file_path',
+        'competency_id',
+        'user_id'
     ];
+
+    /**
+     * Scope a query to search training materials by title, description, or file name.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string|null  $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearch(Builder $query, ?string $search = null): Builder
+    {
+        if ($search) {
+            $query->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%")
+                  ->orWhere('file_name', 'LIKE', "%{$search}%");
+        }
+
+        return $query;
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function competency()
+    {
+        return $this->belongsTo(Competency::class);
+    }
+
+    public function training()
+    {
+        return $this->belongsTo(Training::class);
+    }
 }

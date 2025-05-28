@@ -142,6 +142,7 @@
             <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
@@ -169,13 +170,32 @@
                     <div class="form-group row mb-3">
                         <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency') }}</label>
                         <div class="col-md-6">
-                            <input id="competency" type="text" class="form-control @error('competency') is-invalid @enderror" name="competency" value="{{ old('competency') }}" required autocomplete="competency">
-                            @error('competency')
+                            <select id="competency" class="form-control @error('competency_id') is-invalid @enderror" name="competency_id" required>
+                                <option value="">Select Competency</option>
+                                @foreach($competencies as $competency)
+                                    <option value="{{ $competency->id }}" {{ old('competency_id') == $competency->id ? 'selected' : '' }}>
+                                        {{ $competency->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('competency_id')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="core_competency" class="form-label">Core Competency</label>
+                        <select class="form-control" id="core_competency" name="core_competency" required>
+                            <option value="">Select Core Competency...</option>
+                            <option value="Foundational/Mandatory">Foundational/Mandatory</option>
+                            <option value="Competency Enhancement">Competency Enhancement</option>
+                            <option value="Leadership/Executive Development">Leadership/Executive Development</option>
+                            <option value="Gender and Development (GAD)-Related">Gender and Development (GAD)-Related</option>
+                            <option value="Others">Others</option>
+                        </select>
                     </div>
 
                     <div class="form-group row mb-3">
@@ -244,7 +264,14 @@
                     <div class="form-group row mb-3">
                         <label for="superior" class="col-md-4 col-form-label text-md-right">{{ __('Superior') }}</label>
                         <div class="col-md-6">
-                            <input id="superior" type="text" class="form-control @error('superior') is-invalid @enderror" name="superior" value="{{ old('superior') }}">
+                            <select id="superior" name="superior" class="form-control @error('superior') is-invalid @enderror">
+                                <option value="">Select Superior</option>
+                                @foreach(App\Models\User::getSuperiors() as $superior)
+                                    <option value="{{ $superior->full_name }}" {{ old('superior') == $superior->full_name ? 'selected' : '' }}>
+                                        {{ $superior->full_name }}
+                                    </option>
+                                @endforeach
+                            </select>
                             @error('superior')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -340,7 +367,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="participantModalLabel">List of Participants</h5>
+                    <h5 class="modal-title" id="participantModalLabel">Add Participants</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -351,7 +378,7 @@
                                     <th>Name</th>
                                     <th>Position</th>
                                     <th>Division</th>
-                                    <th>Role</th>
+                                    <th>Participation Type</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -362,13 +389,19 @@
                                     <td>{{ $user->position }}</td>
                                     <td>{{ $user->division }}</td>
                                     <td>
-                                        <select class="form-select form-select-sm participant-role" data-user-id="{{ $user->id }}">
-                                            <option value="participant">Participant</option>
-                                            <option value="resource_person">Resource Person</option>
+                                        <select class="form-select participation-type" data-user-id="{{ $user->id }}">
+                                            <option value="">Select Type</option>
+                                            @foreach($participationTypes as $type)
+                                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                            @endforeach
                                         </select>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary add-participant-btn" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">Add</button>
+                                        <button class="btn btn-sm btn-primary add-participant-btn" 
+                                            data-user-id="{{ $user->id }}" 
+                                            data-user-name="{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.">
+                                            Add
+                                        </button>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -393,6 +426,11 @@
             const doneBtn = document.getElementById('doneBtn');
             const participantModal = document.getElementById('participantModal');
             const modal = bootstrap.Modal.getInstance(participantModal) || new bootstrap.Modal(participantModal);
+            const form = document.getElementById('trainingForm');
+
+            // Clear any pre-selected participants
+            participantsSelect.innerHTML = '';
+            selectedParticipantsDiv.innerHTML = '';
 
             // Function to update the selected participants display
             function updateSelectedParticipantsDisplay() {
@@ -400,41 +438,59 @@
                 Array.from(participantsSelect.options).forEach(option => {
                     const participantDiv = document.createElement('div');
                     participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
-                    const role = option.dataset.role || 'participant';
-                    const roleBadge = role === 'resource_person' ? 
-                        '<span class="badge bg-primary ms-2">Resource Person</span>' : 
-                        '<span class="badge bg-secondary ms-2">Participant</span>';
+                    const participationTypeSelect = document.querySelector(`.participation-type[data-user-id="${option.value}"]`);
+                    const participationType = participationTypeSelect.value;
+                    const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
                     
                     participantDiv.innerHTML = `
-                        <span>${option.text} ${roleBadge}</span>
-                        <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${option.value}">
-                            <i class="bi bi-x"></i> Remove
-                        </button>
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">${option.text}</span>
+                            <span class="badge bg-info">${participationTypeName}</span>
+                        </div>
+                        <div>
+                            <input type="hidden" name="participants[]" value="${option.value}">
+                            <input type="hidden" name="participation_types[${option.value}]" value="${participationType}">
+                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${option.value}">
+                                <i class="bi bi-x"></i> Remove
+                            </button>
+                        </div>
                     `;
                     selectedParticipantsDiv.appendChild(participantDiv);
                 });
+
+                // Log the current state
+                console.log('Selected participants:', Array.from(participantsSelect.options).map(opt => ({
+                    id: opt.value,
+                    name: opt.text
+                })));
             }
 
             // Handle Add Participant button clicks
             addParticipantBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const userId = this.dataset.userId;
-                    const userName = this.closest('tr').querySelector('td:first-child').textContent.trim();
-                    const roleSelect = this.closest('tr').querySelector('.participant-role');
-                    const role = roleSelect.value;
+                    const participationTypeSelect = document.querySelector(`.participation-type[data-user-id="${userId}"]`);
+                    const participationType = participationTypeSelect.value;
                     
-                    // Check if user is already selected
-                    const optionExists = Array.from(participantsSelect.options).some(option => option.value === userId);
-                    
-                    if (!optionExists) {
-                        const option = new Option(userName, userId, true, true);
-                        option.dataset.role = role;
-                        participantsSelect.appendChild(option);
-                        this.disabled = true;
-                        this.textContent = 'Added';
-                        this.classList.remove('btn-primary');
-                        this.classList.add('btn-success');
+                    if (!participationType) {
+                        alert('Please select a participation type');
+                        return;
                     }
+
+                    // Add to select if not already selected
+                    if (!Array.from(participantsSelect.options).some(opt => opt.value === userId)) {
+                        const option = new Option(this.dataset.userName, userId);
+                        participantsSelect.add(option);
+                    }
+                    
+                    // Update button state
+                    this.disabled = true;
+                    this.textContent = 'Added';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-success');
+                    
+                    // Update display
+                    updateSelectedParticipantsDisplay();
                 });
             });
 
@@ -466,44 +522,68 @@
 
             // Handle Done button click
             doneBtn.addEventListener('click', function() {
-                // Update the display before closing the modal
                 updateSelectedParticipantsDisplay();
                 modal.hide();
             });
 
-            // Reset Add buttons when modal is hidden
-            participantModal.addEventListener('hidden.bs.modal', function() {
-                addParticipantBtns.forEach(btn => {
-                    btn.disabled = false;
-                    btn.textContent = 'Add';
-                    btn.classList.remove('btn-success');
-                    btn.classList.add('btn-primary');
-                });
-            });
-
-            // Form validation
-            const form = document.getElementById('trainingForm');
+            // Form validation and submission
             form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                console.log('Form submission started');
+                
+                // Validate required fields
                 const requiredFields = form.querySelectorAll('[required]');
                 let isValid = true;
+                let firstInvalidField = null;
 
                 requiredFields.forEach(field => {
-                    if (!field.value.trim()) {
+                    if (!field.value) {
                         isValid = false;
                         field.classList.add('is-invalid');
+                        if (!firstInvalidField) {
+                            firstInvalidField = field;
+                        }
                     } else {
                         field.classList.remove('is-invalid');
                     }
                 });
 
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Please fill in all required fields.');
+                // Check if participants are selected
+                const selectedParticipants = form.querySelectorAll('input[name="participants[]"]');
+                if (selectedParticipants.length === 0) {
+                    alert('Please add at least one participant');
+                    isValid = false;
+                }
+
+                // Log form data
+                const formData = new FormData(form);
+                console.log('Form data:', {
+                    title: formData.get('title'),
+                    competency_id: formData.get('competency_id'),
+                    period_from: formData.get('period_from'),
+                    period_to: formData.get('period_to'),
+                    implementation_date: formData.get('implementation_date'),
+                    participants: Array.from(formData.getAll('participants[]')),
+                    participation_types: Object.fromEntries(
+                        Array.from(formData.entries())
+                            .filter(([key]) => key.startsWith('participation_types['))
+                            .map(([key, value]) => [key.match(/\[(\d+)\]/)[1], value])
+                    )
+                });
+
+                if (isValid) {
+                    console.log('Form is valid, submitting...');
+                    form.submit();
+                } else {
+                    console.log('Form validation failed');
+                    if (firstInvalidField) {
+                        firstInvalidField.focus();
+                    }
                 }
             });
 
-            // Clear initial selections
-            participantsSelect.innerHTML = '';
+            // Initialize display
             updateSelectedParticipantsDisplay();
         });
 

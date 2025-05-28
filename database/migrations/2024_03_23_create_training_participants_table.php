@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('training_participants', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('training_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->integer('year')->nullable();
+            $table->foreignId('training_id')->constrained('trainings')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->year('year');
             $table->timestamps();
+
+            // Add unique constraint to prevent duplicate entries
+            $table->unique(['training_id', 'user_id', 'year']);
         });
     }
 

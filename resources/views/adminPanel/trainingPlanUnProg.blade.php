@@ -201,6 +201,7 @@
             <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
@@ -214,10 +215,10 @@
                     <a href="{{ route('admin.training-plan') }}" class="tab-button">Programmed</a>
                     <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
-                <div class="search-box">
+                <form action="{{ route('admin.training-plan.unprogrammed') }}" method="GET" class="search-box">
+                    <input type="text" name="search" placeholder="Search by title or participant..." value="{{ request('search') }}">
                     <i class="bi bi-search search-icon"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
+                </form>
             </div>
 
             <div class="training-table mt-3">
@@ -234,7 +235,7 @@
                     @foreach($trainings->sortByDesc('created_at') as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
-                            <td>{{ $training->competency }}</td>
+                            <td>{{ $training->competency->name }}</td>
                             <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/y') : 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
@@ -273,5 +274,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add search functionality
+        document.querySelector('.search-box input').addEventListener('input', function(e) {
+            // Add a small delay to prevent too many requests
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+    </script>
 </body>
 </html>

@@ -6,14 +6,14 @@ use App\Http\Controllers\TrainingProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdminController; // akon gi add
+use App\Http\Controllers\AdminController; // akon gi add    
 use App\Http\Controllers\TrainingTrackingController;
 
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
-Route::get('/search/results', [SearchController::class, 'results'])->name('search.results');
 Route::get('/search/export/{format}', [SearchController::class, 'export'])->name('search.export');
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
+Route::get('/search/results', [SearchController::class, 'results'])->name('search.results');
 
 // Login Routes (if not using Laravel Breeze or Jetstream)
 Route::get('/login', function () {
@@ -99,11 +99,8 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
             $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
             return view('adminPanel.trainingPlanUnProg', compact('trainings'));
         })->name('training-plan.unprogrammed');
-
-        Route::get('training-plan/create', function () {
-            $users = \App\Models\User::all();
-            return view('adminPanel.createTraining', compact('users'));
-        })->name('training-plan.create');
+ 
+        Route::get('training-plan/create', [TrainingProfileController::class, 'create'])->name('training-plan.create');
 
         Route::post('training-plan/store', [TrainingProfileController::class, 'store'])->name('training-plan.store');
 

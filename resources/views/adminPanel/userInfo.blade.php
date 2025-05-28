@@ -225,6 +225,7 @@
         <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
         <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+        <a href="{{ route('search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
 
     <!-- Main Content -->
@@ -272,8 +273,8 @@
                         <input type="text" class="form-control" value="{{ $user->division }}" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Office/Department</label>
-                        <input type="text" class="form-control" value="{{ $user->office }}" readonly>
+                        <label class="form-label">Position</label>
+                        <input type="text" class="form-control" value="{{ $user->position }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Name of Supervisor (Last, First, MI)</label>
