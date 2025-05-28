@@ -11,12 +11,9 @@ return new class extends Migration
         Schema::create('trainings', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->foreignId('competency_id')->constrained('competencies');
-            $table->string('core_competency')->nullable(); 
             $table->date('period_from')->nullable();
             $table->date('period_to')->nullable();
-            $table->date('implementation_date_from')->nullable();
-            $table->date('implementation_date_to')->nullable();
+            $table->date('implementation_date');
             $table->decimal('budget', 10, 2)->nullable();
             $table->integer('no_of_hours')->nullable();
             $table->string('superior')->nullable();
@@ -32,8 +29,6 @@ return new class extends Migration
             $table->integer('supervisor_post_rating')->nullable();
             $table->timestamps();
         });
-       // DB::statement('UPDATE trainings t JOIN competencies c ON t.competency = c.name SET t.competency_id = c.id');
-
     }
 
     public function down()

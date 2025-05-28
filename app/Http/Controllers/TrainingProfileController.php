@@ -79,31 +79,6 @@ class TrainingProfileController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'competency' => 'required|string|max:255',
-            'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
-            'implementation_date' => 'required|date',
-            'no_of_hours' => 'nullable|numeric',
-            'provider' => 'nullable|string|max:255',
-            'dev_target' => 'nullable|string',
-            'performance_goal' => 'nullable|string',
-            'objective' => 'nullable|string',
-            'participation_type' => 'required|in:Resource Person,Participant',
-            'participants' => 'nullable|array',
-            'participants.*' => 'exists:users,id'
-        ]);
-
-        // Create training data with type always set to Program
-        $trainingData = $request->except('participants');
-        $trainingData['type'] = 'Program';
-
-        $training = Training::create($trainingData);
-
-        // Add participants if any were selected
-        if ($request->has('participants')) {
-            $training->participants()->attach($request->participants);
-        }
         try {
             \Log::info('Training creation request data:', $request->all());
 
@@ -111,6 +86,7 @@ class TrainingProfileController extends Controller
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
                 'competency_id' => 'required|exists:competencies,id',
+                'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
                 'period_from' => 'required|date',
                 'period_to' => 'required|date|after_or_equal:period_from',
                 'implementation_date' => 'required|date',
@@ -137,6 +113,7 @@ class TrainingProfileController extends Controller
                 $training = Training::create([
                     'title' => $validated['title'],
                     'competency_id' => $validated['competency_id'],
+                    'core_competency' => $validated['core_competency'],
                     'period_from' => $validated['period_from'],
                     'period_to' => $validated['period_to'],
                     'implementation_date' => $validated['implementation_date'],
@@ -148,10 +125,13 @@ class TrainingProfileController extends Controller
                     'performance_goal' => $validated['performance_goal'],
                     'objective' => $validated['objective'],
                     'type' => $validated['type'],
-                    'status' => 'pending'
+                    'status' => 'Pending'
                 ]);
 
                 \Log::info('Training created:', ['training_id' => $training->id]);
+
+                // Get the year from the implementation date
+                $year = date('Y', strtotime($validated['implementation_date']));
 
                 // Attach participants with their participation types
                 $participants = $validated['participants'];
@@ -159,18 +139,19 @@ class TrainingProfileController extends Controller
 
                 \Log::info('Attaching participants:', [
                     'participants' => $participants,
-                    'participation_types' => $participationTypes
+                    'participation_types' => $participationTypes,
+                    'year' => $year
                 ]);
 
                 foreach ($participants as $participantId) {
                     if (isset($participationTypes[$participantId])) {
                         $training->participants()->attach($participantId, [
-                            'participation_type_id' => $participationTypes[$participantId]
+                            'year' => $year
                         ]);
                         \Log::info('Attached participant:', [
                             'training_id' => $training->id,
                             'participant_id' => $participantId,
-                            'participation_type_id' => $participationTypes[$participantId]
+                            'year' => $year
                         ]);
                     } else {
                         \Log::warning('Missing participation type for participant:', [
