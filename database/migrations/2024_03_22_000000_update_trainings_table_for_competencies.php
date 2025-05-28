@@ -13,14 +13,6 @@ return new class extends Migration
             // First, add the new column
             $table->foreignId('competency_id')->nullable()->after('title')->constrained('competencies');
         });
-
-        // Then, migrate existing competency data
-        DB::statement('UPDATE trainings t JOIN competencies c ON t.competency = c.name SET t.competency_id = c.id');
-
-        Schema::table('trainings', function (Blueprint $table) {
-            // Finally, drop the old column
-            $table->dropColumn('competency');
-        });
     }
 
     public function down()

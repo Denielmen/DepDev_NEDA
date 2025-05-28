@@ -132,10 +132,7 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         })->name('training.view.unprogrammed');
 
         // Participants routes
-        Route::get('/participants', function () {
-            $users = \App\Models\User::all();
-            return view('adminPanel.listOfUser', compact('users'));
-        })->name('participants');
+        Route::get('/participants', [App\Http\Controllers\AdminController::class, 'participants'])->name('participants');
 
         // Register routes for admin
         Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
@@ -175,5 +172,12 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
 
     Route::post('/tracking', [TrainingTrackingController::class, 'store'])->name('tracking.store');
 });
+
+// After (for testing):
+    Route::middleware(['auth'])->group(function () {
+        // Training Reports Export Routes
+        Route::get('/reports/export/pdf', [AdminController::class, 'exportPdf'])->name('admin.reports.export.pdf');
+        Route::get('/reports/export/excel', [AdminController::class, 'exportExcel'])->name('admin.reports.export.excel');
+    });
 
 require __DIR__.'/auth.php';

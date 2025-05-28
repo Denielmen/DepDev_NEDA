@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Training;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TrainingsExport;
 
 class AdminController extends Controller
 {
@@ -21,24 +25,50 @@ class AdminController extends Controller
 
     public function reports()
     {
-        // Fetch all trainings.
-        // It's assumed that your Training model has accessors (e.g., getParticipants2025Attribute)
-        // or relationships that provide the 'participants_2025', 'participants_2026', 
-        // and 'participants_2027' collections as used in your Blade template.
-        // It is also assumed that each Training model has an attribute representing its category.
-        $allTrainings = Training::all(); // You might need to use Training::with('relevant_relationship_for_accessors')->get();
+        // Fetch all trainings with their relationships
+        $allTrainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
+            ->orderBy('core_competency')
+            ->get();
 
-        // Group the trainings by category.
-        // IMPORTANT: Replace 'category' with the actual attribute name on your Training model
-        // that holds the category name (e.g., 'name', 'category_name', 'type', etc.).
-        // If your category is determined by a related model (e.g., $training->categoryRelation->name),
-        // the grouping logic would be:
-        // $trainings = $allTrainings->groupBy(function ($training) {
-        //     return $training->categoryRelation->name ?? 'Uncategorized'; // Adjust to your model structure
-        // });
-        // For a direct attribute on the Training model:
-        $trainings = $allTrainings->groupBy('category'); 
+        // Group the trainings by core_competency and sort each group by created_at descending
+        $trainings = $allTrainings->groupBy('core_competency')->map(function ($group) {
+            return $group->sortByDesc('created_at');
+        });
 
         return view('adminPanel.report', compact('trainings'));
+    }
+
+    // Export Reports to PDF
+    public function exportPdf()
+    {
+        $allTrainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
+            ->orderBy('core_competency')
+            ->get();
+
+        // Group the trainings by core_competency and sort each group by created_at descending
+        $trainings = $allTrainings->groupBy('core_competency')->map(function ($group) {
+            return $group->sortByDesc('created_at');
+        });
+
+        $pdf = Pdf::loadView('adminPanel.reports.pdf', compact('trainings'));
+        return $pdf->download('training_report.pdf');
+    }
+
+    // Export Reports to Excel
+    public function exportExcel()
+    {
+        $trainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2025', 'participants_2026', 'participants_2027'])
+            ->orderBy('core_competency')
+            ->get();
+
+        return Excel::download(new TrainingsExport($trainings), 'training_report.xlsx');
+    }
+
+    public function participants()
+    {
+        $users = User::all();
+        $positions = User::distinct()->pluck('position')->filter()->values()->toArray();
+
+        return view('adminPanel.listOfUser', compact('users', 'positions'));
     }
 } 

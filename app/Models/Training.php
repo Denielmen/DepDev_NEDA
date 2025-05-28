@@ -11,6 +11,7 @@ class Training extends Model
     protected $fillable = [
         'title',
         'competency_id',
+        'core_competency', 
         'period_from',
         'period_to',
         'implementation_date',
@@ -49,8 +50,8 @@ class Training extends Model
      */
     public function participants()
     {
-        return $this->belongsToMany(User::class, 'training_participant')
-                    ->withPivot('participation_type_id')
+        return $this->belongsToMany(User::class, 'training_participants')
+                    ->withPivot('year')
                     ->withTimestamps();
     }
 
@@ -75,8 +76,8 @@ class Training extends Model
      */
     public function participationTypes()
     {
-        return $this->belongsToMany(ParticipationType::class, 'training_participant')
-                    ->withPivot('user_id')
+        return $this->belongsToMany(ParticipationType::class, 'training_participants')
+                    ->withPivot('user_id', 'year')
                     ->withTimestamps();
     }
 

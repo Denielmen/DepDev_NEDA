@@ -315,7 +315,7 @@
                     @foreach($programmedTrainings as $training)
                     <tr>
                         <td>{{ $training->title }}</td>
-                        <td>{{ $training->competency }}</td>
+                        <td>{{ $training->competency->name}}</td>
                         <td>{{ $training->implementation_date->format('m/d/y') }}</td>
                         <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>

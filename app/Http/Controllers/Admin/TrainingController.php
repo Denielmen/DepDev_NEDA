@@ -29,13 +29,36 @@ class TrainingController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'competency' => 'required|string|max:255',
+            'competency_id' => 'required|exists:competencies,id',
+            'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
+            'period_from' => 'required|date',
+            'period_to' => 'required|date',
             'implementation_date' => 'required|date',
+            'budget' => 'nullable|numeric',
+            'no_of_hours' => 'nullable|integer',
+            'superior' => 'nullable|string|max:255',
             'provider' => 'nullable|string|max:255',
+            'dev_target' => 'nullable|string',
+            'performance_goal' => 'nullable|string',
+            'objective' => 'nullable|string',
             'type' => 'required|in:Program,Unprogrammed',
+            'participants' => 'required|array|min:1',
+            'participants.*' => 'exists:users,id',
+            'participation_types' => 'required|array',
+            'participation_types.*' => 'exists:participation_types,id'
         ]);
 
-        Training::create($request->all());
+        $training = Training::create($request->all());
+
+        // Attach participants with their participation types
+        foreach ($request->participants as $participantId) {
+            $participationTypeId = $request->participation_types[$participantId] ?? null;
+            if ($participationTypeId) {
+                $training->participants()->attach($participantId, [
+                    'participation_type_id' => $participationTypeId
+                ]);
+            }
+        }
 
         return redirect()->route('admin.training-plan')
             ->with('success', 'Training created successfully.');
