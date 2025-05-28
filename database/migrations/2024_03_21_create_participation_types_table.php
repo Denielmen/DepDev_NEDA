@@ -15,13 +15,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('training_participant', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('training_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('participation_type_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
+        
     }
 
     public function down()

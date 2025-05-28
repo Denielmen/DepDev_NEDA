@@ -46,4 +46,9 @@ class TrainingMaterial extends Model
     {
         return $this->belongsTo(Competency::class);
     }
+
+    public function training()
+    {
+        return $this->belongsTo(Training::class);
+    }
 }
