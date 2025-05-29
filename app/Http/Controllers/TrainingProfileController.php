@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\DB;
 class TrainingProfileController extends Controller
 {
     public function program()
-    {
+    {   
+        $competencies = Competency::orderBy('name')->get();
         $trainings = Training::where('type', 'Program')
             ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
             ->orderBy('status')
@@ -50,7 +51,8 @@ class TrainingProfileController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'competency_id' => 'required|exists:competencies,id',
-            'implementation_date' => 'required|date',
+            'implementation_date_from' => 'required|date',
+            'implementation_date_to' => 'required|date',
             'no_of_hours' => 'nullable|numeric',
             'provider' => 'nullable|string|max:255',
             'dev_target' => 'nullable|string',
@@ -89,7 +91,8 @@ class TrainingProfileController extends Controller
                 'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
                 'period_from' => 'required|date',
                 'period_to' => 'required|date|after_or_equal:period_from',
-                'implementation_date' => 'required|date',
+                'implementation_date_from' => 'required|date',
+            'implementation_date_to' => 'required|date',
                 'no_of_hours' => 'nullable|numeric',
                 'budget' => 'nullable|numeric',
                 'provider' => 'nullable|string|max:255',
@@ -116,7 +119,8 @@ class TrainingProfileController extends Controller
                     'core_competency' => $validated['core_competency'],
                     'period_from' => $validated['period_from'],
                     'period_to' => $validated['period_to'],
-                    'implementation_date' => $validated['implementation_date'],
+                    'implementation_date_from' => $validated['implementation_date_from'],
+                    'implementation_date_to' => $validated['implementation_date_to'],
                     'no_of_hours' => $validated['no_of_hours'],
                     'budget' => $validated['budget'],
                     'provider' => $validated['provider'],

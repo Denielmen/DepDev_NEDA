@@ -80,13 +80,13 @@ class SearchController extends Controller
                     });
                 })
                 ->when($year, function($q) use ($year) {
-                    $q->whereYear('implementation_date', $year);
+                    $q->whereYear('implementation_date_from', $year);
                 })
                 ->when($dateFrom, function($q) use ($dateFrom) {
-                    $q->where('implementation_date', '>=', $dateFrom);
+                    $q->where('implementation_date_from', '>=', $dateFrom);
                 })
                 ->when($dateTo, function($q) use ($dateTo) {
-                    $q->where('implementation_date', '<=', $dateTo);
+                    $q->where('implementation_date_from', '<=', $dateTo);
                 })
                 ->when($competencies, function($q) use ($competencies) {
                     $q->whereIn('competency_id', $competencies);
@@ -178,13 +178,13 @@ class SearchController extends Controller
                         });
                     })
                     ->when($year, function($q) use ($year) {
-                        $q->whereYear('implementation_date', $year);
+                        $q->whereYear('implementation_date_from', $year);
                     })
                     ->when($dateFrom, function($q) use ($dateFrom) {
-                        $q->where('implementation_date', '>=', $dateFrom);
+                        $q->where('implementation_date_from', '>=', $dateFrom);
                     })
                     ->when($dateTo, function($q) use ($dateTo) {
-                        $q->where('implementation_date', '<=', $dateTo);
+                        $q->where('implementation_date_to', '<=', $dateTo);
                     })
                     ->when($competencies, function($q) use ($competencies) {
                         $q->whereIn('competency_id', $competencies);

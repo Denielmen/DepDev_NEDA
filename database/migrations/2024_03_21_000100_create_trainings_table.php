@@ -15,7 +15,8 @@ return new class extends Migration
             $table->string('competency')->nullable();
             $table->date('period_from')->nullable();
             $table->date('period_to')->nullable();
-            $table->date('implementation_date');
+            $table->date('implementation_date_from')->nullable();
+            $table->date('implementation_date_to')->nullable();
             $table->decimal('budget', 10, 2)->nullable();
             $table->integer('no_of_hours')->nullable();
             $table->string('superior')->nullable();

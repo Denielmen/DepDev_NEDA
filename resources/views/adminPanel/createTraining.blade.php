@@ -233,10 +233,10 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="implementation_date" class="col-md-4 col-form-label text-md-right">{{ __('Implementation Date') }}</label>
+                        <label for="implementation_date_from" class="col-md-4 col-form-label text-md-right">{{ __('Implementation Date From') }}</label>
                         <div class="col-md-6">
-                            <input id="implementation_date" type="date" class="form-control @error('implementation_date') is-invalid @enderror" name="implementation_date" value="{{ old('implementation_date') }}" required>
-                            @error('implementation_date')
+                            <input id="implementation_date_from" type="date" class="form-control @error('implementation_date_from') is-invalid @enderror" name="implementation_date_from" value="{{ old('implementation_date_from') }}" required>
+                            @error('implementation_date_from')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -571,7 +571,7 @@
                     core_competency: formData.get('core_competency'),
                     period_from: formData.get('period_from'),
                     period_to: formData.get('period_to'),
-                    implementation_date: formData.get('implementation_date'),
+                    implementation_date_from: formData.get('implementation_date_from'),
                     budget: formData.get('budget'),
                     no_of_hours: formData.get('no_of_hours'),
                     superior: formData.get('superior'),

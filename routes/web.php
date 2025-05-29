@@ -81,6 +81,7 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
 
     Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
         ->name('training.resources');
+        Route::get('/training-materials/{trainingMaterial}/download', [TrainingMaterialController::class, 'download'])->name('training_materials.download');
 
     // Admin Panel Routes
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {

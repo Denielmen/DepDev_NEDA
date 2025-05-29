@@ -215,7 +215,7 @@
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/Y') : '' }}</td>
+                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Learning Service Provider:</td>

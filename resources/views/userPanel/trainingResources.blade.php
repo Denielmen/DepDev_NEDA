@@ -187,14 +187,14 @@
                         @forelse($materials as $material)
                             <tr>
                                 <td class="text-center">{{ $material->title }}</td>
-                                <td class="text-center">{{ $material->competency }}</td>
+                                <td class="text-center">{{ $material->competency->name }}</td>
                                 <td class="text-center">{{ $material->source }}</td>
                                 <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
                                 <td class="text-center">
                                     <button 
                                         class="btn btn-primary btn-sm me-1"
                                         @if(!$material->file_path) disabled @endif
-                                        onclick="@if($material->file_path) window.location.href = '{{ route('training.material.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                        onclick="@if($material->file_path) window.location.href = '{{ route('training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
                                         title="@if(!$material->file_path) No file available @endif"
                                     >
                                         <i class="fas fa-download"></i> Download File

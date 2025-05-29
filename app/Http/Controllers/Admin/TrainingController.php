@@ -10,8 +10,9 @@ class TrainingController extends Controller
 {
     public function index()
     {
+        $competencies = \App\Models\Competency::all();
         $trainings = Training::where('type', 'Program')->get();
-        return view('adminPanel.trainingPlan', compact('trainings'));
+        return view('adminPanel.trainingPlan', compact('trainings', 'competencies'));
     }
 
     public function unprogrammed()
@@ -33,7 +34,8 @@ class TrainingController extends Controller
             'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
             'period_from' => 'required|date',
             'period_to' => 'required|date',
-            'implementation_date' => 'required|date',
+            'implementation_date_from' => 'required|date',
+            'implementation_date_to' => 'required|date',
             'budget' => 'nullable|numeric',
             'no_of_hours' => 'nullable|integer',
             'superior' => 'nullable|string|max:255',
@@ -74,7 +76,8 @@ class TrainingController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'competency' => 'required|string|max:255',
-            'implementation_date' => 'required|date',
+            'implementation_date_from' => 'required|date',
+            'implementation_date_to' => 'required|date',
             'provider' => 'nullable|string|max:255',
             'type' => 'required|in:Program,Unprogrammed',
         ]);

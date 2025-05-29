@@ -300,7 +300,7 @@
                     <tr>
                         <td>{{ $training->title }}</td>
                         <td>{{ $training->competency->name }}</td>
-                        <td>{{ $training->implementation_date->format('m/d/y') }}</td>
+                        <td>{{ $training->implementation_date_from->format('m/d/y') }} - {{ $training->implementation_date_to->format('m/d/y') }}</td>
                         <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>{{ $training->status }}</td>

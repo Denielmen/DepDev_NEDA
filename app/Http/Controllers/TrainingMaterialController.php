@@ -1,18 +1,90 @@
 <?php
+
+namespace App\Http\Controllers;
+
 use App\Models\TrainingMaterial;
 use Illuminate\Http\Request;
 
 class TrainingMaterialController extends Controller
 {
+    // List and search training materials
     public function index(Request $request)
     {
-        $search = $request->input('search'); // Get the search term from the request
-
+        $search = $request->input('search');
         $trainingMaterials = TrainingMaterial::search($search)->get();
-
-        // Now you can pass $trainingMaterials to your view
         return view('training_materials.index', compact('trainingMaterials', 'search'));
     }
 
-    // ... other controller methods
+    // Show a single training material
+    public function show(TrainingMaterial $trainingMaterial)
+    {
+        return view('training_materials.show', compact('trainingMaterial'));
+    }
+
+    // Show the form to create a new training material
+    public function create()
+    {
+        return view('training_materials.create');
+    }
+
+    // Store a new training material
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title'         => 'required|string|max:255',
+            'competency_id' => 'required|exists:competencies,id',
+            'user_id'       => 'required|exists:users,id',
+            'source'        => 'nullable|string|max:255',
+            'file_path'     => 'nullable|string|max:255',
+            'link'          => 'nullable|url',
+            'type'          => 'required|string|max:50',
+        ]);
+        TrainingMaterial::create($validated);
+        return redirect()->route('training_materials.index')->with('success', 'Training material created!');
+    }
+
+    // Show the form to edit a training material
+    public function edit(TrainingMaterial $trainingMaterial)
+    {
+        return view('training_materials.edit', compact('trainingMaterial'));
+    }
+
+    // Update a training material
+    public function update(Request $request, TrainingMaterial $trainingMaterial)
+    {
+        $validated = $request->validate([
+            'title'         => 'required|string|max:255',
+            'competency_id' => 'required|exists:competencies,id',
+            'user_id'       => 'required|exists:users,id',
+            'source'        => 'nullable|string|max:255',
+            'file_path'     => 'nullable|string|max:255',
+            'link'          => 'nullable|url',
+            'type'          => 'required|string|max:50',
+        ]);
+        $trainingMaterial->update($validated);
+        return redirect()->route('training_materials.index')->with('success', 'Training material updated!');
+    }
+
+    // Delete a training material
+    public function destroy(TrainingMaterial $trainingMaterial)
+    {
+        $trainingMaterial->delete();
+        return redirect()->route('training_materials.index')->with('success', 'Training material deleted!');
+    }
+
+    // Download a training material file
+    public function download(TrainingMaterial $trainingMaterial)
+    {
+        if (!$trainingMaterial->file_path) {
+            return back()->with('error', 'No file available for download.');
+        }
+
+        $filePath = storage_path('app/public/' . $trainingMaterial->file_path);
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        return response()->download($filePath);
+    }
 }
