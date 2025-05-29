@@ -51,7 +51,7 @@ class Training extends Model
     public function participants()
     {
         return $this->belongsToMany(User::class, 'training_participants')
-                    ->withPivot('year')
+                    ->withPivot('year', 'participation_type_id')
                     ->withTimestamps();
     }
 

@@ -262,7 +262,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($users->sortBy('last_name') as $user)
+                            @foreach($users->sortBy([
+                                ['is_active', 'desc'],
+                                ['last_name', 'asc']
+                            ]) as $user)
                             <tr>
                                 <td>
                                     <span class="status-indicator {{ $user->is_active ? 'active' : 'inactive' }}"></span>
