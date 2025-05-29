@@ -321,7 +321,24 @@
                         <td>{{ $training->provider }}</td>
                         <td>{{ $training->status }}</td>
                         <td>
-                            {{ $training->participation_type }}
+                            @php
+                                $participationTypeName = 'N/A';
+                                // Find the participant pivot data for the current user in this training
+                                $participantPivot = $training->participants->first(function ($participant) use ($user) {
+                                    return $participant->id === $user->id;
+                                });
+
+                                if ($participantPivot && $participantPivot->pivot) {
+                                    // Now that we have the pivot, get the participation type ID
+                                    $participationTypeId = $participantPivot->pivot->participation_type_id;
+                                    // Find the participation type name using the ID
+                                    $participationType = \App\Models\ParticipationType::find($participationTypeId);
+                                    if ($participationType) {
+                                        $participationTypeName = $participationType->name;
+                                    }
+                                }
+                            @endphp
+                            {{ $participationTypeName }}
                         </td>
                         <td>
                             <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
