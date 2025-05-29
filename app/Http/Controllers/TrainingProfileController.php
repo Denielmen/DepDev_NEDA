@@ -87,6 +87,7 @@ class TrainingProfileController extends Controller
                 'title' => 'required|string|max:255',
                 'competency_id' => 'required|exists:competencies,id',
                 'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
+                'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
                 'period_from' => 'required|date',
                 'period_to' => 'required|date|after_or_equal:period_from',
                 'implementation_date' => 'required|date',
@@ -113,7 +114,7 @@ class TrainingProfileController extends Controller
                 $training = Training::create([
                     'title' => $validated['title'],
                     'competency_id' => $validated['competency_id'],
-                    'core_competency' => $validated['core_competency'],
+                    'core_competency' => $validated['core_competency'] === 'Others' ? $validated['core_competency_input'] : $validated['core_competency'],
                     'period_from' => $validated['period_from'],
                     'period_to' => $validated['period_to'],
                     'implementation_date' => $validated['implementation_date'],
@@ -125,7 +126,7 @@ class TrainingProfileController extends Controller
                     'performance_goal' => $validated['performance_goal'],
                     'objective' => $validated['objective'],
                     'type' => $validated['type'],
-                    'status' => 'Pending'
+                    'status' => 'Not Yet Implemented'
                 ]);
 
                 \Log::info('Training created:', ['training_id' => $training->id]);
@@ -146,7 +147,8 @@ class TrainingProfileController extends Controller
                 foreach ($participants as $participantId) {
                     if (isset($participationTypes[$participantId])) {
                         $training->participants()->attach($participantId, [
-                            'year' => $year
+                            'year' => $year,
+                            'participation_type_id' => $participationTypes[$participantId]
                         ]);
                         \Log::info('Attached participant:', [
                             'training_id' => $training->id,

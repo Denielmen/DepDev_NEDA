@@ -159,14 +159,17 @@
                     <div class="form-group row mb-3">
                         <label for="core_competency" class="col-md-4 col-form-label text-md-right">{{ __('Core Competency') }}</label>
                         <div class="col-md-6">
-                            <select class="form-control @error('core_competency') is-invalid @enderror" id="core_competency" name="core_competency" required>
+                            <select class="form-control @error('core_competency') is-invalid @enderror" id="core_competency" name="core_competency" required onchange="toggleCoreCompetencyInput()">
                                 <option value="">Select Core Competency...</option>
                                 <option value="Foundational/Mandatory" {{ old('core_competency') == 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
                                 <option value="Competency Enhancement" {{ old('core_competency') == 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
                                 <option value="Leadership/Executive Development" {{ old('core_competency') == 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
                                 <option value="Gender and Development (GAD)-Related" {{ old('core_competency') == 'Gender and Development (GAD)-Related' ? 'selected' : '' }}>Gender and Development (GAD)-Related</option>
                                 <option value="Others" {{ old('core_competency') == 'Others' ? 'selected' : '' }}>Others</option>
-                           </select>
+                            </select>
+                            <input type="text" class="form-control mt-2 @error('core_competency') is-invalid @enderror" 
+                                id="core_competency_input" name="core_competency_input" 
+                                placeholder="Enter core competency" value="{{ old('core_competency_input') }}" style="display: none;">
                             @error('core_competency')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -377,6 +380,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="participantSearch" placeholder="Search participants..." onkeyup="searchParticipants()">
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -389,8 +398,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($users as $user)
-                                <tr>
+                                @foreach($users->sortBy('last_name') as $user)
+                                <tr class="participant-row">
                                     <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
                                     <td>{{ $user->position }}</td>
                                     <td>{{ $user->division }}</td>
@@ -611,6 +620,53 @@
                 date.setFullYear(date.getFullYear() + 3);
                 const toDate = date.toISOString().split('T')[0];
                 document.getElementById('period_to').value = toDate;
+            }
+        }
+
+        function toggleCoreCompetencyInput() {
+            const coreCompetencySelect = document.getElementById('core_competency');
+            const coreCompetencyInput = document.getElementById('core_competency_input');
+
+            if (coreCompetencySelect.value === 'Others') {
+                coreCompetencySelect.style.display = 'none';
+                coreCompetencyInput.style.display = 'block';
+                coreCompetencyInput.required = true;
+                coreCompetencyInput.focus();
+            } else {
+                coreCompetencySelect.style.display = 'block';
+                coreCompetencyInput.style.display = 'none';
+                coreCompetencyInput.required = false;
+            }
+        }
+
+        // Call on page load to set initial state
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCoreCompetencyInput();
+        });
+
+        function searchParticipants() {
+            const input = document.getElementById('participantSearch');
+            const filter = input.value.toUpperCase();
+            const rows = document.getElementsByClassName('participant-row');
+
+            for (let i = 0; i < rows.length; i++) {
+                const nameCell = rows[i].getElementsByTagName('td')[0];
+                const positionCell = rows[i].getElementsByTagName('td')[1];
+                const divisionCell = rows[i].getElementsByTagName('td')[2];
+                
+                if (nameCell && positionCell && divisionCell) {
+                    const nameText = nameCell.textContent || nameCell.innerText;
+                    const positionText = positionCell.textContent || positionCell.innerText;
+                    const divisionText = divisionCell.textContent || divisionCell.innerText;
+                    
+                    if (nameText.toUpperCase().indexOf(filter) > -1 || 
+                        positionText.toUpperCase().indexOf(filter) > -1 || 
+                        divisionText.toUpperCase().indexOf(filter) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
             }
         }
     </script>

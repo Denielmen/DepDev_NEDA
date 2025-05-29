@@ -76,12 +76,6 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         return view('userPanel.trainingEffectiveness');
     })->name('training.effectiveness');
 
-    Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
-        ->name('training.rate.participant');
-
-    Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
-        ->name('training.resources');
-
     // Admin Panel Routes
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         // Admin Home
@@ -140,9 +134,18 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
 
         Route::get('/participants/{id}', function ($id) {
             $user = \App\Models\User::findOrFail($id);
-            $programmedTrainings = \App\Models\Training::where('type', 'Program')->get();
+            // Fetch programmed trainings where the user is a participant
+            $programmedTrainings = \App\Models\Training::where('type', 'Program')
+                ->whereHas('participants', function ($query) use ($user) {
+                    $query->where('training_participants.user_id', $user->id);
+                })
+                // Eager load the participant relationship specifically for this user
+                ->with(['participants' => function ($query) use ($user) {
+                    $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
+                }])
+                ->get();
             return view('adminPanel.userInfo', compact('user', 'programmedTrainings'));
-        })->name('participants.info');  
+        })->name('participants.info');
 
         Route::get('/participants/{id}/unprogrammed', function ($id) {
             $user = \App\Models\User::findOrFail($id);
@@ -166,6 +169,10 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         // View user info routes
         Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('viewUserInfo');
         Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('viewUserInfoUnprog');
+
+        // Route to handle saving participant evaluation rating (moved inside admin group)
+        Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
+            ->name('training.rate'); // Renamed to admin.training.rate
     });
 
     Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
