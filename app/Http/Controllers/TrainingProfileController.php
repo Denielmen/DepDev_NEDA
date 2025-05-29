@@ -73,126 +73,79 @@ class TrainingProfileController extends Controller
 
     public function create()
     {
-        $users = User::where('is_active', true)->get();
-        $competencies = Competency::orderBy('name')->get();
-        $participationTypes = ParticipationType::orderBy('name')->get();
-        return view('adminPanel.createTraining', compact('users', 'competencies', 'participationTypes'));
+        $competencies = \App\Models\Competency::orderBy('name')->get();
+        $users = \App\Models\User::orderBy('last_name')->get();
+        $participationTypes = \App\Models\ParticipationType::all();
+        return view('adminPanel.createTraining', compact('competencies', 'users', 'participationTypes'));
     }
 
     public function store(Request $request)
     {
-        try {
-            \Log::info('Training creation request data:', $request->all());
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'competency_id' => 'required|exists:competencies,id',
+            'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
+            'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
+            'period_from' => 'required|date',
+            'period_to' => 'required|date|after_or_equal:period_from',
+            'implementation_date_from' => 'required|date',
+            'implementation_date_to' => 'nullable|date',
+            'no_of_hours' => 'nullable|numeric',
+            'budget' => 'nullable|numeric',
+            'provider' => 'nullable|string|max:255',
+            'superior' => 'nullable|string|max:255',
+            'dev_target' => 'nullable|string',
+            'performance_goal' => 'nullable|string',
+            'objective' => 'nullable|string',
+            'type' => 'required|in:Program,Unprogrammed',
+            'participants' => 'required|array|min:1',
+            'participants.*' => 'exists:users,id',
+            'participation_types' => 'required|array',
+        ]);
 
-            // Validate the request
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'competency_id' => 'required|exists:competencies,id',
-                'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
-                'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
-                'period_from' => 'required|date',
-                'period_to' => 'required|date|after_or_equal:period_from',
-                'implementation_date_from' => 'required|date',
-            'implementation_date_to' => 'required|date',
-                'no_of_hours' => 'nullable|numeric',
-                'budget' => 'nullable|numeric',
-                'provider' => 'nullable|string|max:255',
-                'superior' => 'nullable|string|max:255',
-                'dev_target' => 'nullable|string',
-                'performance_goal' => 'nullable|string',
-                'objective' => 'nullable|string',
-                'type' => 'required|in:Program,Unprogrammed',
-                'participants' => 'required|array',
-                'participants.*' => 'exists:users,id',
-                'participation_types' => 'required|array',
-                'participation_types.*' => 'exists:participation_types,id'
-            ]);
-
-            \Log::info('Validated data:', $validated);
-
-            DB::beginTransaction();
-
-            try {
-                // Create the training
-                $training = Training::create([
-                    'title' => $validated['title'],
-                    'competency_id' => $validated['competency_id'],
-                    'core_competency' => $validated['core_competency'] === 'Others' ? $validated['core_competency_input'] : $validated['core_competency'],
-                    'period_from' => $validated['period_from'],
-                    'period_to' => $validated['period_to'],
-                    'implementation_date_from' => $validated['implementation_date_from'],
-                    'implementation_date_to' => $validated['implementation_date_to'],
-                    'no_of_hours' => $validated['no_of_hours'],
-                    'budget' => $validated['budget'],
-                    'provider' => $validated['provider'],
-                    'superior' => $validated['superior'],
-                    'dev_target' => $validated['dev_target'],
-                    'performance_goal' => $validated['performance_goal'],
-                    'objective' => $validated['objective'],
-                    'type' => $validated['type'],
-                    'status' => 'Not Yet Implemented'
-                ]);
-
-                \Log::info('Training created:', ['training_id' => $training->id]);
-
-                // Get the year from the implementation date
-                $year = date('Y', strtotime($validated['implementation_date']));
-
-                // Attach participants with their participation types
-                $participants = $validated['participants'];
-                $participationTypes = $validated['participation_types'];
-
-                \Log::info('Attaching participants:', [
-                    'participants' => $participants,
-                    'participation_types' => $participationTypes,
-                    'year' => $year
-                ]);
-
-                foreach ($participants as $participantId) {
-                    if (isset($participationTypes[$participantId])) {
-                        $training->participants()->attach($participantId, [
-                            'year' => $year,
-                            'participation_type_id' => $participationTypes[$participantId]
-                        ]);
-                        \Log::info('Attached participant:', [
-                            'training_id' => $training->id,
-                            'participant_id' => $participantId,
-                            'year' => $year
-                        ]);
-                    } else {
-                        \Log::warning('Missing participation type for participant:', [
-                            'training_id' => $training->id,
-                            'participant_id' => $participantId
-                        ]);
-                    }
-                }
-
-                DB::commit();
-                \Log::info('Training creation completed successfully');
-
-                return redirect()->route('admin.training-plan')
-                    ->with('success', 'Training created successfully.');
-            } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error('Error in transaction:', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                throw $e;
+        foreach ($validated['participants'] as $participantId) {
+            if (
+                !isset($validated['participation_types'][$participantId]) ||
+                !\App\Models\ParticipationType::find($validated['participation_types'][$participantId])
+            ) {
+                return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
             }
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation error:', [
-                'errors' => $e->errors(),
-                'input' => $request->all()
+        }
+
+        DB::beginTransaction();
+        try {
+            $training = Training::create([
+                'title' => $validated['title'],
+                'competency_id' => $validated['competency_id'],
+                'core_competency' => $validated['core_competency'] === 'Others' ? $validated['core_competency_input'] : $validated['core_competency'],
+                'period_from' => $validated['period_from'],
+                'period_to' => $validated['period_to'],
+                'implementation_date_from' => $validated['implementation_date_from'],
+                'implementation_date_to' => $validated['implementation_date_to'] ?? null,
+                'no_of_hours' => $validated['no_of_hours'] ?? null,
+                'budget' => $validated['budget'] ?? null,
+                'provider' => $validated['provider'] ?? null,
+                'superior' => $validated['superior'] ?? null,
+                'dev_target' => $validated['dev_target'] ?? null,
+                'performance_goal' => $validated['performance_goal'] ?? null,
+                'objective' => $validated['objective'] ?? null,
+                'type' => $validated['type'],
+                'status' => 'Not Yet Implemented'
             ]);
-            return back()->withErrors($e->errors())->withInput();
+
+            $year = date('Y', strtotime($validated['implementation_date_from']));
+            foreach ($validated['participants'] as $participantId) {
+                $training->participants()->attach($participantId, [
+                    'year' => $year,
+                    'participation_type_id' => $validated['participation_types'][$participantId]
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('admin.training-plan')->with('success', 'Training created successfully.');
         } catch (\Exception $e) {
-            \Log::error('Error creating training:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return back()->withInput()
-                ->with('error', 'Error creating training: ' . $e->getMessage());
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Failed to create training: ' . $e->getMessage()]);
         }
     }
 
@@ -288,4 +241,4 @@ class TrainingProfileController extends Controller
 
         return response()->download($filePath);
     }
-} 
+}

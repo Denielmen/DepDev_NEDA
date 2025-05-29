@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('training_id')->constrained('trainings')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('participation_type_id')
+                  ->nullable()
+                  ->constrained('participation_types')
+                  ->onDelete('set null');
             $table->year('year');
             $table->timestamps();
 
-            // Add unique constraint to prevent duplicate entries
             $table->unique(['training_id', 'user_id', 'year']);
         });
     }
@@ -30,4 +33,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('training_participants');
     }
-}; 
+};

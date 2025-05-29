@@ -370,7 +370,15 @@
             </div>
         </div>
     </div>
-
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
     <!-- Participant List Modal -->
     <div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -670,5 +678,6 @@
             }
         }
     </script>
+
 </body>
 </html>

@@ -443,20 +443,42 @@
 const alignedTraining = document.getElementById('alignedTraining');
 const otherTrainingTitle = document.getElementById('otherTrainingTitle');
 const mainTitleInput = document.querySelector('input[name="training_title"]');
+const competencySelect = document.querySelector('select[name="competency_id"]');
+const hoursInput = document.querySelector('input[name="hours"]');
+const expensesInput = document.querySelector('input[name="expenses"]');
+const dateFromInput = document.querySelector('input[name="date_from"]');
+const dateToInput = document.querySelector('input[name="date_to"]');
+const providerInput = document.querySelector('input[name="provider"]');
+const roleSelect = document.querySelector('select[name="role"]');
 
 alignedTraining.addEventListener('change', function() {
     const selectedId = this.value;
     if (selectedId === 'other') {
         otherTrainingTitle.style.display = 'block';
         mainTitleInput.value = '';
-        mainTitleInput.readOnly = true;
+        mainTitleInput.readOnly = false;
         otherTrainingTitle.value = '';
+        // Clear autofilled fields
+        competencySelect.value = '';
+        hoursInput.value = '';
+        expensesInput.value = '';
+        dateFromInput.value = '';
+        dateToInput.value = '';
+        providerInput.value = '';
+        roleSelect.value = '';
     } else {
         otherTrainingTitle.style.display = 'none';
         const training = trainings[selectedId];
         if (training) {
             mainTitleInput.value = training.title || '';
             mainTitleInput.readOnly = true;
+            competencySelect.value = training.competency_id || '';
+            hoursInput.value = training.no_of_hours || '';
+            expensesInput.value = training.budget || '';
+            dateFromInput.value = training.implementation_date_from || '';
+            dateToInput.value = training.implementation_date_to || '';
+            providerInput.value = training.provider || '';
+            roleSelect.value = 'Course 1'; // Default to Participant, adjust as needed
         }
     }
 });

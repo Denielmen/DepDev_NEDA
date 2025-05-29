@@ -235,7 +235,7 @@
                             data-pre-rating="{{ $training->participant_pre_rating ?? '' }}"
                             data-post-rating="{{ $training->participant_post_rating ?? '' }}">
                             <td class="text-center">{{ $training->title }}</td>
-                            <td class="text-center">{{ $training->competency }}</td>
+                            <td class="text-center">{{ $training->competency->name }}</td>
                             <td class="text-center">
                                 @if($training->status === 'Implemented' )
                                     {{ \Carbon\Carbon::parse($training->first()->implementation_date_to)->format('d/m/Y') }}
