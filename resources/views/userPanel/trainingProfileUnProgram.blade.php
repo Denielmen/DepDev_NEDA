@@ -217,7 +217,7 @@
                         @foreach($trainings as $training)
                         <tr>
                             <td class="text-center">{{ $training->title }}</td>
-                            <td class="text-center">{{ $training->competency }}</td>
+                            <td class="text-center">{{ $training->competency->name }}</td>
                             <td class="text-center">{{ \Carbon\Carbon::parse($training->implementation_date_from)->format('m/d/y') }}</td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>

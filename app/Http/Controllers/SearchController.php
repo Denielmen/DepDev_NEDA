@@ -70,8 +70,7 @@ class SearchController extends Controller
                           ->orWhereHas('participants', function($subQ) use ($query) {
                               $subQ->where(function($subQ) use ($query) {
                                   $subQ->where('first_name', 'like', "%{$query}%")
-                                      ->orWhere('last_name', 'like', "%{$query}%")
-                                      ->orWhere('participation_type', 'like', "%{$query}%");
+                                      ->orWhere('last_name', 'like', "%{$query}%");
                               });
                           })
                           ->orWhereHas('competency', function($subQ) use ($query) {

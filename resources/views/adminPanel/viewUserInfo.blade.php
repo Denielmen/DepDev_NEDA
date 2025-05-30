@@ -263,14 +263,16 @@
                     </tr>
                 </table>
                 <div class="eval-buttons">
-                    <button class="btn btn-eval btn-pre-eval" {{ $training->participant_pre_rating ? 'disabled' : '' }}>
+                    <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }})">
                         <i class="bi bi-clipboard-check"></i>
                         Pre-Eval
                     </button>
-                    <button class="btn btn-eval btn-post-eval" {{ $training->participant_post_rating ? 'disabled' : '' }}>
+                    <a href="{{ route('admin.training.post-evaluation', ['id' => $training->id]) }}" 
+                       class="btn btn-eval btn-post-eval" 
+                       {{ $training->participant_post_rating ? 'disabled' : '' }}>
                         <i class="bi bi-clipboard-data"></i>
                         Post-Eval
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -282,7 +284,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="evaluationModalLabel">Evaluation</h5>
+                    <h5 class="modal-title" id="evaluationModalLabel">Pre-Evaluation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -293,7 +295,7 @@
                             <table class="table table-bordered mb-0">
                                 <tr>
                                     <td rowspan="2" style="vertical-align: middle; width:60%">
-                                        In a scale 1-4 (4 is being the highest ), please tick the circle which describes the proficiency level of your subordinate after participation in this course.
+                                        In a scale 4-1 (4 being the highest), please tick the circle which best describes the proficiency level of your subordinate after participation in this course.
                                     </td>
                                     <th class="text-center">1</th>
                                     <th class="text-center">2</th>
@@ -310,7 +312,6 @@
                         </div>
                     </div>
                     <input type="hidden" id="modalTrainingId" value="">
-                    <input type="hidden" id="modalEvalType" value="">
                     @csrf
                 </div>
                 <div class="modal-footer">
@@ -323,44 +324,44 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const evaluationModal = new bootstrap.Modal(document.getElementById('evaluationModal'));
-            const preEvalButton = document.querySelector('.btn-pre-eval');
-            const postEvalButton = document.querySelector('.btn-post-eval');
-            const modalTrainingIdInput = document.getElementById('modalTrainingId');
-            const modalEvalTypeInput = document.getElementById('modalEvalType');
             const submitEvaluationBtn = document.getElementById('submitEvaluationBtn');
             const preRatingDisplay = document.getElementById('participant_pre_rating_display');
-            const postRatingDisplay = document.getElementById('participant_post_rating_display');
+            const ratingInputs = document.querySelectorAll('input[name="proficiency_level"]');
 
-            const trainingId = {{ $training->id ?? 'null' }};
-
-            if (preEvalButton) {
-                preEvalButton.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    document.querySelectorAll('input[name="proficiency_level"]').forEach(radio => radio.checked = false);
-                    modalTrainingIdInput.value = trainingId;
-                    modalEvalTypeInput.value = 'Pre-Evaluation';
-                    evaluationModal.show();
-                });
-            }
-
-            if (postEvalButton) {
-                postEvalButton.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    document.querySelectorAll('input[name="proficiency_level"]').forEach(radio => radio.checked = false);
-                    modalTrainingIdInput.value = trainingId;
-                    modalEvalTypeInput.value = 'Post-Evaluation';
-                    evaluationModal.show();
-                });
-            }
+            window.showPreEvalModal = function(trainingId) {
+                const currentRating = preRatingDisplay.textContent;
+                document.getElementById('modalTrainingId').value = trainingId;
+                
+                // If there's a previous rating, show it
+                if (currentRating && currentRating !== 'N/A') {
+                    ratingInputs.forEach(input => {
+                        input.disabled = true;
+                        if (input.value === currentRating) {
+                            input.checked = true;
+                        }
+                    });
+                    submitEvaluationBtn.disabled = true;
+                    submitEvaluationBtn.style.cursor = 'not-allowed';
+                } else {
+                    // If no rating yet, enable inputs and submit button
+                    ratingInputs.forEach(input => {
+                        input.disabled = false;
+                        input.checked = false;
+                    });
+                    submitEvaluationBtn.disabled = false;
+                    submitEvaluationBtn.style.cursor = 'pointer';
+                }
+                
+                evaluationModal.show();
+            };
 
             if (submitEvaluationBtn) {
                 submitEvaluationBtn.addEventListener('click', function () {
                     const rating = document.querySelector('input[name="proficiency_level"]:checked');
-                    const trainingId = modalTrainingIdInput.value;
-                    const evalType = modalEvalTypeInput.value;
+                    const trainingId = document.getElementById('modalTrainingId').value;
                     const csrfToken = document.querySelector('input[name="_token"]').value;
 
-                    if (!rating || !trainingId || !evalType) {
+                    if (!rating || !trainingId) {
                         alert('Please select a rating.');
                         return;
                     }
@@ -373,22 +374,19 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: JSON.stringify({
-                            type: evalType,
+                            type: 'Pre-Evaluation',
                             rating: rating.value
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert('Evaluation submitted successfully!');
+                            alert('Pre-Evaluation submitted successfully!');
                             evaluationModal.hide();
-                            if (evalType === 'Pre-Evaluation') {
-                                preRatingDisplay.textContent = data.pre_rating;
-                                preEvalButton.disabled = true;
-                            } else if (evalType === 'Post-Evaluation') {
-                                postRatingDisplay.textContent = data.post_rating;
-                                postEvalButton.disabled = true;
-                            }
+                            preRatingDisplay.textContent = data.pre_rating;
+                            // Disable submit button after successful submission
+                            submitEvaluationBtn.disabled = true;
+                            submitEvaluationBtn.style.cursor = 'not-allowed';
                         } else {
                             alert('Error submitting evaluation.' + (data.message ? ': ' + data.message : ''));
                         }

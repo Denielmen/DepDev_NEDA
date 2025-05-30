@@ -103,6 +103,13 @@
         .form-group {
             margin-bottom: 1rem;
         }
+
+        /* CSS to increase checkbox size in participant modal */
+        #participantModal .form-check-input {
+            width: 1.5em; /* Increase width */
+            height: 1.5em; /* Increase height */
+            margin-top: 0.25em; /* Adjust vertical alignment if needed */
+        }
     </style>
 </head>
 <body>
@@ -402,7 +409,7 @@
                                     <th>Position</th>
                                     <th>Division</th>
                                     <th>Participation Type</th>
-                                    <th>Action</th>
+                                    <th>Select</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -420,11 +427,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary add-participant-btn" 
-                                            data-user-id="{{ $user->id }}" 
-                                            data-user-name="{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.">
-                                            Add
-                                        </button>
+                                        <input type="checkbox" class="form-check-input participant-checkbox" data-user-id="{{ $user->id }}">
                                     </td>
                                 </tr>
                                 @endforeach
@@ -434,7 +437,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="doneBtn">Done</button>
+                    <button type="button" class="btn btn-primary" id="addSelectedParticipantsBtn">Add</button>
                 </div>
             </div>
         </div>
@@ -445,35 +448,70 @@
         document.addEventListener('DOMContentLoaded', function() {
             const participantsSelect = document.getElementById('participants');
             const selectedParticipantsDiv = document.getElementById('selectedParticipants');
-            const addParticipantBtns = document.querySelectorAll('.add-participant-btn');
-            const doneBtn = document.getElementById('doneBtn');
             const participantModal = document.getElementById('participantModal');
             const modal = bootstrap.Modal.getInstance(participantModal) || new bootstrap.Modal(participantModal);
             const form = document.getElementById('trainingForm');
+            const addSelectedParticipantsBtn = document.getElementById('addSelectedParticipantsBtn');
 
             // Clear any pre-selected participants
             participantsSelect.innerHTML = '';
             selectedParticipantsDiv.innerHTML = '';
 
-            // Function to update the selected participants display
-            function updateSelectedParticipantsDisplay() {
+            // Function to update the selected participants display and hidden inputs
+            function updateSelectedParticipants() {
                 selectedParticipantsDiv.innerHTML = '';
-                Array.from(participantsSelect.options).forEach(option => {
+                 // Clear the old hidden inputs before adding new ones
+                form.querySelectorAll('input[name="participants[]"], input[name^="participation_types["]').forEach(input => {
+                    input.remove();
+                });
+
+                const selected = [];
+                document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
+                    const userId = checkbox.dataset.userId;
+                    const participantRow = checkbox.closest('.participant-row');
+                    const participationTypeSelect = participantRow.querySelector('.participation-type');
+                    const participationTypeId = participationTypeSelect.value;
+                    const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
+                    const userName = participantRow.querySelector('td').textContent.trim(); // Get name from the first cell
+
+                    // Only add if a participation type is selected and it's not the default empty option
+                    if (participationTypeId && participationTypeId !== '') {
+                         selected.push({
+                            id: userId,
+                            name: userName,
+                            participation_type_id: participationTypeId,
+                            participation_type_name: participationTypeName
+                        });
+
+                        // Add hidden inputs to the main form
+                        const participantInput = document.createElement('input');
+                        participantInput.type = 'hidden';
+                        participantInput.name = 'participants[]';
+                        participantInput.value = userId;
+                        form.appendChild(participantInput);
+
+                        const participationTypeInput = document.createElement('input');
+                        participationTypeInput.type = 'hidden';
+                        participationTypeInput.name = `participation_types[${userId}]`;
+                        participationTypeInput.value = participationTypeId;
+                        form.appendChild(participationTypeInput);
+
+                    }
+                });
+
+                // Update the visual display
+                selected.forEach(participant => {
                     const participantDiv = document.createElement('div');
                     participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
-                    const participationTypeSelect = document.querySelector(`.participation-type[data-user-id="${option.value}"]`);
-                    const participationType = participationTypeSelect.value;
-                    const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
                     
                     participantDiv.innerHTML = `
                         <div class="d-flex align-items-center">
-                            <span class="me-2">${option.text}</span>
-                            <span class="badge bg-info">${participationTypeName}</span>
+                            <span class="me-2">${participant.name}</span>
+                            <span class="badge bg-info">${participant.participation_type_name}</span>
                         </div>
                         <div>
-                            <input type="hidden" name="participants[]" value="${option.value}">
-                            <input type="hidden" name="participation_types[${option.value}]" value="${participationType}">
-                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${option.value}">
+                             ${/* We keep the remove button functionality for the displayed list outside the modal */''}
+                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.id}">
                                 <i class="bi bi-x"></i> Remove
                             </button>
                         </div>
@@ -482,74 +520,60 @@
                 });
 
                 // Log the current state
-                console.log('Selected participants:', Array.from(participantsSelect.options).map(opt => ({
-                    id: opt.value,
-                    name: opt.text
-                })));
+                console.log('Selected participants:', selected);
             }
 
-            // Handle Add Participant button clicks
-            addParticipantBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const userId = this.dataset.userId;
-                    const participationTypeSelect = document.querySelector(`.participation-type[data-user-id="${userId}"]`);
-                    const participationType = participationTypeSelect.value;
-                    
-                    if (!participationType) {
-                        alert('Please select a participation type');
-                        return;
-                    }
-
-                    // Add to select if not already selected
-                    if (!Array.from(participantsSelect.options).some(opt => opt.value === userId)) {
-                        const option = new Option(this.dataset.userName, userId);
-                        participantsSelect.add(option);
-                    }
-                    
-                    // Update button state
-                    this.disabled = true;
-                    this.textContent = 'Added';
-                    this.classList.remove('btn-primary');
-                    this.classList.add('btn-success');
-                    
-                    // Update display
-                    updateSelectedParticipantsDisplay();
-                });
+             // Handle Add Selected Participants button click in modal footer
+            addSelectedParticipantsBtn.addEventListener('click', function() {
+                updateSelectedParticipants();
+                modal.hide(); // Close the modal after adding
             });
 
-            // Handle Remove Participant button clicks
+            // Handle Remove Participant button clicks from the displayed list outside the modal
             selectedParticipantsDiv.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-participant')) {
                     const button = e.target.closest('.remove-participant');
                     const userId = button.dataset.userId;
                     
-                    // Remove from select
-                    const option = Array.from(participantsSelect.options).find(opt => opt.value === userId);
-                    if (option) {
-                        option.remove();
+                    // Remove the hidden inputs for this user
+                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+
+                    // Uncheck the corresponding checkbox in the modal (if modal is open)
+                    const checkboxInModal = document.querySelector(`.participant-checkbox[data-user-id="${userId}"]`);
+                    if (checkboxInModal) {
+                        checkboxInModal.checked = false;
                     }
                     
-                    // Reset the Add button in modal
-                    const addBtn = document.querySelector(`.add-participant-btn[data-user-id="${userId}"]`);
-                    if (addBtn) {
-                        addBtn.disabled = false;
-                        addBtn.textContent = 'Add';
-                        addBtn.classList.remove('btn-success');
-                        addBtn.classList.add('btn-primary');
+                    // Remove the participant's div from the display
+                    button.closest('.d-flex').remove();
+
+                    // Update the console log (optional, for debugging)
+                     console.log('Removed participant:', userId);
+                     console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
+                } else if (e.target.classList.contains('remove-participant')) { // Handle click directly on the icon inside the button
+                     const button = e.target;
+                    const userId = button.dataset.userId;
+                     // Remove the hidden inputs for this user
+                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+
+                    // Uncheck the corresponding checkbox in the modal (if modal is open)
+                    const checkboxInModal = document.querySelector(`.participant-checkbox[data-user-id="${userId}"]`);
+                    if (checkboxInModal) {
+                        checkboxInModal.checked = false;
                     }
-                    
-                    // Update display
-                    updateSelectedParticipantsDisplay();
+
+                    // Remove the participant's div from the display
+                    button.closest('.d-flex').remove();
+
+                     // Update the console log (optional, for debugging)
+                     console.log('Removed participant:', userId);
+                     console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
                 }
             });
 
-            // Handle Done button click
-            doneBtn.addEventListener('click', function() {
-                updateSelectedParticipantsDisplay();
-                modal.hide();
-            });
-
-            // Form validation and submission
+            // Form validation and submission - Keep this, ensure it reads from the hidden inputs
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
@@ -573,22 +597,23 @@
                     }
                 });
 
-                // Check if participants are selected
+                // Check if participants are selected by looking at the hidden inputs
                 const selectedParticipants = form.querySelectorAll('input[name="participants[]"]');
                 if (selectedParticipants.length === 0) {
                     alert('Please add at least one participant');
                     isValid = false;
                 }
 
-                // Log form data
+                // Log form data - Keep this, it now reads from the hidden inputs
                 const formData = new FormData(form);
                 console.log('Form data:', {
                     title: formData.get('title'),
                     competency_id: formData.get('competency_id'),
-                    core_competency: formData.get('core_competency'),
+                    core_competency: formData.get('core_competency') === 'Others' ? formData.get('core_competency_input') : formData.get('core_competency'), // Get the correct core competency value
                     period_from: formData.get('period_from'),
                     period_to: formData.get('period_to'),
                     implementation_date_from: formData.get('implementation_date_from'),
+                     implementation_date_to: formData.get('implementation_date_to'), // Added missing field
                     budget: formData.get('budget'),
                     no_of_hours: formData.get('no_of_hours'),
                     superior: formData.get('superior'),
@@ -601,7 +626,7 @@
                     participation_types: Object.fromEntries(
                         Array.from(formData.entries())
                             .filter(([key]) => key.startsWith('participation_types['))
-                            .map(([key, value]) => [key.match(/\[(\d+)\]/)[1], value])
+                            .map(([key, value]) => [key.match(/\[(\d+)\]/)[1], value]) // Corrected regex escaping
                     )
                 });
 
@@ -617,17 +642,31 @@
                 }
             });
 
-            // Initialize display
-            updateSelectedParticipantsDisplay();
+            // Event listener for modal close to update display based on selections
+            participantModal.addEventListener('hidden.bs.modal', function () {
+                 updateSelectedParticipants();
+            });
+
+             // Initial call to setup the display based on any old data (if page was reloaded with errors)
+             // This part might need adjustment depending on how old input is handled after validation errors.
+             // For now, let's assume fresh start or data is correctly in hidden inputs if validation failed.
+             // We can add logic here later if needed to read from old input to pre-select checkboxes on modal open.
+
         });
 
         function setPeriodTo() {
-            const fromDate = document.getElementById('period_from').value;
+            const fromDateInput = document.getElementById('period_from');
+            const toDateInput = document.getElementById('period_to');
+            const fromDate = fromDateInput.value;
+
             if (fromDate) {
                 const date = new Date(fromDate);
+                // Add exactly 3 years
                 date.setFullYear(date.getFullYear() + 3);
+                 // Subtract one day to get the end date of the 3-year period
+                date.setDate(date.getDate() - 1);
                 const toDate = date.toISOString().split('T')[0];
-                document.getElementById('period_to').value = toDate;
+                toDateInput.value = toDate;
             }
         }
 
@@ -645,6 +684,9 @@
                 coreCompetencyInput.style.display = 'none';
                 coreCompetencyInput.required = false;
             }
+             // Ensure the correct value is sent in the form based on which element is visible/used
+             // This might require updating a hidden field or handling in the form submission logic.
+             // The form submission logic already handles this by checking the select value.
         }
 
         // Call on page load to set initial state

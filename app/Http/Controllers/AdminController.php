@@ -28,6 +28,7 @@ class AdminController extends Controller
         // Fetch all trainings with their relationships
         $allTrainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
             ->orderBy('core_competency')
+            ->where('type', 'Program') // Filter for programmed trainings
             ->get();
 
         // Group the trainings by core_competency and sort each group by created_at descending
