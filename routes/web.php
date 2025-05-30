@@ -64,6 +64,8 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         return view('userPanel.trainingEffectivenesss');
     })->name('training.effectivenesss');
 
+    Route::get('/training-resources', [TrainingProfileController::class, 'resources'])->name('training.resources');
+
     Route::get('/evalParticipant', [\App\Http\Controllers\TrainingProfileController::class, 'evalParticipantForm'])->name('evalParticipant');
 
     Route::get('/evalSupervisor', function() {
@@ -83,6 +85,7 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         ->name('training.resources');
         Route::get('/training-materials/{trainingMaterial}/download', [TrainingMaterialController::class, 'download'])->name('training_materials.download');
 
+        
     // Admin Panel Routes
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         // Admin Home
@@ -176,6 +179,10 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
         // View user info routes
         Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('viewUserInfo');
         Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('viewUserInfoUnprog');
+
+        // Post-evaluation route
+        Route::get('/training/{id}/post-evaluation', [TrainingProfileController::class, 'postEvaluation'])
+            ->name('training.post-evaluation');
 
         // Route to handle saving participant evaluation rating (moved inside admin group)
         Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])

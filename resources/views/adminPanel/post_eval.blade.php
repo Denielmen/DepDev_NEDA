@@ -278,20 +278,20 @@
   <div class="d-flex">
 
     <!-- Sidebar -->
-    <div class="sidebar" style="top: 56px;">
-      <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-      <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-      <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-      <a href="{{ route('training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-      <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
-    </div>
+    <div class="sidebar">
+            <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
+        </div>
 
     <!-- Main Content -->
     <div class="main-content">
 
       <!-- Back Button -->
       <div class="back-button">
-        <a href="{{ route('training.effectivenesss') }}" class="btn-back-minimal">
+        <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn-back-minimal">
           <i class="bi bi-arrow-left me-2"></i> Back
         </a>
       </div>
@@ -304,17 +304,13 @@
           <p>(For Supervisor/Manager of the Participant - Online)</p>
         </div>
 
-        <form method="POST" action="{{ route('training.effectivenesss') }}" class="evaluation-form">
+        <form method="POST" action="{{ route('admin.training.rate', ['id' => $training->id]) }}" class="evaluation-form">
           @csrf
-          <label for="courseTitle">Course Title:</label>
-          <select id="courseTitle" name="courseTitle" required style="margin-bottom: 20px;">
-            <option value="">Select Course</option>
-            <option value="course1">Course 1</option>
-            <option value="course2">Course 2</option>
-          </select>
+          <input type="hidden" name="type" value="Post-Evaluation">
 
           <div class="instruction-container">
-            <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied, (3) Satisfied, <br>(2) Dissatisfied, (1) Very Dissatisfied.</p>
+            <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong>
+            <br> (4) Very Satisfied, (3) Satisfied, (2) Dissatisfied, (1) Very Dissatisfied.</p> 
           </div>
 
           <table>

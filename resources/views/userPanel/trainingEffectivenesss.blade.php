@@ -259,7 +259,7 @@
                             <i class="bi bi-person-fill" style="font-size: 2rem; margin-bottom: 10px;"></i>
                             <div style="background-color: #79a7f5; padding: 15px; border-radius: 20px; text-align: left;">
                                 <h5 style="font-weight: bold;">View Evaluations</h5>
-                                <p style="margin-bottom: 0; font-size: 15px">Select Evaluiations to view. (Participant/Supervisor)</p>
+                                <p style="margin-bottom: 0; font-size: 15px">Select Evaluations to view. (Participant/Supervisor)</p>
                             </div>
                         </div>
                     </div>
