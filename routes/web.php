@@ -85,115 +85,115 @@ Route::middleware(['auth'])->group(function () {   // User Panel Routes
     Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
         ->name('training.resources');
         Route::get('/training-materials/{trainingMaterial}/download', [TrainingMaterialController::class, 'download'])->name('training_materials.download');
-
-        
-    // Admin Panel Routes
-    Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
-        // Admin Home
-        Route::get('/', function () {
-            return view('adminPanel.welcomeAdmin');
-        })->name('home');
-
-        // Training Plan routes
-        Route::get('training-plan', function () {
-            $trainings = \App\Models\Training::where('type', 'Program')->get();
-            return view('adminPanel.trainingPlan', compact('trainings'));
-        })->name('training-plan');
-
-        Route::get('training-plan/unprogrammed', function () {
-            $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
-            return view('adminPanel.trainingPlanUnProg', compact('trainings'));
-        })->name('training-plan.unprogrammed');
- 
-        Route::get('training-plan/create', [TrainingProfileController::class, 'create'])->name('training-plan.create');
-
-        Route::post('training-plan/store', [TrainingProfileController::class, 'store'])->name('training-plan.store');
-
-        Route::get('/training-plan', [TrainingProfileController::class, 'trainingPlan'])->name('training-plan');
-        Route::get('/training-plan/edit', [TrainingProfileController::class, 'edit'])->name('training-plan.edit');
-        Route::put('/training-plan/update', [TrainingProfileController::class, 'update'])->name('training-plan.update');
-        Route::get('/training-plan/unprogrammed', function () {
-            $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
-            return view('adminPanel.trainingPlanUnProg', compact('trainings'));
-        })->name('training-plan.unprogrammed');
-
-        // Add participant route
-        Route::post('/training-plan/{training}/add-participant', [TrainingProfileController::class, 'addParticipant'])
-            ->name('training-plan.add-participant');
-        Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-        Route::post('/register', [RegisteredUserController::class, 'store']);
-        // Delete training route
-        Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])
-            ->name('training-plan.destroy');
-
-        Route::get('training-plan/{id}', function ($id) {
-            $training = \App\Models\Training::findOrFail($id);
-            return view('adminPanel.trainingView', compact('training'));
-        })->name('training.view');
-
-        Route::get('training-plan/unprogrammed/{id}', function ($id) {
-            $training = \App\Models\Training::findOrFail($id);
-            return view('adminPanel.trainingViewUnprog', compact('training'));
-        })->name('training.view.unprogrammed');
-
-        // Participants routes
-        Route::get('/participants', [App\Http\Controllers\AdminController::class, 'participants'])->name('participants');
-
-        // Register routes for admin
-        Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-        Route::post('/register', [RegisteredUserController::class, 'store']);
-
-        Route::get('/participants/{id}', function ($id) {
-            $user = \App\Models\User::findOrFail($id);
-            // Fetch programmed trainings where the user is a participant
-            $programmedTrainings = \App\Models\Training::where('type', 'Program')
-                ->whereHas('participants', function ($query) use ($user) {
-                    $query->where('training_participants.user_id', $user->id);
-                })
-                // Eager load the participant relationship specifically for this user
-                ->with(['participants' => function ($query) use ($user) {
-                    $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
-                }])
-                ->get();
-            return view('adminPanel.userInfo', compact('user', 'programmedTrainings'));
-        })->name('participants.info');
-
-        Route::get('/participants/{id}/unprogrammed', function ($id) {
-            $user = \App\Models\User::findOrFail($id);
-            $unprogrammedTrainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
-            return view('adminPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
-        })->name('participants.info.unprogrammed');
-
-        // Reports routes
-        // Route::get('/reports', function () {
-        //     return view('adminPanel.report');
-        // })->name('reports');
-
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-        // User status toggle route
-        Route::patch('/users/{user}/toggle-status', [App\Http\Controllers\Admin\AccountController::class, 'toggleStatus'])
-            ->name('toggleUserStatus');
-
-        // View user info routes
-        Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('viewUserInfo');
-        Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('viewUserInfoUnprog');
-
-        // Post-evaluation route
-        Route::get('/training/{id}/post-evaluation', [TrainingProfileController::class, 'postEvaluation'])
-            ->name('training.post-evaluation');
-
-        // Route to handle saving participant evaluation rating (moved inside admin group)
-        Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
-            ->name('training.rate'); // Renamed to admin.training.rate
     });
 
-    Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/', function () {
+        if (!auth()->user() || auth()->user()->role !== 'Admin') {
+            abort(403, 'Unauthorized');
+        }
+        return view('adminPanel.welcomeAdmin');
+    })->name('admin.home');
 
-    Route::post('/tracking', [TrainingTrackingController::class, 'store'])->name('tracking.store');
+    // Training Plan routes
+    Route::get('training-plan', function () {
+        $trainings = \App\Models\Training::where('type', 'Program')->get();
+        return view('adminPanel.trainingPlan', compact('trainings'));
+    })->name('admin.training-plan');
+
+    Route::get('training-plan/unprogrammed', function () {
+        $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
+        return view('adminPanel.trainingPlanUnProg', compact('trainings'));
+    })->name('admin.training-plan.unprogrammed');
+
+    Route::get('training-plan/create', [TrainingProfileController::class, 'create'])->name('admin.training-plan.create');
+
+    Route::post('training-plan/store', [TrainingProfileController::class, 'store'])->name('admin.training-plan.store');
+
+    Route::get('/training-plan', [TrainingProfileController::class, 'trainingPlan'])->name('admin.training-plan');
+    Route::get('/training-plan/edit', [TrainingProfileController::class, 'edit'])->name('admin.training-plan.edit');
+    Route::put('/training-plan/update', [TrainingProfileController::class, 'update'])->name('admin.training-plan.update');
+    Route::get('/training-plan/unprogrammed', function () {
+        $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
+        return view('adminPanel.trainingPlanUnProg', compact('trainings'));
+    })->name('admin.training-plan.unprogrammed');
+
+    // Add participant route
+    Route::post('/training-plan/{training}/add-participant', [TrainingProfileController::class, 'addParticipant'])
+        ->name('admin.training-plan.add-participant');
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+    // Delete training route
+    Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])
+        ->name('admin.training-plan.destroy');
+
+    Route::get('training-plan/{id}', function ($id) {
+        $training = \App\Models\Training::findOrFail($id);
+        return view('adminPanel.trainingView', compact('training'));
+    })->name('admin.training.view');
+
+    Route::get('training-plan/unprogrammed/{id}', function ($id) {
+        $training = \App\Models\Training::findOrFail($id);
+        return view('adminPanel.trainingViewUnprog', compact('training'));
+    })->name('admin.training.view.unprogrammed');
+
+    // Participants routes
+    Route::get('/participants', [App\Http\Controllers\AdminController::class, 'participants'])->name('admin.participants');
+
+    // Register routes for admin
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('admin.register');
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+
+    Route::get('/participants/{id}', function ($id) {
+        $user = \App\Models\User::findOrFail($id);
+        // Fetch programmed trainings where the user is a participant
+        $programmedTrainings = \App\Models\Training::where('type', 'Program')
+            ->whereHas('participants', function ($query) use ($user) {
+                $query->where('training_participants.user_id', $user->id);
+            })
+            // Eager load the participant relationship specifically for this user
+            ->with(['participants' => function ($query) use ($user) {
+                $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
+            }])
+            ->get();
+        return view('adminPanel.userInfo', compact('user', 'programmedTrainings'));
+    })->name('admin.participants.info');
+
+    Route::get('/participants/{id}/unprogrammed', function ($id) {
+        $user = \App\Models\User::findOrFail($id);
+        $unprogrammedTrainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
+        return view('adminPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
+    })->name('admin.participants.info.unprogrammed');
+
+    // Reports routes
+    // Route::get('/reports', function () {
+    //     return view('adminPanel.report');
+    // })->name('reports');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('admin.profile.destroy');
+
+    // User status toggle route
+    Route::patch('/users/{user}/toggle-status', [App\Http\Controllers\Admin\AccountController::class, 'toggleStatus'])
+        ->name('admin.toggleUserStatus');
+
+    // View user info routes
+    Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('admin.viewUserInfo');
+    Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('admin.viewUserInfoUnprog');
+
+    // Post-evaluation route
+    Route::get('/training/{id}/post-evaluation', [TrainingProfileController::class, 'postEvaluation'])
+        ->name('admin.training.post-evaluation');
+
+    // Route to handle saving participant evaluation rating (moved inside admin group)
+    Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
+        ->name('admin.training.rate'); // Renamed to admin.training.rate
 });
+
+Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
+
+Route::post('/tracking', [TrainingTrackingController::class, 'store'])->name('tracking.store');
 
 // After (for testing):
     Route::middleware(['auth'])->group(function () {
