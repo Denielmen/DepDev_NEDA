@@ -177,11 +177,13 @@
                     </tr>
                     <tr>
                         <td class="label">Competency:</td>
-                        <td>{{ $training->competency ?? '' }}</td>
+                        <td>{{ $training->competency->name ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
+                         <td class="label">Year of Implementation:</td>
+                         <td>
+                          {{ $training->implementation_date_from ? \Carbon\Carbon::parse($training->implementation_date_from)->format('Y') : '' }}
+                         </td>  
                     </tr>
                     <tr>
                         <td class="label">Budget (per hour):</td>

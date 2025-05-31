@@ -47,18 +47,26 @@ class TrainingTrackingController extends Controller
                 'title' => $request->input('other_training_title'),
                 'competency_id' => $request->input('competency_id'),
                 'provider' => $request->input('provider'),
+                'no_of_hours' => $request->input('no_of_hours'),
+                'budget' => $request->input('expenses'),
                 'type' => 'Unprogrammed',
                 'status' => 'Implemented',
-                'implementation_date_from' => $request->input('date_from'), // <-- REQUIRED
-                'implementation_date_to' => $request->input('date_to'),     // <-- REQUIRED
+                'implementation_date_from' => $request->input('implementation_date_from'), // <-- REQUIRED
+                'implementation_date_to' => $request->input('implementation_date_to'),     // <-- REQUIRED
             ]);
 
         } else {
             $training = Training::find($request->input('courseTitle'));
             if ($training && $training->status !== 'Implemented') {
                 $training->status = 'Implemented';
+                // Update implementation dates if provided
+                if ($request->filled('date_from')) {
+                    $training->implementation_date_from = $request->input('date_from');
+                }
+                if ($request->filled('date_to')) {
+                    $training->implementation_date_to = $request->input('date_to');
+                }
                 $training->save();
-                
             }
         }
 

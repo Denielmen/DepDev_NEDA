@@ -8,6 +8,7 @@ use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController; // akon gi add    
 use App\Http\Controllers\TrainingTrackingController;
+use App\Http\Controllers\TrainingMaterialController;
 
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/search/export/{format}', [SearchController::class, 'export'])->name('search.export');

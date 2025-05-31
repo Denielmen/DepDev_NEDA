@@ -330,7 +330,7 @@
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label class="form-label">No. of Hours:</label>
-                            <input type="text" class="form-control" name="hours" placeholder="1000hrs" required>
+                            <input type="number" class="form-control" name="no_of_hours" placeholder="hours" required>
                         </div>
                         <div class="col-md-4 form-group">
                             <label class="form-label">Actual Expenses:</label>
@@ -344,7 +344,7 @@
                             <div class="date-range">
                                 <input type="date" class="form-control" name="date_from" id="date_from" required onchange="updateDateTo()">
                                 <span>To:</span>
-                                <input type="date" class="form-control" name="date_to" id="date_to" required readonly>
+                                <input type="date" class="form-control" name="date_to" id="date_to" required>
                             </div>
                         </div>
                     </div>
