@@ -19,7 +19,8 @@ class TrainingProfileController extends Controller
             ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
             ->orderBy('status')
             ->paginate(10);
-        return view('userPanel.trainingProfileProgram', compact('trainings','competencies'));
+        $competencies = Competency::orderBy('name')->get();
+        return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies'));
     }
 
     public function unprogrammed()
@@ -217,7 +218,7 @@ class TrainingProfileController extends Controller
                   ->orWhereDate('created_at', $search);
             });
         }
-        $materials = $query->where('type', 'material')->orderByDesc('created_at')->get();
+        $materials = $query->orderByDesc('created_at')->get();
         return view('userPanel.trainingResources', compact('materials'));
     }
 
@@ -240,5 +241,12 @@ class TrainingProfileController extends Controller
         }
 
         return response()->download($filePath);
+    }
+
+
+    public function postEvaluation($id)
+    {
+        $training = Training::with('participants')->findOrFail($id);
+        return view('adminPanel.post_eval', compact('training'));
     }
 }
