@@ -42,10 +42,13 @@ Route::get('/welcome', function () {
 });
 
 // Protected Routes (Require Login) to be delete later
-Route::middleware(['auth'])->group(function () {   // User Panel Routes
+Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/', function () {
+        if (!auth()->user() || auth()->user()->role !== 'User') {
+            abort(403, 'Unauthorized');
+        }
         return view('userPanel.welcomeUser');
-    })->name('home'); 
+    })->name('home');
 
     Route::get('/training-profile/program', [TrainingProfileController::class, 'program'])
         ->name('training.profile.program');
