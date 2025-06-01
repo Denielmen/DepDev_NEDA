@@ -185,11 +185,11 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
-            <a href="{{ route('home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+            <a href="{{ route('user.home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
@@ -209,7 +209,7 @@
                     <div class="row w-100" style="max-width: 900px;">
                         <div class="col-12 col-md-6 mb-4">
                             <div class="card text-center h-100">
-                                <a href="{{ route('training.profile.program') }}" class="text-decoration-none">
+                                <a href="{{ route('user.training.profile.program') }}" class="text-decoration-none">
                                     <h5>Training Profile</h5>
                                     <p>View and plan learning activities aligned with your role.</p>
                                 </a>
@@ -217,7 +217,7 @@
                         </div>
                         <div class="col-12 col-md-6 mb-4">
                             <div class="card text-center h-100">
-                                <a href="{{ route('tracking') }}" class="text-decoration-none">
+                                <a href="{{ route('user.tracking') }}" class="text-decoration-none">
                                     <h5>Training Tracking & History</h5>
                                     <p>Track your learning and development progress.</p>
                                 </a>
@@ -225,7 +225,7 @@
                         </div>
                         <div class="col-12 col-md-6 mb-4">
                             <div class="card text-center h-100">
-                                <a href="{{ route('training.effectivenesss') }}" class="text-decoration-none">
+                                <a href="{{ route('user.training.effectivenesss') }}" class="text-decoration-none">
                                     <h5>Training Effectiveness</h5>
                                     <p>Evaluate the effectiveness of completed trainings.</p>
                                 </a>
@@ -233,7 +233,7 @@
                         </div>
                         <div class="col-12 col-md-6 mb-4">
                             <div class="card text-center h-100">
-                                <a href="{{ route('training.resources') }}" class="text-decoration-none">
+                                <a href="{{ route('user.training.resources') }}" class="text-decoration-none">
                                     <h5>Training Resources</h5>
                                     <p>Access to Training Materials.</p>
                                 </a>

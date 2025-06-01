@@ -53,7 +53,7 @@
         <img src="/images/neda-logo.png" alt="NEDA Logo" class="neda-logo">
         <h1 class="welcome-title">Welcome to DEPDEV</h1>
         <p class="mb-4">Learning and Development Database System Region VII</p>
-        <a href="{{ route('training.profile') }}" class="btn btn-primary">
+        <a href="{{ route('user.training.profile') }}" class="btn btn-primary">
             <i class="bi bi-person-vcard me-2"></i>View Training Profile
         </a>
     </div>

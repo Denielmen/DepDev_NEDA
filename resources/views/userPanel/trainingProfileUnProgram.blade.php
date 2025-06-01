@@ -175,11 +175,11 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
-            <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+            <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
@@ -190,8 +190,8 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="tab-buttons">
-                    <a href="{{ route('training.profile.program') }}" class="tab-button">Programmed</a>
-                    <a href="{{ route('training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
+                    <a href="{{ route('user.training.profile.program') }}" class="tab-button">Programmed</a>
+                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
                 <div class="search-box">
                     <input type="text" placeholder="Search...">

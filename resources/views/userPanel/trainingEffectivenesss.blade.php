@@ -226,11 +226,11 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
-            <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+            <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
@@ -246,7 +246,7 @@
                     <h1 class="text-role text-center">Choose your role</h1>
                     <div class="choicebox">
                         <!-- Evaluate Card -->
-                        <div class="choice" onclick="window.location.href='{{ route('evalParticipant') }}'">
+                        <div class="choice" onclick="window.location.href='{{ route('user.evalParticipant') }}'">
                             <i class="bi bi-people-fill" style="font-size: 2rem; margin-bottom: 10px;"></i>
                             <div style="background-color: #79a7f5; padding: 15px; border-radius: 20px; text-align: left;">
                                 <h5 style="font-weight: bold;">Post Evaluation</h5>
@@ -255,7 +255,7 @@
                         </div>
 
                         <!-- View Evaluations Card -->
-                        <div class="choice" onclick="window.location.href='{{ route('evalSupervisor') }}'">
+                        <div class="choice" onclick="window.location.href='{{ route('user.evalSupervisor') }}'">
                             <i class="bi bi-person-fill" style="font-size: 2rem; margin-bottom: 10px;"></i>
                             <div style="background-color: #79a7f5; padding: 15px; border-radius: 20px; text-align: left;">
                                 <h5 style="font-weight: bold;">View Evaluations</h5>

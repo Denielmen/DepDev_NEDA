@@ -152,11 +152,11 @@
         </div>
     </nav>
     <div class="sidebar">
-        <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-        <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-        <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-        <a href="{{ route('training.resources') }}" class="active"><i class="bi bi-archive me-2"></i>Training Resources</a>
+        <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+        <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+        <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+        <a href="{{ route('user.training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+        <a href="{{ route('user.training.resources') }}" class="active"><i class="bi bi-archive me-2"></i>Training Resources</a>
     </div>
     <div class="main-content">
         <div class="content-wrapper flex-grow-1">
@@ -194,7 +194,7 @@
                                     <button 
                                         class="btn btn-primary btn-sm me-1"
                                         @if(!$material->file_path) disabled @endif
-                                        onclick="@if($material->file_path) window.location.href = '{{ route('training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                        onclick="@if($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
                                         title="@if(!$material->file_path) No file available @endif"
                                     >
                                         <i class="fas fa-download"></i> Download File

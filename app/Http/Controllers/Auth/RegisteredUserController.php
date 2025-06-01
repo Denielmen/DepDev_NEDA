@@ -16,7 +16,7 @@ class RegisteredUserController extends Controller
     {
         // If user is authenticated and not an admin, redirect to home
         if (auth()->check() && auth()->user()->role !== 'Admin') {
-            return redirect()->route('home');
+            return redirect()->route('user.home');
         }
         
         // If user is admin or guest, show registration form
