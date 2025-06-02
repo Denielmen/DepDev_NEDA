@@ -178,6 +178,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         ->name('admin.training.post-evaluation');
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
         ->name('admin.training.rate');
+    Route::post('/training/{id}/post-evaluation/submit', [TrainingProfileController::class, 'submitPostEvaluation'])->name('admin.training.post-evaluation.submit');
 });
 
 // Admin reports and exports

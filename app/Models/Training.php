@@ -12,13 +12,12 @@ class Training extends Model
         'title',
         'competency_id',
         'core_competency', 
-          'period_from' => 'date',
-    'period_to' => 'date',
-    'implementation_date_from' => 'date',
-    'implementation_date_to' => 'date',
+        'period_from' => 'date',
+        'period_to' => 'date',
+        'implementation_date_from' => 'date',
+        'implementation_date_to' => 'date',
         'budget',
         'no_of_hours',
-        'superior',
         'provider',
         'dev_target',
         'performance_goal',
@@ -28,18 +27,20 @@ class Training extends Model
         'participant_pre_rating',
         'participant_post_rating',
         'supervisor_pre_rating',
-        'supervisor_post_rating'
+        'supervisor_post_rating',
+        'supervisor_post_evaluation'
     ];
     protected $casts = [
         'period_from' => 'date',
-    'period_to' => 'date',
-    'implementation_date_from' => 'date',
-    'implementation_date_to' => 'date',
+        'period_to' => 'date',
+        'implementation_date_from' => 'date',
+        'implementation_date_to' => 'date',
         'budget' => 'decimal:2',
         'participant_pre_rating' => 'integer',
         'participant_post_rating' => 'integer',
         'supervisor_pre_rating' => 'integer',
-        'supervisor_post_rating' => 'integer'
+        'supervisor_post_rating' => 'integer',
+        'supervisor_post_evaluation' => 'array'
     ];
 
     public function competency()

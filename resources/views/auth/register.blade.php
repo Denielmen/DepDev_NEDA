@@ -102,16 +102,26 @@
      <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown">
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        Admin
+                        {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -124,6 +134,7 @@
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
     <!-- Main Content -->

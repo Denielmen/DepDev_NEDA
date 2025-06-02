@@ -232,7 +232,6 @@
                         <tr>
                             <th>Training Title</th>
                             <th>Competency</th>
-                            <!-- <th>Core Competency</th> -->
                             <th>Period of Implementation</th>
                             <th>Training Details</th>
                         </tr>

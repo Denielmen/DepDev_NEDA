@@ -19,7 +19,6 @@ return new class extends Migration
             $table->date('implementation_date_to')->nullable();
             $table->decimal('budget', 10, 2)->nullable();
             $table->integer('no_of_hours')->nullable();
-            $table->string('superior')->nullable();
             $table->string('provider')->nullable();
             $table->text('dev_target')->nullable();
             $table->text('performance_goal')->nullable();
@@ -30,6 +29,7 @@ return new class extends Migration
             $table->integer('participant_post_rating')->nullable();
             $table->integer('supervisor_pre_rating')->nullable();
             $table->integer('supervisor_post_rating')->nullable();
+            $table->json('supervisor_post_evaluation')->nullable();
             $table->timestamps();
         });
     }

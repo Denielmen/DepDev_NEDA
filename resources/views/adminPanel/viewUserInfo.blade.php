@@ -166,8 +166,8 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ route('admin.home') }}">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+            <a class="navbar-brand" href="#">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
@@ -177,6 +177,16 @@
                         {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -226,10 +236,6 @@
                         <td>{{ $training->no_of_hours ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Superior:</td>
-                        <td>{{ $training->superior ?? '' }}</td>
-                    </tr>
-                    <tr>
                         <td class="label">Learning Service Provider:</td>
                         <td>{{ $training->provider ?? '' }}</td>
                     </tr>
@@ -255,7 +261,7 @@
                     </tr>
                     <tr>
                         <td class="label">Supervisor Pre-Rating:</td>
-                        <td>{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
+                        <td id="supervisor_pre_rating_display">{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Supervisor Post-Rating:</td>
@@ -269,7 +275,7 @@
                     </button>
                     <a href="{{ route('admin.training.post-evaluation', ['id' => $training->id]) }}" 
                        class="btn btn-eval btn-post-eval" 
-                       {{ $training->participant_post_rating ? 'disabled' : '' }}>
+                       {{ $training->supervisor_post_rating ? 'disabled' : '' }}>
                         <i class="bi bi-clipboard-data"></i>
                         Post-Eval
                     </a>
@@ -329,10 +335,12 @@
             const ratingInputs = document.querySelectorAll('input[name="proficiency_level"]');
 
             window.showPreEvalModal = function(trainingId) {
-                const currentRating = preRatingDisplay.textContent;
+                // Get the current supervisor pre-rating from the table
+                const supervisorPreRatingDisplay = document.getElementById('supervisor_pre_rating_display');
+                const currentRating = supervisorPreRatingDisplay ? supervisorPreRatingDisplay.textContent : 'N/A';
                 document.getElementById('modalTrainingId').value = trainingId;
-                
-                // If there's a previous rating, show it
+
+                // If there's a previous rating, show it and disable inputs
                 if (currentRating && currentRating !== 'N/A') {
                     ratingInputs.forEach(input => {
                         input.disabled = true;
@@ -342,6 +350,9 @@
                     });
                     submitEvaluationBtn.disabled = true;
                     submitEvaluationBtn.style.cursor = 'not-allowed';
+                    // Optionally show a message indicating it's already rated
+                    document.getElementById('currentRatingMsg').textContent = 'This training has already been pre-evaluated by the supervisor.';
+                    document.getElementById('currentRatingMsg').style.display = 'block';
                 } else {
                     // If no rating yet, enable inputs and submit button
                     ratingInputs.forEach(input => {
@@ -350,8 +361,9 @@
                     });
                     submitEvaluationBtn.disabled = false;
                     submitEvaluationBtn.style.cursor = 'pointer';
+                    document.getElementById('currentRatingMsg').style.display = 'none'; // Hide message
                 }
-                
+
                 evaluationModal.show();
             };
 
@@ -366,6 +378,11 @@
                         return;
                     }
 
+                    // Disable inputs and button immediately on submit attempt
+                    ratingInputs.forEach(input => input.disabled = true);
+                    submitEvaluationBtn.disabled = true;
+                    submitEvaluationBtn.style.cursor = 'not-allowed';
+
                     fetch('{{ route('admin.training.rate', ':id') }}'.replace(':id', trainingId), {
                         method: 'POST',
                         headers: {
@@ -374,7 +391,7 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: JSON.stringify({
-                            type: 'Pre-Evaluation',
+                            type: 'Supervisor-Pre-Evaluation',
                             rating: rating.value
                         })
                     })
@@ -383,17 +400,26 @@
                         if (data.success) {
                             alert('Pre-Evaluation submitted successfully!');
                             evaluationModal.hide();
-                            preRatingDisplay.textContent = data.pre_rating;
-                            // Disable submit button after successful submission
-                            submitEvaluationBtn.disabled = true;
-                            submitEvaluationBtn.style.cursor = 'not-allowed';
+                            // Update the display with the new rating
+                            document.getElementById('supervisor_pre_rating_display').textContent = data.supervisor_pre_rating;
+
+                            // Inputs and button are already disabled from the attempt, keep them that way
+
                         } else {
                             alert('Error submitting evaluation.' + (data.message ? ': ' + data.message : ''));
+                            // Re-enable inputs and button on failure so user can try again
+                            ratingInputs.forEach(input => input.disabled = false);
+                            submitEvaluationBtn.disabled = false;
+                            submitEvaluationBtn.style.cursor = 'pointer';
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('An error occurred while submitting the evaluation.');
+                        // Re-enable inputs and button on error so user can try again
+                        ratingInputs.forEach(input => input.disabled = false);
+                        submitEvaluationBtn.disabled = false;
+                        submitEvaluationBtn.style.cursor = 'pointer';
                     });
                 });
             }

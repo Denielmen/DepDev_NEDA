@@ -14,6 +14,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            background-color: #f8f9fa;
         }
         .navbar {
             background-color:rgb(255, 255, 255);
@@ -35,10 +36,13 @@
         }
         .sidebar {
             background-color: #003366;
-            min-height: calc(100vh - 56px);
+            position: fixed;
+            top: 56px;
+            left: 0;
             width: 270px;
+            height: calc(100vh - 56px);
             padding-top: 20px;
-            margin-top: 56px;
+            z-index: 1030;
         }
         .sidebar a {
             color: white;
@@ -52,11 +56,13 @@
             font-weight: bold;
         }
         .main-content {
-            flex-grow: 1;
-            padding: 20px;
-            background-color: #f8f9fa;
-            background-color: rgb(187, 219, 252);
+            margin-left: 270px;
             margin-top: 56px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            background-color: rgb(187, 219, 252);
+            padding: 20px;
+            width: calc(100vw - 270px);
         }
         .content-header {
             background-color: #e7f1ff;
@@ -187,7 +193,7 @@
 
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" style="top: 56px;">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
