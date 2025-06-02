@@ -209,10 +209,6 @@
                         <td>{{ $training->no_of_hours ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Superior:</td>
-                        <td>{{ $training->superior ?? '' }}</td>
-                    </tr>
-                    <tr>
                         <td class="label">Learning Service Provider:</td>
                         <td>{{ $training->provider ?? '' }}</td>
                     </tr>

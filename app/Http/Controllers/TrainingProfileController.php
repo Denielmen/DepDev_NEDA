@@ -94,7 +94,6 @@ class TrainingProfileController extends Controller
             'no_of_hours' => 'nullable|numeric',
             'budget' => 'nullable|numeric',
             'provider' => 'nullable|string|max:255',
-            'superior' => 'nullable|string|max:255',
             'dev_target' => 'nullable|string',
             'performance_goal' => 'nullable|string',
             'objective' => 'nullable|string',
@@ -126,7 +125,6 @@ class TrainingProfileController extends Controller
                 'no_of_hours' => $validated['no_of_hours'] ?? null,
                 'budget' => $validated['budget'] ?? null,
                 'provider' => $validated['provider'] ?? null,
-                'superior' => $validated['superior'] ?? null,
                 'dev_target' => $validated['dev_target'] ?? null,
                 'performance_goal' => $validated['performance_goal'] ?? null,
                 'objective' => $validated['objective'] ?? null,
@@ -190,20 +188,31 @@ class TrainingProfileController extends Controller
     public function rateParticipant(Request $request, $id)
     {
         $request->validate([
-            'type' => 'required|in:Pre-Evaluation,Post-Evaluation',
-            'rating' => 'required|integer|min:1|max:4',
+            'type' => 'required|in:Pre-Evaluation,Post-Evaluation,Supervisor-Pre-Evaluation,Supervisor-Post-Evaluation',
+            'rating' => 'required_if:type,Pre-Evaluation,Supervisor-Pre-Evaluation|nullable|integer|min:1|max:4',
+            'supervisor_proficiency_rating' => 'required_if:type,Post-Evaluation|integer|min:1|max:4',
         ]);
         $training = Training::findOrFail($id);
         if ($request->type === 'Pre-Evaluation') {
             $training->participant_pre_rating = $request->rating;
-        } else {
-            $training->participant_post_rating = $request->rating;
+        } else if ($request->type === 'Post-Evaluation') {
+            // If supervisor proficiency rating is present, save it
+            if ($request->has('supervisor_proficiency_rating')) {
+                $training->supervisor_post_rating = $request->supervisor_proficiency_rating;
+            }
+            // Note: We are intentionally not saving participant_post_rating from this form
+        } else if ($request->type === 'Supervisor-Pre-Evaluation') {
+            $training->supervisor_pre_rating = $request->rating;
+        } else if ($request->type === 'Supervisor-Post-Evaluation') {
+            $training->supervisor_post_rating = $request->rating;
         }
         $training->save();
         return response()->json([
             'success' => true,
             'pre_rating' => $training->participant_pre_rating,
             'post_rating' => $training->participant_post_rating,
+            'supervisor_pre_rating' => $training->supervisor_pre_rating,
+            'supervisor_post_rating' => $training->supervisor_post_rating,
         ]);
     }
 
@@ -248,5 +257,53 @@ class TrainingProfileController extends Controller
     {
         $training = Training::with('participants')->findOrFail($id);
         return view('adminPanel.post_eval', compact('training'));
+    }
+
+    public function submitPostEvaluation(Request $request, $id)
+    {
+        $request->validate([
+            'goals' => 'required|integer|min:1|max:4',
+            'learning1' => 'required|integer|min:1|max:5',
+            'learning2' => 'required|integer|min:1|max:5',
+            'learning3' => 'required|integer|min:1|max:5',
+            'learning4' => 'required|integer|min:1|max:5',
+            'performance1' => 'required|integer|min:1|max:4',
+            'workPerformanceChanges' => 'required|string',
+            'initiateParticipation' => 'required|in:Yes,No',
+            'trainingSuggestions' => 'required|string'
+        ]);
+
+        $training = Training::findOrFail($id);
+        
+        // Calculate average rating from all sections
+        $averageRating = round((
+            $request->goals + 
+            $request->learning1 + 
+            $request->learning2 + 
+            $request->learning3 + 
+            $request->learning4 + 
+            $request->performance1
+        ) / 6);
+
+        // Store the post-evaluation rating and detailed data
+        $training->supervisor_post_rating = $averageRating;
+        $training->supervisor_post_evaluation = [
+            'goals' => $request->goals,
+            'learning1' => $request->learning1,
+            'learning2' => $request->learning2,
+            'learning3' => $request->learning3,
+            'learning4' => $request->learning4,
+            'performance1' => $request->performance1,
+            'workPerformanceChanges' => $request->workPerformanceChanges,
+            'initiateParticipation' => $request->initiateParticipation,
+            'trainingSuggestions' => $request->trainingSuggestions
+        ];
+        $training->save();
+
+        // Get the user ID from the training's first participant
+        $userId = $training->participants->first()->id;
+
+        return redirect()->route('admin.viewUserInfo', ['id' => $userId])
+            ->with('success', 'Post-evaluation submitted successfully.');
     }
 }

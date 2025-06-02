@@ -281,24 +281,6 @@
                         </div>
                     </div>
 
-                    <div class="form-group row mb-3">
-                        <label for="superior" class="col-md-4 col-form-label text-md-right">{{ __('Superior') }}</label>
-                        <div class="col-md-6">
-                            <select id="superior" name="superior" class="form-control @error('superior') is-invalid @enderror">
-                                <option value="">Select Superior</option>
-                                @foreach(App\Models\User::getSuperiors() as $superior)
-                                    <option value="{{ $superior->full_name }}" {{ old('superior') == $superior->full_name ? 'selected' : '' }}>
-                                        {{ $superior->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('superior')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                    </div>
 
                     <div class="form-group row mb-3">
                         <label for="provider" class="col-md-4 col-form-label text-md-right">{{ __('Learning Service Provider') }}</label>
@@ -616,7 +598,7 @@
                      implementation_date_to: formData.get('implementation_date_to'), // Added missing field
                     budget: formData.get('budget'),
                     no_of_hours: formData.get('no_of_hours'),
-                    superior: formData.get('superior'),
+                    // superior: formData.get('superior'),
                     provider: formData.get('provider'),
                     dev_target: formData.get('dev_target'),
                     performance_goal: formData.get('performance_goal'),

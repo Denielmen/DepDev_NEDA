@@ -1,6 +1,7 @@
 {{-- filepath: d:\DepDev_NEDA\resources\views\auth\login.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,10 +16,12 @@
             padding: 0;
             overflow-x: hidden;
         }
+
         .login-container {
             display: flex;
             min-height: 100vh;
         }
+
         .left-panel {
             width: 40%;
             background-color: #003366;
@@ -29,24 +32,29 @@
             align-items: center;
             padding: 2rem;
         }
+
         .left-panel h1 {
             font-size: 2rem;
             font-weight: bold;
             margin-bottom: 1rem;
         }
+
         .left-panel p {
             font-size: 0.9rem;
             margin-bottom: 2rem;
             text-align: center;
         }
+
         .left-panel form {
             width: 100%;
             max-width: 400px;
         }
+
         .left-panel .form-control {
             margin-bottom: 1rem;
             border-radius: 5px;
         }
+
         .left-panel .btn-login {
             background-color: #004080;
             color: white;
@@ -55,12 +63,15 @@
             border-radius: 5px;
             width: 100%;
         }
+
         .left-panel .btn-login:hover {
             background-color: #0059b3;
         }
+
         .left-panel .form-check-label {
             color: white;
         }
+
         .right-panel {
             width: 60%;
             background-image: url('{{ asset('images/neda-building.jpg') }}');
@@ -68,10 +79,11 @@
             background-position: center;
             position: relative;
         }
+
         .right-panel .overlay {
             position: absolute;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.65);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -80,25 +92,36 @@
             text-align: center;
             padding: 2rem;
         }
+
         .right-panel .overlay h2 {
             font-size: 1.5rem;
             font-weight: bold;
-            margin-bottom: 0.5rem;
+            color: rgb(15, 110, 204);
         }
+
         .right-panel .overlay h3 {
             font-size: 1.2rem;
+            font-weight: bold;
             margin-bottom: 1rem;
         }
+
         .right-panel .overlay p {
             font-size: 0.8rem;
         }
+
+        .depdev-logo {
+            width: 150px;
+            max-width: 90%;
+            padding: 1rem;
+        }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <!-- Left Panel -->
         <div class="left-panel">
-            <h1>Login into your account</h1>
+            <h1>Login to your account</h1>
             <p>Accessing this system requires a login. Please enter your credentials below.</p>
             <form method="POST" action="{{ route('login') }}">
                 @csrf
@@ -129,11 +152,16 @@
         <!-- Right Panel -->
         <div class="right-panel">
             <div class="overlay">
-                <h2>REPUBLIC OF THE PHILIPPINES</h2>
-                <h3>DEPARTMENT OF ECONOMY PLANNING AND DEVELOPMENT</h3>
-                <p>All Rights Reserved © 2023-2025</p>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 10rem;">
+                    <img src="{{ asset('images/DEPDev_logo.png') }}" alt="DEPDEV Logo" class="depdev-logo" style="width: 120px; max-width: 45%; padding:1rem;">
+                    <img src="{{ asset('images/repub.png') }}" alt="Republic Logo" class="repub-logo" style="width: 120px; max-width: 45%;padding: 1rem;">
+                </div>
+                <h3>REPUBLIC OF THE PHILIPPINES</h3>
+                <h2>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT</h2>
+                <h2>CENTRAL VISAYAS REGION</h2>
             </div>
         </div>
     </div>
 </body>
+
 </html>
