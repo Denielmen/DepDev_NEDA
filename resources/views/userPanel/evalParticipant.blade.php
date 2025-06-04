@@ -461,6 +461,31 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const courseTitleSelect = document.getElementById('courseTitle');
+            const evaluationForm = document.querySelector('.evaluation-form');
+
+            courseTitleSelect.addEventListener('change', function() {
+                const trainingId = this.value;
+                if (trainingId) {
+                    // Update the form action dynamically based on the selected training ID
+                    evaluationForm.action = '/user/training/' + trainingId + '/submit-participant-evaluation';
+                } else {
+                    // Clear the action if no training is selected
+                    evaluationForm.action = '';
+                }
+            });
+
+            // Optional: Prevent form submission if no training is selected (though the route will handle this)
+            evaluationForm.addEventListener('submit', function(event) {
+                if (!courseTitleSelect.value) {
+                    alert('Please select a training before submitting.');
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

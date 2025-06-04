@@ -226,7 +226,7 @@
                             </td>
                             <td class="text-center">Participant</td>
                             <td class="text-center">
-                                <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>
+                                <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>  
                             </td>
                         </tr>
                         @endforeach
