@@ -8,44 +8,62 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        :root {
-            --primary-color: #003366;
-            --primary-hover: #004080;
-            --secondary-color: #f8f9fa;
-        }
-        
+
         body {
-            background-color: var(--secondary-color);
+            background-color: #f7f8fa;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
-
         .navbar {
-            background-color: white !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color:rgb(255, 255, 255);
+            padding: 0.5rem 1rem;
+            box-shadow: 1px 3px 3px 0px #737373;
         }
-
+        .navbar-brand {
+            color: #003366 !important;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+        }
+        .navbar-brand img {
+            height: 30px;
+            margin-right: 10px;
+        }
+        .nav-link, .user-icon, .user-menu {
+            color: black !important;
+        }
         .sidebar {
-            background-color: var(--primary-color);
+            background-color: #003366;
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            position: fixed;
+            top: 56px;
+            left: 0;
         }
-
         .sidebar a {
             color: white;
             text-decoration: none;
             display: block;
             padding: 12px 20px;
             font-size: 0.9rem;
-            transition: background-color 0.3s;
         }
-
         .sidebar a:hover, .sidebar a.active {
-            background-color: var(--primary-hover);
+            background-color: #004080;
+            font-weight: bold;
         }
 
         .main-content {
             flex-grow: 1;
             padding: 20px;
+            background-color: rgb(187, 219, 252);
+            margin-left: 270px;
+            margin-top: 50px;
+            padding-bottom: 20px;
+
         }
 
         .search-card {
@@ -57,24 +75,24 @@
         }
 
         .search-header {
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid #003366;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
+            border-color: #003366;
             box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            background-color: #003366;
+            border-color: #003366;
         }
 
         .btn-primary:hover {
             background-color: var(--primary-hover);
-            border-color: var(--primary-hover);
+            border-color: #003366;
         }
 
         .results-table {
@@ -84,7 +102,7 @@
         }
 
         .results-table th {
-            background-color: var(--primary-color);
+            background-color: #003366;
             color: white;
         }
 
@@ -110,24 +128,25 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo" height="30">
-                DEPDEV Learning and Development System
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
+                DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
-                <i class="bi bi-bell-fill me-3"></i>
                 <div class="dropdown">
-                    <div class="dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i> Admin
+                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
+                        <i class="bi bi-person-circle"></i>
+                        {{ auth()->user()->last_name ?? 'Admin' }}
+                        <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
                                 </button>
                             </form>
                         </li>

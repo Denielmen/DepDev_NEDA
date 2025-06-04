@@ -9,6 +9,7 @@ use App\Models\Competency;
 use App\Models\ParticipationType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class TrainingProfileController extends Controller
 {
@@ -25,7 +26,9 @@ class TrainingProfileController extends Controller
 
     public function unprogrammed()
     {
-        $trainings = Training::where('type', 'Unprogrammed')->paginate(10);
+        $trainings = Training::where('type', 'Unprogrammed')
+            ->where('user_id', Auth::id())
+            ->paginate(10);
         return view('userPanel.trainingProfileUnProgram', compact('trainings'));
     }
 

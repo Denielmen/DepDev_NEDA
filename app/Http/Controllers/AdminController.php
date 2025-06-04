@@ -14,13 +14,15 @@ class AdminController extends Controller
     public function viewUserInfo($id)
     {
         $training = Training::findOrFail($id);
-        return view('adminPanel.viewUserInfo', compact('training'));
+        $user = $training->participants->first(); // Get the first participant
+        return view('adminPanel.viewUserInfo', compact('training', 'user'));
     }
 
     public function viewUserInfoUnprog($id)
     {
         $training = Training::findOrFail($id);
-        return view('adminPanel.viewUserInfoUnprog', compact('training'));
+        $user = User::findOrFail($training->user_id); // Get the creator of the training
+        return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
     }
 
     public function reports()

@@ -162,7 +162,15 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     Route::get('/participants/{id}/unprogrammed', function ($id) {
         $user = \App\Models\User::findOrFail($id);
-        $unprogrammedTrainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
+        $unprogrammedTrainings = \App\Models\Training::where('type', 'Unprogrammed')
+            ->where(function($query) use ($user) {
+                $query->where('user_id', $user->id)
+                      ->orWhereHas('participants', function($q) use ($user) {
+                          $q->where('users.id', $user->id);
+                      });
+            })
+            ->with(['competency', 'participants'])
+            ->get();
         return view('adminPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
     })->name('admin.participants.info.unprogrammed');
 

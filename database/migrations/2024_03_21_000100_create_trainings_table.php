@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->foreignId('competency_id')->constrained('competencies');
+            $table->foreignId('user_id')->nullable()->constrained('users');
             $table->string('core_competency')->nullable();
             $table->date('period_from')->nullable();
             $table->date('period_to')->nullable();

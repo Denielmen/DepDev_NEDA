@@ -255,7 +255,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget (per hour)') }}</label>
+                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget') }}</label>
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-text">₱</span>
@@ -270,7 +270,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Number of Hours') }}</label>
+                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Total Number of Hours') }}</label>
                         <div class="col-md-6">
                             <input id="no_of_hours" type="number" class="form-control @error('no_of_hours') is-invalid @enderror" name="no_of_hours" value="{{ old('no_of_hours') }}">
                             @error('no_of_hours')

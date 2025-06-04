@@ -24,7 +24,6 @@
             left: 0;
             right: 0;
             z-index: 1030;
-            //hi there
         }
         .navbar-brand {
             color: #003366 !important;
@@ -137,35 +136,33 @@
         }
         .program-tabs .nav-link {
             color: #d6d3d3 !important;
-            /* background-color: white; */
-            /* border: 1px solid #003366; */
             margin-right: 5px;
             border-radius: 5px;
             color: #003366 !important;
             background-color: white;
 
         }
-        /* .program-tabs .nav-link:hover {
-            color: #003366 !important;
-            background-color: white;
-        } */
         .program-tabs .nav-link.active {
             background-color: #003366;
             color: white !important;
             font-weight: bold;
         }
-        .btn-outline-primary {
-            color: #003366;
-            border-color: #003366;
-        }
-        .btn-outline-primary:hover {
+        .btn-back {
             background-color: #003366;
-            color: white;
+            color: #fff;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-decoration: none;
+            margin-right: 900px;
+            
         }
-        .back-button {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .btn-back:hover {
+            background-color: #004080;
+            color: #fff;
+            transform: translateY(-1px);
         }
         .user-info-card.text-center {
             padding: 25px 20px;
@@ -181,6 +178,9 @@
         .user-avatar {
             margin-bottom: 20px;
         }
+        .form-label,.mb-0 {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -191,13 +191,23 @@
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center"> 
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
                         {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -214,11 +224,12 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <button class="btn btn-outline-primary" onclick="window.location.href='{{ route('admin.participants') }}'">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-        </div>
+    <div class="top-actions">
+                <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants') }}'">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </button>
+            </div>
 
         <div class="row">
             <!-- User Info Card -->
@@ -282,40 +293,63 @@
 
         <!-- Scrollable Table -->
         <div class="table-container">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Training Title</th>
-                        <th>Competency</th>
-                        <th>Period of Implementation</th>
-                        <th>No. of Hours</th>
-                        <th>Provider</th>
-                        <th>Status</th>
-                        <th>User Role</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($unprogrammedTrainings as $training)
-                    <tr>
-                        <td>{{ $training->title }}</td>
-                        <td>{{ $training->competency->name }}</td>
-                        <td>{{ $training->implementation_date_from->format('m/d/y') }} - {{ $training->implementation_date_to->format('m/d/y') }}</td>
-                        <td>{{ $training->no_of_hours }}</td>
-                        <td>{{ $training->provider }}</td>
-                        <td>{{ $training->status }}</td>
-                        <td>
-                            @foreach($training->participants ?? [] as $participant)
-                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
-                            @endforeach
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.viewUserInfoUnprog', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            @if($unprogrammedTrainings->isEmpty())
+                <div class="alert alert-info text-center">
+                    <h5>No Unprogrammed Trainings Found</h5>
+                    <p>This user has not created any unprogrammed trainings yet.</p>
+                </div>
+            @else
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Training Title</th>
+                            <th>Competency</th>
+                            <th>Period of Implementation</th>
+                            <th>No. of Hours</th>
+                            <th>Provider</th>
+                            <th>Status</th>
+                            <th>User Role</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($unprogrammedTrainings as $training)
+                        <tr>
+                            <td>{{ $training->title }}</td>
+                            <td>{{ $training->competency->name }}</td>
+                            <td>
+                                @if($training->implementation_date_from && $training->implementation_date_to)
+                                    {{ $training->implementation_date_from->format('m/d/y') }} - {{ $training->implementation_date_to->format('m/d/y') }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>{{ $training->no_of_hours }}</td>
+                            <td>{{ $training->provider }}</td>
+                            <td>{{ $training->status }}</td>
+                            <td>
+                                @if($training->user_id == $user->id)
+                                    Creator
+                                @else
+                                    @php
+                                        $participant = $training->participants->where('id', $user->id)->first();
+                                        $participationType = $participant ? $participant->pivot->participation_type_id : null;
+                                    @endphp
+                                    @if($participationType)
+                                        {{ \App\Models\ParticipationType::find($participationType)->name }}
+                                    @else
+                                        N/A
+                                    @endif
+                                @endif
+                            </td>
+                            <td>
+                                <a href="{{ route('admin.viewUserInfoUnprog', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
     </main>
 

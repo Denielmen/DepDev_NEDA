@@ -96,9 +96,7 @@
         .details-table tr:last-child td {
             border-bottom: none;
         }
-        .top-actions {
-            
-        }
+
         .btn-back {
             background-color: #003366;
             color: #fff;
@@ -203,10 +201,10 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="top-actions">
-                <a href="{{ url()->previous() }}" class="btn btn-back">
+                <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants.info', ['id' => $user->id]) }}'">
                     <i class="bi bi-arrow-left"></i>
                     Back
-                </a>
+                </button>
             </div>
             <div class="details-card">
                 <h2 class="details-title">Training Details</h2>

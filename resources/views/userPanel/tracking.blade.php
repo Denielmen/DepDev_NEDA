@@ -319,11 +319,11 @@
                         </div>
                         <div class="col-md-3 form-group">
                             <label class="form-label">Role:</label>
-                            <select id="role" name="role" class="form-control" required>
+                            <select id="role" name="participation_type_id" class="form-control" required>
                                 <option value="" disabled selected>Select Role</option>
-                                <option value="Course 1">Participant</option>
-                                <option value="Course 2">Resource Person</option>
-                        
+                                @foreach($participationTypes as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
