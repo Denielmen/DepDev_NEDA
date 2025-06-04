@@ -54,6 +54,9 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training-profile/program/{id}', [TrainingProfileController::class, 'show'])
         ->name('user.training.profile.show');
 
+    Route::get('/training-profile/unprogrammed/{id}', [TrainingProfileController::class, 'showUnprogrammed'])
+        ->name('user.training.profile.unprogram.show');
+
     Route::get('/training/{id}/effectiveness/participant/{type}', [TrainingProfileController::class, 'effectivenessParticipant'])
         ->name('user.training.effectiveness.participant');
 
@@ -89,6 +92,10 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
 
     Route::get('/training-materials/{trainingMaterial}/download', [TrainingMaterialController::class, 'download'])
         ->name('user.training_materials.download');
+
+    // Route for submitting the detailed participant evaluation form
+    Route::post('/training/{id}/submit-participant-evaluation', [TrainingProfileController::class, 'submitParticipantEvaluation'])
+        ->name('user.training.submit.participant.evaluation');
 });
 
 // ADMIN PANEL ROUTES (unchanged, but make sure admin checks are in place)

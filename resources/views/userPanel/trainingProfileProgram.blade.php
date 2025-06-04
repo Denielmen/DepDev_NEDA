@@ -322,95 +322,97 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let selectedRating = null;
-        document.querySelectorAll('.open-eval-modal').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var type = this.getAttribute('data-type');
-                var trainingId = this.getAttribute('data-training');
-                var evaluated = this.getAttribute('data-evaluated') === '1';
-                document.getElementById('evaluationModalLabel').textContent = type;
-                document.getElementById('modalTrainingId').value = trainingId;
-                document.getElementById('modalEvalType').value = type;
-                // Reset radio buttons
-                document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
-                    r.checked = false;
-                    r.disabled = false;
-                });
-                selectedRating = null;
-                // Show current rating if exists
-                var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
-                var currentRating = '';
-                if (type === 'Pre-Evaluation') {
-                    currentRating = row.getAttribute('data-pre-rating');
-                } else {
-                    currentRating = row.getAttribute('data-post-rating');
-                }
-                var msgDiv = document.getElementById('currentRatingMsg');
-                if (currentRating && currentRating !== 'null') {
-                    msgDiv.textContent = `Your previous rating: ${currentRating}`;
-                    // Pre-select radio
+        document.addEventListener('DOMContentLoaded', function() {
+            let selectedRating = null;
+            document.querySelectorAll('.open-eval-modal').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var type = this.getAttribute('data-type');
+                    var trainingId = this.getAttribute('data-training');
+                    var evaluated = this.getAttribute('data-evaluated') === '1';
+                    document.getElementById('evaluationModalLabel').textContent = type;
+                    document.getElementById('modalTrainingId').value = trainingId;
+                    document.getElementById('modalEvalType').value = type;
+                    // Reset radio buttons
                     document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
-                        if (r.value === currentRating) r.checked = true;
+                        r.checked = false;
+                        r.disabled = false;
                     });
-                    selectedRating = currentRating;
-                } else {
-                    msgDiv.textContent = '';++
-                }
-                // If already evaluated, make radios readonly and hide submit
-                var submitBtn = document.querySelector('#evaluationModal .btn-primary');
-                if (evaluated) {
-                    document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = true);
-                    submitBtn.style.display = 'none';
-                } else {
-                    document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = false);
-                    submitBtn.style.display = '';
-                }
-                var modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
-                modal.show();
-            });
-        });
-        document.querySelectorAll('input[name="proficiency_level"]').forEach(function(radio) {
-            radio.addEventListener('change', function() {
-                selectedRating = this.value;
-            });
-        });
-        document.querySelector('#evaluationModal .btn-primary').addEventListener('click', function() {
-            var trainingId = document.getElementById('modalTrainingId').value;
-            var type = document.getElementById('modalEvalType').value;
-            if (!selectedRating) {
-                alert('Please select a proficiency level.');
-                return;
-            }
-            fetch(`/training/${trainingId}/rate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    type: type,
-                    rating: selectedRating
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update the row's data attribute
+                    selectedRating = null;
+                    // Show current rating if exists
                     var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
+                    var currentRating = '';
                     if (type === 'Pre-Evaluation') {
-                        row.setAttribute('data-pre-rating', data.pre_rating);
+                        currentRating = row.getAttribute('data-pre-rating');
                     } else {
-                        row.setAttribute('data-post-rating', data.post_rating);
+                        currentRating = row.getAttribute('data-post-rating');
                     }
-                    // Update modal message
-                    document.getElementById('currentRatingMsg').textContent = `Your previous rating: ${selectedRating}`;
-                    // Close modal
-                    bootstrap.Modal.getInstance(document.getElementById('evaluationModal')).hide();
-                } else {
-                    alert('Failed to save rating.');
+                    var msgDiv = document.getElementById('currentRatingMsg');
+                    if (currentRating && currentRating !== 'null') {
+                        msgDiv.textContent = `Your previous rating: ${currentRating}`;
+                        // Pre-select radio
+                        document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
+                            if (r.value === currentRating) r.checked = true;
+                        });
+                        selectedRating = currentRating;
+                    } else {
+                        msgDiv.textContent = '';
+                    }
+                    // If already evaluated, make radios readonly and hide submit
+                    var submitBtn = document.querySelector('#evaluationModal .btn-primary');
+                    if (evaluated) {
+                        document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = true);
+                        submitBtn.style.display = 'none';
+                    } else {
+                        document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = false);
+                        submitBtn.style.display = '';
+                    }
+                    var modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+                    modal.show();
+                });
+            });
+            document.querySelectorAll('input[name="proficiency_level"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    selectedRating = this.value;
+                });
+            });
+            document.querySelector('#evaluationModal .btn-primary').addEventListener('click', function() {
+                var trainingId = document.getElementById('modalTrainingId').value;
+                var type = document.getElementById('modalEvalType').value;
+                if (!selectedRating) {
+                    alert('Please select a proficiency level.');
+                    return;
                 }
-            })
-            .catch(() => alert('Failed to save rating.'));
+                fetch(`/user/training/${trainingId}/rate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        type: type,
+                        rating: selectedRating
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the row's data attribute
+                        var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
+                        if (type === 'Pre-Evaluation') {
+                            row.setAttribute('data-pre-rating', data.pre_rating);
+                        } else {
+                            row.setAttribute('data-post-rating', data.post_rating);
+                        }
+                        // Update modal message
+                        document.getElementById('currentRatingMsg').textContent = `Your previous rating: ${selectedRating}`;
+                        // Close modal
+                        bootstrap.Modal.getInstance(document.getElementById('evaluationModal')).hide();
+                    } else {
+                        alert('Failed to save rating.');
+                    }
+                })
+                .catch(() => alert('Failed to save rating.'));
+            });
         });
     </script>
 </body>

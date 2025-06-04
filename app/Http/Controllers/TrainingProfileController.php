@@ -38,6 +38,12 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingProfileShow', compact('training'));
     }
 
+    public function showUnprogrammed($id)
+    {
+        $training = Training::where('type', 'Unprogrammed')->findOrFail($id);
+        return view('userPanel.trainingProfileUnprogramShow', compact('training'));
+    }
+
     public function effectivenessParticipant($id, $type)
     {
         $training = Training::findOrFail($id);
