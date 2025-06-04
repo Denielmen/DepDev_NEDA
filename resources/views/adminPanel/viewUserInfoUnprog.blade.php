@@ -160,19 +160,29 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ route('admin.home') }}">
+            <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center"> 
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
                         {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

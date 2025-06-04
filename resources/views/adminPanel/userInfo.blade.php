@@ -143,35 +143,33 @@
         }
         .program-tabs .nav-link {
             color: #d6d3d3 !important;
-            /* background-color: white; */
-            /* border: 1px solid #003366; */
             margin-right: 5px;
             border-radius: 5px;
             color: #003366 !important;
             background-color: white;
 
         }
-        /* .program-tabs .nav-link:hover {
-            color: #003366 !important;
-            background-color: white;
-        } */
         .program-tabs .nav-link.active {
             background-color: #003366;
             color: white !important;
             font-weight: bold;
         }
-        .btn-outline-primary {
-            color: #003366;
-            border-color: #003366;
-        }
-        .btn-outline-primary:hover {
+        .btn-back {
             background-color: #003366;
-            color: white;
+            color: #fff;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-decoration: none;
+            margin-right: 900px;
+            
         }
-        .back-button {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .btn-back:hover {
+            background-color: #004080;
+            color: #fff;
+            transform: translateY(-1px);
         }
         .user-info-card.text-center {
             padding: 25px 20px;
@@ -186,6 +184,9 @@
         }
         .user-avatar {
             margin-bottom: 20px;
+        }
+        .form-label,.mb-0 {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -230,11 +231,12 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <button class="btn btn-outline-primary" onclick="window.location.href='{{ route('admin.participants') }}'">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-        </div>
+        <div class="top-actions">
+                <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants') }}'">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </button>
+            </div>
 
         <div class="row">
             <!-- User Info Card -->

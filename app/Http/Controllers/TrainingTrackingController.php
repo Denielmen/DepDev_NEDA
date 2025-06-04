@@ -12,12 +12,12 @@ class TrainingTrackingController extends Controller
     public function index()
     {
         // Fetch all programmed trainings that are not implemented
-         
         $competencies = \App\Models\Competency::all();
         $programmedTrainings = Training::where('type', 'Program')
             ->where('status', '!=', 'Implemented')
             ->get();
-        return view('userPanel.tracking', compact('programmedTrainings','competencies'));
+        $participationTypes = \App\Models\ParticipationType::all();
+        return view('userPanel.tracking', compact('programmedTrainings', 'competencies', 'participationTypes'));
     }
 
     public function store(Request $request)
@@ -51,8 +51,18 @@ class TrainingTrackingController extends Controller
                 'budget' => $request->input('expenses'),
                 'type' => 'Unprogrammed',
                 'status' => 'Implemented',
-                'implementation_date_from' => $request->input('implementation_date_from'), // <-- REQUIRED
-                'implementation_date_to' => $request->input('implementation_date_to'),     // <-- REQUIRED
+                'implementation_date_from' => $request->input('implementation_date_from'),
+                'implementation_date_to' => $request->input('implementation_date_to'),
+                'user_id' => Auth::id(),
+            ]);
+
+            // Get the participation type ID from the request
+            $participationTypeId = $request->input('participation_type_id');
+            
+            // Add the user as a participant with their selected role
+            $training->participants()->attach(Auth::id(), [
+                'participation_type_id' => $participationTypeId,
+                'year' => date('Y')
             ]);
 
         } else {

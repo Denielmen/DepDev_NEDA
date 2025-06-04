@@ -107,26 +107,24 @@
       margin: 0 auto 1.5rem auto;
     }
 
-    .back-button {
-      margin-bottom: 20px;
-    }
+    .btn-back {
+            background-color: #003366;
+            color: #fff;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-decoration: none;
+            margin-right: 900px;
+            
+        }
+        .btn-back:hover {
+            background-color: #004080;
+            color: #fff;
+            transform: translateY(-1px);
+        }
 
-    .btn-back-minimal {
-      text-decoration: none;
-      background-color: white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      color: #003366;
-      display: inline-flex;
-      align-items: center;
-      transition: background-color 0.2s ease;
-    }
-
-    .btn-back-minimal:hover {
-      background-color: rgba(0, 32, 96, 0.05);
-    }
 
     table {
       width: 100%;
@@ -288,13 +286,13 @@
 
     <!-- Main Content -->
     <div class="main-content">
-
       <!-- Back Button -->
-      <div class="back-button">
-        <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn-back-minimal">
-          <i class="bi bi-arrow-left me-2"></i> Back
-        </a>
-      </div>
+      <div class="top-actions">
+                <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </a>
+            </div>
 
       <div class="evaluation-container">
         <div class="evaluation-header">
