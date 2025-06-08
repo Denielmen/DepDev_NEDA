@@ -165,15 +165,38 @@
                     </tr>
                     <tr>
                         <td class="label">User Role:</td>
-                        <td>{{ isset($user) ? $user->user_role : 'Participant' }}</td>
+                        <td>
+                            @php
+                                $currentUser = Auth::user();
+                                $userRole = 'N/A';
+                                if ($currentUser) {
+                                    $participant = $training->participants->where('id', $currentUser->id)->first();
+                                    if ($participant && isset($participant->pivot->participation_type_id)) {
+                                        $participationType = App\Models\ParticipationType::find($participant->pivot->participation_type_id);
+                                        $userRole = $participationType->name ?? 'N/A';
+                                    }
+                                }
+                            @endphp
+                            {{ $userRole }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">No. of Hours:</td>
                         <td>{{ $training->no_of_hours ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
+                        <td class="label">Date of Attendance:</td>
+                        <td>
+                            @if($training->implementation_date_from && $training->implementation_date_to)
+                                {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
+                            @elseif($training->implementation_date_from)
+                                {{ $training->implementation_date_from->format('m/d/Y') }} - N/A
+                            @elseif($training->implementation_date_to)
+                                N/A - {{ $training->implementation_date_to->format('m/d/Y') }}
+                            @else
+                                N/A
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">Learning Service Provider:</td>

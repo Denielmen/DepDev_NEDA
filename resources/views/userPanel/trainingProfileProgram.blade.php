@@ -254,7 +254,20 @@
                             <td class="text-center">
                                 {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
                             </td>
-                            <td class="text-center">Participant</td>
+                            <td class="text-center">
+                                @php
+                                    $currentUser = Auth::user();
+                                    $userRole = 'N/A';
+                                    if ($currentUser) {
+                                        $participant = $training->participants->where('id', $currentUser->id)->first();
+                                        if ($participant && isset($participant->pivot->participation_type_id)) {
+                                            $participationType = $participationTypes->get($participant->pivot->participation_type_id);
+                                            $userRole = $participationType->name ?? 'N/A';
+                                        }
+                                    }
+                                @endphp
+                                {{ $userRole }}
+                            </td>
                             <td class="text-center">
                                 <div class="btn-group">
                                     <a href="{{ route('user.training.profile.show', $training->id) }}" class="btn btn-info btn-sm">View</a>
