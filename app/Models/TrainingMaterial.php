@@ -25,11 +25,15 @@ class TrainingMaterial extends Model
     {
         if ($search) {
             $query->where('title', 'LIKE', "%{$search}%")
-                  ->orWhere('description', 'LIKE', "%{$search}%")
-                  ->orWhere('file_name', 'LIKE', "%{$search}%");
+                  ->orWhere('description', 'LIKE', "%{$search}%");
         }
 
         return $query;
+    }// app/Models/Training.php
+    
+    public function trainingMaterials()
+    {
+        return $this->hasMany(TrainingMaterial::class);
     }
 
     public function user()
@@ -44,6 +48,6 @@ class TrainingMaterial extends Model
 
     public function training()
     {
-        return $this->belongsTo(Training::class);
+        return $this->belongsTo(Training::class,'training_id');
     }
 }
