@@ -10,12 +10,11 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingTrackingController;
 use App\Http\Controllers\TrainingMaterialController;
 
-// Search and Auth
-Route::get('/search', [SearchController::class, 'index'])->name('search.index');
-Route::get('/search/export/{format}', [SearchController::class, 'export'])->name('search.export');
+
+
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
-Route::get('/search/results', [SearchController::class, 'results'])->name('search.results');
+
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
@@ -180,6 +179,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             ->get();
         return view('adminPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
     })->name('admin.participants.info.unprogrammed');
+
+    //Search routes
+    Route::get('/search', [SearchController::class, 'index'])->name('admin.search.index');
+    Route::get('/search/export/{format}', [SearchController::class, 'export'])->name('search.export');
+    Route::get('/search/results', [SearchController::class, 'results'])->name('admin.search.results');
 
     // Profile and user management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');

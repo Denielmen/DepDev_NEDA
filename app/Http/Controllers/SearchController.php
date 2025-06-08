@@ -18,42 +18,47 @@ class SearchController extends Controller
 {
     public function index()
     {
-        // Get unique divisions for the filter
+        // Get unique divisions and positions for the filters
         $divisions = User::select('division')->distinct()->pluck('division');
+        $positions = User::select('position')->distinct()->pluck('position');
+        $competencies = Competency::all();
         
         // Initialize empty results collection
         $results = new Collection();
         
-        return view('search', compact('divisions', 'results'));
+        return view('search', compact('divisions', 'positions', 'competencies', 'results'));
     }
 
     public function results(Request $request)
     {
         $query = $request->input('keyword');
-        $type = $request->input('type');
+        $types = $request->input('type', []); // Now handles multiple types
         $year = $request->input('year');
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
         $competencies = $request->input('competencies', []);
-        $user_id = $request->input('user_id');
-        $participation_type = $request->input('participation_type');
+        $division = $request->input('division');
+        $position = $request->input('position');
         
         $results = collect();
 
-        // If no type specified, search all types
-        if (empty($type)) {
-            // Search users based on name or supervisor
+        // If no types specified, search all types
+        if (empty($types)) {
+            $types = ['Training', 'User', 'Training Material'];
+        }
+
+        // Search users
+        if (in_array('User', $types)) {
             $users = User::query()
                 ->when($query, function($q) use ($query) {
                     $q->where(function($q) use ($query) {
                         $q->where('first_name', 'like', "%{$query}%")
-                          ->orWhere('last_name', 'like', "%{$query}%")
-                          ->orWhere('superior', 'like', "%{$query}%")
-                          ->orWhere('position', 'like', "%{$query}%");
+                          ->orWhere('last_name', 'like', "%{$query}%");
                     });
                 })
-                ->when($user_id, function($q) use ($user_id) {
-                    $q->where('id', $user_id);
+                ->when($division, function($q) use ($division) {
+                    $q->where('division', $division);
+                })
+                ->when($position, function($q) use ($position) {
+                    $q->where('position', $position);
                 })
                 ->get()
                 ->map(function($user) {
@@ -61,173 +66,94 @@ class SearchController extends Controller
                     return $user;
                 });
             $results = $results->concat($users);
+        }
+// Search trainings
+if (in_array('Training', $types)) {
+    $trainings = Training::query()
+        ->when($query, function($q) use ($query) {
+            $q->where(function($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                  ->orWhereHas('participants', function($subQ) use ($query) {
+                      $subQ->where(function($subQ) use ($query) {
+                          $subQ->where('first_name', 'like', "%{$query}%")
+                              ->orWhere('last_name', 'like', "%{$query}%");
+                      });
+                  })
+                  ->orWhereHas('competency', function($subQ) use ($query) {
+                      $subQ->where('name', 'like', "%{$query}%");
+                  });
+            });
+        })
+        ->when($year, function($q) use ($year) {
+            $q->where(function($q) use ($year) {
+                $q->whereYear('period_from', '<=', $year)
+                  ->whereYear('period_to', '>=', $year);
+            });
+        })
+        ->when($competencies, function($q) use ($competencies) {
+            $q->whereIn('competency_id', $competencies);
+        })
+        ->with('participants') // eager load participants
+        ->get()
+        ->map(function($training) {
+            $training->search_type = 'training';
+            $training->participants = $training->participants->map(function($participant) {
+                return [
+                    'id' => $participant->id,
+                    'name' => $participant->first_name . ' ' . $participant->last_name,
+                ];
+            });
+            $training->trainingMaterials = TrainingMaterial::where('training_id', $training->id)->get()->map(function($material) {
+                return [
+                    'id' => $material->id,
+                    'title' => $material->title,
+                ];
+            });
+            return $training;
+        });
+    $results = $results->concat($trainings);
+}
 
-            // Search trainings based on various criteria
-            $trainings = Training::query()
-                ->when($query, function($q) use ($query) {
-                    $q->where(function($q) use ($query) {
-                        $q->where('title', 'like', "%{$query}%")
-                          ->orWhereHas('participants', function($subQ) use ($query) {
-                              $subQ->where(function($subQ) use ($query) {
-                                  $subQ->where('first_name', 'like', "%{$query}%")
-                                      ->orWhere('last_name', 'like', "%{$query}%");
-                              });
-                          })
-                          ->orWhereHas('competency', function($subQ) use ($query) {
-                              $subQ->where('name', 'like', "%{$query}%");
-                          });
-                    });
-                })
-                ->when($year, function($q) use ($year) {
-                    $q->whereYear('implementation_date_from', $year);
-                })
-                ->when($dateFrom, function($q) use ($dateFrom) {
-                    $q->where('implementation_date_from', '>=', $dateFrom);
-                })
-                ->when($dateTo, function($q) use ($dateTo) {
-                    $q->where('implementation_date_from', '<=', $dateTo);
-                })
-                ->when($competencies, function($q) use ($competencies) {
-                    $q->whereIn('competency_id', $competencies);
-                })
-                ->when($participation_type, function($q) use ($participation_type) {
-                    $q->whereHas('participants', function($subQ) use ($participation_type) {
-                        $subQ->where('participation_type', $participation_type);
-                    });
-                })
-                ->get()
-                ->map(function($training) {
-                    $training->search_type = 'training';
-                    return $training;
-                });
-            $results = $results->concat($trainings);
-
-            // Search training materials
+        // Search training materials
+        if (in_array('Training Material', $types)) {
             $materials = TrainingMaterial::query()
                 ->when($query, function($q) use ($query) {
                     $q->where(function($q) use ($query) {
-                        $q->where('file_name', 'like', "%{$query}%")
-                          ->orWhereHas('user', function($subQ) use ($query) {
-                              $subQ->where(function($subQ) use ($query) {
-                                  $subQ->where('first_name', 'like', "%{$query}%")
-                                       ->orWhere('last_name', 'like', "%{$query}%")
-                                       ->orWhere('superior', 'like', "%{$query}%")
-                                       ->orWhere('position', 'like', "%{$query}%");
-                              });
-                          })
+                        $q->where('title', 'like', "%{$query}%")
                           ->orWhereHas('competency', function($subQ) use ($query) {
                               $subQ->where('name', 'like', "%{$query}%");
                           })
                           ->orWhereHas('training', function($subQ) use ($query) {
-                              $subQ->where('title', 'like', "%{$query}%")
-                                   ->orWhereHas('participants', function($subQ) use ($query) {
-                                       $subQ->where(function($subQ) use ($query) {
-                                           $subQ->where('first_name', 'like', "%{$query}%")
-                                                ->orWhere('last_name', 'like', "%{$query}%")
-                                                ->orWhere('participation_type', 'like', "%{$query}%");
-                                       });
-                                   });
+                              $subQ->where('title', 'like', "%{$query}%");
                           });
                     });
                 })
+                ->when($competencies, function($q) use ($competencies) {
+                    $q->whereIn('competency_id', $competencies);
+                })
                 ->get()
                 ->map(function($material) {
-                    $material->search_type = 'material';
+                    $material->search_type = 'training_material';
                     return $material;
                 });
             $results = $results->concat($materials);
-
-        } else { // Specific type search
-            if ($type === 'user') {
-                $users = User::query()
-                    ->when($query, function($q) use ($query) {
-                        $q->where(function($q) use ($query) {
-                            $q->where('first_name', 'like', "%{$query}%")
-                              ->orWhere('last_name', 'like', "%{$query}%")
-                              ->orWhere('superior', 'like', "%{$query}%")
-                              ->orWhere('position', 'like', "%{$query}%");
-                        });
-                    })
-                    ->when($user_id, function($q) use ($user_id) {
-                        $q->where('id', $user_id);
-                    })
-                    ->get()
-                    ->map(function($user) {
-                        $user->search_type = 'user';
-                        return $user;
-                    });
-                $results = $results->concat($users);
-            }
-
-            if ($type === 'training') {
-                $trainings = Training::query()
-                    ->when($query, function($q) use ($query) {
-                        $q->where(function($q) use ($query) {
-                            $q->where('title', 'like', "%{$query}%")
-                              ->orWhereHas('participants', function($subQ) use ($query) {
-                                  $subQ->where(function($subQ) use ($query) {
-                                      $subQ->where('first_name', 'like', "%{$query}%")
-                                          ->orWhere('last_name', 'like', "%{$query}%")
-                                          ->orWhere('participation_type', 'like', "%{$query}%");
-                                  });
-                              })
-                              ->orWhereHas('competency', function($subQ) use ($query) {
-                                  $subQ->where('name', 'like', "%{$query}%");
-                              });
-                        });
-                    })
-                    ->when($year, function($q) use ($year) {
-                        $q->whereYear('implementation_date_from', $year);
-                    })
-                    ->when($dateFrom, function($q) use ($dateFrom) {
-                        $q->where('implementation_date_from', '>=', $dateFrom);
-                    })
-                    ->when($dateTo, function($q) use ($dateTo) {
-                        $q->where('implementation_date_to', '<=', $dateTo);
-                    })
-                    ->when($competencies, function($q) use ($competencies) {
-                        $q->whereIn('competency_id', $competencies);
-                    })
-                    ->when($participation_type, function($q) use ($participation_type) {
-                        $q->whereHas('participants', function($subQ) use ($participation_type) {
-                            $subQ->where('participation_type', $participation_type);
-                        });
-                    })
-                    ->get()
-                    ->map(function($training) {
-                        $training->search_type = 'training';
-                        return $training;
-                    });
-                $results = $results->concat($trainings);
-            }
-
-            if ($type === 'material') {
-                $materials = TrainingMaterial::query()
-                    ->when($query, function($q) use ($query) {
-                        $q->where(function($q) use ($query) {
-                            $q->where('uploader_name', 'like', "%{$query}%")
-                              ->orWhereHas('competency', function($subQ) use ($query) {
-                                  $subQ->where('name', 'like', "%{$query}%");
-                              })
-                              ->orWhereHas('training', function($subQ) use ($query) {
-                                  $subQ->where('title', 'like', "%{$query}%");
-                              })
-                              ->orWhere('filename', 'like', "%{$query}%");
-                        });
-                    })
-                    ->get()
-                    ->map(function($material) {
-                        $material->search_type = 'material';
-                        return $material;
-                    });
-                $results = $results->concat($materials);
-            }
         }
 
-        return view('search', [
-            'results' => $results,
-            'divisions' => User::select('division')->distinct()->pluck('division')
-        ]);
+        // Get all data needed for the view
+        $divisions = User::select('division')->distinct()->pluck('division');
+        $positions = User::select('position')->distinct()->pluck('position');
+        $competencies = Competency::all();
+        
+        // Create a map of competency IDs to names for the filter tags
+        $availableCompetencies = $competencies->pluck('name', 'id')->toArray();
+
+        return view('search', compact(
+            'results',
+            'divisions',
+            'positions',
+            'competencies',
+            'availableCompetencies'
+        ));
     }
 
     public function export(Request $request, $format)
@@ -236,7 +162,7 @@ class SearchController extends Controller
         $results = $this->results($request);
         
         if ($format === 'pdf') {
-            $pdf = PDF::loadView('search.export', ['results' => $results]);
+            $pdf = PDF::loadView('search', ['competencies' => $competencies, 'results' => $results]);
             return $pdf->download('search-results.pdf');
         } else if ($format === 'excel') {
             return Excel::download(new SearchExport($results), 'search-results.xlsx');
