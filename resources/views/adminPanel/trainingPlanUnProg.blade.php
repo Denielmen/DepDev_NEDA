@@ -242,11 +242,11 @@
                                     <a href="{{ route('admin.training.view.unprogrammed', $training->id) }}" class="btn btn-view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
-                                    <div class="dropdown">
+                                    {{-- <div class="dropdown">
                                         <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
                                             <i class="bi bi-three-dots"></i>
                                         </button>
-                                        <ul class="dropdown-menu">
+                                        <!-- <ul class="dropdown-menu">
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
                                                     <i class="bi bi-pencil-square"></i> Edit
@@ -261,8 +261,8 @@
                                                     </button>
                                                 </form>
                                             </li>
-                                        </ul>
-                                    </div>
+                                        </ul> -->
+                                    </div> --}}
                                 </div>
                             </td>
                         </tr>

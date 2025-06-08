@@ -224,6 +224,21 @@
                         <td class="label">Objective:</td>
                         <td>{{ $training->objective ?? '' }}</td>
                     </tr>
+                    <tr>
+                        <td class="label">Participants:</td>
+                        <td>
+                            @forelse ($training->participants as $participant)
+                                <div>
+                                    {{ $participant->first_name }} {{ $participant->last_name }} 
+                                    @if($participant->pivot && $participant->pivot->participation_type_id)
+                                        ({{ \App\Models\ParticipationType::find($participant->pivot->participation_type_id)->name ?? 'N/A' }})
+                                    @endif
+                                </div>
+                            @empty
+                                No participants found.
+                            @endforelse
+                        </td>
+                    </tr>
                 </table>
                 <div class="action-buttons">
                     <a href="#" class="btn btn-edit">

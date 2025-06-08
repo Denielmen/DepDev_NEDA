@@ -185,6 +185,28 @@
             background-color: #c82333;
             color: white;
         }
+        .tab-buttons {
+            display: inline-flex;
+            gap: 5px;
+            margin-right: 37rem;
+        }
+        .tab-button {
+            background-color: white;
+            border: none;
+            padding: 8px 20px;
+            font-weight: 500;
+            color: #003366;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .tab-button:hover {
+            text-decoration: none;
+            color: #003366;
+        }
+        .tab-button.active {
+            background-color: #003366;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -243,6 +265,10 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-end mb-2">
+                <div class="tab-buttons">
+                    <a href="#" class="tab-button active" id="active-tab" onclick="filterUsersByStatus('active'); return false;">Active</a>
+                    <a href="#" class="tab-button" id="inactive-tab" onclick="filterUsersByStatus('inactive'); return false;">Disable</a>
+                </div>
                     <label for="sort-by" class="me-2">Sort by</label>
                     <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers()">
                         <option value="all">All Positions</option>
@@ -297,42 +323,116 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function searchUsers() {
-            const input = document.getElementById('searchInput');
-            const filter = input.value.toUpperCase();
-            const table = document.querySelector('.table-container table');
-            const tr = table.getElementsByTagName('tr');
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toUpperCase();
+    const table = document.querySelector('.table-container table');
+    const tr = table.getElementsByTagName('tr');
+    const activeTab = document.querySelector('.tab-button.active').id;
+    const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
-            for (let i = 1; i < tr.length; i++) {
-                const td = tr[i].getElementsByTagName('td')[1]; // Name column
-                if (td) {
-                    const txtValue = td.textContent || td.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = '';
-                    } else {
-                        tr[i].style.display = 'none';
-                    }
+    for (let i = 1; i < tr.length; i++) {
+        const nameCell = tr[i].getElementsByTagName('td')[1]; // Name column
+        const statusCell = tr[i].getElementsByTagName('td')[0]; // Status column
+        
+        if (nameCell && statusCell) {
+            const nameValue = nameCell.textContent || nameCell.innerText;
+            const statusText = statusCell.textContent || statusCell.innerText;
+            
+            // Only search within the current tab's status (active or inactive)
+            if (statusText.includes(statusFilter)) {
+                if (nameValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = '';
+                } else {
+                    tr[i].style.display = 'none';
                 }
+            } else {
+                tr[i].style.display = 'none';
             }
         }
+    }
+}
 
-        function sortUsers() {
-            const select = document.getElementById('sort-by');
-            const position = select.value;
-            const table = document.querySelector('.table-container table');
-            const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
+function sortUsers() {
+    const select = document.getElementById('sort-by');
+    const position = select.value;
+    const table = document.querySelector('.table-container table');
+    const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
+    const activeTab = document.querySelector('.tab-button.active').id;
+    const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
-            tr.forEach(row => {
-                const userPosition = row.getElementsByTagName('td')[2].textContent; // Position column
-                if (position === 'all' || userPosition === position) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+    tr.forEach(row => {
+        const userPosition = row.getElementsByTagName('td')[2].textContent; // Position column
+        const statusText = row.getElementsByTagName('td')[0].textContent; // Status column
+        
+        // Only sort within the current tab's status (active or inactive)
+        if (statusText.includes(statusFilter)) {
+            if (position === 'all' || userPosition.trim() === position.trim()) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        } else {
+            row.style.display = 'none';
         }
+    });
+}
+
+function filterUsersByStatus(status) {
+    // Update active tab
+    document.getElementById('active-tab').classList.remove('active');
+    document.getElementById('inactive-tab').classList.remove('active');
+    document.getElementById(status + '-tab').classList.add('active');
+    
+    // Filter table rows
+    const table = document.querySelector('.table-container table');
+    const tr = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < tr.length; i++) {
+        const statusCell = tr[i].getElementsByTagName('td')[0];
+        if (statusCell) {
+            const statusText = statusCell.textContent.trim();
+            if ((status === 'active' && statusText.includes('Active')) || 
+                (status === 'inactive' && statusText.includes('Inactive'))) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+    
+    // Reset search and sort when switching tabs
+    document.getElementById('searchInput').value = '';
+    document.getElementById('sort-by').value = 'all';
+}
+
+        function filterUsersByStatus(status) {
+    // Update active tab
+    document.getElementById('active-tab').classList.remove('active');
+    document.getElementById('inactive-tab').classList.remove('active');
+    document.getElementById(status + '-tab').classList.add('active');
+    
+    // Filter table rows
+    const table = document.querySelector('.table-container table');
+    const tr = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < tr.length; i++) {
+        const statusCell = tr[i].getElementsByTagName('td')[0];
+        if (statusCell) {
+            const statusText = statusCell.textContent.trim();
+            if ((status === 'active' && statusText.includes('Active')) || 
+                (status === 'inactive' && statusText.includes('Inactive'))) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+// Initialize to show only active users when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    filterUsersByStatus('active');
+});
     </script>
 </body>
 </html>
-
-
-

@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Training; // Example model
 use App\Models\User; // Example model
 use App\Models\TrainingMaterial; // Import TrainingMaterial model
-use App\Models\Competency; // Import Competency model
-use PDF;
+use App\Models\Competency; // Import Competency modelse PDF;
+use Barryvdh\DomPDF\Facade\PDF;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SearchExport; // Assuming SearchExport is in App\\Exports
 use Carbon\Carbon; // Import Carbon for date formatting
@@ -167,6 +167,7 @@ if (in_array('Training', $types)) {
         $results = $this->results($request);
         
         if ($format === 'pdf') {
+            $competencies = Competency::all();
             $pdf = PDF::loadView('search', ['competencies' => $competencies, 'results' => $results]);
             return $pdf->download('search-results.pdf');
         } else if ($format === 'excel') {
