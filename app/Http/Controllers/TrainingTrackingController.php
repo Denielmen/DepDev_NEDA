@@ -22,12 +22,16 @@ class TrainingTrackingController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all()); // TEMPORARY: Dump all incoming request data - REMOVED
+
         $request->validate([
             'uploaded_file'   => 'nullable', // We'll handle validation for multiple files below
             'uploaded_file.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:51200', // 50MB max per file
             'web_url'         => 'nullable|url',
             'courseTitle'     => 'required',
-            'other_training_title' => 'required_if:courseTitle,other',
+            'training_title'  => 'required_if:courseTitle,other',
+            'implementation_date_from' => 'required|date',
+            'implementation_date_to' => 'required|date|after_or_equal:implementation_date_from',
             // Add other validations as needed
         ]);
 
@@ -44,7 +48,7 @@ class TrainingTrackingController extends Controller
         // Handle 'Others' selection
         if ($request->input('courseTitle') === 'other') {
             $training = Training::create([
-                'title' => $request->input('other_training_title'),
+                'title' => $request->input('training_title'),
                 'competency_id' => $request->input('competency_id'),
                 'provider' => $request->input('provider'),
                 'no_of_hours' => $request->input('no_of_hours'),

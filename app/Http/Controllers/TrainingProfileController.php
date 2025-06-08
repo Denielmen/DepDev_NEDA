@@ -14,28 +14,59 @@ use Illuminate\Support\Facades\Auth;
 class TrainingProfileController extends Controller
 {
     public function program()
-    {   
+    {
         $competencies = Competency::orderBy('name')->get();
+        $userId = Auth::id();
         $trainings = Training::where('type', 'Program')
             ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
             ->orderBy('status')
+            // Eager load the specific participant for the current user, without trying to load participationType on User model
+            ->with(['participants' => function($query) use ($userId) {
+                $query->where('users.id', $userId);
+            }])
             ->paginate(10);
-        $competencies = Competency::orderBy('name')->get();
-        return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies'));
+
+        // Load all participation types once for efficient lookup in the view
+        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
+
+        return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies', 'participationTypes'));
     }
 
     public function unprogrammed()
     {
+        $userId = Auth::id();
         $trainings = Training::where('type', 'Unprogrammed')
-            ->where('user_id', Auth::id())
+            ->where(function($query) use ($userId) {
+                $query->where('user_id', $userId) // Creator of the training
+                    ->orWhereHas('participants', function($q) use ($userId) {
+                        $q->where('users.id', $userId); // User is a participant
+                    });
+            })
+            // Eager load the specific participant for the current user, without trying to load participationType on User model
+            ->with(['participants' => function($query) use ($userId) {
+                $query->where('users.id', $userId);
+            }])
             ->paginate(10);
-        return view('userPanel.trainingProfileUnProgram', compact('trainings'));
+
+        // Load all participation types once for efficient lookup in the view
+        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
+
+        // Temporarily dump the trainings collection for debugging (keep commented until resolved)
+        // dd($trainings);
+
+        return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
 
     public function show($id)
     {
-        $training = Training::with('participants')->findOrFail($id);
-        return view('userPanel.trainingProfileShow', compact('training'));
+        $userId = Auth::id();
+        $training = Training::with(['participants' => function($query) use ($userId) {
+            $query->where('users.id', $userId);
+        }])->findOrFail($id);
+
+        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
+
+        return view('userPanel.trainingProfileShow', compact('training', 'participationTypes'));
     }
 
     public function showUnprogrammed($id)

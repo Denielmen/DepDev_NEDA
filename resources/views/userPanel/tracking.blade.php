@@ -290,21 +290,21 @@
                     @csrf
                     <div class="row">
                         <div class="col-md-6 form-group">
+                            <label class="form-label">Aligned Training:</label>
+                            <select id="alignedTraining" name="courseTitle" class="form-control" required>
+                                <option value="" disabled selected>Select aligned training</option>
+                                @foreach($programmedTrainings as $training)
+                                    <option value="{{ $training->id }}">{{ $training->title }}</option>
+                                @endforeach
+                                <option value="other">Others</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 form-group">
                             <label class="form-label">Title of the Training:</label>
                             <input type="text" class="form-control" name="training_title" required>
                         </div>
                         
-                        <div class="col-md-6 form-group">
-                            <label class="form-label">Aligned Training:</label>
-                            <select id="alignedTraining" name="courseTitle" class="form-control" required>
-    <option value="" disabled selected>Select aligned training</option>
-    @foreach($programmedTrainings as $training)
-        <option value="{{ $training->id }}">{{ $training->title }}</option>
-    @endforeach
-    <option value="other">Others</option>
-</select>
-<input type="text" id="otherTrainingTitle" name="other_training_title" class="form-control mt-2" style="display:none;" placeholder="Enter training title">
-                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-8 form-group">
@@ -342,9 +342,9 @@
                         <div class="col-md-4 form-group">
                             <label class="form-label">Date of Attendance:</label>
                             <div class="date-range">
-                                <input type="date" class="form-control" name="date_from" id="date_from" required onchange="updateDateTo()">
+                                <input type="date" class="form-control" name="implementation_date_from" id="implementation_date_from" required>
                                 <span>To:</span>
-                                <input type="date" class="form-control" name="date_to" id="date_to" required>
+                                <input type="date" class="form-control" name="implementation_date_to" id="implementation_date_to" required>
                             </div>
                         </div>
                     </div>
@@ -422,8 +422,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>;
     <script>
         function updateDateTo() {
-            const dateFromInput = document.getElementById('date_from');
-            const dateToInput = document.getElementById('date_to');
+            const dateFromInput = document.getElementById('implementation_date_from');
+            const dateToInput = document.getElementById('implementation_date_to');
             if (dateFromInput.value) {
                 const dateFrom = new Date(dateFromInput.value);
                 const dateTo = new Date(dateFrom);
@@ -444,20 +444,18 @@ const alignedTraining = document.getElementById('alignedTraining');
 const otherTrainingTitle = document.getElementById('otherTrainingTitle');
 const mainTitleInput = document.querySelector('input[name="training_title"]');
 const competencySelect = document.querySelector('select[name="competency_id"]');
-const hoursInput = document.querySelector('input[name="hours"]');
+const hoursInput = document.querySelector('input[name="no_of_hours"]');
 const expensesInput = document.querySelector('input[name="expenses"]');
-const dateFromInput = document.querySelector('input[name="date_from"]');
-const dateToInput = document.querySelector('input[name="date_to"]');
+const dateFromInput = document.querySelector('input[name="implementation_date_from"]');
+const dateToInput = document.querySelector('input[name="implementation_date_to"]');
 const providerInput = document.querySelector('input[name="provider"]');
-const roleSelect = document.querySelector('select[name="role"]');
+const roleSelect = document.querySelector('select[name="participation_type_id"]');
 
 alignedTraining.addEventListener('change', function() {
     const selectedId = this.value;
     if (selectedId === 'other') {
-        otherTrainingTitle.style.display = 'block';
         mainTitleInput.value = '';
         mainTitleInput.readOnly = false;
-        otherTrainingTitle.value = '';
         // Clear autofilled fields
         competencySelect.value = '';
         hoursInput.value = '';
@@ -467,7 +465,6 @@ alignedTraining.addEventListener('change', function() {
         providerInput.value = '';
         roleSelect.value = '';
     } else {
-        otherTrainingTitle.style.display = 'none';
         const training = trainings[selectedId];
         if (training) {
             mainTitleInput.value = training.title || '';

@@ -173,66 +173,86 @@
                     </tr>
                     <tr>
                         <td class="label">Three-Year Period:</td>
-                        <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
+                        <td>
+                            @php
+                                $periodFrom = $training->period_from ? $training->period_from->format('m/d/Y') : 'N/A';
+                                $periodTo = $training->period_to ? $training->period_to->format('m/d/Y') : 'N/A';
+                            @endphp
+                            From: {{ $periodFrom }} To: {{ $periodTo }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">Competency:</td>
-                        <td>{{ $training->competency->name ?? '' }}</td>
+                        <td>{{ $training->competency->name ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                          <td class="label">Year of Implementation:</td>
                          <td>
-                          {{ $training->implementation_date_from ? \Carbon\Carbon::parse($training->implementation_date_from)->format('Y') : '' }}
+                          {{ $training->implementation_date_from ? $training->implementation_date_from->format('Y') : 'N/A' }}
                          </td>  
                     </tr>
                     <tr>
                         <td class="label">Budget (per hour):</td>
-                        <td>{{ $training->budget ?? '' }}</td>
+                        <td>{{ $training->budget ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">No. of Hours:</td>
-                        <td>{{ $training->no_of_hours ?? '' }}</td>
+                        <td>{{ $training->no_of_hours ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">User Role:</td>
-                        <td>{{ isset($user) ? $user->user_role : 'Participant' }}</td>
+                        <td>
+                            @php
+                                $currentUser = Auth::user();
+                                $userRole = 'N/A';
+                                if ($currentUser) {
+                                    $participant = $training->participants->where('id', $currentUser->id)->first();
+                                    if ($participant && isset($participant->pivot->participation_type_id)) {
+                                        // Look up the participation type name from the collection passed by the controller
+                                        $participationType = $participationTypes->get($participant->pivot->participation_type_id);
+                                        $userRole = $participationType->name ?? 'N/A';
+                                    }
+                                }
+                            @endphp
+                            {{ $userRole }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">Superior:</td>
-                        <td>{{ $training->superior ?? '' }}</td>
+                        <td>{{ $training->superior ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Learning Service Provider:</td>
-                        <td>{{ $training->provider ?? '' }}</td>
+                        <td>{{ $training->provider ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Development Target:</td>
-                        <td>{{ $training->development_target ?? '' }}</td>
+                        <td>{{ $training->dev_target ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Performance Goal this Support:</td>
-                        <td>{{ $training->performance_goal ?? '' }}</td>
+                        <td>{{ $training->performance_goal ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Objective:</td>
-                        <td>{{ $training->objective ?? '' }}</td>
+                        <td>{{ $training->objective ?? 'N/A' }}</td>
                     </tr>
                     @if($training->type === 'Program')
                     <tr>
                         <td class="label">Participant Pre Rating:</td>
-                        <td>{{ $training->participant_pre_rating ?? '' }}</td>
+                        <td>{{ $training->participant_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Participant Post Rating:</td>
-                        <td>{{ $training->participant_post_rating ?? '' }}</td>
+                        <td>{{ $training->participant_post_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Supervisor Pre Rating:</td>
-                        <td>{{ $training->supervisor_pre_rating ?? '' }}</td>
+                        <td>{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Supervisor Post Rating:</td>
-                        <td>{{ $training->supervisor_post_rating ?? '' }}</td>
+                        <td>{{ $training->supervisor_post_rating ?? 'N/A' }}</td>
                     </tr>
                     @endif
                 </table>
