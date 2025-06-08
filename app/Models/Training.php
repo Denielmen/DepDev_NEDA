@@ -105,4 +105,9 @@ class Training extends Model
             ->wherePivot('year', '2027')
             ->withTimestamps();
     }
+
+    public function trainingMaterials()
+    {
+        return $this->hasMany(TrainingMaterial::class, 'training_id');
+    }
 }

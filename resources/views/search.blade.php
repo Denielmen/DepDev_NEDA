@@ -72,85 +72,76 @@
         .sidebar a.active {
             background-color: #004080;
             font-weight: bold;
+        }
 
-            .sidebar a:hover,
-            .sidebar a.active {
-                background-color: var(--primary-hover);
-            }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: rgb(187, 219, 252);
+            margin-left: 270px;
+            margin-top: 50px;
+            padding-bottom: 20px;
+        }
 
-            .main-content {
-                flex-grow: 1;
-                padding: 20px;
-                background-color: rgb(187, 219, 252);
-                margin-left: 270px;
-                margin-top: 50px;
-                padding-bottom: 20px;
+        .search-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
 
-            }
+        .search-header {
+            border-bottom: 2px solid #003366;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
 
-            .search-card {
-                background: white;
-                border-radius: 10px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                padding: 20px;
-                margin-bottom: 20px;
-            }
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+        }
 
-            .search-header {
-                border-bottom: 2px solid #003366;
-                padding-bottom: 10px;
-                margin-bottom: 20px;
-            }
+        .btn-primary {
+            background-color: #003366;
+            border-color: #003366;
+        }
 
-            .form-control:focus,
-            .form-select:focus {
-                border-color: #003366;
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: #003366;
+        }
 
-                .form-control:focus,
-                .form-select:focus {
-                    border-color: var(--primary-color);
-                    box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
-                }
+        .results-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
 
-                .btn-primary {
-                    background-color: #003366;
-                    border-color: #003366;
-                }
+        .results-table th {
+            background-color: #003366;
+            color: white;
+        }
 
-                .btn-primary:hover {
-                    background-color: var(--primary-hover);
-                    border-color: #003366;
-                }
+        .dropdown-menu {    
+            max-height: 200px;
+            overflow-y: auto;
+        }
 
-                .results-table {
-                    background: white;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                }
+        .filter-tag {
+            background-color: #e9ecef;
+            border-radius: 15px;
+            padding: 5px 10px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
 
-                .results-table th {
-                    background-color: #003366;
-                    color: white;
-                }
-
-                .dropdown-menu {
-                    max-height: 200px;
-                    overflow-y: auto;
-                }
-
-                .filter-tag {
-                    background-color: #e9ecef;
-                    border-radius: 15px;
-                    padding: 5px 10px;
-                    margin-right: 5px;
-                    margin-bottom: 5px;
-                    display: inline-block;
-                }
-
-                .filter-tag i {
-                    cursor: pointer;
-                    margin-left: 5px;
-                }
+        .filter-tag i {
+            cursor: pointer;
+            margin-left: 5px;
+        }
     </style>
 </head>
 
@@ -193,6 +184,7 @@
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
             <a href="{{ route('admin.search.index') }}" class="active"><i class="bi bi-search me-2"></i>Search</a>
         </div>
+
         <!-- Main Content -->
         <div class="main-content">
             <div class="search-card">
@@ -210,7 +202,6 @@
                                     placeholder="Search" value="{{ request('keyword') }}">
                             </div>
                         </div>
-                        <br>
                         <!-- Type Filter -->
                         <div class="col-md-4">
                             <label for="type" class="form-label">Type</label>
@@ -234,13 +225,12 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Year of Implementation Filter -->
+                        <!-- Additional Filters -->
                         <div class="col-md-4 training-filter" style="display: none;">
                             <label for="year" class="form-label">Year of Implementation</label>
                             <input type="number" name="year" id="year" class="form-control" placeholder="YYYY"
                                 min="2000" max="{{ date('Y') }}" value="{{ request('year') }}">
                         </div>
-                        <!-- Competency Filter (for Trainings and Training Materials) -->
                         <div class="col-md-4 competency-filter" style="display: none;">
                             <label for="competencies" class="form-label">Competencies</label>
                             <select class="form-control" id="competencies" name="competencies[]" multiple>
@@ -252,7 +242,6 @@
                                 @endforeach
                             </select>
                         </div>
-                        <!-- Division Filter (for Users) -->
                         <div class="col-md-4 user-filter" style="display: none;">
                             <label for="division" class="form-label">Division</label>
                             <select name="division" id="division" class="form-select">
@@ -265,7 +254,6 @@
                                 @endforeach
                             </select>
                         </div>
-                        <!-- Position Filter (for Users) -->
                         <div class="col-md-4 user-filter" style="display: none;">
                             <label for="position" class="form-label">Position</label>
                             <select name="position" id="position" class="form-select">
@@ -278,75 +266,27 @@
                                 @endforeach
                             </select>
                         </div>
-                        <!-- Active Filters -->
-                        @if (request()->hasAny(['keyword', 'type', 'year', 'competencies', 'division', 'position']))
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <div class="mt-2">
-                                        <small class="text-muted">Active Filters:</small>
-                                        @if (request('keyword'))
-                                            <span class="filter-tag">
-                                                Keyword: {{ request('keyword') }}
-                                                <i class="bi bi-x-circle"></i>
-                                            </span>
-                                        @endif
-                                        @if (request('type'))
-                                            <span class="filter-tag">
-                                                Type: {{ ucfirst(implode(', ', request('type', []))) }}
-                                                <i class="bi bi-x-circle"></i>
-                                            </span>
-                                        @endif
-                                        @if (request('year'))
-                                            <span class="filter-tag">
-                                                Year: {{ request('year') }}
-                                                <i class="bi bi-x-circle"></i>
-                                            </span>
-                                        @endif
-                                        @if (request('competencies'))
-                                            @foreach (request('competencies') as $competency)
-                                                <span class="filter-tag">
-                                                    Competency:
-                                                    {{ $availableCompetencies[$competency] ?? $competency }}
-                                                    <i class="bi bi-x-circle"></i>
-                                                </span>
-                                            @endforeach
-                                        @endif
-                                        @if (request('division'))
-                                            <span class="filter-tag">
-                                                Division: {{ request('division') }}
-                                                <i class="bi bi-x-circle"></i>
-                                            </span>
-                                        @endif
-                                        @if (request('position'))
-                                            <span class="filter-tag">
-                                                Position: {{ request('position') }}
-                                                <i class="bi bi-x-circle"></i>
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search me-2"></i>Search
-                            </button>
-                            <div>
-                                <a href="{{ route('search.export', array_merge(['format' => 'pdf'], request()->query())) }}"
-                                    class="btn btn-light me-2">
-                                    <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
-                                </a>
-                                <a href="{{ route('search.export', array_merge(['format' => 'excel'], request()->query())) }}"
-                                    class="btn btn-light">
-                                    <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
-                                </a>
-                            </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-2"></i>Search
+                        </button>
+                        <div>
+                            <a href="{{ route('search.export', array_merge(['format' => 'pdf'], request()->query())) }}"
+                                class="btn btn-light me-2">
+                                <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+                            </a>
+                            <a href="{{ route('search.export', array_merge(['format' => 'excel'], request()->query())) }}"
+                                class="btn btn-light">
+                                <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
+                            </a>
                         </div>
+                    </div>
                 </form>
             </div>
             <!-- Results Section -->
             <div class="results-table">
-                <!-- Training Results -->
+                <!-- Results content here -->
                 @if ($results->where('search_type', 'training')->isNotEmpty())
                     <div class="card mb-3">
                         <div class="card-header bg-primary text-white">
@@ -368,14 +308,18 @@
                                             <td>
                                                 @if ($result->participants)
                                                     @foreach ($result->participants as $participant)
-                                                        {{ $participant['name'] }}<br>
+                                                    {{ $loop->iteration }}. {{ $participant['name'] }}<br>
                                                     @endforeach
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($result->trainingMaterials)
-                                                    @foreach ($result->trainingMaterials as $material)
-                                                        {{ $material->title }}
+                                                @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
+                                                    @foreach ($result->relatedMaterials as $material)
+                                                        @if ($material->file_path)
+                                                        {{ $loop->iteration }}. <a href="{{ asset($material->file_path) }}" download>{{ $material->title }}</a><br>
+                                                        @else
+                                                            {{ $material->title }} (No file available)<br>
+                                                        @endif
                                                     @endforeach
                                                 @else
                                                     No training materials available
@@ -501,6 +445,7 @@
                     </div>
                 @endif
             </div>
+            </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -550,7 +495,6 @@
             });
         });
     </script>
-
 </body>
 
 </html>

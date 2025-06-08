@@ -70,47 +70,52 @@ class SearchController extends Controller
 // Search trainings
 if (in_array('Training', $types)) {
     $trainings = Training::query()
-        ->when($query, function($q) use ($query) {
-            $q->where(function($q) use ($query) {
+        ->with('trainingMaterials') // Eager load trainingMaterials
+        ->when($query, function ($q) use ($query) {
+            $q->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
-                  ->orWhereHas('participants', function($subQ) use ($query) {
-                      $subQ->where(function($subQ) use ($query) {
+                  ->orWhereHas('participants', function ($subQ) use ($query) {
+                      $subQ->where(function ($subQ) use ($query) {
                           $subQ->where('first_name', 'like', "%{$query}%")
                               ->orWhere('last_name', 'like', "%{$query}%");
                       });
                   })
-                  ->orWhereHas('competency', function($subQ) use ($query) {
+                  ->orWhereHas('competency', function ($subQ) use ($query) {
                       $subQ->where('name', 'like', "%{$query}%");
                   });
             });
         })
-        ->when($year, function($q) use ($year) {
-            $q->where(function($q) use ($year) {
+        ->when($year, function ($q) use ($year) {
+            $q->where(function ($q) use ($year) {
                 $q->whereYear('period_from', '<=', $year)
                   ->whereYear('period_to', '>=', $year);
             });
         })
-        ->when($competencies, function($q) use ($competencies) {
+        ->when($competencies, function ($q) use ($competencies) {
             $q->whereIn('competency_id', $competencies);
         })
-        ->with('participants') // eager load participants
+        ->with('participants') // Eager load participants
         ->get()
-        ->map(function($training) {
+        ->map(function ($training) {
             $training->search_type = 'training';
-            $training->participants = $training->participants->map(function($participant) {
+
+            // Map participants
+            $training->participants = $training->participants->map(function ($participant) {
                 return [
                     'id' => $participant->id,
                     'name' => $participant->first_name . ' ' . $participant->last_name,
                 ];
             });
-            $training->trainingMaterials = TrainingMaterial::where('training_id', $training->id)->get()->map(function($material) {
-                return [
-                    'id' => $material->id,
-                    'title' => $material->title,
-                ];
-            });
+
+            // Include training materials uploaded by users that match the training title and source
+            $training->relatedMaterials = TrainingMaterial::query()
+                ->where('title', 'like', "%{$training->title}%") // Match materials by title
+                ->where('source', 'like', "%{$training->source}%") // Verify source matches
+                ->get();
+
             return $training;
         });
+
     $results = $results->concat($trainings);
 }
 
