@@ -10,11 +10,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingTrackingController;
 use App\Http\Controllers\TrainingMaterialController;
 
-
-
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
-
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
@@ -65,10 +62,8 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::post('/tracking', [TrainingTrackingController::class, 'store'])
         ->name('user.tracking.store');
 
-    Route::get('/training-effectivenesss', function() {
-        return view('userPanel.trainingEffectivenesss');
-    })->name('user.training.effectivenesss');
 
+Route::get('user/training-effectiveness', [TrainingController::class, 'showTrainingEffectiveness'])->name('user.training.effectiveness');
     Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
         ->name('user.training.resources');
 
@@ -81,10 +76,6 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
 
     Route::get('/training/{id}/export', [TrainingProfileController::class, 'export'])
         ->name('user.training.export');
-
-    Route::get('/training-effectiveness', function () {
-        return view('userPanel.trainingEffectiveness');
-    })->name('user.training.effectiveness');
 
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
         ->name('user.training.rate.participant');

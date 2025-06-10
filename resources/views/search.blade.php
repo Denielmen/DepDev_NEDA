@@ -124,7 +124,7 @@
             color: white;
         }
 
-        .dropdown-menu {    
+        .dropdown-menu {
             max-height: 200px;
             overflow-y: auto;
         }
@@ -308,7 +308,7 @@
                                             <td>
                                                 @if ($result->participants)
                                                     @foreach ($result->participants as $participant)
-                                                    {{ $loop->iteration }}. {{ $participant['name'] }}<br>
+                                                        {{ $loop->iteration }}. {{ $participant['name'] }}<br>
                                                     @endforeach
                                                 @endif
                                             </td>
@@ -316,7 +316,9 @@
                                                 @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
                                                     @foreach ($result->relatedMaterials as $material)
                                                         @if ($material->file_path)
-                                                        {{ $loop->iteration }}. <a href="{{ asset($material->file_path) }}" download>{{ $material->title }}</a><br>
+                                                            {{ $loop->iteration }}. <a
+                                                                href="{{ asset($material->file_path) }}"
+                                                                download>{{ $material->title }}</a><br>
                                                         @else
                                                             {{ $material->title }} (No file available)<br>
                                                         @endif
@@ -445,8 +447,8 @@
                     </div>
                 @endif
             </div>
-            </div>
         </div>
+    </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>

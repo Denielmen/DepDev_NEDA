@@ -49,7 +49,7 @@
             padding-top: 20px;
         }
 
-        .sidebar a{
+        .sidebar a {
             color: white;
             text-decoration: none;
             display: block;
@@ -57,7 +57,8 @@
             font-size: 0.9rem;
         }
 
-        .sidebar a:hover, .sidebar a.active {
+        .sidebar a:hover,
+        .sidebar a.active {
             background-color: #004080;
             font-weight: bold;
         }
@@ -115,7 +116,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-width: 800px;
             margin: 0 auto;
-            
+
         }
 
         .choicebox {
@@ -182,9 +183,11 @@
             padding: 0.5rem 1rem;
             font-size: 0.9rem;
         }
+
         .dropdown-item:hover {
             background-color: #f8f9fa;
         }
+
         .dropdown-item.text-danger:hover {
             background-color: #dc3545;
             color: white !important;
@@ -228,49 +231,104 @@
         <div class="sidebar" style="top: 56px;">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('user.training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking &
+                History</a>
+            <a href="{{ route('user.training.effectiveness') }}" class="active"><i
+                    class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
             <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
 
             <div class="form-container">
-                <div class="form-title">
-                    Training Effectiveness
-                </div>
 
-                <!-- Roles Container -->
-                <div class="roles">
-                    <!-- Text Role -->
-                    <h1 class="text-role text-center">Choose your role</h1>
-                    <div class="choicebox">
-                        <!-- Evaluate Card -->
-                        <div class="choice" onclick="window.location.href='{{ route('user.evalParticipant') }}'">
-                            <i class="bi bi-people-fill" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                            <div style="background-color: #79a7f5; padding: 15px; border-radius: 20px; text-align: left;">
-                                <h5 style="font-weight: bold;">Post Evaluation</h5>
-                                <p style="margin-bottom: 0; font-size: 15px">Click here to evaluate yourself.</p>
-                            </div>
-                        </div>
+                <div class="form-container">
+                    <div class="form-title">
+                        Training Effectiveness
+                    </div>
 
-                        <!-- View Evaluations Card -->
-                        <div class="choice" onclick="window.location.href='{{ route('user.evalSupervisor') }}'">
-                            <i class="bi bi-person-fill" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                            <div style="background-color: #79a7f5; padding: 15px; border-radius: 20px; text-align: left;">
-                                <h5 style="font-weight: bold;">View Evaluations</h5>
-                                <p style="margin-bottom: 0; font-size: 15px">Select Evaluations to view. (Participant/Supervisor)</p>
-                            </div>
-                        </div>
+                    <!-- Trainings Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Training Title</th>
+                                    <th>Status</th>
+                                    <th>Pre-Evaluation Rating</th>
+                                    <th>Post-Evaluation Rating</th>
+                                    <th>Evaluation</th>
+                                    <th>View Evaluations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($trainings->sortByDesc('status') as $training)
+                                    <tr>
+                                        <td>{{ $training->title }}</td>
+                                        <td>
+                                            {{ $training->status == 'implemented' ? 'Implemented' : 'Not Implemented' }}
+                                        </td>
+                                        <td>
+                                            @if ($training->participant_pre_rating && $training->supervisor_pre_rating)
+                                                {{ round(($training->participant_pre_rating + $training->supervisor_pre_rating) / 2, 2) }}
+                                            @elseif ($training->participant_pre_rating)
+                                                {{ $training->participant_pre_rating }}
+                                            @elseif ($training->supervisor_pre_rating)
+                                                {{ $training->supervisor_pre_rating }}
+                                            @else
+                                                Empty
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($training->participant_post_rating && $training->supervisor_post_rating)
+                                                {{ round(($training->participant_post_rating + $training->supervisor_post_rating) / 2, 2) }}
+                                            @elseif ($training->participant_post_rating)
+                                                {{ $training->participant_post_rating }}
+                                            @elseif ($training->supervisor_post_rating)
+                                                {{ $training->supervisor_post_rating }}
+                                            @else
+                                                Empty
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('user.evalParticipant', ['training_id' => $training->id]) }}"
+                                                class="btn btn-primary btn-sm">
+                                                Evaluate
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm"
+                                                onchange="window.location.href=this.value">
+                                                <option value="">Select Evaluation</option>
+                                                <option
+                                                    value="{{ route('user.evalParticipant', ['training_id' => $training->id, 'type' => 'participant_pre']) }}">
+                                                    Own Pre-Evaluation
+                                                </option>
+                                                <option
+                                                    value="{{ route('user.evalParticipant', ['training_id' => $training->id, 'type' => 'participant_post']) }}">
+                                                    Own Post-Evaluation
+                                                </option>
+                                                <option
+                                                    value="{{ route('user.evalParticipant', ['training_id' => $training->id, 'type' => 'supervisor_pre']) }}">
+                                                    Supervisor Pre-Evaluation
+                                                </option>
+                                                <option
+                                                    value="{{ route('user.evalParticipant', ['training_id' => $training->id, 'type' => 'supervisor_post']) }}">
+                                                    Supervisor Post-Evaluation
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+            <!-- End of Main Content -->
+
         </div>
-        <!-- End of Main Content -->
-
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- filepath: d:\tests\trial\DepDev_NEDA\resources\views\userPanel\trainingEffectivenesss.blade.php -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
