@@ -174,11 +174,7 @@
                     <tr>
                         <td class="label">Three-Year Period:</td>
                         <td>
-                            @php
-                                $periodFrom = $training->period_from ? $training->period_from->format('m/d/Y') : 'N/A';
-                                $periodTo = $training->period_to ? $training->period_to->format('m/d/Y') : 'N/A';
-                            @endphp
-                            From: {{ $periodFrom }} To: {{ $periodTo }}
+                            From: {{ $training->period_from ?? 'N/A' }} To: {{ $training->period_to ?? 'N/A' }}
                         </td>
                     </tr>
                     <tr>
@@ -216,10 +212,6 @@
                             @endphp
                             {{ $userRole }}
                         </td>
-                    </tr>
-                    <tr>
-                        <td class="label">Superior:</td>
-                        <td>{{ $training->superior ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Learning Service Provider:</td>

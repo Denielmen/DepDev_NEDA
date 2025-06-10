@@ -143,7 +143,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     Route::get('training-plan/unprogrammed/{id}', function ($id) {
         $training = \App\Models\Training::findOrFail($id);
-        return view('adminPanel.trainingViewUnprog', compact('training'));
+        $user = auth()->user();
+        return view('adminPanel.trainingViewUnprog', compact('training', 'user'));
     })->name('admin.training.view.unprogrammed');
 
     // Participants routes

@@ -14,8 +14,8 @@ return new class extends Migration
             $table->foreignId('competency_id')->constrained('competencies');
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->string('core_competency')->nullable();
-            $table->date('period_from')->nullable();
-            $table->date('period_to')->nullable();
+            $table->integer('period_from')->nullable();
+            $table->integer('period_to')->nullable();
             $table->date('implementation_date_from')->nullable();
             $table->date('implementation_date_to')->nullable();
             $table->decimal('budget', 10, 2)->nullable();

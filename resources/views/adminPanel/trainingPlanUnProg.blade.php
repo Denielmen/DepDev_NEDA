@@ -236,7 +236,15 @@
                         <tr>
                             <td>{{ $training->title }}</td>
                             <td>{{ $training->competency->name }}</td>
-                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/y') : 'Not set' }}</td>
+                            <td>@if($training->implementation_date_from && $training->implementation_date_to)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @elseif($training->implementation_date_from)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - N/A
+                                @elseif($training->implementation_date_to)
+                                    N/A - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @else
+                                    N/A
+                                @endif</td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <a href="{{ route('admin.training.view.unprogrammed', $training->id) }}" class="btn btn-view">

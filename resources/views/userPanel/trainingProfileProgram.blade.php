@@ -244,9 +244,9 @@
                             <td class="text-center">{{ $training->competency->name }}</td>
                             <td class="text-center">
                                 @if($training->status === 'Implemented' )
-                                    {{ \Carbon\Carbon::parse($training->first()->implementation_date_to)->format('d/m/Y') }}
+                                    {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
                                 @else
-                                    {{ \Carbon\Carbon::parse($training->period_from)->format('Y') }}
+                                    {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
                                 @endif
                             </td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
