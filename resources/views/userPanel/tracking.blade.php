@@ -223,6 +223,9 @@
             justify-content: center;
             margin-top: 30px;
         }
+        .hidden {
+            display: none;
+        }
         @media (max-width: 900px) {
             .submission-flex {
                 flex-direction: column;
@@ -354,53 +357,41 @@
                         <input type="text" class="form-control" name="provider" required>
                     </div>
 
-                        <div class="submission-types mb-4">
-                            <label class="form-label">Choose a submission type</label>
-                            <div class="submission-flex">
-                                <!-- Upload Button -->
-                                <div class="submission-col">
-                                    <button type="button" class="submission-btn submission-large" id="uploadBtn">
-                                        <i class="bi bi-upload"></i>
-                                        <div>Upload Training Materials</div>
-                                    </button>
-                                    <div class="submission-desc">
-                                        <span>Accepted file types: <b>pdf, png, jpg, jpeg</b></span><br>
-                                        <span>Max file size: <b>50 MB</b></span>
-                                    </div>
-                                </div>
-                                <div class="submission-or">OR</div>
-                                <!-- Link Button -->
-                                <div class="submission-col">
-                                    <button type="button" class="submission-btn submission-large" id="linkBtn">
-                                        <i class="bi bi-link-45deg"></i>
-                                        <div>Text</div>
-                                    </button>
-                                    <div class="submission-desc">
-                                        Paste link of Training Materials
-                                    </div>
-                                </div>
+                    <div class="form-group">
+                        <label class="form-label mb-2">Choose a submission type</label>
+                        <div class="d-flex justify-content-center flex-wrap gap-3">
+                            <div class="submission-col">
+                                <label for="uploadMaterials" class="submission-btn submission-large" id="uploadMaterialsLabel">
+                                    <i class="bi bi-cloud-arrow-up"></i>
+                                    Upload Training Materials
+                                </label>
+                                <input type="file" id="uploadMaterials" name="uploadMaterials" accept="image/jpeg,image/png,application/pdf" style="display: none;">
+                                <p class="submission-desc">Accepted file types: pdf, png, jpg, jpeg</p>
+                                <p class="submission-desc">Max file size: 50 MB</p>
                             </div>
-                            <!-- Certificates Button Row -->
-                            <div class="submission-cert-row">
-                                <div class="submission-col">
-                                    <button type="button" class="submission-btn submission-large" id="uploadCertBtn">
-                                        <i class="bi bi-file-earmark-medical"></i>
-                                        <div>Upload Training Certificates</div>
-                                    </button>
-                                    <div class="submission-desc">
-                                        <span>Accepted file types: <b>pdf, png, jpg, jpeg</b></span><br>
-                                        <span>Max file size: <b>50 MB</b></span>
-        </div>
-    </div>
-    </div>
+                            <div class="submission-col">
+                                <label for="linkMaterials" class="submission-btn submission-large" id="linkMaterialsLabel">
+                                    <i class="bi bi-link-45deg"></i>
+                                    Paste Link of Training Materials
+                                </label>
+                                <input type="text" id="linkMaterials" name="linkMaterials" class="form-control mt-2" placeholder="Paste your link here" style="display: none;">
+                                <p class="submission-desc mt-2">Accepted file types: pdf, png, jpg, jpeg</p>
+                                <p class="submission-desc">Max file size: 50 MB</p>
+                            </div>
+                            <div class="submission-col">
+                                <label for="uploadCertificates" class="submission-btn submission-large" id="uploadCertificatesLabel">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                    Upload Training Certificates
+                                </label>
+                                <input type="file" id="uploadCertificates" name="uploadCertificates" accept="image/jpeg,image/png,application/pdf" style="display: none;">
+                                <p class="submission-desc">Accepted file types: pdf, png, jpg, jpeg</p>
+                                <p class="submission-desc">Max file size: 50 MB</p>
+                            </div>
+                        </div>
+                        <div id="filePreview" class="mt-3"></div>
+                        <div id="certPreview" class="mt-3"></div>
+                    </div>
 
-                        <!-- Hidden actual inputs -->
-                        <input type="file" name="uploaded_file[]" id="fileInput" style="display:none;" multiple accept=".pdf,.png,.jpg,.jpeg">
-                        <input type="file" name="certificate_file[]" id="certInput" style="display:none;" multiple accept=".pdf,.png,.jpg,.jpeg">
-                        <input type="text" name="web_url" id="linkInput" class="form-control mt-2" placeholder="Paste your link here">
-                        <!-- File/Image Preview -->
-                        <div id="filePreview" style="margin-top: 15px;"></div>
-                        <div id="certPreview" style="margin-top: 15px;"></div>
                     <div class="text-center mt-4">
                         <button type="submit" class="btn-save">Save</button>
                     </div>
@@ -441,7 +432,6 @@
       const trainings = @json($programmedTrainings->keyBy('id'));
 
 const alignedTraining = document.getElementById('alignedTraining');
-const otherTrainingTitle = document.getElementById('otherTrainingTitle');
 const mainTitleInput = document.querySelector('input[name="training_title"]');
 const competencySelect = document.querySelector('select[name="competency_id"]');
 const hoursInput = document.querySelector('input[name="no_of_hours"]');
@@ -480,30 +470,32 @@ alignedTraining.addEventListener('change', function() {
     }
 });
 
-otherTrainingTitle.addEventListener('input', function() {
-    mainTitleInput.value = this.value;
-});
-
-        document.getElementById('uploadBtn').onclick = function() {
-            document.getElementById('fileInput').click();
+        document.getElementById('uploadMaterialsLabel').onclick = function() {
+            document.getElementById('uploadMaterials').click();
             this.classList.add('active');
-            document.getElementById('linkBtn').classList.remove('active');
-            document.getElementById('linkInput').style.display = 'none';
+            document.getElementById('linkMaterials').style.display = 'none';
+            document.getElementById('linkMaterialsLabel').classList.remove('active');
+            document.getElementById('uploadCertificatesLabel').classList.remove('active');
         };
-        document.getElementById('linkBtn').onclick = function() {
-            document.getElementById('linkInput').style.display = 'block';
+        document.getElementById('linkMaterialsLabel').onclick = function() {
+            console.log('Paste Link button clicked!');
+            document.getElementById('linkMaterials').style.display = 'block';
             this.classList.add('active');
-            document.getElementById('uploadBtn').classList.remove('active');
+            document.getElementById('uploadMaterialsLabel').classList.remove('active');
+            document.getElementById('uploadCertificatesLabel').classList.remove('active');
         };
-        document.getElementById('uploadCertBtn').onclick = function() {
-            document.getElementById('certInput').click();
+        document.getElementById('uploadCertificatesLabel').onclick = function() {
+            document.getElementById('uploadCertificates').click();
             this.classList.add('active');
+            document.getElementById('linkMaterials').style.display = 'none';
+            document.getElementById('linkMaterialsLabel').classList.remove('active');
+            document.getElementById('uploadMaterialsLabel').classList.remove('active');
         };
 
         // File/Image Preview Logic with Remove (X) Button
         let selectedFiles = [];
 
-        document.getElementById('fileInput').addEventListener('change', function(event) {
+        document.getElementById('uploadMaterials').addEventListener('change', function(event) {
             selectedFiles = Array.from(event.target.files);
             renderPreviews();
         });
@@ -569,12 +561,12 @@ otherTrainingTitle.addEventListener('input', function() {
         function updateFileInput() {
             const dataTransfer = new DataTransfer();
             selectedFiles.forEach(file => dataTransfer.items.add(file));
-            document.getElementById('fileInput').files = dataTransfer.files;
+            document.getElementById('uploadMaterials').files = dataTransfer.files;
         }
 
         // Certificate file preview logic (optional, similar to filePreview)
         let selectedCertFiles = [];
-        document.getElementById('certInput').addEventListener('change', function(event) {
+        document.getElementById('uploadCertificates').addEventListener('change', function(event) {
             selectedCertFiles = Array.from(event.target.files);
             renderCertPreviews();
         });
@@ -640,7 +632,7 @@ otherTrainingTitle.addEventListener('input', function() {
         function updateCertInput() {
             const dataTransfer = new DataTransfer();
             selectedCertFiles.forEach(file => dataTransfer.items.add(file));
-            document.getElementById('certInput').files = dataTransfer.files;
+            document.getElementById('uploadCertificates').files = dataTransfer.files;
         }
     </script>
 </body>

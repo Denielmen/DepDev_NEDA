@@ -206,10 +206,7 @@
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Date of Attendance</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">No. of Hours</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">User Role</th>
+                            <th class="text-center" style="background-color: #003366; color: white; ">Status</th>
                             <th class="text-center" style="background-color: #003366; color: white;">Details</th>
                         </tr>
                     </thead>
@@ -229,20 +226,8 @@
                                     N/A
                                 @endif
                             </td>
-                            <td class="text-center">{{ $training->no_of_hours }}</td>
-                            <td class="text-center">{{ $training->provider }}</td>
                             <td class="text-center">
                                 {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
-                            </td>
-                            <td class="text-center">
-                                @php
-                                    $currentUserParticipant = $training->participants->first();
-                                    $userRole = null;
-                                    if ($currentUserParticipant && isset($currentUserParticipant->pivot->participation_type_id)) {
-                                        $userRole = $participationTypes->get($currentUserParticipant->pivot->participation_type_id)->name ?? 'N/A';
-                                    }
-                                @endphp
-                                {{ $userRole ?? 'N/A' }}
                             </td>
                             <td class="text-center">
                                 <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>  
