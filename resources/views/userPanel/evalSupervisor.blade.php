@@ -282,7 +282,7 @@
       <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
       <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
       <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-      <a href="{{ route('user.training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+      <a href="{{ route('user.training.effectiveness') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
       <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
     </div>
 
@@ -291,7 +291,7 @@
 
       <!-- Back Button -->
       <div class="back-button">
-        <a href="{{ route('user.training.effectivenesss') }}" class="btn-back-minimal">
+        <a href="{{ route('user.training.effectiveness') }}" class="btn-back-minimal">
           <i class="bi bi-arrow-left me-2"></i> Back
         </a>
       </div>
@@ -304,7 +304,7 @@
           <p>(For Supervisor/Manager of the Participant - Online)</p>
         </div>
 
-        <form method="POST" action="{{ route('user.training.effectivenesss') }}" class="evaluation-form">
+        <form method="POST" action="{{ route('user.training.effectiveness') }}" class="evaluation-form">
           @csrf
           <label for="courseTitle">Course Title:</label>
           <select id="courseTitle" name="courseTitle" required style="margin-bottom: 20px;">
