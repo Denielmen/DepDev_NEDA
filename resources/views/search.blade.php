@@ -273,11 +273,11 @@
                         </button>
                         <div>
                             <a href="{{ route('search.export', array_merge(['format' => 'pdf'], request()->query())) }}"
-                                class="btn btn-light me-2">
+                                class="btn btn-danger me-2">
                                 <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
                             </a>
                             <a href="{{ route('search.export', array_merge(['format' => 'excel'], request()->query())) }}"
-                                class="btn btn-light">
+                                class="btn btn-success">
                                 <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
                             </a>
                         </div>

@@ -236,17 +236,25 @@
                         <tr>
                             <td>{{ $training->title }}</td>
                             <td>{{ $training->competency->name }}</td>
-                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/y') : 'Not set' }}</td>
+                            <td>@if($training->implementation_date_from && $training->implementation_date_to)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @elseif($training->implementation_date_from)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - N/A
+                                @elseif($training->implementation_date_to)
+                                    N/A - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @else
+                                    N/A
+                                @endif</td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <a href="{{ route('admin.training.view.unprogrammed', $training->id) }}" class="btn btn-view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
-                                    <div class="dropdown">
+                                    {{-- <div class="dropdown">
                                         <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
                                             <i class="bi bi-three-dots"></i>
                                         </button>
-                                        <ul class="dropdown-menu">
+                                        <!-- <ul class="dropdown-menu">
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
                                                     <i class="bi bi-pencil-square"></i> Edit
@@ -261,8 +269,8 @@
                                                     </button>
                                                 </form>
                                             </li>
-                                        </ul>
-                                    </div>
+                                        </ul> -->
+                                    </div> --}}
                                 </div>
                             </td>
                         </tr>

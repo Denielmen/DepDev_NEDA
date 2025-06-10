@@ -77,6 +77,7 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
+            border: 2px solid #004080;
         }
         .user-avatar i {
             font-size: 3rem;
@@ -187,6 +188,13 @@
         }
         .form-label,.mb-0 {
             font-weight: bold;
+        }
+        .btn-primary{
+            background-color: #003366;
+            color: #fff;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -318,7 +326,11 @@
                     <tr>
                         <td>{{ $training->title }}</td>
                         <td>{{ $training->competency->name}}</td>
-                        <td>@if($training->implementation_date_from){{ $training->implementation_date_from->format('m/d/y') }}@else N/A @endif - @if($training->implementation_date_to){{ $training->implementation_date_to->format('m/d/y') }}@else N/A @endif</td>
+                        <td>@if($training->status === 'Implemented' )
+                                    {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
+                                @else
+                                    {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
+                                @endif</td>
                         <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>{{ $training->status }}</td>

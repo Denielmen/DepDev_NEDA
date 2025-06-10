@@ -19,8 +19,8 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Attempt to authenticate using user_id and password
-        if (Auth::attempt(['user_id' => $request->user_id, 'password' => $request->password])) {
+        // Attempt to authenticate using user_id, password, and active status
+        if (Auth::attempt(['user_id' => $request->user_id, 'password' => $request->password, 'is_active' => true])) {
             $request->session()->regenerate();
             // Redirect to the home route
             return redirect()->route('home');

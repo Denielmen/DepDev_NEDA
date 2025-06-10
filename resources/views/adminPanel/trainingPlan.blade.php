@@ -241,7 +241,7 @@
                         <tr>
                             <td>{{ $training->title }}</td>
                             <td>{{ $training->competency->name }}</td>
-                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/y') : 'Not set' }}</td>
+                            <td>{{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <!-- <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view"> -->
