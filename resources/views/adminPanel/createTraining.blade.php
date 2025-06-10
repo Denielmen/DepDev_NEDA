@@ -221,7 +221,7 @@
                     <div class="form-group row mb-3">
                         <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From') }}</label>
                         <div class="col-md-6">
-                            <input id="period_from" type="date" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required onchange="setPeriodTo()">
+                            <input id="period_from" type="number" min="2000" max="2100" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required onchange="setPeriodTo()" placeholder="YYYY">
                             @error('period_from')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -233,7 +233,7 @@
                     <div class="form-group row mb-3">
                         <label for="period_to" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period To') }}</label>
                         <div class="col-md-6">
-                            <input id="period_to" type="date" class="form-control @error('period_to') is-invalid @enderror" name="period_to" value="{{ old('period_to') }}" required>
+                            <input id="period_to" type="number" min="2000" max="2100" class="form-control @error('period_to') is-invalid @enderror" name="period_to" value="{{ old('period_to') }}" required placeholder="YYYY">
                             @error('period_to')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -637,18 +637,14 @@
         });
 
         function setPeriodTo() {
-            const fromDateInput = document.getElementById('period_from');
-            const toDateInput = document.getElementById('period_to');
-            const fromDate = fromDateInput.value;
+            const fromYearInput = document.getElementById('period_from');
+            const toYearInput = document.getElementById('period_to');
+            const fromYear = parseInt(fromYearInput.value);
 
-            if (fromDate) {
-                const date = new Date(fromDate);
-                // Add exactly 3 years
-                date.setFullYear(date.getFullYear() + 3);
-                 // Subtract one day to get the end date of the 3-year period
-                date.setDate(date.getDate() - 1);
-                const toDate = date.toISOString().split('T')[0];
-                toDateInput.value = toDate;
+            if (fromYear) {
+                // Add 3 years to the from year
+                const toYear = fromYear + 3;
+                toYearInput.value = toYear;
             }
         }
 

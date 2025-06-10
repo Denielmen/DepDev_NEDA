@@ -31,8 +31,8 @@ class Training extends Model
         'supervisor_post_evaluation'
     ];
     protected $casts = [
-        'period_from' => 'date',
-        'period_to' => 'date',
+        // 'period_from' => 'date',
+        // 'period_to' => 'date',
         'implementation_date_from' => 'date',
         'implementation_date_to' => 'date',
         'budget' => 'decimal:2',

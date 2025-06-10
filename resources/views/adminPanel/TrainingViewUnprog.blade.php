@@ -156,7 +156,19 @@
                     </tr>
                     <tr>
                         <td class="label">Role:</td>
-                        <td>{{ $training->user_role ?? 'Participant' }}</td>
+                        <td>@if($training->user_id == $user->id)
+                                    Creator
+                                @else
+                                    @php
+                                        $participant = $training->participants->where('id', $user->id)->first();
+                                        $participationType = $participant ? $participant->pivot->participation_type_id : null;
+                                    @endphp
+                                    @if($participationType)
+                                        {{ \App\Models\ParticipationType::find($participationType)->name }}
+                                    @else
+                                        N/A
+                                    @endif
+                                @endif</td>
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>

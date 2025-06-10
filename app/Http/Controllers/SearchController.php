@@ -163,12 +163,77 @@ if (in_array('Training', $types)) {
 
     public function export(Request $request, $format)
     {
-        // Get the search results
-        $results = $this->results($request);
-        
+        // Get the search results using the same logic as the results method
+        $keyword = $request->input('keyword');
+        $types = $request->input('type', []);
+        $year = $request->input('year');
+        $competencies = $request->input('competencies', []);
+        $division = $request->input('division');
+        $position = $request->input('position');
+
+        $results = collect();
+
+        // Search in trainings
+        if (empty($types) || in_array('Training', $types)) {
+            $trainingQuery = Training::query();
+            if ($keyword) {
+                $trainingQuery->where('title', 'like', "%{$keyword}%");
+            }
+            if ($year) {
+                $trainingQuery->whereYear('implementation_date_from', $year);
+            }
+            if (!empty($competencies)) {
+                $trainingQuery->whereIn('competency_id', $competencies);
+            }
+            $trainings = $trainingQuery->with(['competency', 'participants'])->get();
+            foreach ($trainings as $training) {
+                $training->search_type = 'training';
+                // Removed explicit formatting of participants for PDF export
+                $results->push($training);
+            }
+        }
+
+        // Search in users
+        if (empty($types) || in_array('User', $types)) {
+            $userQuery = User::query();
+            if ($keyword) {
+                $userQuery->where(function($query) use ($keyword) {
+                    $query->where('first_name', 'like', "%{$keyword}%")
+                          ->orWhere('last_name', 'like', "%{$keyword}%")
+                          ->orWhere('mid_init', 'like', "%{$keyword}%");
+                });
+            }
+            if ($division) {
+                $userQuery->where('division', $division);
+            }
+            if ($position) {
+                $userQuery->where('position', $position);
+            }
+            $users = $userQuery->get();
+            foreach ($users as $user) {
+                $user->search_type = 'user';
+                $results->push($user);
+            }
+        }
+
+        // Search in training materials
+        if (empty($types) || in_array('Training Material', $types)) {
+            $materialQuery = TrainingMaterial::query();
+            if ($keyword) {
+                $materialQuery->where('title', 'like', "%{$keyword}%");
+            }
+            if (!empty($competencies)) {
+                $materialQuery->whereIn('competency_id', $competencies);
+            }
+            $materials = $materialQuery->with(['competency', 'user'])->get();
+            foreach ($materials as $material) {
+                $material->search_type = 'training_material';
+                $results->push($material);
+            }
+        }
+
         if ($format === 'pdf') {
-            $competencies = Competency::all();
-            $pdf = PDF::loadView('search', ['competencies' => $competencies, 'results' => $results]);
+            $pdf = PDF::loadView('search.pdf', compact('results'));
             return $pdf->download('search-results.pdf');
         } else if ($format === 'excel') {
             return Excel::download(new SearchExport($results), 'search-results.xlsx');

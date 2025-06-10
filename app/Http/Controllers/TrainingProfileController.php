@@ -127,8 +127,8 @@ class TrainingProfileController extends Controller
             'competency_id' => 'required|exists:competencies,id',
             'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
             'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
-            'period_from' => 'required|date',
-            'period_to' => 'required|date|after_or_equal:period_from',
+            'period_from' => 'required|integer|digits:4',
+            'period_to' => 'required|integer|digits:4|gte:period_from',
             'implementation_date_from' => 'required|date',
             'implementation_date_to' => 'nullable|date',
             'no_of_hours' => 'nullable|numeric',
@@ -315,6 +315,11 @@ class TrainingProfileController extends Controller
 
         $training = Training::findOrFail($id);
         
+        // Check if the training status is 'Implemented'
+        if ($training->status !== 'Implemented') {
+            return back()->withErrors(['status' => 'Post-evaluation can only be submitted for implemented trainings.']);
+        }
+
         // Calculate average rating from all sections
         $averageRating = round((
             $request->goals + 

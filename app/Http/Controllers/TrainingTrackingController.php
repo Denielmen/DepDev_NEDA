@@ -73,13 +73,9 @@ class TrainingTrackingController extends Controller
             $training = Training::find($request->input('courseTitle'));
             if ($training && $training->status !== 'Implemented') {
                 $training->status = 'Implemented';
-                // Update implementation dates if provided
-                if ($request->filled('date_from')) {
-                    $training->implementation_date_from = $request->input('date_from');
-                }
-                if ($request->filled('date_to')) {
-                    $training->implementation_date_to = $request->input('date_to');
-                }
+                // Update implementation dates
+                $training->implementation_date_from = $request->input('implementation_date_from');
+                $training->implementation_date_to = $request->input('implementation_date_to');
                 $training->save();
             }
         }
