@@ -1,4 +1,3 @@
-{{-- filepath: d:\DepDev_NEDA\resources\views\auth\login.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -83,7 +82,7 @@
         .right-panel .overlay {
             position: absolute;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.65);
+            background-color: rgba(0, 0, 0, 0.15);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -96,13 +95,18 @@
         .right-panel .overlay h2 {
             font-size: 1.5rem;
             font-weight: bold;
-            color: rgb(15, 110, 204);
+            color:rgb(255, 255, 255);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            letter-spacing: 0.8px;
         }
 
         .right-panel .overlay h3 {
             font-size: 1.2rem;
             font-weight: bold;
-            margin-bottom: 1rem;
+            margin-bottom: 0.9rem;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            letter-spacing: 0.5px;
         }
 
         .right-panel .overlay p {
@@ -113,6 +117,7 @@
             width: 150px;
             max-width: 90%;
             padding: 1rem;
+            filter: brightness(1.9);
         }
     </style>
 </head>
@@ -164,4 +169,4 @@
     </div>
 </body>
 
-</html>
+</html> 
