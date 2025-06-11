@@ -191,16 +191,21 @@ class TrainingProfileController extends Controller
     public function addParticipant(Training $training, Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id'
+            'user_id' => 'required|exists:users,id',
+            'participation_type_id' => 'required|exists:participation_types,id',
+            'year' => 'required|integer|digits:4',
         ]);
 
-        // Check if user is already a participant
-        if ($training->participants()->where('user_id', $request->user_id)->exists()) {
-            return back()->with('error', 'User is already a participant in this training.');
+        // Check if user is already a participant for the given year
+        if ($training->participants()->where('user_id', $request->user_id)->wherePivot('year', $request->year)->exists()) {
+            return back()->with('error', 'User is already a participant in this training for the specified year.');
         }
 
-        // Add the participant
-        $training->participants()->attach($request->user_id);
+        // Add the participant with participation type and year
+        $training->participants()->attach($request->user_id, [
+            'participation_type_id' => $request->participation_type_id,
+            'year' => $request->year,
+        ]);
 
         return back()->with('success', 'Participant added successfully.');
     }
