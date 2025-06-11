@@ -16,7 +16,6 @@ class User extends Authenticatable
         'first_name',
         'mid_init',
         'position',
-        'office',
         'years_in_position',
         'years_in_csc',
         'division',
@@ -25,6 +24,7 @@ class User extends Authenticatable
         'superior',
         'password',
         'is_active',
+        'is_superior_eligible',
     ];
 
     protected $hidden = [
@@ -49,7 +49,8 @@ class User extends Authenticatable
      */
     public function trainings()
     {
-        return $this->belongsToMany(Training::class, 'training_participants')
+        return $this->belongsToMany(Training::class, 'training_participant')
+                    ->withPivot('participation_type_id')
                     ->withTimestamps();
     }
 
@@ -64,6 +65,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_superior_eligible' => 'boolean',
         ];
     }
 
@@ -73,13 +75,7 @@ class User extends Authenticatable
     public static function getSuperiors()
     {
         return static::where('is_active', true)
-            ->where(function($query) {
-                $query->where('role', 'Admin')
-                    ->orWhere('position', 'like', '%Director%')
-                    ->orWhere('position', 'like', '%Manager%')
-                    ->orWhere('position', 'like', '%Head%')
-                    ->orWhere('position', 'like', '%Chief%');
-            })
+            ->where('is_superior_eligible', true)
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();

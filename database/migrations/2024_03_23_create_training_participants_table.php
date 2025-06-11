@@ -13,10 +13,16 @@ return new class extends Migration
     {
         Schema::create('training_participants', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('training_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->integer('year')->nullable();
+            $table->foreignId('training_id')->constrained('trainings')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('participation_type_id')
+                  ->nullable()
+                  ->constrained('participation_types')
+                  ->onDelete('set null');
+            $table->year('year');
             $table->timestamps();
+
+            $table->unique(['training_id', 'user_id', 'year']);
         });
     }
 
@@ -27,4 +33,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('training_participants');
     }
-}; 
+};

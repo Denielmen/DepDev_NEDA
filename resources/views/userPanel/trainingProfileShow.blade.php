@@ -156,11 +156,11 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+            <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
@@ -173,69 +173,83 @@
                     </tr>
                     <tr>
                         <td class="label">Three-Year Period:</td>
-                        <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
+                        <td>
+                            From: {{ $training->period_from ?? 'N/A' }} To: {{ $training->period_to ?? 'N/A' }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">Competency:</td>
-                        <td>{{ $training->competency ?? '' }}</td>
+                        <td>{{ $training->competency->name ?? 'N/A' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/Y') : '' }}</td>
+                         <td class="label">Year of Implementation:</td>
+                         <td>
+                          {{ $training->implementation_date_from ? $training->implementation_date_from->format('Y') : 'N/A' }}
+                         </td>  
                     </tr>
                     <tr>
                         <td class="label">Budget (per hour):</td>
-                        <td>{{ $training->budget ?? '' }}</td>
+                        <td>{{ $training->budget ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">No. of Hours:</td>
-                        <td>{{ $training->no_of_hours ?? '' }}</td>
+                        <td>{{ $training->no_of_hours ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">User Role:</td>
-                        <td>{{ isset($user) ? $user->user_role : 'Participant' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Superior:</td>
-                        <td>{{ $training->superior ?? '' }}</td>
+                        <td>
+                            @php
+                                $currentUser = Auth::user();
+                                $userRole = 'N/A';
+                                if ($currentUser) {
+                                    $participant = $training->participants->where('id', $currentUser->id)->first();
+                                    if ($participant && isset($participant->pivot->participation_type_id)) {
+                                        // Look up the participation type name from the collection passed by the controller
+                                        $participationType = $participationTypes->get($participant->pivot->participation_type_id);
+                                        $userRole = $participationType->name ?? 'N/A';
+                                    }
+                                }
+                            @endphp
+                            {{ $userRole }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">Learning Service Provider:</td>
-                        <td>{{ $training->provider ?? '' }}</td>
+                        <td>{{ $training->provider ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Development Target:</td>
-                        <td>{{ $training->development_target ?? '' }}</td>
+                        <td>{{ $training->dev_target ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Performance Goal this Support:</td>
-                        <td>{{ $training->performance_goal ?? '' }}</td>
+                        <td>{{ $training->performance_goal ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Objective:</td>
-                        <td>{{ $training->objective ?? '' }}</td>
+                        <td>{{ $training->objective ?? 'N/A' }}</td>
                     </tr>
                     @if($training->type === 'Program')
                     <tr>
                         <td class="label">Participant Pre Rating:</td>
-                        <td>{{ $training->participant_pre_rating ?? '' }}</td>
+                        <td>{{ $training->participant_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Participant Post Rating:</td>
-                        <td>{{ $training->participant_post_rating ?? '' }}</td>
+                        <td>{{ $training->participant_post_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Supervisor Pre Rating:</td>
-                        <td>{{ $training->supervisor_pre_rating ?? '' }}</td>
+                        <td>{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Supervisor Post Rating:</td>
-                        <td>{{ $training->supervisor_post_rating ?? '' }}</td>
+                        <td>{{ $training->supervisor_post_rating ?? 'N/A' }}</td>
                     </tr>
                     @endif
                 </table>
                 <div class="btn-row">
-                    <a href="{{ route('training.profile.program') }}" class="btn btn-back">Back</a>
+                    <a href="{{ route('user.training.profile.program') }}" class="btn btn-back">Back</a>
                 </div>
             </div>
         </div>

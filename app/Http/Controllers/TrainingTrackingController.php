@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Training;
 use App\Models\TrainingMaterial;
-use App\Models\TthRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,20 +12,26 @@ class TrainingTrackingController extends Controller
     public function index()
     {
         // Fetch all programmed trainings that are not implemented
+        $competencies = \App\Models\Competency::all();
         $programmedTrainings = Training::where('type', 'Program')
             ->where('status', '!=', 'Implemented')
             ->get();
-        return view('userPanel.tracking', compact('programmedTrainings'));
+        $participationTypes = \App\Models\ParticipationType::all();
+        return view('userPanel.tracking', compact('programmedTrainings', 'competencies', 'participationTypes'));
     }
 
     public function store(Request $request)
     {
+        // dd($request->all()); // TEMPORARY: Dump all incoming request data - REMOVED
+
         $request->validate([
             'uploaded_file'   => 'nullable', // We'll handle validation for multiple files below
             'uploaded_file.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:51200', // 50MB max per file
             'web_url'         => 'nullable|url',
             'courseTitle'     => 'required',
-            'other_training_title' => 'required_if:courseTitle,other',
+            'training_title'  => 'required_if:courseTitle,other',
+            'implementation_date_from' => 'required|date',
+            'implementation_date_to' => 'required|date|after_or_equal:implementation_date_from',
             // Add other validations as needed
         ]);
 
@@ -43,45 +48,79 @@ class TrainingTrackingController extends Controller
         // Handle 'Others' selection
         if ($request->input('courseTitle') === 'other') {
             $training = Training::create([
-                'title' => $request->input('other_training_title'),
-                'competency' => $request->input('competency'),
+                'title' => $request->input('training_title'),
+                'competency_id' => $request->input('competency_id'),
                 'provider' => $request->input('provider'),
+                'no_of_hours' => $request->input('no_of_hours'),
+                'budget' => $request->input('expenses'),
                 'type' => 'Unprogrammed',
                 'status' => 'Implemented',
-                'implementation_date' => $request->input('date_from'),
+                'implementation_date_from' => $request->input('implementation_date_from'),
+                'implementation_date_to' => $request->input('implementation_date_to'),
+                'user_id' => Auth::id(),
             ]);
-            // Create TTH record for unprogrammed/implemented
-            TthRecord::create([
-                'training_id' => $training->id,
-                'date_from'   => $request->input('date_from'),
-                'date_to'     => $request->input('date_to'),
+
+            // Get the participation type ID from the request
+            $participationTypeId = $request->input('participation_type_id');
+            
+            // Add the user as a participant with their selected role
+            $training->participants()->attach(Auth::id(), [
+                'participation_type_id' => $participationTypeId,
+                'year' => date('Y')
             ]);
+
         } else {
             $training = Training::find($request->input('courseTitle'));
             if ($training && $training->status !== 'Implemented') {
                 $training->status = 'Implemented';
+                // Update implementation dates
+                $training->implementation_date_from = $request->input('implementation_date_from');
+                $training->implementation_date_to = $request->input('implementation_date_to');
                 $training->save();
-                // Create TTH record for programmed/implemented
-                TthRecord::create([
-                    'training_id' => $training->id,
-                    'date_from'   => $request->input('date_from'),
-                    'date_to'     => $request->input('date_to'),
-                ]);
             }
         }
 
-        // Save uploaded files as TrainingMaterial with user as source
-        if ($training && !empty($filePaths)) {
-            foreach ($filePaths as $filePath) {
+        // Debug: Log the web_url value
+        \Log::info('web_url:', [$request->web_url]);
+
+        // Save a single TrainingMaterial record for file and/or link
+        $filePath = null;
+        if (!empty($filePaths)) {
+            $filePath = $filePaths[0]; // Only the first file
+        }
+        $link = $request->filled('web_url') ? $request->web_url : null;
+
+        if ($training && ($filePath || $link)) {
+            TrainingMaterial::create([
+                'title'         => $training->title,
+                'competency_id' => $training->competency_id ?? $request->input('competency_id'),
+                'user_id'       => Auth::id(), // <-- Add this line
+                'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                'file_path'     => $filePath,
+                'link'          => $link,
+                'type'          => 'material',
+            ]);
+        }
+
+        // Save uploaded certificates as TrainingMaterial with type 'certificate'
+        if ($training && $request->hasFile('certificate_file')) {
+            foreach ($request->file('certificate_file') as $file) {
+                $certPath = $file->store('uploads', [
+                    'disk' => 'public',
+                    'visibility' => 'public',
+                ]);
                 TrainingMaterial::create([
-                    'title'      => $training->title,
-                    'competency' => $training->competency,
-                    'source'     => Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                    'file_path'  => $filePath,
+                    'title'         => $training->title,
+                    'competency_id' => $training->competency_id ?? null,
+                    'user_id'       => Auth::id(), // <-- Add this line
+                    'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                    'file_path'     => $certPath,
+                    'link'          => null,
+                    'type'          => 'certificate',
                 ]);
             }
         }
 
         return back()->with('success', 'Submission successful!');
     }
-} 
+}

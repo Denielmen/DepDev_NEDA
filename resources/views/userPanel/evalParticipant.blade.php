@@ -61,7 +61,8 @@
             font-size: 0.9rem;
         }
 
-        .sidebar a:hover, .sidebar a.active {
+        .sidebar a:hover,
+        .sidebar a.active {
             background-color: #004080;
             font-weight: bold;
         }
@@ -98,7 +99,7 @@
             font-weight: bold;
             text-align: left;
         }
-       
+
 
         .rating-cell {
             text-align: center;
@@ -187,8 +188,11 @@
         }
 
         .neda-logo {
-            width: 70px;
-            margin-bottom: 1.5rem;
+            width: 80%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 1.5rem auto;
         }
 
         .form-group {
@@ -250,9 +254,11 @@
             padding: 0.5rem 1rem;
             font-size: 0.9rem;
         }
+
         .dropdown-item:hover {
             background-color: #f8f9fa;
         }
+
         .dropdown-item.text-danger:hover {
             background-color: #dc3545;
             color: white !important;
@@ -293,17 +299,17 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
-            <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+            <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
             <div class="back-button">
-                <a href="{{ route('training.effectivenesss') }}" class="btn-back-minimal">
+                <a href="{{ route('user.training.effectivenesss') }}" class="btn-back-minimal">
                     <i class="bi bi-arrow-left me-2"></i>
                     Back
                 </a>
@@ -312,24 +318,23 @@
             <div class="evaluation-container">
                 <div class="evaluation-header">
                     <img src="{{ asset('images/DEPDev_logo_text_center.png') }}" alt="NEDA Logo" class="neda-logo">
-                    <h4>Republic of the Philippines</h4>
-                    <h5>NATIONAL ECONOMIC AND DEVELOPMENT AUTHORITY</h5>
+
                     <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
                     <p>(For Participant)</p>
                 </div>
 
-                <form method="POST" action="{{ route('training.effectivenesss') }}" class="evaluation-form">
+                <form method="POST" action="{{ route('user.training.effectivenesss') }}" class="evaluation-form">
                     @csrf
                     <label for="courseTitle">Course Title:</label>
                     <select id="courseTitle" name="courseTitle" required style="margin-bottom: 20px;">
                         <option value="">Select Training</option>
                         @foreach($implementedTrainings as $training)
-                            <option value="{{ $training->id }}">{{ $training->title }}</option>
+                        <option value="{{ $training->id }}">{{ $training->title }}</option>
                         @endforeach
                     </select>
 
                     <div class="instruction-container">
-                        <p><strong>Please tick the circle which describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied, (3) Satisfied, <br>(2) Dissatisfied, (1) Very Dissatisfied.</p>
+                        <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied; (3) Satisfied; <br>(2) Dissatisfied; (1) Very Dissatisfied.</p>
                     </div>
 
                     <table>
@@ -341,7 +346,7 @@
                             <th style="width: 5%; text-align: center;">4</th>
                         </tr>
                         <tr>
-                            <td>How satisfied are you in the learner's achievement of your learning goals/objectives as specified in your learner's profile.</td>
+                            <td>How satisfied are you in the achievement of your learning goals/objectives as specified in your learner's profile.</td>
                             <td class="rating-cell"><input type="radio" name="goals" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="goals" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="goals" value="3"></td>
@@ -389,7 +394,7 @@
 
                     <table>
                         <tr>
-                            <th style="width: 60%;">C. Work Performance (after one performance period)</th>
+                            <th style="width: 60%;">C. Work Performance (to be determined within one performance period)</th>
                             <th style="width: 4%; text-align: center;">1</th>
                             <th style="width: 4%; text-align: center;">2</th>
                             <th style="width: 4%; text-align: center;">3</th>
@@ -422,9 +427,10 @@
                         </tr>
                     </table>
 
-                    <p><strong>To support your your training, please describe changes in work performance as a result of
-                            attendance to this training. if employee's work performance did not change, please cite possible
-                            reasons and what support is needed in order for the employee's to apply acquired knowledge and skills.</strong></p>
+                    <p><strong>To support your rating on application of learing and work performance, give specific instance and evidence on 
+                            how learning/s gained was applied at work and hhow work performance was improved. If the learning/s gained cannot
+                            be applied to actual work, kindly specify the reasons.
+                        </strong></p>
                     <textarea name="changes" placeholder="Describe any changes..." required></textarea>
 
 
@@ -437,7 +443,7 @@
                             <th style="width: 5%; text-align: center;">4</th>
                         </tr>
                         <tr>
-                            <td>In a scale 1-4 (4 is being the highest ), please tick the circle which describes the proficiency level of your subordinate after participation in this course.</td>
+                            <td>In a scale 4-1 (4 being the highest ), please tick the circle which best describes your proficiency after your participation in this course.</td>
                             <td class="rating-cell"><input type="radio" name="proficiency" value="1" required></td>
                             <td class="rating-cell"><input type="radio" name="proficiency" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="proficiency" value="3"></td>
@@ -445,7 +451,7 @@
                         </tr>
                     </table>
 
-                    <p><strong>E. Comments/Suggestions on the training program.</strong></p>
+                    <p><strong>E. Comments/recommendation</strong> (If any, to increase the impact of the training.)</p>
                     <textarea name="comments" placeholder="Your comments or suggestions..." required></textarea>
 
                     <button type="submit">Submit</button>
@@ -455,6 +461,31 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const courseTitleSelect = document.getElementById('courseTitle');
+            const evaluationForm = document.querySelector('.evaluation-form');
+
+            courseTitleSelect.addEventListener('change', function() {
+                const trainingId = this.value;
+                if (trainingId) {
+                    // Update the form action dynamically based on the selected training ID
+                    evaluationForm.action = '/user/training/' + trainingId + '/submit-participant-evaluation';
+                } else {
+                    // Clear the action if no training is selected
+                    evaluationForm.action = '';
+                }
+            });
+
+            // Optional: Prevent form submission if no training is selected (though the route will handle this)
+            evaluationForm.addEventListener('submit', function(event) {
+                if (!courseTitleSelect.value) {
+                    alert('Please select a training before submitting.');
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

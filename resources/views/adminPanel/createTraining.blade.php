@@ -103,6 +103,13 @@
         .form-group {
             margin-bottom: 1rem;
         }
+
+        /* CSS to increase checkbox size in participant modal */
+        #participantModal .form-check-input {
+            width: 1.5em; /* Increase width */
+            height: 1.5em; /* Increase height */
+            margin-top: 0.25em; /* Adjust vertical alignment if needed */
+        }
     </style>
 </head>
 <body>
@@ -142,6 +149,7 @@
             <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
@@ -153,6 +161,29 @@
                 <h4 class="text-center mb-4">Training Information</h4>
                 <form method="POST" action="{{ route('admin.training-plan.store') }}" id="trainingForm">
                     @csrf
+
+                    {{-- Core Competency Field --}}
+                    <div class="form-group row mb-3">
+                        <label for="core_competency" class="col-md-4 col-form-label text-md-right">{{ __('Core Competency') }}</label>
+                        <div class="col-md-6">
+                            <select class="form-control @error('core_competency') is-invalid @enderror" id="core_competency" name="core_competency" required onchange="toggleCoreCompetencyInput()">
+                                <option value="">Select Core Competency...</option>
+                                <option value="Foundational/Mandatory" {{ old('core_competency') == 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
+                                <option value="Competency Enhancement" {{ old('core_competency') == 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
+                                <option value="Leadership/Executive Development" {{ old('core_competency') == 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
+                                <option value="Gender and Development (GAD)-Related" {{ old('core_competency') == 'Gender and Development (GAD)-Related' ? 'selected' : '' }}>Gender and Development (GAD)-Related</option>
+                                <option value="Others" {{ old('core_competency') == 'Others' ? 'selected' : '' }}>Others</option>
+                            </select>
+                            <input type="text" class="form-control mt-2 @error('core_competency') is-invalid @enderror" 
+                                id="core_competency_input" name="core_competency_input" 
+                                placeholder="Enter core competency" value="{{ old('core_competency_input') }}" style="display: none;">
+                            @error('core_competency')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
 
                     <div class="form-group row mb-3">
                         <label for="title" class="col-md-4 col-form-label text-md-right">{{ __('Title/Area') }}</label>
@@ -169,8 +200,15 @@
                     <div class="form-group row mb-3">
                         <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency') }}</label>
                         <div class="col-md-6">
-                            <input id="competency" type="text" class="form-control @error('competency') is-invalid @enderror" name="competency" value="{{ old('competency') }}" required autocomplete="competency">
-                            @error('competency')
+                            <select id="competency" class="form-control @error('competency_id') is-invalid @enderror" name="competency_id" required>
+                                <option value="">Select Competency</option>
+                                @foreach($competencies as $competency)
+                                    <option value="{{ $competency->id }}" {{ old('competency_id') == $competency->id ? 'selected' : '' }}>
+                                        {{ $competency->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('competency_id')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -178,10 +216,12 @@
                         </div>
                     </div>
 
+                   
+
                     <div class="form-group row mb-3">
                         <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From') }}</label>
                         <div class="col-md-6">
-                            <input id="period_from" type="date" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required onchange="setPeriodTo()">
+                            <input id="period_from" type="number" min="2000" max="2100" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required onchange="setPeriodTo()" placeholder="YYYY">
                             @error('period_from')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -193,7 +233,7 @@
                     <div class="form-group row mb-3">
                         <label for="period_to" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period To') }}</label>
                         <div class="col-md-6">
-                            <input id="period_to" type="date" class="form-control @error('period_to') is-invalid @enderror" name="period_to" value="{{ old('period_to') }}" required>
+                            <input id="period_to" type="number" min="2000" max="2100" class="form-control @error('period_to') is-invalid @enderror" name="period_to" value="{{ old('period_to') }}" required placeholder="YYYY">
                             @error('period_to')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -203,10 +243,10 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="implementation_date" class="col-md-4 col-form-label text-md-right">{{ __('Implementation Date') }}</label>
+                        <label for="implementation_date_from" class="col-md-4 col-form-label text-md-right">{{ __('Implementation Date From') }}</label>
                         <div class="col-md-6">
-                            <input id="implementation_date" type="date" class="form-control @error('implementation_date') is-invalid @enderror" name="implementation_date" value="{{ old('implementation_date') }}" required>
-                            @error('implementation_date')
+                            <input id="implementation_date_from" type="date" class="form-control @error('implementation_date_from') is-invalid @enderror" name="implementation_date_from" value="{{ old('implementation_date_from') }}" required>
+                            @error('implementation_date_from')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -215,7 +255,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget (per hour)') }}</label>
+                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget') }}</label>
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-text">₱</span>
@@ -230,7 +270,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Number of Hours') }}</label>
+                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Total Number of Hours') }}</label>
                         <div class="col-md-6">
                             <input id="no_of_hours" type="number" class="form-control @error('no_of_hours') is-invalid @enderror" name="no_of_hours" value="{{ old('no_of_hours') }}">
                             @error('no_of_hours')
@@ -241,17 +281,6 @@
                         </div>
                     </div>
 
-                    <div class="form-group row mb-3">
-                        <label for="superior" class="col-md-4 col-form-label text-md-right">{{ __('Superior') }}</label>
-                        <div class="col-md-6">
-                            <input id="superior" type="text" class="form-control @error('superior') is-invalid @enderror" name="superior" value="{{ old('superior') }}">
-                            @error('superior')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                    </div>
 
                     <div class="form-group row mb-3">
                         <label for="provider" class="col-md-4 col-form-label text-md-right">{{ __('Learning Service Provider') }}</label>
@@ -311,13 +340,9 @@
                                 <!-- Selected participants will be displayed here -->
                             </div>
                             <select id="participants" class="form-control @error('participants') is-invalid @enderror" name="participants[]" multiple style="display: none;">
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ in_array($user->id, old('participants', [])) ? 'selected' : '' }}>
-                                    {{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.
-                                    </option>
-                                @endforeach
+                                {{-- Options are added via JavaScript --}}
                             </select>
-                            @error('participants')
+                             @error('participants')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -334,16 +359,30 @@
             </div>
         </div>
     </div>
-
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
     <!-- Participant List Modal -->
     <div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="participantModalLabel">List of Participants</h5>
+                    <h5 class="modal-title" id="participantModalLabel">Add Participants</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="participantSearch" placeholder="Search participants..." onkeyup="searchParticipants()">
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -351,24 +390,26 @@
                                     <th>Name</th>
                                     <th>Position</th>
                                     <th>Division</th>
-                                    <th>Role</th>
-                                    <th>Action</th>
+                                    <th>Participation Type</th>
+                                    <th>Select</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($users as $user)
-                                <tr>
+                                @foreach($users->sortBy('last_name') as $user)
+                                <tr class="participant-row">
                                     <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
                                     <td>{{ $user->position }}</td>
                                     <td>{{ $user->division }}</td>
                                     <td>
-                                        <select class="form-select form-select-sm participant-role" data-user-id="{{ $user->id }}">
-                                            <option value="participant">Participant</option>
-                                            <option value="resource_person">Resource Person</option>
+                                        <select class="form-select participation-type" data-user-id="{{ $user->id }}">
+                                            <option value="">Select Type</option>
+                                            @foreach($participationTypes as $type)
+                                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                            @endforeach
                                         </select>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary add-participant-btn" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">Add</button>
+                                        <input type="checkbox" class="form-check-input participant-checkbox" data-user-id="{{ $user->id }}">
                                     </td>
                                 </tr>
                                 @endforeach
@@ -378,7 +419,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="doneBtn">Done</button>
+                    <button type="button" class="btn btn-primary" id="addSelectedParticipantsBtn">Add</button>
                 </div>
             </div>
         </div>
@@ -389,133 +430,274 @@
         document.addEventListener('DOMContentLoaded', function() {
             const participantsSelect = document.getElementById('participants');
             const selectedParticipantsDiv = document.getElementById('selectedParticipants');
-            const addParticipantBtns = document.querySelectorAll('.add-participant-btn');
-            const doneBtn = document.getElementById('doneBtn');
             const participantModal = document.getElementById('participantModal');
             const modal = bootstrap.Modal.getInstance(participantModal) || new bootstrap.Modal(participantModal);
+            const form = document.getElementById('trainingForm');
+            const addSelectedParticipantsBtn = document.getElementById('addSelectedParticipantsBtn');
 
-            // Function to update the selected participants display
-            function updateSelectedParticipantsDisplay() {
+            // Clear any pre-selected participants
+            participantsSelect.innerHTML = '';
+            selectedParticipantsDiv.innerHTML = '';
+
+            // Function to update the selected participants display and hidden inputs
+            function updateSelectedParticipants() {
                 selectedParticipantsDiv.innerHTML = '';
-                Array.from(participantsSelect.options).forEach(option => {
+                 // Clear the old hidden inputs before adding new ones
+                form.querySelectorAll('input[name="participants[]"], input[name^="participation_types["]').forEach(input => {
+                    input.remove();
+                });
+
+                const selected = [];
+                document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
+                    const userId = checkbox.dataset.userId;
+                    const participantRow = checkbox.closest('.participant-row');
+                    const participationTypeSelect = participantRow.querySelector('.participation-type');
+                    const participationTypeId = participationTypeSelect.value;
+                    const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
+                    const userName = participantRow.querySelector('td').textContent.trim(); // Get name from the first cell
+
+                    // Only add if a participation type is selected and it's not the default empty option
+                    if (participationTypeId && participationTypeId !== '') {
+                         selected.push({
+                            id: userId,
+                            name: userName,
+                            participation_type_id: participationTypeId,
+                            participation_type_name: participationTypeName
+                        });
+
+                        // Add hidden inputs to the main form
+                        const participantInput = document.createElement('input');
+                        participantInput.type = 'hidden';
+                        participantInput.name = 'participants[]';
+                        participantInput.value = userId;
+                        form.appendChild(participantInput);
+
+                        const participationTypeInput = document.createElement('input');
+                        participationTypeInput.type = 'hidden';
+                        participationTypeInput.name = `participation_types[${userId}]`;
+                        participationTypeInput.value = participationTypeId;
+                        form.appendChild(participationTypeInput);
+
+                    }
+                });
+
+                // Update the visual display
+                selected.forEach(participant => {
                     const participantDiv = document.createElement('div');
                     participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
-                    const role = option.dataset.role || 'participant';
-                    const roleBadge = role === 'resource_person' ? 
-                        '<span class="badge bg-primary ms-2">Resource Person</span>' : 
-                        '<span class="badge bg-secondary ms-2">Participant</span>';
                     
                     participantDiv.innerHTML = `
-                        <span>${option.text} ${roleBadge}</span>
-                        <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${option.value}">
-                            <i class="bi bi-x"></i> Remove
-                        </button>
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">${participant.name}</span>
+                            <span class="badge bg-info">${participant.participation_type_name}</span>
+                        </div>
+                        <div>
+                             ${/* We keep the remove button functionality for the displayed list outside the modal */''}
+                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.id}">
+                                <i class="bi bi-x"></i> Remove
+                            </button>
+                        </div>
                     `;
                     selectedParticipantsDiv.appendChild(participantDiv);
                 });
+
+                // Log the current state
+                console.log('Selected participants:', selected);
             }
 
-            // Handle Add Participant button clicks
-            addParticipantBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const userId = this.dataset.userId;
-                    const userName = this.closest('tr').querySelector('td:first-child').textContent.trim();
-                    const roleSelect = this.closest('tr').querySelector('.participant-role');
-                    const role = roleSelect.value;
-                    
-                    // Check if user is already selected
-                    const optionExists = Array.from(participantsSelect.options).some(option => option.value === userId);
-                    
-                    if (!optionExists) {
-                        const option = new Option(userName, userId, true, true);
-                        option.dataset.role = role;
-                        participantsSelect.appendChild(option);
-                        this.disabled = true;
-                        this.textContent = 'Added';
-                        this.classList.remove('btn-primary');
-                        this.classList.add('btn-success');
-                    }
-                });
+             // Handle Add Selected Participants button click in modal footer
+            addSelectedParticipantsBtn.addEventListener('click', function() {
+                updateSelectedParticipants();
+                modal.hide(); // Close the modal after adding
             });
 
-            // Handle Remove Participant button clicks
+            // Handle Remove Participant button clicks from the displayed list outside the modal
             selectedParticipantsDiv.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-participant')) {
                     const button = e.target.closest('.remove-participant');
                     const userId = button.dataset.userId;
                     
-                    // Remove from select
-                    const option = Array.from(participantsSelect.options).find(opt => opt.value === userId);
-                    if (option) {
-                        option.remove();
+                    // Remove the hidden inputs for this user
+                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+
+                    // Uncheck the corresponding checkbox in the modal (if modal is open)
+                    const checkboxInModal = document.querySelector(`.participant-checkbox[data-user-id="${userId}"]`);
+                    if (checkboxInModal) {
+                        checkboxInModal.checked = false;
                     }
                     
-                    // Reset the Add button in modal
-                    const addBtn = document.querySelector(`.add-participant-btn[data-user-id="${userId}"]`);
-                    if (addBtn) {
-                        addBtn.disabled = false;
-                        addBtn.textContent = 'Add';
-                        addBtn.classList.remove('btn-success');
-                        addBtn.classList.add('btn-primary');
+                    // Remove the participant's div from the display
+                    button.closest('.d-flex').remove();
+
+                    // Update the console log (optional, for debugging)
+                     console.log('Removed participant:', userId);
+                     console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
+                } else if (e.target.classList.contains('remove-participant')) { // Handle click directly on the icon inside the button
+                     const button = e.target;
+                    const userId = button.dataset.userId;
+                     // Remove the hidden inputs for this user
+                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+
+                    // Uncheck the corresponding checkbox in the modal (if modal is open)
+                    const checkboxInModal = document.querySelector(`.participant-checkbox[data-user-id="${userId}"]`);
+                    if (checkboxInModal) {
+                        checkboxInModal.checked = false;
                     }
-                    
-                    // Update display
-                    updateSelectedParticipantsDisplay();
+
+                    // Remove the participant's div from the display
+                    button.closest('.d-flex').remove();
+
+                     // Update the console log (optional, for debugging)
+                     console.log('Removed participant:', userId);
+                     console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
                 }
             });
 
-            // Handle Done button click
-            doneBtn.addEventListener('click', function() {
-                // Update the display before closing the modal
-                updateSelectedParticipantsDisplay();
-                modal.hide();
-            });
-
-            // Reset Add buttons when modal is hidden
-            participantModal.addEventListener('hidden.bs.modal', function() {
-                addParticipantBtns.forEach(btn => {
-                    btn.disabled = false;
-                    btn.textContent = 'Add';
-                    btn.classList.remove('btn-success');
-                    btn.classList.add('btn-primary');
-                });
-            });
-
-            // Form validation
-            const form = document.getElementById('trainingForm');
+            // Form validation and submission - Keep this, ensure it reads from the hidden inputs
             form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                console.log('Form submission started');
+                
+                // Validate required fields
                 const requiredFields = form.querySelectorAll('[required]');
                 let isValid = true;
+                let firstInvalidField = null;
 
                 requiredFields.forEach(field => {
-                    if (!field.value.trim()) {
+                    if (!field.value) {
                         isValid = false;
                         field.classList.add('is-invalid');
+                        if (!firstInvalidField) {
+                            firstInvalidField = field;
+                        }
+                        console.log('Invalid field:', field.name);
                     } else {
                         field.classList.remove('is-invalid');
                     }
                 });
 
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Please fill in all required fields.');
+                // Check if participants are selected by looking at the hidden inputs
+                const selectedParticipants = form.querySelectorAll('input[name="participants[]"]');
+                if (selectedParticipants.length === 0) {
+                    alert('Please add at least one participant');
+                    isValid = false;
+                }
+
+                // Log form data - Keep this, it now reads from the hidden inputs
+                const formData = new FormData(form);
+                console.log('Form data:', {
+                    title: formData.get('title'),
+                    competency_id: formData.get('competency_id'),
+                    core_competency: formData.get('core_competency') === 'Others' ? formData.get('core_competency_input') : formData.get('core_competency'), // Get the correct core competency value
+                    period_from: formData.get('period_from'),
+                    period_to: formData.get('period_to'),
+                    implementation_date_from: formData.get('implementation_date_from'),
+                     implementation_date_to: formData.get('implementation_date_to'), // Added missing field
+                    budget: formData.get('budget'),
+                    no_of_hours: formData.get('no_of_hours'),
+                    // superior: formData.get('superior'),
+                    provider: formData.get('provider'),
+                    dev_target: formData.get('dev_target'),
+                    performance_goal: formData.get('performance_goal'),
+                    objective: formData.get('objective'),
+                    type: formData.get('type'),
+                    participants: Array.from(formData.getAll('participants[]')),
+                    participation_types: Object.fromEntries(
+                        Array.from(formData.entries())
+                            .filter(([key]) => key.startsWith('participation_types['))
+                            .map(([key, value]) => [key.match(/\[(\d+)\]/)[1], value]) // Corrected regex escaping
+                    )
+                });
+
+                if (isValid) {
+                    console.log('Form is valid, submitting...');
+                    // Submit the form
+                    this.submit();
+                } else {
+                    console.log('Form validation failed');
+                    if (firstInvalidField) {
+                        firstInvalidField.focus();
+                    }
                 }
             });
 
-            // Clear initial selections
-            participantsSelect.innerHTML = '';
-            updateSelectedParticipantsDisplay();
+            // Event listener for modal close to update display based on selections
+            participantModal.addEventListener('hidden.bs.modal', function () {
+                 updateSelectedParticipants();
+            });
+
+             // Initial call to setup the display based on any old data (if page was reloaded with errors)
+             // This part might need adjustment depending on how old input is handled after validation errors.
+             // For now, let's assume fresh start or data is correctly in hidden inputs if validation failed.
+             // We can add logic here later if needed to read from old input to pre-select checkboxes on modal open.
+
         });
 
         function setPeriodTo() {
-            const fromDate = document.getElementById('period_from').value;
-            if (fromDate) {
-                const date = new Date(fromDate);
-                date.setFullYear(date.getFullYear() + 3);
-                const toDate = date.toISOString().split('T')[0];
-                document.getElementById('period_to').value = toDate;
+            const fromYearInput = document.getElementById('period_from');
+            const toYearInput = document.getElementById('period_to');
+            const fromYear = parseInt(fromYearInput.value);
+
+            if (fromYear) {
+                // Add 3 years to the from year
+                const toYear = fromYear + 3;
+                toYearInput.value = toYear;
+            }
+        }
+
+        function toggleCoreCompetencyInput() {
+            const coreCompetencySelect = document.getElementById('core_competency');
+            const coreCompetencyInput = document.getElementById('core_competency_input');
+
+            if (coreCompetencySelect.value === 'Others') {
+                coreCompetencySelect.style.display = 'none';
+                coreCompetencyInput.style.display = 'block';
+                coreCompetencyInput.required = true;
+                coreCompetencyInput.focus();
+            } else {
+                coreCompetencySelect.style.display = 'block';
+                coreCompetencyInput.style.display = 'none';
+                coreCompetencyInput.required = false;
+            }
+             // Ensure the correct value is sent in the form based on which element is visible/used
+             // This might require updating a hidden field or handling in the form submission logic.
+             // The form submission logic already handles this by checking the select value.
+        }
+
+        // Call on page load to set initial state
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCoreCompetencyInput();
+        });
+
+        function searchParticipants() {
+            const input = document.getElementById('participantSearch');
+            const filter = input.value.toUpperCase();
+            const rows = document.getElementsByClassName('participant-row');
+
+            for (let i = 0; i < rows.length; i++) {
+                const nameCell = rows[i].getElementsByTagName('td')[0];
+                const positionCell = rows[i].getElementsByTagName('td')[1];
+                const divisionCell = rows[i].getElementsByTagName('td')[2];
+                
+                if (nameCell && positionCell && divisionCell) {
+                    const nameText = nameCell.textContent || nameCell.innerText;
+                    const positionText = positionCell.textContent || positionCell.innerText;
+                    const divisionText = divisionCell.textContent || divisionCell.innerText;
+                    
+                    if (nameText.toUpperCase().indexOf(filter) > -1 || 
+                        positionText.toUpperCase().indexOf(filter) > -1 || 
+                        divisionText.toUpperCase().indexOf(filter) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
             }
         }
     </script>
+
 </body>
 </html>

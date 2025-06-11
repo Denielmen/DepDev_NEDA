@@ -138,6 +138,7 @@
             <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
@@ -151,15 +152,27 @@
                     </tr>
                     <tr>
                         <td class="label">Competency:</td>
-                        <td>{{ $training->competency ?? '' }}</td>
+                        <td>{{ $training->competency->name ?? '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Role:</td>
-                        <td>{{ $training->user_role ?? 'Participant' }}</td>
+                        <td>@if($training->user_id == $user->id)
+                                    Creator
+                                @else
+                                    @php
+                                        $participant = $training->participants->where('id', $user->id)->first();
+                                        $participationType = $participant ? $participant->pivot->participation_type_id : null;
+                                    @endphp
+                                    @if($participationType)
+                                        {{ \App\Models\ParticipationType::find($participationType)->name }}
+                                    @else
+                                        N/A
+                                    @endif
+                                @endif</td>
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/Y') : '' }}</td>
+                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Learning Service Provider:</td>

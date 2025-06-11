@@ -64,7 +64,8 @@
       font-size: 0.9rem;
     }
 
-    .sidebar a:hover, .sidebar a.active {
+    .sidebar a:hover,
+    .sidebar a.active {
       background-color: #004080;
       font-weight: bold;
     }
@@ -99,8 +100,11 @@
     }
 
     .neda-logo {
-      width: 70px;
-      margin-bottom: 1.5rem;
+      width: 80%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto 1.5rem auto;
     }
 
     .back-button {
@@ -179,7 +183,6 @@
     }
 
     .section-title {
-      font-weight: bold;
       margin-top: 20px;
     }
 
@@ -225,15 +228,17 @@
     }
 
     .dropdown-item {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
     }
+
     .dropdown-item:hover {
-        background-color: #f8f9fa;
+      background-color: #f8f9fa;
     }
+
     .dropdown-item.text-danger:hover {
-        background-color: #dc3545;
-        color: white !important;
+      background-color: #dc3545;
+      color: white !important;
     }
   </style>
 </head>
@@ -274,11 +279,11 @@
 
     <!-- Sidebar -->
     <div class="sidebar" style="top: 56px;">
-      <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-      <a href="{{ route('training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-      <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-      <a href="{{ route('training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-      <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+      <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+      <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+      <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+      <a href="{{ route('user.training.effectivenesss') }}" class="active"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+      <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
     </div>
 
     <!-- Main Content -->
@@ -286,21 +291,20 @@
 
       <!-- Back Button -->
       <div class="back-button">
-        <a href="{{ route('training.effectivenesss') }}" class="btn-back-minimal">
+        <a href="{{ route('user.training.effectivenesss') }}" class="btn-back-minimal">
           <i class="bi bi-arrow-left me-2"></i> Back
         </a>
       </div>
 
       <div class="evaluation-container">
         <div class="evaluation-header">
-          <img src="{{ asset('images/neda-logo.png') }}" alt="NEDA Logo" class="neda-logo">
-          <h4>Republic of the Philippines</h4>
-          <h5>NATIONAL ECONOMIC AND DEVELOPMENT AUTHORITY</h5>
+          <img src="{{ asset('images/DEPDev_logo_text_center.png') }}" alt="NEDA Logo" class="neda-logo">
+
           <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
-          <p>(For Supervisor)</p>
+          <p>(For Supervisor/Manager of the Participant - Online)</p>
         </div>
 
-        <form method="POST" action="{{ route('training.effectivenesss') }}" class="evaluation-form">
+        <form method="POST" action="{{ route('user.training.effectivenesss') }}" class="evaluation-form">
           @csrf
           <label for="courseTitle">Course Title:</label>
           <select id="courseTitle" name="courseTitle" required style="margin-bottom: 20px;">
@@ -310,7 +314,7 @@
           </select>
 
           <div class="instruction-container">
-            <p><strong>Please tick the circle which describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied, (3) Satisfied, <br>(2) Dissatisfied, (1) Very Dissatisfied.</p>
+            <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied, (3) Satisfied, <br>(2) Dissatisfied, (1) Very Dissatisfied.</p>
           </div>
 
           <table>
@@ -331,12 +335,12 @@
           </table>
 
           <div class="instruction-container">
-            <p><strong>Please tick the circle which best describes your evaluation of the program. You have 5 choices to choose from: </strong>(4) Strongly agree, (3) Agree, <br>(2) Disagree, (1) Strongly Disagree, (Na) Not Applicable</p>
+            <p><strong>Please tick the circle which best describes your evaluation of the program. You have 5 choices to choose from: </strong>(4) Strongly agree, (3) Agree, <br>(2) Disagree, (1) Strongly Disagree, (NA) Not Applicable</p>
           </div>
           <table>
             <tr>
-              <th style="width: 60%;">B. Participants' Work Performance  (To be determined within one 
-              performance rating period) </th>
+              <th style="width: 60%;">B. Participants' Work Performance (to be determined within one
+                performance rating period) </th>
               <th style="width: 4%; text-align: center;">1</th>
               <th style="width: 4%; text-align: center;">2</th>
               <th style="width: 4%; text-align: center;">3</th>
@@ -344,7 +348,7 @@
               <th style="width: 4%; text-align: center;">NA</th>
             </tr>
             <tr>
-              <td>1. The employee applied the learning's gained from this course.</td>
+              <td>1. The employee applied the learning/s gained from this course.</td>
               <td class="rating-cell"><input type="radio" name="learning1" value="1" required></td>
               <td class="rating-cell"><input type="radio" name="learning1" value="2"></td>
               <td class="rating-cell"><input type="radio" name="learning1" value="3"></td>
@@ -357,7 +361,7 @@
               <td class="rating-cell"><input type="radio" name="learning2" value="2"></td>
               <td class="rating-cell"><input type="radio" name="learning2" value="3"></td>
               <td class="rating-cell"><input type="radio" name="learning2" value="4"></td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
+              <td class="rating-cell"><input type="radio" name="learning2" value="5"></td>
             </tr>
             <tr>
               <td>3. The proficiency level of the employee on this course increased.</td>
@@ -365,35 +369,35 @@
               <td class="rating-cell"><input type="radio" name="learning3" value="2"></td>
               <td class="rating-cell"><input type="radio" name="learning3" value="3"></td>
               <td class="rating-cell"><input type="radio" name="learning3" value="4"></td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
+              <td class="rating-cell"><input type="radio" name="learning3" value="5"></td>
             </tr>
             <tr>
-              <td>4. The employee's overall work performance increase/improved.</td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="1" required></td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="2"></td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="3"></td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="4"></td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
+              <td>4. The employee's overall work performance increased/improved.</td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="1" required></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="2"></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="3"></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="4"></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="5"></td>
             </tr>
           </table>
 
           <div class="form-group">
-            <label for="workPerformanceChanges"><strong>To support your your training, please describe changes in work performance as a result of 
-attendance to this training. if employee's work performance did not change, please cite possible 
-reasons and what support is needed in order for the employee's to apply acquired knowledge and skills.</strong></label>
+            <label for="workPerformanceChanges"><strong>To support your raating, please describe changes in work performance as a result of
+                attendance to this training. If employee's work performance did not change, please cite possible
+                reasons and what support is needed in order for the employees to apply acquired knowledge and skills.</strong></label>
             <textarea name="workPerformanceChanges" rows="4" placeholder="Write down the changes from your performance..."></textarea>
           </div>
 
           <table>
             <tr>
-              <th style="width: 60%;">C.  Learner's Proficiency Level</th>
+              <th style="width: 60%;">C. Learner's Proficiency Level</th>
               <th style="width: 5%; text-align: center;">1</th>
               <th style="width: 5%; text-align: center;">2</th>
               <th style="width: 5%; text-align: center;">3</th>
               <th style="width: 5%; text-align: center;">4</th>
             </tr>
             <tr>
-              <td>In a scale 1-4 (4 is being the highest ), please tick the circle which describes the proficiency level of your subordinate after participation in this course.</td>
+              <td>In a scale 4-1 (4 being the highest), please tick the circle which best describes the proficiency level of your subordinate after participation in this course.</td>
               <td class="rating-cell"><input type="radio" name="performance1" value="1" required></td>
               <td class="rating-cell"><input type="radio" name="performance1" value="2"></td>
               <td class="rating-cell"><input type="radio" name="performance1" value="3"></td>
@@ -402,15 +406,7 @@ reasons and what support is needed in order for the employee's to apply acquired
 
           </table>
 
-      
-          <p><strong>To support your your training, please describe changes in work performance as a result of
-              attendance to this training. if employee's work performance did not change, please cite possible
-              reasons and what support is needed in order for the employee's to apply acquired knowledge and skills.</strong></p>
-          <textarea name="changes" rows="4" placeholder="Describe any changes..." required></textarea>
-
-
-
-          <div class="section-title">D. Comments/Recommendation (if any, to increase the impact of the training.)</div>
+          <div class="section-title"><strong>D. Comments/Recommendation</strong> (if any, to increase the impact of the training.)</div>
           <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
             <strong>I will initiate the participation of other staffs to this course.</strong>
             <div class="form-check">
@@ -423,7 +419,7 @@ reasons and what support is needed in order for the employee's to apply acquired
             </div>
           </div>
 
-          <div class="section-title">E. Comments/Suggestion on the training  program.</div>
+          <div class="section-title"><strong>E. Comments/Suggestion on the training program.<strong></div>
           <textarea name="trainingSuggestions" rows="4" placeholder="Input here your comments......"></textarea>
 
           <div class="submit-button">

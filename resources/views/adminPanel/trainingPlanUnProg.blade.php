@@ -201,6 +201,7 @@
             <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
@@ -214,10 +215,10 @@
                     <a href="{{ route('admin.training-plan') }}" class="tab-button">Programmed</a>
                     <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
-                <div class="search-box">
+                <form action="{{ route('admin.training-plan.unprogrammed') }}" method="GET" class="search-box">
+                    <input type="text" name="search" placeholder="Search by title or participant..." value="{{ request('search') }}">
                     <i class="bi bi-search search-icon"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
+                </form>
             </div>
 
             <div class="training-table mt-3">
@@ -234,18 +235,26 @@
                     @foreach($trainings->sortByDesc('created_at') as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
-                            <td>{{ $training->competency }}</td>
-                            <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/y') : 'Not set' }}</td>
+                            <td>{{ $training->competency->name }}</td>
+                            <td>@if($training->implementation_date_from && $training->implementation_date_to)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @elseif($training->implementation_date_from)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - N/A
+                                @elseif($training->implementation_date_to)
+                                    N/A - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @else
+                                    N/A
+                                @endif</td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <a href="{{ route('admin.training.view.unprogrammed', $training->id) }}" class="btn btn-view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
-                                    <div class="dropdown">
+                                    {{-- <div class="dropdown">
                                         <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
                                             <i class="bi bi-three-dots"></i>
                                         </button>
-                                        <ul class="dropdown-menu">
+                                        <!-- <ul class="dropdown-menu">
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
                                                     <i class="bi bi-pencil-square"></i> Edit
@@ -260,8 +269,8 @@
                                                     </button>
                                                 </form>
                                             </li>
-                                        </ul>
-                                    </div>
+                                        </ul> -->
+                                    </div> --}}
                                 </div>
                             </td>
                         </tr>
@@ -273,5 +282,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add search functionality
+        document.querySelector('.search-box input').addEventListener('input', function(e) {
+            // Add a small delay to prevent too many requests
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+    </script>
 </body>
 </html>

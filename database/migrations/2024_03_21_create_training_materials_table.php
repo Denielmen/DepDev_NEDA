@@ -11,9 +11,12 @@ return new class extends Migration
         Schema::create('training_materials', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('competency');
             $table->string('source');
-            $table->string('file_path');
+            $table->string('file_path')->nullable();
+            $table->string('link')->nullable();
+            $table->string('type')->default('material');
+            $table->foreignId('competency_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

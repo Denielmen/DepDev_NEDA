@@ -175,11 +175,11 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
-            <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+            <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
@@ -190,8 +190,8 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="tab-buttons">
-                    <a href="{{ route('training.profile.program') }}" class="tab-button">Programmed</a>
-                    <a href="{{ route('training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
+                    <a href="{{ route('user.training.profile.program') }}" class="tab-button">Programmed</a>
+                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
                 <div class="search-box">
                     <input type="text" placeholder="Search...">
@@ -205,7 +205,7 @@
                         <tr>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Date of Attendance</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">No. of Hours</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
@@ -217,16 +217,35 @@
                         @foreach($trainings as $training)
                         <tr>
                             <td class="text-center">{{ $training->title }}</td>
-                            <td class="text-center">{{ $training->competency }}</td>
-                            <td class="text-center">{{ \Carbon\Carbon::parse($training->implementation_date)->format('m/d/y') }}</td>
+                            <td class="text-center">{{ $training->competency->name }}</td>
+                            <td class="text-center">
+                                @if($training->implementation_date_from && $training->implementation_date_to)
+                                    {{ $training->implementation_date_from->format('d/m/Y') }} - {{ $training->implementation_date_to->format('d/m/Y') }}
+                                @elseif($training->implementation_date_from)
+                                    {{ $training->implementation_date_from->format('d/m/Y') }} - N/A
+                                @elseif($training->implementation_date_to)
+                                    N/A - {{ $training->implementation_date_to->format('d/m/Y') }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
                             <td class="text-center">
                                 {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
                             </td>
-                            <td class="text-center">Participant</td>
                             <td class="text-center">
-                                <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>
+                                @php
+                                    $currentUserParticipant = $training->participants->first();
+                                    $userRole = null;
+                                    if ($currentUserParticipant && isset($currentUserParticipant->pivot->participation_type_id)) {
+                                        $userRole = $participationTypes->get($currentUserParticipant->pivot->participation_type_id)->name ?? 'N/A';
+                                    }
+                                @endphp
+                                {{ $userRole ?? 'N/A' }}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>  
                             </td>
                         </tr>
                         @endforeach

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('trainings', function (Blueprint $table) {
-            $table->enum('participation_type', ['Resource Person', 'Participant'])->after('type')->default('Participant');
+        Schema::table('training_materials', function (Blueprint $table) {
+            $table->foreignId('training_id')->nullable()->constrained('trainings')->onDelete('set null');
         });
     }
 
@@ -21,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('trainings', function (Blueprint $table) {
-            $table->dropColumn('participation_type');
+        Schema::table('training_materials', function (Blueprint $table) {
+            $table->dropForeign(['training_id']);
+            $table->dropColumn('training_id');
         });
     }
-};
+}; 

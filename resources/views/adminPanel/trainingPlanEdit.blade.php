@@ -33,12 +33,12 @@
                         <input type="text" class="form-control" id="competency" name="competency" value="{{ $training->competency }}" required>
                     </div>
                     <div class="mb-3">
-                        <label for="implementation_date" class="form-label">Implementation Date</label>
-                        <input type="date" class="form-control" id="implementation_date" name="implementation_date" value="{{ $training->implementation_date->format('Y-m-d') }}" required>
+                        <label for="implementation_date_from" class="form-label">Implementation Date From</label>
+                        <input type="date" class="form-control" id="implementation_date_from" name="implementation_date_from" value="{{ $training->implementation_date_from->format('Y-m-d') }}" required>
                     </div>
                     <div class="mb-3">
-                        <label for="provider" class="form-label">Provider</label>
-                        <input type="text" class="form-control" id="provider" name="provider" value="{{ $training->provider }}">
+                        <label for="implementation_date_to" class="form-label">Implementation Date To</label>
+                        <input type="date" class="form-control" id="implementation_date_to" name="implementation_date_to" value="{{ $training->implementation_date_to->format('Y-m-d') }}" required>
                     </div>
                     <div class="mb-3">
                         <label for="type" class="form-label">Type</label>

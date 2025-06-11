@@ -147,6 +147,7 @@
         <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
         <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
         <a href="{{ route('admin.reports') }}" class="active"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+        <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
 
     <!-- Main Content -->
@@ -172,27 +173,27 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($trainings as $category => $categoryTrainings)
+                        @foreach($trainings as $coreCompetency => $categoryTrainings)
                             <tr>
-                                <td colspan="6" class="category-header">{{ $category }}</td>
+                                <td colspan="6" class="category-header">{{ $coreCompetency }}</td>
                             </tr>
-                            @foreach($categoryTrainings->sortByDesc('created_at') as $training)
+                            @foreach($categoryTrainings as $training)
                                 <tr>
                                     <td>{{ $training->title }}</td>
-                                    <td>{{ $training->competency }}</td>
+                                    <td>{{ $training->competency->name }}</td>
                                     <td>
-                                        @foreach($training->participants ?? [] as $participant)
+                                        @foreach($training->participants_2025 ?? [] as $participant)
                                             {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
                                         @endforeach
                                     </td>
                                     <td>
                                         @foreach($training->participants_2026 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->name }}<br>
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
                                         @endforeach
                                     </td>
                                     <td>
                                         @foreach($training->participants_2027 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->name }}<br>
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
                                         @endforeach
                                     </td>
                                     <td>{{ $training->provider }}</td>
@@ -203,15 +204,12 @@
                 </table>
             </div>
             <div class="d-flex justify-content-end mt-3">
-                <div class="dropdown">
-                    <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-download me-2"></i>Export Report
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="exportDropdownButton">
-                        <li><a class="dropdown-item" href="#">CSV</a></li>
-                        <li><a class="dropdown-item" href="#">PDF</a></li>
-                    </ul>
-                </div>
+                <a href="{{ route('admin.reports.export.pdf') }}" class="btn btn-danger me-2" id="exportPdfButton">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+                </a>
+                <a href="{{ route('admin.reports.export.excel') }}" class="btn btn-success" id="exportExcelButton">
+                    <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
+                </a>
             </div>
         </div>
     </div>

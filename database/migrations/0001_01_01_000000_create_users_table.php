@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('first_name', 50);
             $table->string('mid_init', 10)->nullable();
             $table->string('position', 100);
-            $table->string('office', 100);
             $table->integer('years_in_position');
             $table->integer('years_in_csc');
             $table->string('division', 100);
@@ -27,6 +26,7 @@ return new class extends Migration
             $table->string('superior', 100)->nullable();
             $table->string('password', 255);
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_superior_eligible')->default(false);
             $table->timestamps();
         });
        

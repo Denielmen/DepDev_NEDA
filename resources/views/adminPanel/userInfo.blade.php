@@ -77,6 +77,7 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
+            border: 2px solid #004080;
         }
         .user-avatar i {
             font-size: 3rem;
@@ -143,35 +144,33 @@
         }
         .program-tabs .nav-link {
             color: #d6d3d3 !important;
-            /* background-color: white; */
-            /* border: 1px solid #003366; */
             margin-right: 5px;
             border-radius: 5px;
             color: #003366 !important;
             background-color: white;
 
         }
-        /* .program-tabs .nav-link:hover {
-            color: #003366 !important;
-            background-color: white;
-        } */
         .program-tabs .nav-link.active {
             background-color: #003366;
             color: white !important;
             font-weight: bold;
         }
-        .btn-outline-primary {
-            color: #003366;
-            border-color: #003366;
-        }
-        .btn-outline-primary:hover {
+        .btn-back {
             background-color: #003366;
-            color: white;
+            color: #fff;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-decoration: none;
+            margin-right: 900px;
+            
         }
-        .back-button {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .btn-back:hover {
+            background-color: #004080;
+            color: #fff;
+            transform: translateY(-1px);
         }
         .user-info-card.text-center {
             padding: 25px 20px;
@@ -186,6 +185,16 @@
         }
         .user-avatar {
             margin-bottom: 20px;
+        }
+        .form-label,.mb-0 {
+            font-weight: bold;
+        }
+        .btn-primary{
+            background-color: #003366;
+            color: #fff;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -225,15 +234,17 @@
         <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
         <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+        <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <button class="btn btn-outline-primary" onclick="window.location.href='{{ route('admin.participants') }}'">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-        </div>
+        <div class="top-actions">
+                <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants') }}'">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </button>
+            </div>
 
         <div class="row">
             <!-- User Info Card -->
@@ -272,8 +283,8 @@
                         <input type="text" class="form-control" value="{{ $user->division }}" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Office/Department</label>
-                        <input type="text" class="form-control" value="{{ $user->office }}" readonly>
+                        <label class="form-label">Position</label>
+                        <input type="text" class="form-control" value="{{ $user->position }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Name of Supervisor (Last, First, MI)</label>
@@ -314,13 +325,34 @@
                     @foreach($programmedTrainings as $training)
                     <tr>
                         <td>{{ $training->title }}</td>
-                        <td>{{ $training->competency }}</td>
-                        <td>{{ $training->implementation_date->format('m/d/y') }}</td>
+                        <td>{{ $training->competency->name}}</td>
+                        <td>@if($training->status === 'Implemented' )
+                                    {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
+                                @else
+                                    {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
+                                @endif</td>
                         <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>{{ $training->status }}</td>
                         <td>
-                            {{ $training->participation_type }}
+                            @php
+                                $participationTypeName = 'N/A';
+                                // Find the participant pivot data for the current user in this training
+                                $participantPivot = $training->participants->first(function ($participant) use ($user) {
+                                    return $participant->id === $user->id;
+                                });
+
+                                if ($participantPivot && $participantPivot->pivot) {
+                                    // Now that we have the pivot, get the participation type ID
+                                    $participationTypeId = $participantPivot->pivot->participation_type_id;
+                                    // Find the participation type name using the ID
+                                    $participationType = \App\Models\ParticipationType::find($participationTypeId);
+                                    if ($participationType) {
+                                        $participationTypeName = $participationType->name;
+                                    }
+                                }
+                            @endphp
+                            {{ $participationTypeName }}
                         </td>
                         <td>
                             <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn btn-primary">View</a>

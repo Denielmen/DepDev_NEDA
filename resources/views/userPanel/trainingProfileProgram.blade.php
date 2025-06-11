@@ -14,6 +14,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            background-color: #f8f9fa;
         }
         .navbar {
             background-color:rgb(255, 255, 255);
@@ -35,10 +36,13 @@
         }
         .sidebar {
             background-color: #003366;
-            min-height: calc(100vh - 56px);
+            position: fixed;
+            top: 56px;
+            left: 0;
             width: 270px;
+            height: calc(100vh - 56px);
             padding-top: 20px;
-            margin-top: 56px;
+            z-index: 1030;
         }
         .sidebar a {
             color: white;
@@ -52,11 +56,13 @@
             font-weight: bold;
         }
         .main-content {
-            flex-grow: 1;
-            padding: 20px;
-            background-color: #f8f9fa;
-            background-color: rgb(187, 219, 252);
+            margin-left: 270px;
             margin-top: 56px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            background-color: rgb(187, 219, 252);
+            padding: 20px;
+            width: calc(100vw - 270px);
         }
         .content-header {
             background-color: #e7f1ff;
@@ -187,12 +193,12 @@
 
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <a href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
-            <a href="{{ route('tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
-            <a href="{{ route('training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
-            <a href="{{ route('training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
+        <div class="sidebar" style="top: 56px;">
+            <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
 
         <!-- Main Content -->
@@ -203,8 +209,8 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="tab-buttons">
-                    <a href="{{ route('training.profile.program') }}" class="tab-button active">Programmed</a>
-                    <a href="{{ route('training.profile.unprogrammed') }}" class="tab-button">Unprogrammed</a>
+                    <a href="{{ route('user.training.profile.program') }}" class="tab-button active">Programmed</a>
+                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button">Unprogrammed</a>
                 </div>
                 <div class="search-box">
                     <input type="text" placeholder="Search...">
@@ -235,12 +241,12 @@
                             data-pre-rating="{{ $training->participant_pre_rating ?? '' }}"
                             data-post-rating="{{ $training->participant_post_rating ?? '' }}">
                             <td class="text-center">{{ $training->title }}</td>
-                            <td class="text-center">{{ $training->competency }}</td>
+                            <td class="text-center">{{ $training->competency->name }}</td>
                             <td class="text-center">
-                                @if($training->status === 'Implemented' && $training->tthRecords && $training->tthRecords->count())
-                                    {{ \Carbon\Carbon::parse($training->tthRecords->first()->date_to)->format('d/m/Y') }}
+                                @if($training->status === 'Implemented' )
+                                    {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
                                 @else
-                                    {{ \Carbon\Carbon::parse($training->implementation_date)->format('Y') }}
+                                    {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
                                 @endif
                             </td>
                             <td class="text-center">{{ $training->no_of_hours }}</td>
@@ -248,34 +254,38 @@
                             <td class="text-center">
                                 {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
                             </td>
-                            <td class="text-center">Participant</td>
+                            <td class="text-center">
+                                @php
+                                    $currentUser = Auth::user();
+                                    $userRole = 'N/A';
+                                    if ($currentUser) {
+                                        $participant = $training->participants->where('id', $currentUser->id)->first();
+                                        if ($participant && isset($participant->pivot->participation_type_id)) {
+                                            $participationType = $participationTypes->get($participant->pivot->participation_type_id);
+                                            $userRole = $participationType->name ?? 'N/A';
+                                        }
+                                    }
+                                @endphp
+                                {{ $userRole }}
+                            </td>
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <a href="{{ route('training.profile.show', $training->id) }}" class="btn btn-info btn-sm">View</a>
-                                    <button
-                                        class="btn btn-sm ms-1 open-eval-modal {{ $preEvaluated ? 'btn-success' : 'btn-warning' }}"
-                                        data-training="{{ $training->id }}"
-                                        data-type="Pre-Evaluation"
-                                        data-evaluated="{{ $preEvaluated ? '1' : '0' }}"
-                                    >
-                                        Pre-Evaluation
-                                    </button>
+                                    <a href="{{ route('user.training.profile.show', $training->id) }}" class="btn btn-info btn-sm">View</a>
+                                    <button class="btn btn-sm ms-1 open-eval-modal {{ $preEvaluated ? 'btn-success' : 'btn-warning' }}" data-training="{{ $training->id }}" data-type="Pre-Evaluation" data-evaluated="{{ $preEvaluated ? '1' : '0' }}">Pre-Evaluation</button>
                                 </div>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-                <div class="d-flex justify-content-center mt-3">
-                    {{ $trainings->links() }}
-                </div>
+                
             </div>
             @if($trainings->count())
                 <div class="d-flex justify-content-end mt-3 mb-3">
-                    <a href="{{ route('training.export', $trainings->first()->id) }}" class="btn btn-info">
+                    <a href="{{ route('user.training.export', $trainings->first()->id) }}" class="btn btn-info">
                         <i class="bi bi-download me-2"></i>Export
                     </a>
-                </div>
+                </div>  
             @endif
         </div>
     </div>
@@ -325,95 +335,97 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let selectedRating = null;
-        document.querySelectorAll('.open-eval-modal').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var type = this.getAttribute('data-type');
-                var trainingId = this.getAttribute('data-training');
-                var evaluated = this.getAttribute('data-evaluated') === '1';
-                document.getElementById('evaluationModalLabel').textContent = type;
-                document.getElementById('modalTrainingId').value = trainingId;
-                document.getElementById('modalEvalType').value = type;
-                // Reset radio buttons
-                document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
-                    r.checked = false;
-                    r.disabled = false;
-                });
-                selectedRating = null;
-                // Show current rating if exists
-                var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
-                var currentRating = '';
-                if (type === 'Pre-Evaluation') {
-                    currentRating = row.getAttribute('data-pre-rating');
-                } else {
-                    currentRating = row.getAttribute('data-post-rating');
-                }
-                var msgDiv = document.getElementById('currentRatingMsg');
-                if (currentRating && currentRating !== 'null') {
-                    msgDiv.textContent = `Your previous rating: ${currentRating}`;
-                    // Pre-select radio
+        document.addEventListener('DOMContentLoaded', function() {
+            let selectedRating = null;
+            document.querySelectorAll('.open-eval-modal').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var type = this.getAttribute('data-type');
+                    var trainingId = this.getAttribute('data-training');
+                    var evaluated = this.getAttribute('data-evaluated') === '1';
+                    document.getElementById('evaluationModalLabel').textContent = type;
+                    document.getElementById('modalTrainingId').value = trainingId;
+                    document.getElementById('modalEvalType').value = type;
+                    // Reset radio buttons
                     document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
-                        if (r.value === currentRating) r.checked = true;
+                        r.checked = false;
+                        r.disabled = false;
                     });
-                    selectedRating = currentRating;
-                } else {
-                    msgDiv.textContent = '';
-                }
-                // If already evaluated, make radios readonly and hide submit
-                var submitBtn = document.querySelector('#evaluationModal .btn-primary');
-                if (evaluated) {
-                    document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = true);
-                    submitBtn.style.display = 'none';
-                } else {
-                    document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = false);
-                    submitBtn.style.display = '';
-                }
-                var modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
-                modal.show();
-            });
-        });
-        document.querySelectorAll('input[name="proficiency_level"]').forEach(function(radio) {
-            radio.addEventListener('change', function() {
-                selectedRating = this.value;
-            });
-        });
-        document.querySelector('#evaluationModal .btn-primary').addEventListener('click', function() {
-            var trainingId = document.getElementById('modalTrainingId').value;
-            var type = document.getElementById('modalEvalType').value;
-            if (!selectedRating) {
-                alert('Please select a proficiency level.');
-                return;
-            }
-            fetch(`/training/${trainingId}/rate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    type: type,
-                    rating: selectedRating
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update the row's data attribute
+                    selectedRating = null;
+                    // Show current rating if exists
                     var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
+                    var currentRating = '';
                     if (type === 'Pre-Evaluation') {
-                        row.setAttribute('data-pre-rating', data.pre_rating);
+                        currentRating = row.getAttribute('data-pre-rating');
                     } else {
-                        row.setAttribute('data-post-rating', data.post_rating);
+                        currentRating = row.getAttribute('data-post-rating');
                     }
-                    // Update modal message
-                    document.getElementById('currentRatingMsg').textContent = `Your previous rating: ${selectedRating}`;
-                    // Close modal
-                    bootstrap.Modal.getInstance(document.getElementById('evaluationModal')).hide();
-                } else {
-                    alert('Failed to save rating.');
+                    var msgDiv = document.getElementById('currentRatingMsg');
+                    if (currentRating && currentRating !== 'null') {
+                        msgDiv.textContent = `Your previous rating: ${currentRating}`;
+                        // Pre-select radio
+                        document.querySelectorAll('input[name="proficiency_level"]').forEach(r => {
+                            if (r.value === currentRating) r.checked = true;
+                        });
+                        selectedRating = currentRating;
+                    } else {
+                        msgDiv.textContent = '';
+                    }
+                    // If already evaluated, make radios readonly and hide submit
+                    var submitBtn = document.querySelector('#evaluationModal .btn-primary');
+                    if (evaluated) {
+                        document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = true);
+                        submitBtn.style.display = 'none';
+                    } else {
+                        document.querySelectorAll('input[name="proficiency_level"]').forEach(r => r.disabled = false);
+                        submitBtn.style.display = '';
+                    }
+                    var modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+                    modal.show();
+                });
+            });
+            document.querySelectorAll('input[name="proficiency_level"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    selectedRating = this.value;
+                });
+            });
+            document.querySelector('#evaluationModal .btn-primary').addEventListener('click', function() {
+                var trainingId = document.getElementById('modalTrainingId').value;
+                var type = document.getElementById('modalEvalType').value;
+                if (!selectedRating) {
+                    alert('Please select a proficiency level.');
+                    return;
                 }
-            })
-            .catch(() => alert('Failed to save rating.'));
+                fetch(`/user/training/${trainingId}/rate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        type: type,
+                        rating: selectedRating
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the row's data attribute
+                        var row = document.querySelector(`tr[data-training-id='${trainingId}']`);
+                        if (type === 'Pre-Evaluation') {
+                            row.setAttribute('data-pre-rating', data.pre_rating);
+                        } else {
+                            row.setAttribute('data-post-rating', data.post_rating);
+                        }
+                        // Update modal message
+                        document.getElementById('currentRatingMsg').textContent = `Your previous rating: ${selectedRating}`;
+                        // Close modal
+                        bootstrap.Modal.getInstance(document.getElementById('evaluationModal')).hide();
+                    } else {
+                        alert('Failed to save rating.');
+                    }
+                })
+                .catch(() => alert('Failed to save rating.'));
+            });
         });
     </script>
 </body>

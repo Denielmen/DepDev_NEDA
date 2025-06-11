@@ -160,23 +160,29 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ route('admin.home') }}">
+            <a class="navbar-brand" href="#">
                 <img src="/images/neda-logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center"> 
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-<<<<<<< Updated upstream
-                        Admin
-=======
                         {{ auth()->user()->last_name ?? 'Admin' }}
->>>>>>> Stashed changes
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -188,6 +194,7 @@
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
             <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
@@ -206,7 +213,7 @@
                     </tr>
                     <tr>
                         <td class="label">Competency:</td>
-                        <td>{{ $training->competency ?? '' }}</td>
+                        <td>{{ $training->competency->name ?? '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">User Role:</td>
@@ -218,7 +225,7 @@
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date ? $training->implementation_date->format('m/d/Y') : '' }}</td>
+                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Learning Service Provider:</td>

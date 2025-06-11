@@ -17,7 +17,7 @@
                 <tr>
                     <td class="border border-gray-300 px-4 py-2">{{ $training->title }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ $training->competency }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ $training->implementation_date }}</td>
+                    <td class="border border-gray-300 px-4 py-2">{{ $training->implementation_date_from }} - {{ $training->implementation_date_to }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ $training->provider }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ $training->status }}</td>
                 </tr>

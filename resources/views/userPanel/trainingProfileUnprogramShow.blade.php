@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Training Details</title>
+    <title>Unprogrammed Training Details - DEPDEV Learning and Development Database System</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #f7f8fa;
+            background-color: rgb(187, 219, 252);
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -57,7 +57,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
-            background-color: rgb(187, 219, 252);
+            
             margin-left: 270px;
             margin-top: 50px;
             padding-bottom: 20px;
@@ -94,57 +94,26 @@
         .details-table tr:last-child td {
             border-bottom: none;
         }
+        .top-actions {
+            margin-bottom: 20px;
+        }
         .btn-back {
             background-color: #003366;
             color: #fff;
             border: none;
-            padding: 8px 32px;
+            padding: 8px 25px;
             border-radius: 4px;
             font-weight: 500;
-            margin-bottom: 24px;
+            margin-bottom: 15px;
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            align-self: flex-start;
-            margin-left: 20px;
+            margin-right: 900px;
         }
         .btn-back:hover {
             background-color: #004080;
             color: #fff;
+            transform: translateY(-1px);
         }
-        .action-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 24px;
-        }
-        .btn-edit, .btn-delete {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: 500;
-        }
-        .btn-edit {
-            background-color: #4a90e2;
-            color: white;
-        }
-        .btn-edit:hover {
-            background-color: #357abd;
-            color: white;
-        }
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-delete:hover {
-            background-color: #c82333;
-            color: white;
-        }
+      
     </style>
 </head>
 <body>
@@ -169,18 +138,20 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
-            <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
+            <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
+            <a href="{{ route('user.training.effectivenesss') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
+            <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
         </div>
         <!-- Main Content -->
         <div class="main-content">
-            <a href="{{ route('admin.training-plan') }}" class="btn btn-back">
-                <i class="bi bi-arrow-left"></i>
-                Back
-            </a>
+            <div class="top-actions">
+                <a href="{{ route('user.training.profile.unprogrammed') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </a>
+            </div>
             <div class="details-card">
                 <h2 class="details-title">Training Details</h2>
                 <table class="details-table">
@@ -193,75 +164,51 @@
                         <td>{{ $training->competency->name ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Three-Year Period:</td>
-                        <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Budget (per hour):</td>
-                        <td>{{ $training->budget ?? '' }}</td>
+                        <td class="label">User Role:</td>
+                        <td>
+                            @php
+                                $currentUser = Auth::user();
+                                $userRole = 'N/A';
+                                if ($currentUser) {
+                                    $participant = $training->participants->where('id', $currentUser->id)->first();
+                                    if ($participant && isset($participant->pivot->participation_type_id)) {
+                                        $participationType = App\Models\ParticipationType::find($participant->pivot->participation_type_id);
+                                        $userRole = $participationType->name ?? 'N/A';
+                                    }
+                                }
+                            @endphp
+                            {{ $userRole }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">No. of Hours:</td>
                         <td>{{ $training->no_of_hours ?? '' }}</td>
                     </tr>
                     <tr>
+                        <td class="label">Date of Attendance:</td>
+                        <td>
+                            @if($training->implementation_date_from && $training->implementation_date_to)
+                                {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
+                            @elseif($training->implementation_date_from)
+                                {{ $training->implementation_date_from->format('m/d/Y') }} - N/A
+                            @elseif($training->implementation_date_to)
+                                N/A - {{ $training->implementation_date_to->format('m/d/Y') }}
+                            @else
+                                N/A
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
                         <td class="label">Learning Service Provider:</td>
                         <td>{{ $training->provider ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Development Target:</td>
-                        <td>{{ $training->dev_target ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Performance Goal this Support:</td>
-                        <td>{{ $training->performance_goal ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Objective:</td>
-                        <td>{{ $training->objective ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Participants:</td>
-                        <td>
-                            @forelse ($training->participants as $participant)
-                                <div>
-                                    {{ $participant->first_name }} {{ $participant->last_name }} 
-                                    @if($participant->pivot && $participant->pivot->participation_type_id)
-                                        ({{ \App\Models\ParticipationType::find($participant->pivot->participation_type_id)->name ?? 'N/A' }})
-                                    @endif
-                                </div>
-                            @empty
-                                No participants found.
-                            @endforelse
-                        </td>
+                        <td class="label">Status:</td>
+                        <td>{{ $training->status ?? '' }}</td>
                     </tr>
                 </table>
-                <div class="action-buttons">
-                    <a href="#" class="btn btn-edit">
-                        <i class="bi bi-pencil"></i>
-                        Edit
-                    </a>
-                    <a href="#" class="btn btn-delete">
-                        <i class="bi bi-trash"></i>
-                        Delete
-                    </a>
-                </div>
             </div>
         </div>
     </div>
-    <ul class="dropdown-menu dropdown-menu-end">
-        <li>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="dropdown-item logout-btn">
-                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
-                </button>
-            </form>
-        </li>
-    </ul>
 </body>
 </html> 

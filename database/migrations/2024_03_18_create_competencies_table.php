@@ -8,17 +8,16 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('tth_records', function (Blueprint $table) {
+        Schema::create('competencies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('training_id')->constrained()->onDelete('cascade');
-            $table->date('date_from')->nullable();
-            $table->date('date_to')->nullable();
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('tth_records');
+        Schema::dropIfExists('competencies');
     }
 }; 
