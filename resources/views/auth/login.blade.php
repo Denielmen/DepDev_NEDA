@@ -73,10 +73,10 @@
 
         .right-panel {
             width: 60%;
-            background-image: url('{{ asset('images/neda-building.jpg') }}');
             background-size: cover;
             background-position: center;
             position: relative;
+           
         }
 
         .right-panel .overlay {
