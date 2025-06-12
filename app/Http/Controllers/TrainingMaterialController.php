@@ -33,7 +33,8 @@ class TrainingMaterialController extends Controller
         $validated = $request->validate([
             'title'         => 'required|string|max:255',
             'competency_id' => 'required|exists:competencies,id',
-            'user_id'       => 'required|exists:users,id',
+            'competency_id.*' => 'exists:competencies,id',
+            'user_id'=> 'required|exists:users,id',
             'source'        => 'nullable|string|max:255',
             'file_path'     => 'nullable|string|max:255',
             'link'          => 'nullable|url',
