@@ -104,6 +104,7 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
+            margin: -80px auto 0 auto;
         }
         .btn-back:hover {
             background-color: #004080;
@@ -143,6 +144,12 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            <div class="top-actions">
+                <a href="{{ route('admin.training-plan.unprogrammed') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </a>
+            </div>
             <div class="details-card">
                 <h2 class="details-title">Training Details</h2>
                 <table class="details-table">
@@ -155,20 +162,22 @@
                         <td>{{ $training->competency->name ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Role:</td>
-                        <td>@if($training->user_id == $user->id)
-                                    Creator
-                                @else
-                                    @php
-                                        $participant = $training->participants->where('id', $user->id)->first();
-                                        $participationType = $participant ? $participant->pivot->participation_type_id : null;
-                                    @endphp
-                                    @if($participationType)
-                                        {{ \App\Models\ParticipationType::find($participationType)->name }}
-                                    @else
-                                        N/A
-                                    @endif
-                                @endif</td>
+                        <td class="label">User Role:</td>
+                        <td>
+                            @php
+                                $userRole = 'N/A';
+                                $creatorId = $training->user_id ?? null;
+
+                                if ($creatorId) {
+                                    $creatorParticipant = $training->participants->where('id', $creatorId)->first();
+                                    if ($creatorParticipant && isset($creatorParticipant->pivot->participation_type_id)) {
+                                        $participationType = $participationTypes->get($creatorParticipant->pivot->participation_type_id);
+                                        $userRole = $participationType ? $participationType->name : 'N/A';
+                                    }
+                                }
+                            @endphp
+                            {{ $userRole }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>
@@ -183,12 +192,6 @@
                         <td>{{ $training->status ?? '' }}</td>
                     </tr>
                 </table>
-                <div class="mt-4">
-                    <a href="{{ route('admin.training-plan.unprogrammed') }}" class="btn btn-back">
-                        <i class="bi bi-arrow-left"></i>
-                        Back
-                    </a>
-                </div>
             </div>
         </div>
     </div>
