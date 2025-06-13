@@ -24,6 +24,7 @@ class Training extends Model
         'objective',
         'type',
         'status',
+        'user_id',
         'participant_pre_rating',
         'participant_post_rating',
         'supervisor_pre_rating',
