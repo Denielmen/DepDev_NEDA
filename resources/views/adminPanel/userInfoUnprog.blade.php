@@ -181,6 +181,13 @@
         .form-label,.mb-0 {
             font-weight: bold;
         }
+        .btn-primary{
+            background-color: #003366;
+            color: #fff;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>

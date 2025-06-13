@@ -149,10 +149,10 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('admin.home') }}">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
@@ -162,6 +162,16 @@
                         {{ auth()->user()->last_name ?? 'Admin' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -194,7 +204,7 @@
                     </tr>
                     <tr>
                         <td class="label">Three-Year Period:</td>
-                        <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
+                        <td> {{ $training->period_from ?? '' }} - {{ $training->period_to ?? '' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Year of Implementation:</td>
@@ -215,7 +225,7 @@
                     <tr>
                         <td class="label">Development Target:</td>
                         <td>{{ $training->dev_target ?? '' }}</td>
-                    </tr>
+                    </tr> 
                     <tr>
                         <td class="label">Performance Goal this Support:</td>
                         <td>{{ $training->performance_goal ?? '' }}</td>
@@ -227,41 +237,46 @@
                     <tr>
                         <td class="label">Participants:</td>
                         <td>
+                            @php
+                                // Force a fresh reload of the participants relationship
+                                $training->load(['participants' => function($query) {
+                                    $query->orderBy('last_name')->orderBy('first_name');
+                                }]);
+                            @endphp
+                            
                             @forelse ($training->participants as $participant)
-                                <div>
-                                    {{ $participant->first_name }} {{ $participant->last_name }} 
+                                <div class="mb-1">
+                                    {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}
                                     @if($participant->pivot && $participant->pivot->participation_type_id)
-                                        ({{ \App\Models\ParticipationType::find($participant->pivot->participation_type_id)->name ?? 'N/A' }})
+                                        <span class="badge bg-info">
+                                            {{ $participationTypes[$participant->pivot->participation_type_id]->name ?? 'N/A' }}
+                                        </span>
                                     @endif
                                 </div>
                             @empty
-                                No participants found.
+                                <div class="text-muted">No participants found.</div>
                             @endforelse
                         </td>
                     </tr>
                 </table>
                 <div class="action-buttons">
-                    <a href="#" class="btn btn-edit">
+                    <a href="{{ route('admin.training-plan.edit', $training) }}" class="btn btn-edit">
                         <i class="bi bi-pencil"></i>
                         Edit
                     </a>
-                    <a href="#" class="btn btn-delete">
-                        <i class="bi bi-trash"></i>
-                        Delete
-                    </a>
+                    <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this training? This action cannot be undone.')">
+                            <i class="bi bi-trash"></i>
+                            Delete
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    <ul class="dropdown-menu dropdown-menu-end">
-        <li>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="dropdown-item logout-btn">
-                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
-                </button>
-            </form>
-        </li>
-    </ul>
 </body>
 </html> 
+
+

@@ -9,9 +9,35 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingTrackingController;
 use App\Http\Controllers\TrainingMaterialController;
+use Illuminate\Support\Facades\Auth;
+
+
 
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
+
+Route::get('/', function () {
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+    // If already logged in, show an error message
+    abort(403, 'User is already logged in.');
+});
+Route::middleware('guest')->group(function () {
+    Route::get('/login', function () {
+        return view('auth.login');
+    })->name('login');
+    
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
+    Route::get('/welcome', function () {
+        return view('welcome');
+    });
+});
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
@@ -22,10 +48,6 @@ Route::get('/', function () {
     }
     // If already logged in, show an error message
     abort(403, 'User is already logged in.');
-});
-Route::post('/login', [LoginController::class, 'login']);
-Route::get('/welcome', function () {
-    return view('welcome');
 });
 
 // USER PANEL ROUTES (all with user. prefix)
@@ -111,21 +133,17 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('training-plan/create', [TrainingProfileController::class, 'create'])->name('admin.training-plan.create');
     Route::post('training-plan/store', [TrainingProfileController::class, 'store'])->name('admin.training-plan.store');
     Route::get('/training-plan', [TrainingProfileController::class, 'trainingPlan'])->name('admin.training-plan');
-    Route::get('/training-plan/edit', [TrainingProfileController::class, 'edit'])->name('admin.training-plan.edit');
-    Route::put('/training-plan/update', [TrainingProfileController::class, 'update'])->name('admin.training-plan.update');
-    Route::get('/training-plan/unprogrammed', function () {
-        $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
-        return view('adminPanel.trainingPlanUnProg', compact('trainings'));
-    })->name('admin.training-plan.unprogrammed');
-
-    // Add participant route
-    Route::post('/training-plan/{training}/add-participant', [TrainingProfileController::class, 'addParticipant'])
-        ->name('admin.training-plan.add-participant');
-    Route::get('/register', [RegisteredUserController::class, 'create'])->name('admin.register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
-    // Delete training route
+    Route::get('/training-plan/{training}/edit', [TrainingProfileController::class, 'edit'])
+        ->name('admin.training-plan.edit');
+    Route::put('/training-plan/{training}', [TrainingProfileController::class, 'update'])
+        ->name('admin.training-plan.update');
+    Route::delete('/training-plan/{training}/participant/{user}', [TrainingProfileController::class, 'removeParticipant'])
+        ->name('admin.training-plan.remove-participant');
     Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])
         ->name('admin.training-plan.destroy');
+
+    Route::get('/training-plan/{training}', [TrainingProfileController::class, 'show'])
+        ->name('admin.training-plan.show');
 
     Route::get('training-plan/{id}', function ($id) {
         $training = \App\Models\Training::findOrFail($id);
@@ -133,9 +151,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     })->name('admin.training.view');
 
     Route::get('training-plan/unprogrammed/{id}', function ($id) {
-        $training = \App\Models\Training::findOrFail($id);
-        $user = auth()->user();
-        return view('adminPanel.trainingViewUnprog', compact('training', 'user'));
+        $training = \App\Models\Training::with(['participants' => function($query) {
+            $query->withPivot('participation_type_id', 'year');
+        }])->findOrFail($id);
+        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
+        return view('adminPanel.trainingViewUnprog', compact('training', 'participationTypes'));
     })->name('admin.training.view.unprogrammed');
 
     // Participants routes
@@ -190,6 +210,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
         ->name('admin.training.rate');
     Route::post('/training/{id}/post-evaluation/submit', [TrainingProfileController::class, 'submitPostEvaluation'])->name('admin.training.post-evaluation.submit');
+    Route::post('/training-plan/{training}/add-participant', [TrainingProfileController::class, 'addParticipant'])
+        ->name('admin.training-plan.add-participant');
 });
 
 // Admin reports and exports
@@ -200,3 +222,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+
+

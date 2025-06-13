@@ -60,7 +60,7 @@
             padding: 20px;
             background-color: rgb(187, 219, 252);
             margin-left: 270px;
-            margin-top: 50px;
+            margin-top: 30px;
             padding-bottom: 20px;
 
         }
@@ -188,7 +188,7 @@
         .tab-buttons {
             display: inline-flex;
             gap: 5px;
-            margin-right: 37rem;
+            margin-right: 38rem;
         }
         .tab-button {
             background-color: white;
@@ -436,3 +436,4 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>
+
