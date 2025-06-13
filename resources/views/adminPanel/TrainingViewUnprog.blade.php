@@ -165,13 +165,14 @@
                         <td class="label">User Role:</td>
                         <td>
                             @php
-                                $currentUser = Auth::user();
                                 $userRole = 'N/A';
-                                if ($currentUser) {
-                                    $participant = $training->participants->where('id', $currentUser->id)->first();
-                                    if ($participant && isset($participant->pivot->participation_type_id)) {
-                                        $participationType = App\Models\ParticipationType::find($participant->pivot->participation_type_id);
-                                        $userRole = $participationType->name ?? 'N/A';
+                                $creatorId = $training->user_id ?? null;
+
+                                if ($creatorId) {
+                                    $creatorParticipant = $training->participants->where('id', $creatorId)->first();
+                                    if ($creatorParticipant && isset($creatorParticipant->pivot->participation_type_id)) {
+                                        $participationType = $participationTypes->get($creatorParticipant->pivot->participation_type_id);
+                                        $userRole = $participationType ? $participationType->name : 'N/A';
                                     }
                                 }
                             @endphp
