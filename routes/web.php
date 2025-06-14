@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
@@ -10,21 +11,26 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingTrackingController;
 use App\Http\Controllers\TrainingMaterialController;
 use Illuminate\Support\Facades\Auth;
-
-
-
+//remove lines 48-50 before deployment
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
 Route::get('/', function () {
-    if (!auth()->check()) {
+    if (!(Auth::check())) {
         return redirect()->route('login');
+    } else {
+        $role = Auth::user()->role;
+        $redirectUrl = $role === 'Admin' ? route('admin.home') : route('user.home');
+        return response("<script>alert('User is already logged in.');window.location.href='{$redirectUrl}';</script>");
     }
-    // If already logged in, show an error message
-    abort(403, 'User is already logged in.');
 });
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
+        if (Auth::check()) {
+            $role = Auth::user()->role;
+            $redirectUrl = $role === 'Admin' ? route('admin.home') : route('user.home');
+            return response("<script>alert('User is already logged in.');window.location.href='{$redirectUrl}';</script>");
+        }
         return view('auth.login');
     })->name('login');
 
@@ -39,26 +45,18 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/', function () {
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
-    // If already logged in, show an error message
-    abort(403, 'User is already logged in.');
-});
-
 // USER PANEL ROUTES (all with user. prefix)
 Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/', function () {
-        if (!auth()->user() || auth()->user()->role !== 'User') {//Check if the user is disabled or not active
+        if (!Auth::user() || Auth::user()->role !== 'User' && Auth::user()->is_active) { //Check if the user is disabled or not active
             abort(403, 'Unauthorized');
         }
         return view('userPanel.welcomeUser');
     })->name('user.home');
 
-    Route::get('/training-profile', function() {
-    return redirect()->route('user.training.profile.program');
-})->name('user.training.profile');
+    Route::get('/training-profile', function () {
+        return redirect()->route('user.training.profile.program');
+    })->name('user.training.profile');
 
     Route::get('/training-profile/program', [TrainingProfileController::class, 'program'])
         ->name('user.training.profile.program');
@@ -82,14 +80,14 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
         ->name('user.tracking.store');
 
 
-Route::get('user/training-effectiveness', [TrainingController::class, 'showTrainingEffectiveness'])->name('user.training.effectiveness');
+    Route::get('user/training-effectiveness', [TrainingController::class, 'showTrainingEffectiveness'])->name('user.training.effectiveness');
     Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
         ->name('user.training.resources');
 
     Route::get('/evalParticipant', [TrainingProfileController::class, 'evalParticipantForm'])
         ->name('user.evalParticipant');
 
-    Route::get('/evalSupervisor', function() {
+    Route::get('/evalSupervisor', function () {
         return view('userPanel.evalSupervisor');
     })->name('user.evalSupervisor');
 
@@ -110,7 +108,7 @@ Route::get('user/training-effectiveness', [TrainingController::class, 'showTrain
 // ADMIN PANEL ROUTES (unchanged, but make sure admin checks are in place)
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/', function () {
-        if (!auth()->user() || auth()->user()->role !== 'Admin') {//checkif the user is admin and not disabled or not active
+        if (!Auth::user() || Auth::user()->role !== 'Admin' && Auth::user()->is_active) { //checkif the user is admin and not disabled or not active
             abort(403, 'Unauthorized');
         }
         return view('adminPanel.welcomeAdmin');
@@ -138,21 +136,20 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         ->name('admin.training-plan.remove-participant');
     Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])
         ->name('admin.training-plan.destroy');
-
     Route::get('/training-plan/{training}', [TrainingProfileController::class, 'show'])
         ->name('admin.training-plan.show');
 
     Route::get('training-plan/{id}', function ($id) {
         $training = \App\Models\Training::findOrFail($id);
-        return view('adminPanel.trainingView', compact('training'));
+        return view('adminPanel.TrainingView', compact('training'));
     })->name('admin.training.view');
 
     Route::get('training-plan/unprogrammed/{id}', function ($id) {
-        $training = \App\Models\Training::with(['participants' => function($query) {
+        $training = \App\Models\Training::with(['participants' => function ($query) {
             $query->withPivot('participation_type_id', 'year');
         }])->findOrFail($id);
         $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
-        return view('adminPanel.trainingViewUnprog', compact('training', 'participationTypes'));
+        return view('adminPanel.TrainingViewUnprog', compact('training', 'participationTypes'));
     })->name('admin.training.view.unprogrammed');
 
     // Participants routes
@@ -178,11 +175,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/participants/{id}/unprogrammed', function ($id) {
         $user = \App\Models\User::findOrFail($id);
         $unprogrammedTrainings = \App\Models\Training::where('type', 'Unprogrammed')
-            ->where(function($query) use ($user) {
+            ->where(function ($query) use ($user) {
                 $query->where('user_id', $user->id)
-                      ->orWhereHas('participants', function($q) use ($user) {
-                          $q->where('users.id', $user->id);
-                      });
+                    ->orWhereHas('participants', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
             })
             ->with(['competency', 'participants'])
             ->get();
@@ -218,7 +215,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports/export/excel', [AdminController::class, 'exportExcel'])->name('admin.reports.export.excel');
 });
 
-require __DIR__.'/auth.php';
-
-
-
+require __DIR__ . '/auth.php';
