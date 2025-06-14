@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('status')->default('Not Yet Implemented');
             $table->integer('participant_pre_rating')->nullable();
             $table->integer('participant_post_rating')->nullable();
+            $table->json('participant_post_evaluation')->nullable();
             $table->integer('supervisor_pre_rating')->nullable();
             $table->integer('supervisor_post_rating')->nullable();
             $table->json('supervisor_post_evaluation')->nullable();

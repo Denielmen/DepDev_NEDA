@@ -446,4 +446,70 @@ class TrainingProfileController extends Controller
                 }
         }
     }
+
+    public function submitPostEvaluation(Request $request, $id)
+    {
+        \Log::info('Supervisor Post Evaluation Submission Request Received', $request->all());
+        \Log::debug('Incoming supervisor post-eval request data:', $request->all());
+
+        try {
+            $validatedData = $request->validate([
+                'goals' => 'required|integer|min:1|max:4',
+                'learning1' => 'required|string|in:1,2,3,4,5',
+                'learning2' => 'required|string|in:1,2,3,4,5',
+                'learning3' => 'required|string|in:1,2,3,4,5',
+                'learning4' => 'required|string|in:1,2,3,4,5',
+                'workPerformanceChanges' => 'required|string',
+                'performance1' => 'required|string|in:1,2,3,4',
+                'initiateParticipation' => 'required|in:Yes,No',
+                'trainingSuggestions' => 'required|string',
+                'type' => 'required|in:supervisor_post',
+            ]);
+            \Log::debug('Supervisor post-eval validation successful.', $validatedData);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Supervisor post-eval validation failed:', $e->errors());
+            return response()->json(['success' => false, 'message' => 'Validation failed.', 'errors' => $e->errors()], 422);
+        }
+
+        $training = Training::findOrFail($id);
+        \Log::debug('Training found for supervisor post-eval:', ['id' => $training->id, 'title' => $training->title]);
+
+        $detailedSupervisorPostEvaluationData = [
+            'goals' => $validatedData['goals'],
+            'learning1' => $validatedData['learning1'],
+            'learning2' => $validatedData['learning2'],
+            'learning3' => $validatedData['learning3'],
+            'learning4' => $validatedData['learning4'],
+            'workPerformanceChanges' => $validatedData['workPerformanceChanges'],
+            'performance1' => $validatedData['performance1'],
+            'initiateParticipation' => $validatedData['initiateParticipation'],
+            'trainingSuggestions' => $validatedData['trainingSuggestions'],
+        ];
+
+        // Calculate average rating for supervisor post (excluding NA/5 if needed)
+        $numericRatings = [];
+        foreach (['goals', 'learning1', 'learning2', 'learning3', 'learning4', 'performance1'] as $key) {
+            if (is_numeric($validatedData[$key]) && $validatedData[$key] != 5) {
+                $numericRatings[] = (int)$validatedData[$key];
+            }
+        }
+        $averageRating = null;
+        if (count($numericRatings) > 0) {
+            $averageRating = round(array_sum($numericRatings) / count($numericRatings), 2);
+        }
+        $training->supervisor_post_rating = $averageRating;
+        $training->supervisor_post_evaluation = $detailedSupervisorPostEvaluationData;
+
+        try {
+            $training->save();
+            \Log::info("Training {$id} supervisor post-evaluation saved successfully. Average rating: {$averageRating}");
+            \Log::debug('Training saved successfully (supervisor post-eval).', ['training_id' => $training->id, 'supervisor_post_rating' => $training->supervisor_post_rating, 'supervisor_post_evaluation' => $training->supervisor_post_evaluation]);
+
+            // Redirect back with a success message instead of returning JSON
+            return redirect()->back()->with('success', 'Supervisor post-evaluation submitted successfully!');
+        } catch (\Exception $e) {
+            \Log::error("Failed to save supervisor post-evaluation for training {$id}: " . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()->with('error', 'Failed to save supervisor post-evaluation.');
+        }
+    }
 }
