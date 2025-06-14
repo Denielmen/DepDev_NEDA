@@ -422,7 +422,7 @@
           <textarea name="trainingSuggestions" rows="4" placeholder="Input here your comments......" {{ $training->supervisor_post_evaluation ? 'readonly' : '' }}>{{ $training->supervisor_post_evaluation ? $training->supervisor_post_evaluation['trainingSuggestions'] : '' }}</textarea>
 
           <div class="submit-button">
-            <button type="submit" {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}>Submit</button>
+            <button type="submit" class="btn btn-primary" {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}>Submit</button>
           </div>
 
         </form>

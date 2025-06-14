@@ -645,7 +645,7 @@
 
             if (fromYear) {
                 // Add 3 years to the from year
-                const toYear = fromYear + 2;
+                const toYear = fromYear + 3;
                 toYearInput.value = toYear;
             }
         }
