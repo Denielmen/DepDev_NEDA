@@ -64,6 +64,8 @@
             padding: 15px 20px;
             margin-bottom: 20px;
             border-radius: 5px;
+            width: 56rem;
+            margin-left:4rem;
         }
         .training-header h2 {
             font-size: 1.5rem;
@@ -155,7 +157,7 @@
         <!-- Main Content -->
         <div class="flex-grow-1 main-content p-4" style="margin-top: 56px;">
             <div class="mb-4 training-header">
-                <h2 class="mb-0">Training Plan</h2>
+                <h2 class="mb-0 ">Create Training</h2>
             </div>
             <div class="training-card">
                 <h4 class="text-center mb-4">Training Information</h4>
@@ -395,9 +397,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($users->sortBy('last_name') as $user)
+                                @foreach($users->where('is_active', true) as $user)
                                 <tr class="participant-row">
-                                    <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
+                                    <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}</td>
                                     <td>{{ $user->position }}</td>
                                     <td>{{ $user->division }}</td>
                                     <td>
@@ -643,7 +645,7 @@
 
             if (fromYear) {
                 // Add 3 years to the from year
-                const toYear = fromYear + 3;
+                const toYear = fromYear + 2;
                 toYearInput.value = toYear;
             }
         }
@@ -701,3 +703,5 @@
 
 </body>
 </html>
+
+

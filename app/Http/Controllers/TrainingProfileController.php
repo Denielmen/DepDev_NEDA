@@ -27,7 +27,7 @@ class TrainingProfileController extends Controller
             ->paginate(10);
 
         // Load all participation types once for efficient lookup in the view
-        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
+       $participationTypes = ParticipationType::all()->keyBy('id');
 
         return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies', 'participationTypes'));
     }
@@ -49,7 +49,7 @@ class TrainingProfileController extends Controller
             ->paginate(10);
 
         // Load all participation types once for efficient lookup in the view
-        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
+        $participationTypes = ParticipationType::all()->keyBy('id');
 
         // Temporarily dump the trainings collection for debugging (keep commented until resolved)
         // dd($trainings);
@@ -57,16 +57,20 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
 
-    public function show($id)
+    public function show(Training $training)
     {
-        $userId = Auth::id();
-        $training = Training::with(['participants' => function($query) use ($userId) {
-            $query->where('users.id', $userId);
-        }])->findOrFail($id);
-
+        // Force a fresh reload of the participants relationship
+        $training->refresh();
+        
+        // Eager load the participants relationship with their pivot data
+        $training->load(['participants' => function($query) {
+            $query->orderBy('last_name')->orderBy('first_name');
+        }, 'competency']);
+        
+        // Get participation types for display
         $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
-
-        return view('userPanel.trainingProfileShow', compact('training', 'participationTypes'));
+        
+        return view('adminPanel.TrainingView', compact('training', 'participationTypes'));
     }
 
     public function showUnprogrammed($id)
@@ -83,27 +87,72 @@ class TrainingProfileController extends Controller
 
     public function edit(Training $training)
     {
+        $training = Training::findOrFail($training->id);
         $competencies = Competency::orderBy('name')->get();
-        return view('adminPanel.editTraining', compact('training', 'competencies'));
+        $participationTypes = ParticipationType::all()->keyBy('id');
+        $users = User::orderBy('last_name')->get();
+
+        $training->load(['participants' => function($query) {
+            $query->withPivot('participation_type_id', 'year');
+        }]);
+
+        return view('adminPanel.editTraining', compact('training', 'competencies', 'participationTypes', 'users'));
     }
 
     public function update(Request $request, Training $training)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'competency_id' => 'required|exists:competencies,id',
-            'implementation_date_from' => 'required|date',
-            'implementation_date_to' => 'required|date',
-            'no_of_hours' => 'nullable|numeric',
-            'provider' => 'nullable|string|max:255',
-            'dev_target' => 'nullable|string',
-            'performance_goal' => 'nullable|string',
-            'objective' => 'nullable|string',
-            'type' => 'required|in:Program,Unprogrammed'
-        ]);
+        try {
+            // $training = Training::findOrFail($id);
+            
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'competency_id' => 'required|exists:competencies,id',
+                'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
+                'period_from' => 'required|integer|digits:4',
+                'period_to' => 'required|integer|digits:4|gte:period_from',
+                'implementation_date_from' => 'required|date',
+                'implementation_date_to' => 'nullable|date',
+                'no_of_hours' => 'nullable|numeric',
+                'budget' => 'nullable|numeric',
+                'provider' => 'nullable|string|max:255',
+                'dev_target' => 'nullable|string',
+                'performance_goal' => 'nullable|string',
+                'objective' => 'nullable|string',
+                'type' => 'required|in:Program,Unprogrammed',
+                'participants' => 'nullable|array',
+                'participants.*' => 'exists:users,id',
+                'participation_types' => 'nullable|array'
+            ]);
 
-        $training->update($request->all());
-        return redirect()->route('admin.training-plan')->with('success', 'Training updated successfully.');
+            // Update training details
+            $training->update($validated);
+
+            // Handle participants
+            if ($request->has('participants')) {
+                // Get current year for the pivot table
+                $currentYear = date('Y');
+                
+                // Prepare the participants data with pivot attributes
+                $participants = [];
+                foreach ($request->participants as $userId) {
+                    $participants[$userId] = [
+                        'participation_type_id' => $request->input("participation_types.$userId"),
+                        'year' => $currentYear
+                    ];
+                }
+                
+                // Sync participants (this will remove any participants not in the array)
+                $training->participants()->sync($participants);
+            } else {
+                // If no participants were selected, detach all
+                $training->participants()->detach();
+            }
+
+            return redirect()->route('admin.training-plan')->with('success', 'Training updated successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Training update error: ' . $e->getMessage());
+            return back()->withInput()->withErrors(['error' => 'Failed to update training: ' . $e->getMessage()]);
+        }
     }
 
     public function trainingPlan()
@@ -114,9 +163,9 @@ class TrainingProfileController extends Controller
 
     public function create()
     {
-        $competencies = \App\Models\Competency::orderBy('name')->get();
-        $users = \App\Models\User::orderBy('last_name')->get();
-        $participationTypes = \App\Models\ParticipationType::all();
+        $competencies = Competency::orderBy('name')->get();
+         $users = User::orderBy('last_name')->get();
+        $participationTypes = ParticipationType::all()->keyBy('id');
         return view('adminPanel.createTraining', compact('competencies', 'users', 'participationTypes'));
     }
 
@@ -144,9 +193,8 @@ class TrainingProfileController extends Controller
         ]);
 
         foreach ($validated['participants'] as $participantId) {
-            if (
-                !isset($validated['participation_types'][$participantId]) ||
-                !\App\Models\ParticipationType::find($validated['participation_types'][$participantId])
+            if (!isset($validated['participation_types'][$participantId]) ||
+                !ParticipationType::find($validated['participation_types'][$participantId])
             ) {
                 return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
             }
@@ -212,23 +260,36 @@ class TrainingProfileController extends Controller
 
     public function removeParticipant(Training $training, Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id'
-        ]);
+        try {
+            $request->validate([
+                'user_id' => 'required|exists:users,id'
+            ]);
 
-        $training->participants()->detach($request->user_id);
+            DB::beginTransaction();
+            
+            $training->participants()->detach($request->user_id);
+            
+            DB::commit();
 
-        return back()->with('success', 'Participant removed successfully.');
+            return back()->with('success', 'Participant removed successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Remove participant error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to remove participant: ' . $e->getMessage()]);
+        }
     }
 
-    public function destroy(Training $training)
-    {
-        // Delete the training
-        $training->delete();
-
-        return redirect()->route('admin.training-plan')
-            ->with('success', 'Training deleted successfully.');
-    }
+   public function destroy(Training $training)
+{
+    // First detach all participants to avoid foreign key constraint issues
+    $training->participants()->detach();
+    
+    // Then delete the training
+    $training->delete();
+    
+    return redirect()->route('admin.training-plan')
+        ->with('success', 'Training deleted successfully.');
+}
 
     public function rateParticipant(Request $request, $id)
     {

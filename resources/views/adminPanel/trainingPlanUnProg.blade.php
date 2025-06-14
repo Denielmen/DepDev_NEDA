@@ -60,7 +60,7 @@
             padding: 20px;
             background-color: rgb(187, 219, 252);
             margin-left: 270px;
-            margin-top: 50px;
+            margin-top: 30px;
             padding-bottom: 20px;
 
         }

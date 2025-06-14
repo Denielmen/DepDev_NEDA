@@ -60,7 +60,7 @@
             padding: 20px;
             background-color: rgb(187, 219, 252);
             margin-left: 270px;
-            margin-top: 36px;
+            margin-top: 30px;
             padding-bottom: 20px;
         }
         .content-header {
@@ -254,9 +254,9 @@
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li>
-                                                <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
+                                               <a class="dropdown-item" href="{{ route('admin.training-plan.edit', ['training' => $training->id]) }}">
                                                     <i class="bi bi-pencil-square"></i> Edit
-                                                </a>
+                                               </a>
                                             </li>
                                             <li>
                                                 <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" class="d-inline">
@@ -329,4 +329,3 @@
     </script>
 </body>
 </html>
-    
