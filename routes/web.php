@@ -89,7 +89,7 @@ Route::get('user/training-effectiveness', [TrainingController::class, 'showTrain
     Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
         ->name('user.training.resources');
 
-    Route::get('/evalParticipant', [TrainingProfileController::class, 'evalParticipantForm'])
+    Route::get('/evalParticipant/{training_id}', [TrainingProfileController::class, 'evalParticipantForm'])
         ->name('user.evalParticipant');
 
     Route::get('/evalSupervisor', function() {
@@ -108,6 +108,10 @@ Route::get('user/training-effectiveness', [TrainingController::class, 'showTrain
     // Route for submitting the detailed participant evaluation form
     Route::post('/training/{id}/submit-participant-evaluation', [TrainingProfileController::class, 'submitParticipantEvaluation'])
         ->name('user.training.submit.participant.evaluation');
+
+    // Route for viewing evaluations
+    Route::get('/evaluation/view/{training_id}/{type}', [TrainingProfileController::class, 'viewEvaluationData'])
+        ->name('user.evaluation.view');
 });
 
 // ADMIN PANEL ROUTES (unchanged, but make sure admin checks are in place)

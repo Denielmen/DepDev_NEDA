@@ -29,7 +29,8 @@ class Training extends Model
         'participant_post_rating',
         'supervisor_pre_rating',
         'supervisor_post_rating',
-        'supervisor_post_evaluation'
+        'supervisor_post_evaluation',
+        'participant_post_evaluation'
     ];
     protected $casts = [
         // 'period_from' => 'date',
@@ -41,7 +42,8 @@ class Training extends Model
         'participant_post_rating' => 'integer',
         'supervisor_pre_rating' => 'integer',
         'supervisor_post_rating' => 'integer',
-        'supervisor_post_evaluation' => 'array'
+        'supervisor_post_evaluation' => 'array',
+        'participant_post_evaluation' => 'array'
     ];
 
     public function competency()

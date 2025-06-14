@@ -231,7 +231,7 @@ class TrainingProfileController extends Controller
         Log::info('Rate Participant Request Received', $request->all());
 
         $request->validate([
-            'type' => 'required|in:participant_pre,participant_post',
+            'type' => 'required|in:participant_pre,participant_post,supervisor_pre,supervisor_post',
             'rating' => 'required|integer|min:1|max:4',
         ]);
 
@@ -243,6 +243,12 @@ class TrainingProfileController extends Controller
         } elseif ($request->type === 'participant_post') {
             $training->participant_post_rating = $request->rating;
             Log::info("Updating participant_post_rating for training {$id} to {$request->rating}");
+        } elseif ($request->type === 'supervisor_pre') {
+            $training->supervisor_pre_rating = $request->rating;
+            Log::info("Updating supervisor_pre_rating for training {$id} to {$request->rating}");
+        } elseif ($request->type === 'supervisor_post') {
+            $training->supervisor_post_rating = $request->rating;
+            Log::info("Updating supervisor_post_rating for training {$id} to {$request->rating}");
         }
 
         try {
@@ -250,9 +256,11 @@ class TrainingProfileController extends Controller
             Log::info("Training {$id} saved successfully.");
         return response()->json([
             'success' => true,
-                'message' => 'Evaluation stored successfully!',
+            'message' => 'Evaluation stored successfully!',
             'pre_rating' => $training->participant_pre_rating,
             'post_rating' => $training->participant_post_rating,
+            'supervisor_pre_rating' => $training->supervisor_pre_rating,
+            'supervisor_post_rating' => $training->supervisor_post_rating,
         ]);
         } catch (\Exception $e) {
             Log::error("Failed to save training {$id}: " . $e->getMessage());

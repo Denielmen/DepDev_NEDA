@@ -304,7 +304,7 @@
 
         <form method="POST" action="{{ route('admin.training.post-evaluation.submit', ['id' => $training->id]) }}" class="evaluation-form">
           @csrf
-          <input type="hidden" name="type" value="Post-Evaluation">
+          <input type="hidden" name="type" value="supervisor_post">
 
           @if($training->supervisor_post_evaluation)
           <div class="alert alert-info">

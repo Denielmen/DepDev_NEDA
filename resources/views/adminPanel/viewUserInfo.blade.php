@@ -389,7 +389,7 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: JSON.stringify({
-                            type: 'Supervisor-Pre-Evaluation',
+                            type: 'supervisor_pre',
                             rating: rating.value
                         })
                     })

@@ -28,4 +28,10 @@ class TrainingController extends Controller
         
         return view('training.add_participants', compact('training', 'availableUsers'));
     }
+
+    public function showTrainingEffectiveness()
+    {
+        $trainings = \App\Models\Training::all()->where('type','Program');
+        return view('userPanel.trainingEffectiveness', compact('trainings'));
+    }
 } 

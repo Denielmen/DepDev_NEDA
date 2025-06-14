@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Training Effectiveness Evaluation - Participant</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -50,7 +51,7 @@
             overflow-y: auto;
             background-color: #003366;
             padding-top: 20px;
-            z-index: 999;/
+            z-index: 999;
         }
 
         .sidebar a {
@@ -318,20 +319,17 @@
             <div class="evaluation-container">
                 <div class="evaluation-header">
                     <img src="{{ asset('images/DEPDev_logo_text_center.png') }}" alt="NEDA Logo" class="neda-logo">
-
+                    <h4>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT</h4>
+                    <h5>CENTRAL VISAYAS REGION</h5>
+                    <br>
                     <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
                     <p>(For Participant)</p>
                 </div>
 
-                <form method="POST" action="{{ route('user.training.effectiveness') }}" class="evaluation-form">
+                <form method="POST" action="{{ route('user.training.submit.participant.evaluation', ['id' => $training->id]) }}" class="evaluation-form">
                     @csrf
-                    <label for="courseTitle">Course Title:</label>
-                    <select id="courseTitle" name="courseTitle" required style="margin-bottom: 20px;">
-                        <option value="">Select Training</option>
-                        @foreach($implementedTrainings as $training)
-                        <option value="{{ $training->id }}">{{ $training->title }}</option>
-                        @endforeach
-                    </select>
+                    <input type="hidden" name="training_id" value="{{ $training->id }}">
+                    <input type="hidden" name="type" value="participant_post"> 
 
                     <div class="instruction-container">
                         <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied; (3) Satisfied; <br>(2) Dissatisfied; (1) Very Dissatisfied.</p>
@@ -355,16 +353,17 @@
                     </table>
 
                     <div class="instruction-container">
-                        <p><strong>Please tick the circle which best describes your evaluation of the program. You have 5 choices to choose from: </strong>(4) Strongly agree, (3) Agree, <br>(2) Disagree, (1) Strongly Disagree, (Na) Not Applicable</p>
+                        <p><strong>Please tick the circle which best describes your evaluation of the program. You have 5 choices to choose from:</strong> (4) Strongly agree, (3) Agree, <br>(2) Disagree, (1) Strongly Disagree, (Na) Not Applicable</p>
                     </div>
+
                     <table>
                         <tr>
                             <th style="width: 60%;">B. Application of Learning</th>
-                            <th style="width: 4%; text-align: center;">1</th>
-                            <th style="width: 4%; text-align: center;">2</th>
-                            <th style="width: 4%; text-align: center;">3</th>
-                            <th style="width: 4%; text-align: center;">4</th>
-                            <th style="width: 4%; text-align: center;">NA</th>
+                            <th style="width: 5%; text-align: center;">1</th>
+                            <th style="width: 5%; text-align: center;">2</th>
+                            <th style="width: 5%; text-align: center;">3</th>
+                            <th style="width: 5%; text-align: center;">4</th>
+                            <th style="width: 5%; text-align: center;">NA</th>
                         </tr>
                         <tr>
                             <td>1. I applied the learning/s gained from this course to my work.</td>
@@ -372,23 +371,31 @@
                             <td class="rating-cell"><input type="radio" name="learning1" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="learning1" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="learning1" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="NA"></td>
                         </tr>
                         <tr>
                             <td>2. The learning/s gained provided me with additional knowledge and skills to perform my role and tasks assigned.</td>
-                            <td class="rating-cell"><input type="radio" name="learning2" value="1" required></td>
+                            <td class="rating-cell"><input type="radio" name="learning2" value="1"></td>
                             <td class="rating-cell"><input type="radio" name="learning2" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="learning2" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="learning2" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
+                            <td class="rating-cell"><input type="radio" name="learning2" value="NA"></td>
                         </tr>
                         <tr>
                             <td>3. The learning/s gained contributed to making better quality and more efficient work.</td>
-                            <td class="rating-cell"><input type="radio" name="learning3" value="1" required></td>
+                            <td class="rating-cell"><input type="radio" name="learning3" value="1"></td>
                             <td class="rating-cell"><input type="radio" name="learning3" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="learning3" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="learning3" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="5"></td>
+                            <td class="rating-cell"><input type="radio" name="learning3" value="NA"></td>
+                        </tr>
+                        <tr>
+                            <td>4. The learning/s gained allowed me to develop more specific competencies related to my field.</td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="1"></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="2"></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="3"></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="NA"></td>
                         </tr>
                     </table>
 
@@ -407,7 +414,7 @@
                             <td class="rating-cell"><input type="radio" name="performance1" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="performance1" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="performance1" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="5"></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="NA"></td>
                         </tr>
                         <tr>
                             <td>2. My competency level increased as a result of participation in this course.</td>
@@ -415,7 +422,7 @@
                             <td class="rating-cell"><input type="radio" name="performance2" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="performance2" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="performance2" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="5"></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="NA"></td>
                         </tr>
                         <tr>
                             <td>3. My overall performance increased/improved as a result of participation in this course.</td>
@@ -423,16 +430,15 @@
                             <td class="rating-cell"><input type="radio" name="performance3" value="2"></td>
                             <td class="rating-cell"><input type="radio" name="performance3" value="3"></td>
                             <td class="rating-cell"><input type="radio" name="performance3" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="5"></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="NA"></td>
                         </tr>
                     </table>
 
-                    <p><strong>To support your rating on application of learing and work performance, give specific instance and evidence on 
+                    <p><strong>To support your rating on application of learing and work performance, give specific instance and evidence on
                             how learning/s gained was applied at work and hhow work performance was improved. If the learning/s gained cannot
                             be applied to actual work, kindly specify the reasons.
                         </strong></p>
                     <textarea name="changes" placeholder="Describe any changes..." required></textarea>
-
 
                     <table>
                         <tr>
@@ -454,7 +460,27 @@
                     <p><strong>E. Comments/recommendation</strong> (If any, to increase the impact of the training.)</p>
                     <textarea name="comments" placeholder="Your comments or suggestions..." required></textarea>
 
-                    <button type="submit">Submit</button>
+                    <div class="form-group">
+                        <label for="workPerformanceChanges">Please describe any changes in your work performance/output as a result of the training:</label>
+                        <textarea id="workPerformanceChanges" name="workPerformanceChanges" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Do you intend to initiate participation in similar training programs in the future?</label><br>
+                        <input type="radio" id="initiateYes" name="initiateParticipation" value="Yes" required>
+                        <label for="initiateYes">Yes</label><br>
+                        <input type="radio" id="initiateNo" name="initiateParticipation" value="No">
+                        <label for="initiateNo">No</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trainingSuggestions">Any suggestions for future training programs:</label>
+                        <textarea id="trainingSuggestions" name="trainingSuggestions" required></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Submit Evaluation</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -463,25 +489,36 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const courseTitleSelect = document.getElementById('courseTitle');
             const evaluationForm = document.querySelector('.evaluation-form');
 
-            courseTitleSelect.addEventListener('change', function() {
-                const trainingId = this.value;
-                if (trainingId) {
-                    // Update the form action dynamically based on the selected training ID
-                    evaluationForm.action = '/user/training/' + trainingId + '/submit-participant-evaluation';
-                } else {
-                    // Clear the action if no training is selected
-                    evaluationForm.action = '';
-                }
-            });
+            evaluationForm.addEventListener('submit', async function(event) {
+                event.preventDefault(); // Prevent default form submission
 
-            // Optional: Prevent form submission if no training is selected (though the route will handle this)
-            evaluationForm.addEventListener('submit', function(event) {
-                if (!courseTitleSelect.value) {
-                    alert('Please select a training before submitting.');
-                    event.preventDefault();
+                const formData = new FormData(evaluationForm);
+                const trainingId = formData.get('training_id');
+                const formAction = `{{ route('user.training.submit.participant.evaluation', ['id' => 'TRAINING_ID_PLACEHOLDER']) }}`.replace('TRAINING_ID_PLACEHOLDER', trainingId);
+
+                try {
+                    const response = await fetch(formAction, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert(result.message);
+                        // Optionally, redirect or update UI
+                        window.location.href = '{{ route('user.training.effectiveness') }}'; // Redirect back to training effectiveness page
+                    } else {
+                        alert('Error: ' + result.message + (result.errors ? '\n' + JSON.stringify(result.errors, null, 2) : ''));
+                    }
+                } catch (error) {
+                    console.error('Error during form submission:', error);
+                    alert('An unexpected error occurred. Please try again.');
                 }
             });
         });

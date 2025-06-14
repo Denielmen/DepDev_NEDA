@@ -446,7 +446,6 @@ alignedTraining.addEventListener('change', function() {
     if (selectedId === 'other') {
         mainTitleInput.value = '';
         mainTitleInput.readOnly = false;
-        // Clear autofilled fields
         competencySelect.value = '';
         hoursInput.value = '';
         expensesInput.value = '';
@@ -454,18 +453,23 @@ alignedTraining.addEventListener('change', function() {
         dateToInput.value = '';
         providerInput.value = '';
         roleSelect.value = '';
-    } else {
-        const training = trainings[selectedId];
-        if (training) {
-            mainTitleInput.value = training.title || '';
-            mainTitleInput.readOnly = true;
-            competencySelect.value = training.competency_id || '';
-            hoursInput.value = training.no_of_hours || '';
-            expensesInput.value = training.budget || '';
-            dateFromInput.value = training.implementation_date_from || '';
-            dateToInput.value = training.implementation_date_to || '';
-            providerInput.value = training.provider || '';
-            roleSelect.value = 'Course 1'; // Default to Participant, adjust as needed
+    } else if (trainings[selectedId]) {
+        const selectedTraining = trainings[selectedId];
+        mainTitleInput.value = selectedTraining.title;
+        mainTitleInput.readOnly = false;
+        competencySelect.value = selectedTraining.competency_id || '';
+        hoursInput.value = selectedTraining.no_of_hours || '';
+        expensesInput.value = selectedTraining.budget || '';
+        dateFromInput.value = selectedTraining.implementation_date_from || '';
+        dateToInput.value = selectedTraining.implementation_date_to || '';
+        providerInput.value = selectedTraining.provider || '';
+
+        // Find the user's role in this specific training
+        const userParticipant = selectedTraining.participants.find(p => p.id === {{ Auth::id() }});
+        if (userParticipant && userParticipant.pivot) {
+            roleSelect.value = userParticipant.pivot.participation_type_id || '';
+        } else {
+            roleSelect.value = '';
         }
     }
 });
@@ -566,7 +570,7 @@ alignedTraining.addEventListener('change', function() {
 
         // Certificate file preview logic (optional, similar to filePreview)
         let selectedCertFiles = [];
-        document.getElementById('uploadCertificates').addEventListener('change', function(event) {
+        document.getElementById('certInput').addEventListener('change', function(event) {   
             selectedCertFiles = Array.from(event.target.files);
             renderCertPreviews();
         });
