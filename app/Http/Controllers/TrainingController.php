@@ -35,5 +35,3 @@ class TrainingController extends Controller
         return view('userPanel.trainingEffectiveness', compact('trainings'));
     }
 }
-
-}
