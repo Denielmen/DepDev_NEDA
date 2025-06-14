@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingTrackingController;
 use App\Http\Controllers\TrainingMaterialController;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -142,9 +143,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     })->name('admin.training.view');
 
     Route::get('training-plan/unprogrammed/{id}', function ($id) {
-        $training = \App\Models\Training::findOrFail($id);
-        $user = auth()->user();
-        return view('adminPanel.trainingViewUnprog', compact('training', 'user'));
+        $training = \App\Models\Training::with(['participants' => function($query) {
+            $query->where('users.id', Auth::id())->withPivot('participation_type_id', 'year');
+        }])->findOrFail($id);
+        return view('adminPanel.trainingViewUnprog', compact('training'));
     })->name('admin.training.view.unprogrammed');
 
     // Participants routes

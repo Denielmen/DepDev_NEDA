@@ -188,7 +188,7 @@
         .tab-buttons {
             display: inline-flex;
             gap: 5px;
-            margin-right: 37rem;
+            margin-right: 38rem;
         }
         .tab-button {
             background-color: white;
