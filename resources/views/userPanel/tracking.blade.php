@@ -406,8 +406,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label mb-2">Choose a submission type</label>
-                            <div class="d-flex justify-content-center flex-wrap gap-3">
+                            <label class="mb-2 form-label">Choose a submission type</label>
+                            <div class="flex-wrap gap-3 d-flex justify-content-center">
                                 <div class="submission-col">
                                     <label for="uploadMaterials" class="submission-btn submission-large"
                                         id="uploadMaterialsLabel">
@@ -426,9 +426,9 @@
                                         Paste Link of Training Materials
                                     </label>
                                     <input type="text" id="linkMaterials" name="linkMaterials"
-                                        class="form-control mt-2" placeholder="Paste your link here"
+                                        class="mt-2 form-control" placeholder="Paste your link here"
                                         style="display: none;">
-                                    <p class="submission-desc mt-2">Accepted file types: pdf, png, jpg, jpeg</p>
+                                    <p class="mt-2 submission-desc">Accepted file types: pdf, png, jpg, jpeg</p>
                                     <p class="submission-desc">Max file size: 50 MB</p>
                                 </div>
                                 <div class="submission-col">
@@ -447,7 +447,7 @@
                             <div id="certPreview" class="mt-3"></div>
                         </div>
 
-                        <div class="text-center mt-4">
+                        <div class="mt-4 text-center">
                             <button type="submit" class="btn-save">Save</button>
                         </div>
                     </form>

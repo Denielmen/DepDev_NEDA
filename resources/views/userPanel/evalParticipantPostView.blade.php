@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Training Effectiveness Evaluation - Participant</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>View Participant Post-Evaluation - {{ $training->title ?? 'N/A' }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -101,17 +100,20 @@
             text-align: left;
         }
 
-
         .rating-cell {
             text-align: center;
         }
 
         select,
-        textarea {
+        textarea,
+        input[type="text"] {
             width: 100%;
             padding: 8px;
             font-size: 14px;
             margin-top: 5px;
+            background-color: #f0f0f0; /* Grey out for read-only */
+            border: 1px solid #ddd;
+            cursor: not-allowed;
         }
 
         textarea {
@@ -133,7 +135,6 @@
         button:hover {
             background: #0056b3;
         }
-
 
         .back-button {
             text-decoration: none;
@@ -322,15 +323,14 @@
                     <h4>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT</h4>
                     <h5>CENTRAL VISAYAS REGION</h5>
                     <br>
-                    <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
+                    <h6>VIEW PARTICIPANT POST-EVALUATION OF TRAINING EFFECTIVENESS</h6>
                     <p>(For Participant)</p>
+                    <br>
+                    <h6>Training Title: {{ $training->title ?? 'N/A' }}</h6>
                 </div>
 
-                <form method="POST" action="{{ route('user.training.submit.participant.evaluation', ['id' => $training->id]) }}" class="evaluation-form">
-                    @csrf
-                    <input type="hidden" name="training_id" value="{{ $training->id }}">
-                    <input type="hidden" name="type" value="participant_post"> 
-
+                @if ($data['success'])
+                <form>
                     <div class="instruction-container">
                         <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied; (3) Satisfied; <br>(2) Dissatisfied; (1) Very Dissatisfied.</p>
                     </div>
@@ -345,10 +345,10 @@
                         </tr>
                         <tr>
                             <td>How satisfied are you in the achievement of your learning goals/objectives as specified in your learner's profile.</td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="1" required></td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="1" disabled {{ (isset($data['detailed_evaluation']['goals']) && $data['detailed_evaluation']['goals'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="2" disabled {{ (isset($data['detailed_evaluation']['goals']) && $data['detailed_evaluation']['goals'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="3" disabled {{ (isset($data['detailed_evaluation']['goals']) && $data['detailed_evaluation']['goals'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="4" disabled {{ (isset($data['detailed_evaluation']['goals']) && $data['detailed_evaluation']['goals'] == 4) ? 'checked' : '' }}></td>
                         </tr>
                     </table>
 
@@ -367,78 +367,78 @@
                         </tr>
                         <tr>
                             <td>1. I applied the learning/s gained from this course to my work.</td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="1" required></td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="learning1" value="NA"></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="1" disabled {{ (isset($data['detailed_evaluation']['learning1']) && $data['detailed_evaluation']['learning1'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="2" disabled {{ (isset($data['detailed_evaluation']['learning1']) && $data['detailed_evaluation']['learning1'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="3" disabled {{ (isset($data['detailed_evaluation']['learning1']) && $data['detailed_evaluation']['learning1'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="4" disabled {{ (isset($data['detailed_evaluation']['learning1']) && $data['detailed_evaluation']['learning1'] == 4) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning1" value="NA" disabled {{ (isset($data['detailed_evaluation']['learning1']) && $data['detailed_evaluation']['learning1'] == 'NA') ? 'checked' : '' }}></td>
                         </tr>
                         <tr>
                             <td>2. The learning/s gained provided me with additional knowledge and skills to perform my role and tasks assigned.</td>
-                            <td class="rating-cell"><input type="radio" name="learning2" value="1"></td>
-                            <td class="rating-cell"><input type="radio" name="learning2" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="learning2" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="learning2" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="learning2" value="NA"></td>
+                            <td class="rating-cell"><input type="radio" name="learning2" value="1" disabled {{ (isset($data['detailed_evaluation']['learning2']) && $data['detailed_evaluation']['learning2'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning2" value="2" disabled {{ (isset($data['detailed_evaluation']['learning2']) && $data['detailed_evaluation']['learning2'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning2" value="3" disabled {{ (isset($data['detailed_evaluation']['learning2']) && $data['detailed_evaluation']['learning2'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning2" value="4" disabled {{ (isset($data['detailed_evaluation']['learning2']) && $data['detailed_evaluation']['learning2'] == 4) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning2" value="NA" disabled {{ (isset($data['detailed_evaluation']['learning2']) && $data['detailed_evaluation']['learning2'] == 'NA') ? 'checked' : '' }}></td>
                         </tr>
                         <tr>
                             <td>3. The learning/s gained contributed to making better quality and more efficient work.</td>
-                            <td class="rating-cell"><input type="radio" name="learning3" value="1"></td>
-                            <td class="rating-cell"><input type="radio" name="learning3" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="learning3" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="learning3" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="learning3" value="NA"></td>
+                            <td class="rating-cell"><input type="radio" name="learning3" value="1" disabled {{ (isset($data['detailed_evaluation']['learning3']) && $data['detailed_evaluation']['learning3'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning3" value="2" disabled {{ (isset($data['detailed_evaluation']['learning3']) && $data['detailed_evaluation']['learning3'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning3" value="3" disabled {{ (isset($data['detailed_evaluation']['learning3']) && $data['detailed_evaluation']['learning3'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning3" value="4" disabled {{ (isset($data['detailed_evaluation']['learning3']) && $data['detailed_evaluation']['learning3'] == 4) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning3" value="NA" disabled {{ (isset($data['detailed_evaluation']['learning3']) && $data['detailed_evaluation']['learning3'] == 'NA') ? 'checked' : '' }}></td>
                         </tr>
                         <tr>
                             <td>4. The learning/s gained allowed me to develop more specific competencies related to my field.</td>
-                            <td class="rating-cell"><input type="radio" name="learning4" value="1"></td>
-                            <td class="rating-cell"><input type="radio" name="learning4" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="learning4" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="learning4" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="learning4" value="NA"></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="1" disabled {{ (isset($data['detailed_evaluation']['learning4']) && $data['detailed_evaluation']['learning4'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="2" disabled {{ (isset($data['detailed_evaluation']['learning4']) && $data['detailed_evaluation']['learning4'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="3" disabled {{ (isset($data['detailed_evaluation']['learning4']) && $data['detailed_evaluation']['learning4'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="4" disabled {{ (isset($data['detailed_evaluation']['learning4']) && $data['detailed_evaluation']['learning4'] == 4) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="learning4" value="NA" disabled {{ (isset($data['detailed_evaluation']['learning4']) && $data['detailed_evaluation']['learning4'] == 'NA') ? 'checked' : '' }}></td>
                         </tr>
                     </table>
 
                     <table>
                         <tr>
-                            <th style="width: 60%;">C. Work Performance (to be determined within one performance period)</th>
-                            <th style="width: 4%; text-align: center;">1</th>
-                            <th style="width: 4%; text-align: center;">2</th>
-                            <th style="width: 4%; text-align: center;">3</th>
-                            <th style="width: 4%; text-align: center;">4</th>
-                            <th style="width: 4%; text-align: center;">NA</th>
+                            <th style="width: 60%;">C. Work Performance (as a result of the training program)</th>
+                            <th style="width: 5%; text-align: center;">1</th>
+                            <th style="width: 5%; text-align: center;">2</th>
+                            <th style="width: 5%; text-align: center;">3</th>
+                            <th style="width: 5%; text-align: center;">4</th>
+                            <th style="width: 5%; text-align: center;">NA</th>
                         </tr>
                         <tr>
                             <td>1. The quality of my work improved as a result participation in this course.</td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="1" required></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="NA"></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="1" disabled {{ (isset($data['detailed_evaluation']['performance1']) && $data['detailed_evaluation']['performance1'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="2" disabled {{ (isset($data['detailed_evaluation']['performance1']) && $data['detailed_evaluation']['performance1'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="3" disabled {{ (isset($data['detailed_evaluation']['performance1']) && $data['detailed_evaluation']['performance1'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="4" disabled {{ (isset($data['detailed_evaluation']['performance1']) && $data['detailed_evaluation']['performance1'] == 4) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance1" value="NA" disabled {{ (isset($data['detailed_evaluation']['performance1']) && $data['detailed_evaluation']['performance1'] == 'NA') ? 'checked' : '' }}></td>
                         </tr>
                         <tr>
                             <td>2. My competency level increased as a result of participation in this course.</td>
-                            <td class="rating-cell"><input type="radio" name="performance2" value="1" required></td>
-                            <td class="rating-cell"><input type="radio" name="performance2" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="performance2" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="performance2" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="NA"></td>
+                            <td class="rating-cell"><input type="radio" name="performance2" value="1" disabled {{ (isset($data['detailed_evaluation']['performance2']) && $data['detailed_evaluation']['performance2'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance2" value="2" disabled {{ (isset($data['detailed_evaluation']['performance2']) && $data['detailed_evaluation']['performance2'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance2" value="3" disabled {{ (isset($data['detailed_evaluation']['performance2']) && $data['detailed_evaluation']['performance2'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance2" value="4" disabled {{ (isset($data['detailed_evaluation']['performance2']) && $data['detailed_evaluation']['performance2'] == 4) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance2" value="NA" disabled {{ (isset($data['detailed_evaluation']['performance2']) && $data['detailed_evaluation']['performance2'] == 'NA') ? 'checked' : '' }}></td>
                         </tr>
                         <tr>
                             <td>3. My overall performance increased/improved as a result of participation in this course.</td>
-                            <td class="rating-cell"><input type="radio" name="performance3" value="1" required></td>
-                            <td class="rating-cell"><input type="radio" name="performance3" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="performance3" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="performance3" value="4"></td>
-                            <td class="rating-cell"><input type="radio" name="performance1" value="NA"></td>
+                            <td class="rating-cell"><input type="radio" name="performance3" value="1" disabled {{ (isset($data['detailed_evaluation']['performance3']) && $data['detailed_evaluation']['performance3'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance3" value="2" disabled {{ (isset($data['detailed_evaluation']['performance3']) && $data['detailed_evaluation']['performance3'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance3" value="3" disabled {{ (isset($data['detailed_evaluation']['performance3']) && $data['detailed_evaluation']['performance3'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance3" value="4" disabled {{ (isset($data['detailed_evaluation']['performance3']) && $data['detailed_evaluation']['performance3'] == 4) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="performance3" value="NA" disabled {{ (isset($data['detailed_evaluation']['performance3']) && $data['detailed_evaluation']['performance3'] == 'NA') ? 'checked' : '' }}></td>
                         </tr>
                     </table>
 
-                    <p><strong>To support your rating on application of learing and work performance, give specific instance and evidence on
-                            how learning/s gained was applied at work and hhow work performance was improved. If the learning/s gained cannot
+                    <p><strong>To support your rating on application of learning and work performance, give specific instance and evidence on
+                            how learning/s gained was applied at work and how work performance was improved. If the learning/s gained cannot
                             be applied to actual work, kindly specify the reasons.
                         </strong></p>
-                    <textarea name="changes" placeholder="Describe any changes..." required></textarea>
+                    <textarea name="changes" readonly>{{ $data['detailed_evaluation']['changes'] ?? '' }}</textarea>
 
                     <table>
                         <tr>
@@ -450,79 +450,44 @@
                         </tr>
                         <tr>
                             <td>In a scale 4-1 (4 being the highest ), please tick the circle which best describes your proficiency after your participation in this course.</td>
-                            <td class="rating-cell"><input type="radio" name="proficiency" value="1" required></td>
-                            <td class="rating-cell"><input type="radio" name="proficiency" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="proficiency" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="proficiency" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="proficiency" value="1" disabled {{ (isset($data['detailed_evaluation']['proficiency']) && $data['detailed_evaluation']['proficiency'] == 1) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="proficiency" value="2" disabled {{ (isset($data['detailed_evaluation']['proficiency']) && $data['detailed_evaluation']['proficiency'] == 2) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="proficiency" value="3" disabled {{ (isset($data['detailed_evaluation']['proficiency']) && $data['detailed_evaluation']['proficiency'] == 3) ? 'checked' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="proficiency" value="4" disabled {{ (isset($data['detailed_evaluation']['proficiency']) && $data['detailed_evaluation']['proficiency'] == 4) ? 'checked' : '' }}></td>
                         </tr>
                     </table>
 
                     <p><strong>E. Comments/recommendation</strong> (If any, to increase the impact of the training.)</p>
-                    <textarea name="comments" placeholder="Your comments or suggestions..." required></textarea>
+                    <textarea name="comments" readonly>{{ $data['detailed_evaluation']['comments'] ?? '' }}</textarea>
 
                     <div class="form-group">
                         <label for="workPerformanceChanges">Please describe any changes in your work performance/output as a result of the training:</label>
-                        <textarea id="workPerformanceChanges" name="workPerformanceChanges" required></textarea>
+                        <textarea id="workPerformanceChanges" name="workPerformanceChanges" readonly>{{ $data['detailed_evaluation']['workPerformanceChanges'] ?? '' }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label>Do you intend to initiate participation in similar training programs in the future?</label><br>
-                        <input type="radio" id="initiateYes" name="initiateParticipation" value="Yes" required>
+                        <input type="radio" id="initiateYes" name="initiateParticipation" value="Yes" disabled {{ (isset($data['detailed_evaluation']['initiateParticipation']) && $data['detailed_evaluation']['initiateParticipation'] == 'Yes') ? 'checked' : '' }}>
                         <label for="initiateYes">Yes</label><br>
-                        <input type="radio" id="initiateNo" name="initiateParticipation" value="No">
+                        <input type="radio" id="initiateNo" name="initiateParticipation" value="No" disabled {{ (isset($data['detailed_evaluation']['initiateParticipation']) && $data['detailed_evaluation']['initiateParticipation'] == 'No') ? 'checked' : '' }}>
                         <label for="initiateNo">No</label>
                     </div>
 
                     <div class="form-group">
                         <label for="trainingSuggestions">Any suggestions for future training programs:</label>
-                        <textarea id="trainingSuggestions" name="trainingSuggestions" required></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Submit Evaluation</button>
+                        <textarea id="trainingSuggestions" name="trainingSuggestions" readonly>{{ $data['detailed_evaluation']['trainingSuggestions'] ?? '' }}</textarea>
                     </div>
                 </form>
+                @else
+                <div class="alert alert-info text-center mt-4">
+                    No participant post-evaluation data found for this training.
+                </div>
+                @endif
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const evaluationForm = document.querySelector('.evaluation-form');
-
-            evaluationForm.addEventListener('submit', async function(event) {
-                event.preventDefault(); // Prevent default form submission
-
-                const formData = new FormData(evaluationForm);
-                const trainingId = formData.get('training_id');
-                const formAction = `{{ route('user.training.submit.participant.evaluation', ['id' => 'TRAINING_ID_PLACEHOLDER']) }}`.replace('TRAINING_ID_PLACEHOLDER', trainingId);
-
-                try {
-                    const response = await fetch(formAction, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        alert(result.message);
-                        // Optionally, redirect or update UI
-                        window.location.href = '{{ route('user.training.effectiveness') }}'; // Redirect back to training effectiveness page
-                    } else {
-                        alert('Error: ' + result.message + (result.errors ? '\n' + JSON.stringify(result.errors, null, 2) : ''));
-                    }
-                } catch (error) {
-                    console.error('Error during form submission:', error);
-                    alert('An unexpected error occurred. Please try again.');
-                }
-            });
-        });
-    </script>
 </body>
 
-</html>
+</html> 

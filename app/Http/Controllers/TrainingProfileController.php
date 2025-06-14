@@ -10,6 +10,7 @@ use App\Models\ParticipationType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TrainingProfileController extends Controller
 {
@@ -293,33 +294,44 @@ class TrainingProfileController extends Controller
 
     public function rateParticipant(Request $request, $id)
     {
+        Log::info('Rate Participant Request Received', $request->all());
+
         $request->validate([
-            'type' => 'required|in:Pre-Evaluation,Post-Evaluation,Supervisor-Pre-Evaluation,Supervisor-Post-Evaluation',
-            'rating' => 'required_if:type,Pre-Evaluation,Supervisor-Pre-Evaluation|nullable|integer|min:1|max:4',
-            'supervisor_proficiency_rating' => 'required_if:type,Post-Evaluation|integer|min:1|max:4',
+            'type' => 'required|in:participant_pre,participant_post,supervisor_pre,supervisor_post',
+            'rating' => 'required|integer|min:1|max:4',
         ]);
+
         $training = Training::findOrFail($id);
-        if ($request->type === 'Pre-Evaluation') {
+
+        if ($request->type === 'participant_pre') {
             $training->participant_pre_rating = $request->rating;
-        } else if ($request->type === 'Post-Evaluation') {
-            // If supervisor proficiency rating is present, save it
-            if ($request->has('supervisor_proficiency_rating')) {
-                $training->supervisor_post_rating = $request->supervisor_proficiency_rating;
-            }
-            // Note: We are intentionally not saving participant_post_rating from this form
-        } else if ($request->type === 'Supervisor-Pre-Evaluation') {
+            Log::info("Updating participant_pre_rating for training {$id} to {$request->rating}");
+        } elseif ($request->type === 'participant_post') {
+            $training->participant_post_rating = $request->rating;
+            Log::info("Updating participant_post_rating for training {$id} to {$request->rating}");
+        } elseif ($request->type === 'supervisor_pre') {
             $training->supervisor_pre_rating = $request->rating;
-        } else if ($request->type === 'Supervisor-Post-Evaluation') {
+            Log::info("Updating supervisor_pre_rating for training {$id} to {$request->rating}");
+        } elseif ($request->type === 'supervisor_post') {
             $training->supervisor_post_rating = $request->rating;
+            Log::info("Updating supervisor_post_rating for training {$id} to {$request->rating}");
         }
+
+        try {
         $training->save();
+            Log::info("Training {$id} saved successfully.");
         return response()->json([
             'success' => true,
+            'message' => 'Evaluation stored successfully!',
             'pre_rating' => $training->participant_pre_rating,
             'post_rating' => $training->participant_post_rating,
             'supervisor_pre_rating' => $training->supervisor_pre_rating,
             'supervisor_post_rating' => $training->supervisor_post_rating,
         ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to save training {$id}: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to save evaluation.'], 500);
+        }
     }
 
     public function resources(Request $request)
@@ -337,10 +349,10 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingResources', compact('materials'));
     }
 
-    public function evalParticipantForm()
+    public function evalParticipantForm($training_id)
     {
-        $implementedTrainings = Training::where('status', 'Implemented')->where('type', 'Program')->get();
-        return view('userPanel.evalParticipant', compact('implementedTrainings'));
+        $training = Training::findOrFail($training_id);
+        return view('userPanel.evalParticipant', compact('training'));
     }
 
     public function downloadMaterial(TrainingMaterial $material)
@@ -365,56 +377,205 @@ class TrainingProfileController extends Controller
         return view('adminPanel.post_eval', compact('training'));
     }
 
-    public function submitPostEvaluation(Request $request, $id)
+    public function submitParticipantEvaluation(Request $request, $id)
     {
-        $request->validate([
-            'goals' => 'required|integer|min:1|max:4',
-            'learning1' => 'required|integer|min:1|max:5',
-            'learning2' => 'required|integer|min:1|max:5',
-            'learning3' => 'required|integer|min:1|max:5',
-            'learning4' => 'required|integer|min:1|max:5',
-            'performance1' => 'required|integer|min:1|max:4',
-            'workPerformanceChanges' => 'required|string',
-            'initiateParticipation' => 'required|in:Yes,No',
-            'trainingSuggestions' => 'required|string'
-        ]);
+        Log::info('Participant Evaluation Submission Request Received', $request->all());
+        Log::debug('Incoming request data:', $request->all());
 
-        $training = Training::findOrFail($id);
-        
-        // Check if the training status is 'Implemented'
-        if ($training->status !== 'Implemented') {
-            return back()->withErrors(['status' => 'Post-evaluation can only be submitted for implemented trainings.']);
+        try {
+            $validatedData = $request->validate([
+                'goals' => 'required|integer|min:1|max:4',
+                'learning1' => 'required|string|in:1,2,3,4,NA',
+                'learning2' => 'required|string|in:1,2,3,4,NA',
+                'learning3' => 'required|string|in:1,2,3,4,NA',
+                'learning4' => 'required|string|in:1,2,3,4,NA',
+                'performance1' => 'required|string|in:1,2,3,4,NA',
+                'performance2' => 'required|string|in:1,2,3,4,NA',
+                'performance3' => 'required|string|in:1,2,3,4,NA',
+                'changes' => 'required|string',
+                'proficiency' => 'required|string|in:1,2,3,4',
+                'comments' => 'nullable|string',
+                'workPerformanceChanges' => 'required|string',
+                'initiateParticipation' => 'required|in:Yes,No',
+                'trainingSuggestions' => 'required|string',
+                'training_id' => 'required|exists:trainings,id',
+                'type' => 'required|in:participant_post',
+            ]);
+            Log::debug('Validation successful.', $validatedData);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed:', $e->errors());
+            return response()->json(['success' => false, 'message' => 'Validation failed.', 'errors' => $e->errors()], 422);
         }
 
-        // Calculate average rating from all sections
-        $averageRating = round((
-            $request->goals + 
-            $request->learning1 + 
-            $request->learning2 + 
-            $request->learning3 + 
-            $request->learning4 + 
-            $request->performance1
-        ) / 6);
+        $training = Training::findOrFail($id);
+        Log::debug('Training found:', ['id' => $training->id, 'title' => $training->title]);
+        
+        // Collect all numeric ratings for averaging
+        $numericRatings = [];
+        $detailedParticipantPostEvaluationData = [];
 
-        // Store the post-evaluation rating and detailed data
-        $training->supervisor_post_rating = $averageRating;
-        $training->supervisor_post_evaluation = [
-            'goals' => $request->goals,
-            'learning1' => $request->learning1,
-            'learning2' => $request->learning2,
-            'learning3' => $request->learning3,
-            'learning4' => $request->learning4,
-            'performance1' => $request->performance1,
-            'workPerformanceChanges' => $request->workPerformanceChanges,
-            'initiateParticipation' => $request->initiateParticipation,
-            'trainingSuggestions' => $request->trainingSuggestions
+        $detailedParticipantPostEvaluationData['goals'] = $validatedData['goals'];
+        for ($i = 1; $i <= 4; $i++) {
+            $learningKey = 'learning' . $i;
+            if (is_numeric($validatedData[$learningKey])) {
+                $numericRatings[] = (int)$validatedData[$learningKey];
+            }
+            $detailedParticipantPostEvaluationData[$learningKey] = $validatedData[$learningKey];
+        }
+        // Save all performance fields
+        for ($i = 1; $i <= 3; $i++) {
+            $performanceKey = 'performance' . $i;
+            if (is_numeric($validatedData[$performanceKey])) {
+                $numericRatings[] = (int)$validatedData[$performanceKey];
+            }
+            $detailedParticipantPostEvaluationData[$performanceKey] = $validatedData[$performanceKey];
+        }
+        $detailedParticipantPostEvaluationData['changes'] = $validatedData['changes'];
+        $detailedParticipantPostEvaluationData['proficiency'] = $validatedData['proficiency'];
+        $detailedParticipantPostEvaluationData['comments'] = $validatedData['comments'] ?? '';
+        $detailedParticipantPostEvaluationData['workPerformanceChanges'] = $validatedData['workPerformanceChanges'];
+        $detailedParticipantPostEvaluationData['initiateParticipation'] = $validatedData['initiateParticipation'];
+        $detailedParticipantPostEvaluationData['trainingSuggestions'] = $validatedData['trainingSuggestions'];
+
+        $averageRating = null;
+        if (count($numericRatings) > 0) {
+            $averageRating = round(array_sum($numericRatings) / count($numericRatings), 2); // Round to 2 decimal places
+        }
+        Log::debug('Calculated average rating:', ['average' => $averageRating, 'numeric_ratings' => $numericRatings]);
+
+        // Store the average rating and detailed data in participant_post_rating and participant_post_evaluation
+        $training->participant_post_rating = $averageRating;
+        $training->participant_post_evaluation = $detailedParticipantPostEvaluationData;
+        
+        try {
+            $training->save();
+            Log::info("Training {$id} participant post-evaluation saved successfully. Average rating: {$averageRating}");
+            Log::debug('Training saved successfully.', ['training_id' => $training->id, 'participant_post_rating' => $training->participant_post_rating, 'participant_post_evaluation' => $training->participant_post_evaluation]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Participant post-evaluation submitted successfully!',
+                'post_rating' => $training->participant_post_rating,
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to save participant post-evaluation for training {$id}: " . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Failed to save participant post-evaluation.'], 500);
+        }
+    }
+
+    public function viewEvaluationData($training_id, $type)
+    {
+        $training = Training::find($training_id);
+
+        if (!$training) {
+            // For API calls (e.g., pre-eval modal), return JSON. For page redirects, handle in view.
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Training not found.'], 404);
+            } else {
+                abort(404, 'Training not found.');
+            }
+        }
+
+        $data = [
+            'training' => $training,
+            'evaluation_type' => $type,
+            'success' => false,
+            'message' => 'No evaluation data found.'
         ];
-        $training->save();
 
-        // Get the user ID from the training's first participant
-        $userId = $training->participants->first()->id;
+        switch ($type) {
+            case 'participant_pre':
+                $data['rating'] = $training->participant_pre_rating;
+                $data['success'] = ($data['rating'] !== null);
+                return response()->json($data); // Always JSON for pre-eval modal
+            case 'participant_post':
+                $data['rating'] = $training->participant_post_rating;
+                $data['detailed_evaluation'] = $training->participant_post_evaluation; // Retrieve all detailed data
+                $data['success'] = ($data['rating'] !== null);
+                // If data exists, or if it's a page load, render the view
+                return view('userPanel.evalParticipantPostView', compact('training', 'data'));
+            case 'supervisor_pre':
+                $data['rating'] = $training->supervisor_pre_rating;
+                $data['success'] = ($data['rating'] !== null);
+                return response()->json($data); // Always JSON for pre-eval modal
+            case 'supervisor_post':
+                $data['rating'] = $training->supervisor_post_rating;
+                $data['detailed_evaluation'] = $training->supervisor_post_evaluation;
+                $data['success'] = ($data['rating'] !== null);
+                return view('userPanel.evalSupervisorPostView', compact('training', 'data'));
+            default:
+                if (request()->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Invalid evaluation type.'], 400);
+                } else {
+                    abort(400, 'Invalid evaluation type.');
+                }
+        }
+    }
 
-        return redirect()->route('admin.viewUserInfo', ['id' => $userId])
-            ->with('success', 'Post-evaluation submitted successfully.');
+    public function submitPostEvaluation(Request $request, $id)
+    {
+        \Log::info('Supervisor Post Evaluation Submission Request Received', $request->all());
+        \Log::debug('Incoming supervisor post-eval request data:', $request->all());
+
+        try {
+            $validatedData = $request->validate([
+                'goals' => 'required|integer|min:1|max:4',
+                'learning1' => 'required|string|in:1,2,3,4,5',
+                'learning2' => 'required|string|in:1,2,3,4,5',
+                'learning3' => 'required|string|in:1,2,3,4,5',
+                'learning4' => 'required|string|in:1,2,3,4,5',
+                'workPerformanceChanges' => 'required|string',
+                'performance1' => 'required|string|in:1,2,3,4',
+                'initiateParticipation' => 'required|in:Yes,No',
+                'trainingSuggestions' => 'required|string',
+                'type' => 'required|in:supervisor_post',
+            ]);
+            \Log::debug('Supervisor post-eval validation successful.', $validatedData);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Supervisor post-eval validation failed:', $e->errors());
+            return response()->json(['success' => false, 'message' => 'Validation failed.', 'errors' => $e->errors()], 422);
+        }
+
+        $training = Training::findOrFail($id);
+        \Log::debug('Training found for supervisor post-eval:', ['id' => $training->id, 'title' => $training->title]);
+
+        $detailedSupervisorPostEvaluationData = [
+            'goals' => $validatedData['goals'],
+            'learning1' => $validatedData['learning1'],
+            'learning2' => $validatedData['learning2'],
+            'learning3' => $validatedData['learning3'],
+            'learning4' => $validatedData['learning4'],
+            'workPerformanceChanges' => $validatedData['workPerformanceChanges'],
+            'performance1' => $validatedData['performance1'],
+            'initiateParticipation' => $validatedData['initiateParticipation'],
+            'trainingSuggestions' => $validatedData['trainingSuggestions'],
+        ];
+
+        // Calculate average rating for supervisor post (excluding NA/5 if needed)
+        $numericRatings = [];
+        foreach (['goals', 'learning1', 'learning2', 'learning3', 'learning4', 'performance1'] as $key) {
+            if (is_numeric($validatedData[$key]) && $validatedData[$key] != 5) {
+                $numericRatings[] = (int)$validatedData[$key];
+            }
+        }
+        $averageRating = null;
+        if (count($numericRatings) > 0) {
+            $averageRating = round(array_sum($numericRatings) / count($numericRatings), 2);
+        }
+        $training->supervisor_post_rating = $averageRating;
+        $training->supervisor_post_evaluation = $detailedSupervisorPostEvaluationData;
+
+        try {
+            $training->save();
+            \Log::info("Training {$id} supervisor post-evaluation saved successfully. Average rating: {$averageRating}");
+            \Log::debug('Training saved successfully (supervisor post-eval).', ['training_id' => $training->id, 'supervisor_post_rating' => $training->supervisor_post_rating, 'supervisor_post_evaluation' => $training->supervisor_post_evaluation]);
+
+            // Redirect back with a success message instead of returning JSON
+            return redirect()->back()->with('success', 'Supervisor post-evaluation submitted successfully!');
+        } catch (\Exception $e) {
+            \Log::error("Failed to save supervisor post-evaluation for training {$id}: " . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()->with('error', 'Failed to save supervisor post-evaluation.');
+        }
     }
 }
