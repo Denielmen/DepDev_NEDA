@@ -94,6 +94,14 @@
             font-weight: 500;
             color: #003366;
         }
+        .content-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .back-button-container {
+            margin-bottom: 20px;
+        }
         .btn-back {
             background-color: #003366;
             color: white;
@@ -104,7 +112,6 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            margin: -80px auto 0 auto;
         }
         .btn-back:hover {
             background-color: #004080;
@@ -144,54 +151,56 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <div class="top-actions">
-                <a href="{{ route('admin.training-plan.unprogrammed') }}" class="btn btn-back">
-                    <i class="bi bi-arrow-left"></i>
-                    Back
-                </a>
-            </div>
-            <div class="details-card">
-                <h2 class="details-title">Training Details</h2>
-                <table class="details-table">
-                    <tr>
-                        <td class="label">Title/Area:</td>
-                        <td>{{ $training->title ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Competency:</td>
-                        <td>{{ $training->competency->name ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">User Role:</td>
-                        <td>
-                            @php
-                                $userRole = 'N/A';
-                                $creatorId = $training->user_id ?? null;
+            <div class="content-container">
+                <div class="back-button-container">
+                    <a href="{{ route('admin.training-plan.unprogrammed') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i>
+                        Back
+                    </a>
+                </div>
+                <div class="details-card">
+                    <h2 class="details-title">Training Details</h2>
+                    <table class="details-table">
+                        <tr>
+                            <td class="label">Title/Area:</td>
+                            <td>{{ $training->title ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Competency:</td>
+                            <td>{{ $training->competency->name ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">User Role:</td>
+                            <td>
+                                @php
+                                    $userRole = 'N/A';
+                                    $creatorId = $training->user_id ?? null;
 
-                                if ($creatorId) {
-                                    $creatorParticipant = $training->participants->where('id', $creatorId)->first();
-                                    if ($creatorParticipant && isset($creatorParticipant->pivot->participation_type_id)) {
-                                        $participationType = $participationTypes->get($creatorParticipant->pivot->participation_type_id);
-                                        $userRole = $participationType ? $participationType->name : 'N/A';
+                                    if ($creatorId) {
+                                        $creatorParticipant = $training->participants->where('id', $creatorId)->first();
+                                        if ($creatorParticipant && isset($creatorParticipant->pivot->participation_type_id)) {
+                                            $participationType = $participationTypes->get($creatorParticipant->pivot->participation_type_id);
+                                            $userRole = $participationType ? $participationType->name : 'N/A';
+                                        }
                                     }
-                                }
-                            @endphp
-                            {{ $userRole }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Learning Service Provider:</td>
-                        <td>{{ $training->provider ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Status:</td>
-                        <td>{{ $training->status ?? '' }}</td>
-                    </tr>
-                </table>
+                                @endphp
+                                {{ $userRole }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">Year of Implementation:</td>
+                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Learning Service Provider:</td>
+                            <td>{{ $training->provider ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Status:</td>
+                            <td>{{ $training->status ?? '' }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -199,3 +208,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 
+
