@@ -79,6 +79,7 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
+            border: 2px solid #004080;
         }
         .user-avatar i {
             font-size: 3rem;
@@ -238,7 +239,7 @@
                 </button>
             </div>
 
-        <div class="row">
+         <div class="row">
             <!-- User Info Card -->
             <div class="col-md-4">
                 <div class="user-info-card text-center">
@@ -275,8 +276,8 @@
                         <input type="text" class="form-control" value="{{ $user->division }}" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Office/Department</label>
-                        <input type="text" class="form-control" value="{{ $user->office }}" readonly>
+                        <label class="form-label">Position</label>
+                        <input type="text" class="form-control" value="{{ $user->position }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Name of Supervisor (Last, First, MI)</label>
@@ -285,7 +286,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Program Tabs -->
         <div class="program-tabs">
             <ul class="nav nav-pills">

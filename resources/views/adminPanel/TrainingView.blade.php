@@ -59,13 +59,18 @@
             padding: 20px;
             background-color: rgb(187, 219, 252);
             margin-left: 270px;
-            margin-top: 50px;
-            padding-bottom: 20px;
-
+            margin-top: 56px;
+            min-height: calc(100vh - 56px);
         }
-        .details-card {
+        .content-container {
             max-width: 1040px;
             width: 100%;
+            margin: 0 auto;
+        }
+        .back-button-container {
+            margin-bottom: 20px;
+        }
+        .details-card {
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -187,96 +192,105 @@
         </div>
         <!-- Main Content -->
         <div class="main-content">
-            <a href="{{ route('admin.training-plan') }}" class="btn btn-back">
-                <i class="bi bi-arrow-left"></i>
-                Back
-            </a>
-            <div class="details-card">
-                <h2 class="details-title">Training Details</h2>
-                <table class="details-table">
-                    <tr>
-                        <td class="label">Title/Area:</td>
-                        <td>{{ $training->title ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Competency:</td>
-                        <td>{{ $training->competency->name ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Three-Year Period:</td>
-                        <td> {{ $training->period_from ?? '' }} - {{ $training->period_to ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Budget (per hour):</td>
-                        <td>{{ $training->budget ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">No. of Hours:</td>
-                        <td>{{ $training->no_of_hours ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Learning Service Provider:</td>
-                        <td>{{ $training->provider ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Development Target:</td>
-                        <td>{{ $training->dev_target ?? '' }}</td>
-                    </tr> 
-                    <tr>
-                        <td class="label">Performance Goal this Support:</td>
-                        <td>{{ $training->performance_goal ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Objective:</td>
-                        <td>{{ $training->objective ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Participants:</td>
-                        <td>
-                            @php
-                                // Force a fresh reload of the participants relationship
-                                $training->load(['participants' => function($query) {
-                                    $query->orderBy('last_name')->orderBy('first_name');
-                                }]);
-                            @endphp
-                            
-                            @forelse ($training->participants as $participant)
-                                <div class="mb-1">
-                                    {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}
-                                    @if($participant->pivot && $participant->pivot->participation_type_id)
-                                        <span class="badge bg-info">
-                                            {{ $participationTypes[$participant->pivot->participation_type_id]->name ?? 'N/A' }}
-                                        </span>
-                                    @endif
-                                </div>
-                            @empty
-                                <div class="text-muted">No participants found.</div>
-                            @endforelse
-                        </td>
-                    </tr>
-                </table>
-                <div class="action-buttons">
-                    <a href="{{ route('admin.training-plan.edit', $training) }}" class="btn btn-edit">
-                        <i class="bi bi-pencil"></i>
-                        Edit
+            <div class="content-container">
+                <div class="back-button-container">
+                    <a href="{{ route('admin.training-plan') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i>
+                        Back
                     </a>
-                    <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" style="display: inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this training? This action cannot be undone.')">
-                            <i class="bi bi-trash"></i>
-                            Delete
-                        </button>
-                    </form>
+                </div>
+                <div class="details-card">
+                    <h2 class="details-title">Training Details</h2>
+                    <table class="details-table">
+                        <tr>
+                            <td class="label">Title/Area:</td>
+                            <td>{{ $training->title ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Competency:</td>
+                            <td>{{ $training->competency->name ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Three-Year Period:</td>
+                            <td> {{ $training->period_from ?? '' }} - {{ $training->period_to ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Year of Implementation:</td>
+                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Budget (per hour):</td>
+                            <td>{{ $training->budget ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">No. of Hours:</td>
+                            <td>{{ $training->no_of_hours ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Learning Service Provider:</td>
+                            <td>{{ $training->provider ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Development Target:</td>
+                            <td>{{ $training->dev_target ?? '' }}</td>
+                        </tr> 
+                        <tr>
+                            <td class="label">Performance Goal this Support:</td>
+                            <td>{{ $training->performance_goal ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Objective:</td>
+                            <td>{{ $training->objective ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Participants:</td>
+                            <td>
+                                @php
+                                    // Force a fresh reload of the participants relationship
+                                    $training->load(['participants' => function($query) {
+                                        $query->orderBy('last_name')->orderBy('first_name');
+                                    }]);
+                                @endphp
+                                
+                                @forelse ($training->participants as $participant)
+                                    <div class="mb-1">
+                                        {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}
+                                        @if($participant->pivot && $participant->pivot->participation_type_id)
+                                            <span class="badge bg-info">
+                                                {{ $participationTypes[$participant->pivot->participation_type_id]->name ?? 'N/A' }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div class="text-muted">No participants found.</div>
+                                @endforelse
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="action-buttons">
+                        <a href="{{ route('admin.training-plan.edit', $training) }}" class="btn btn-edit">
+                            <i class="bi bi-pencil"></i>
+                            Edit
+                        </a>
+                        <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this training? This action cannot be undone.')">
+                                <i class="bi bi-trash"></i>
+                                Delete
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </body>
 </html> 
+
+
+
+
+
 
 

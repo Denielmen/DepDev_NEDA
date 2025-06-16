@@ -188,7 +188,6 @@
         .tab-buttons {
             display: inline-flex;
             gap: 5px;
-            margin-right: 38rem;
         }
         .tab-button {
             background-color: white;
@@ -264,18 +263,20 @@
                         <input type="text" placeholder="Search..." id="searchInput" onkeyup="searchUsers()">
                     </div>
                 </div>
-                <div class="d-flex justify-content-end mb-2">
-                <div class="tab-buttons">
-                    <a href="#" class="tab-button active" id="active-tab" onclick="filterUsersByStatus('active'); return false;">Active</a>
-                    <a href="#" class="tab-button" id="inactive-tab" onclick="filterUsersByStatus('inactive'); return false;">Disable</a>
-                </div>
-                    <label for="sort-by" class="me-2">Sort by</label>
-                    <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers()">
-                        <option value="all">All Positions</option>
-                        @foreach($positions as $position)
-                            <option value="{{ $position }}">{{ $position }}</option>
-                        @endforeach
-                    </select>
+                <div class="d-flex justify-content-between mb-2">
+                    <div class="tab-buttons">
+                        <a href="#" class="tab-button active" id="active-tab" onclick="filterUsersByStatus('active'); return false;">Active</a>
+                        <a href="#" class="tab-button" id="inactive-tab" onclick="filterUsersByStatus('inactive'); return false;">Disable</a>
+                    </div>
+                    <div>
+                        <label for="sort-by" class="me-2">Sort by</label>
+                        <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers()">
+                            <option value="all">All Positions</option>
+                            @foreach($positions as $position)
+                                <option value="{{ $position }}">{{ $position }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table>
@@ -377,34 +378,6 @@ function sortUsers() {
     });
 }
 
-function filterUsersByStatus(status) {
-    // Update active tab
-    document.getElementById('active-tab').classList.remove('active');
-    document.getElementById('inactive-tab').classList.remove('active');
-    document.getElementById(status + '-tab').classList.add('active');
-    
-    // Filter table rows
-    const table = document.querySelector('.table-container table');
-    const tr = table.getElementsByTagName('tr');
-    
-    for (let i = 1; i < tr.length; i++) {
-        const statusCell = tr[i].getElementsByTagName('td')[0];
-        if (statusCell) {
-            const statusText = statusCell.textContent.trim();
-            if ((status === 'active' && statusText.includes('Active')) || 
-                (status === 'inactive' && statusText.includes('Inactive'))) {
-                tr[i].style.display = '';
-            } else {
-                tr[i].style.display = 'none';
-            }
-        }
-    }
-    
-    // Reset search and sort when switching tabs
-    document.getElementById('searchInput').value = '';
-    document.getElementById('sort-by').value = 'all';
-}
-
         function filterUsersByStatus(status) {
     // Update active tab
     document.getElementById('active-tab').classList.remove('active');
@@ -436,4 +409,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>
+
+
 
