@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Training;
 use App\Models\TrainingMaterial;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class TrainingTrackingController extends Controller
@@ -13,43 +12,48 @@ class TrainingTrackingController extends Controller
     public function index()
     {
         // Fetch all programmed trainings that are not implemented
-        $competencies = \App\Models\Competency::distinct()->get();
+        $competencies = \App\Models\Competency::all();
         $programmedTrainings = Training::where('type', 'Program')
             ->where('status', '!=', 'Implemented')
             ->get();
         $participationTypes = \App\Models\ParticipationType::all();
-        return view('userPanel.tracking', compact('programmedTrainings', 'competencies', 'participationTypes'));
+
+        // Fetch and group materials by training_id
+        $materials = TrainingMaterial::with(['competency', 'training'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('training_id');
+
+        // Return all data to a single view
+        return view('userPanel.tracking', compact(
+            'programmedTrainings',
+            'competencies',
+            'participationTypes',
+            'materials'
+        ));
     }
 
     public function store(Request $request)
     {
+        // 1. Validate request
         $request->validate([
-            'uploaded_file'   => 'nullable', // We'll handle validation for multiple files below
-            'uploaded_file.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:51200', // 50MB max per file
-            'web_url'         => 'nullable|url',
-            'courseTitle' => 'required',
-            'training_title' => 'required_if:courseTitle,other',
-            'competency_id' => 'required|array',
-            'competency_id.*' => 'exists:competencies,id',
-            'participation_type_id' => 'required|exists:participation_types,id',
-            'no_of_hours' => 'required|numeric',
-            'expenses' => 'required|numeric',
+            'uploadMaterials'      => 'nullable',
+            'uploadMaterials.*'    => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:51200',
+            'uploadCertificates'   => 'nullable',
+            'uploadCertificates.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:51200',
+            'linkMaterials'        => 'nullable',
+            'courseTitle'          => 'required',
+            'training_title'       => 'required_if:courseTitle,other',
+            'competency_id'        => 'required|exists:competencies,id',
+            'participation_type_id'=> 'required|exists:participation_types,id',
+            'no_of_hours'          => 'required|numeric',
+            'expenses'             => 'required|numeric',
+            'provider'             => 'required',
             'implementation_date_from' => 'required|date',
-            'implementation_date_to' => 'required|date|after_or_equal:implementation_date_from',
-            // Add other validations as needed
+            'implementation_date_to'   => 'required|date|after_or_equal:implementation_date_from',
         ]);
 
-        $filePaths = [];
-        if ($request->hasFile('uploaded_file')) {
-            foreach ($request->file('uploaded_file') as $file) {
-                $filePaths[] = $file->store('uploads', [
-                    'disk' => 'public',
-                    'visibility' => 'public',
-                ]);
-            }
-        }
-
-        // Handle 'Others' selection
+        // 2. Determine training (programmed or unprogrammed)
         if ($request->input('courseTitle') === 'other') {
             $training = Training::create([
                 'title' => $request->input('training_title'),
@@ -63,76 +67,82 @@ class TrainingTrackingController extends Controller
                 'implementation_date_to' => $request->input('implementation_date_to'),
                 'user_id' => Auth::id(),
             ]);
-            // Get the participation type ID from the request
-            $participationTypeId = $request->input('participation_type_id');
-            // Add the user as a participant with their selected role
             $training->participants()->attach(Auth::id(), [
-                'participation_type_id' => $participationTypeId,
+                'participation_type_id' => $request->input('participation_type_id'),
                 'year' => date('Y')
             ]);
         } else {
             $training = Training::find($request->input('courseTitle'));
-            if ($training && $training->status !== 'Implemented') {
+            if ($training) {
                 $training->status = 'Implemented';
-                // Update implementation dates
                 $training->implementation_date_from = $request->input('implementation_date_from');
                 $training->implementation_date_to = $request->input('implementation_date_to');
                 $training->save();
+                // Attach participant if not already attached
+                if (!$training->participants()->where('user_id', Auth::id())->exists()) {
+                    $training->participants()->attach(Auth::id(), [
+                        'participation_type_id' => $request->input('participation_type_id'),
+                        'year' => date('Y')
+                    ]);
+                }
             }
         }
 
-        // Debug: Log the web_url value
-        Log::info('web_url:', [$request->web_url]);
-
-        // Save a single TrainingMaterial record for file and/or link
-        $filePath = null;
-        if (!empty($filePaths)) {
-            $filePath = $filePaths[0]; // Only the first file
+        // 3. Save uploaded materials
+        if ($training && $request->hasFile('uploadMaterials')) {
+            foreach ($request->file('uploadMaterials') as $file) {
+                $filePath = $file->store('uploads', [
+                    'disk' => 'public',
+                    'visibility' => 'public',
+                ]);
+                TrainingMaterial::create([
+                    'title'         => $training->title,
+                    'competency_id' => $training->competency_id,
+                    'user_id'       => Auth::id(),
+                    'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                    'file_path'     => $filePath,
+                    'link'          => null,
+                    'type'          => 'material',
+                    'training_id'   => $training->id, // Ensure training_id is set
+                ]);
+            }
         }
-        $link = $request->filled('web_url') ? $request->web_url : null;
 
-        if ($training && ($filePath || $link)) {
+        // 4. Save link material
+        if ($training && $request->filled('linkMaterials')) {
             TrainingMaterial::create([
                 'title'         => $training->title,
-                'competency_id' => $training->competency_id ?? $request->input('competency_id'),
-                'user_id'       => Auth::id(), // <-- Add this line
+                'competency_id' => $training->competency_id,
+                'user_id'       => Auth::id(),
                 'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                'file_path'     => $filePath,
-                'link'          => $link,
+                'file_path'     => null,
+                'link'          => $request->linkMaterials,
                 'type'          => 'material',
+                'training_id'   => $training->id, // Ensure training_id is set
             ]);
-
-            // Save uploaded files
-            if ($request->hasFile('files')) {
-                foreach ($request->file('files') as $file) {
-                    $filePath = $file->store('uploads', 'public');
-                    TrainingMaterial::create([
-                        'title' => 'Uploaded Material',
-                        'file_path' => $filePath,
-                        'type' => 'material',
-                        'training_id' => $training->id,
-                        'user_id' => Auth::id(),
-                        'source' => Auth::id(), // Set the source field to the current user's ID
-                    ]);
-                }
-            }
-
-            // Save uploaded certificates
-            if ($request->hasFile('uploadCertificates')) {
-                foreach ($request->file('uploadCertificates') as $certificate) {
-                    $certificatePath = $certificate->store('certificates', 'public');
-                    TrainingMaterial::create([
-                        'title' => 'Uploaded Certificate',
-                        'file_path' => $certificatePath,
-                        'type' => 'certificate',
-                        'training_id' => $training->id,
-                        'user_id' => Auth::id(),
-                        'source' => Auth::id(), // Set the source field to the current user's ID
-                    ]);
-                }
-            }
-
-            return back()->with('success', 'Training data and files uploaded successfully!');
         }
+
+        // 5. Save uploaded certificates
+        if ($training && $request->hasFile('uploadCertificates')) {
+            foreach ($request->file('uploadCertificates') as $file) {
+                $certificatePath = $file->store('certificates', [
+                    'disk' => 'public',
+                    'visibility' => 'public',
+                ]);
+                TrainingMaterial::create([
+                    'title'         => $training->title . ' Certificate',
+                    'competency_id' => $training->competency_id,
+                    'user_id'       => Auth::id(),
+                    'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                    'file_path'     => $certificatePath,
+                    'link'          => null,
+                    'type'          => 'certificate',
+                    'training_id'   => $training->id, // Ensure training_id is set
+                ]);
+            }
+        }
+
+        // 6. Redirect to training list
+        return redirect()->route('user.tracking')->with('success', 'Training data, materials, and certificates uploaded successfully!');
     }
 }

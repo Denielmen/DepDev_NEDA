@@ -414,7 +414,7 @@
                                         <i class="bi bi-cloud-arrow-up"></i>
                                         Upload Training Materials
                                     </label>
-                                    <input type="file" id="uploadMaterials" name="files[]"
+                                    <input type="file" id="uploadMaterials" name="uploadMaterials[]"
                                         accept="image/jpeg,image/png,application/pdf" style="display: none;">
                                     <p class="submission-desc">Accepted file types: pdf, png, jpg, jpeg</p>
                                     <p class="submission-desc">Max file size: 50 MB</p>
@@ -428,8 +428,6 @@
                                     <input type="text" id="linkMaterials" name="linkMaterials"
                                         class="mt-2 form-control" placeholder="Paste your link here"
                                         style="display: none;">
-                                    <p class="mt-2 submission-desc">Accepted file types: pdf, png, jpg, jpeg</p>
-                                    <p class="submission-desc">Max file size: 50 MB</p>
                                 </div>
                                 <div class="submission-col">
                                     <label for="uploadCertificates" class="submission-btn submission-large"
@@ -481,11 +479,32 @@
             const uploadCertificatesInput = document.getElementById('uploadCertificates');
             const filePreview = document.getElementById('filePreview');
             const certPreview = document.getElementById('certPreview');
+            const linkMaterialsLabel = document.getElementById('linkMaterialsLabel');
+            const uploadMaterialsLabel = document.getElementById('uploadMaterialsLabel');
+            const linkMaterialsInput = document.getElementById('linkMaterials');
 
             // Training data fetched from the database
             const trainings = @json($programmedTrainings); // Replace with actual data from the backend
             const competencies = @json($competencies); // Replace with actual data from the backend
+            // ...existing code...
 
+            // Validate link input on form submit
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                // Only validate if link input is visible and has a value
+                if (linkMaterialsInput.style.display !== 'none' && linkMaterialsInput.value.trim() !== '') {
+                    const urlPattern = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
+                    if (!urlPattern.test(linkMaterialsInput.value.trim())) {
+                        alert('Please enter a valid URL for the training materials link.');
+                        linkMaterialsInput.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                // ...existing code...
+            });
+
+            // ...existing code...
             // Populate competencies dropdown
             competencySelect.innerHTML = '<option value="" disabled selected>Select Competency</option>';
             competencies.forEach(competency => {
@@ -605,6 +624,36 @@
             uploadCertificatesInput.addEventListener('change', function() {
                 validateFiles(uploadCertificatesInput);
             });
+
+            function hideAllSubmissionFields() {
+                uploadMaterialsInput.style.display = 'none';
+                linkMaterialsInput.style.display = 'none';
+                uploadCertificatesInput.style.display = 'none';
+            }
+            uploadMaterialsLabel.addEventListener('click', function(e) {
+                e.preventDefault();
+                uploadMaterialsInput.style.display = '';
+                uploadMaterialsInput.click();
+                linkMaterialsInput.style.display = 'none';
+            });
+
+
+            // Show link input, hide file upload for materials
+            linkMaterialsLabel.addEventListener('click', function(e) {
+                e.preventDefault();
+                linkMaterialsInput.style.display = '';
+                linkMaterialsInput.focus();
+                uploadMaterialsInput.style.display = 'none';
+            });
+
+            // Optionally, hide link input when user selects a file
+            uploadMaterialsInput.addEventListener('change', function() {
+                if (uploadMaterialsInput.files.length > 0) {
+                    linkMaterialsInput.style.display = 'none';
+                }
+            });
+
+
         });
     </script>
 </body>
