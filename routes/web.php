@@ -101,7 +101,7 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
 // ADMIN PANEL ROUTES (unchanged, but make sure admin checks are in place)
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/', function () {
-        if (!Auth::user() || Auth::user()->role !== 'Admin') {
+        if (!Auth::user() || Auth::user()->role !== 'Admin' || !Auth::user()->is_active) {
             abort(403, 'Unauthorized');
         }
         return view('adminPanel.welcomeAdmin');
