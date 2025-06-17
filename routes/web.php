@@ -24,18 +24,7 @@ Route::get('/', function () {
         return response("<script>alert('User is already logged in.');window.location.href='{$redirectUrl}';</script>");
     }
 });
-Route::middleware('guest')->group(function () {
-    Route::get('/login', function () {
-        if (Auth::check()) {
-            $role = Auth::user()->role;
-            $redirectUrl = $role === 'Admin' ? route('admin.home') : route('user.home');
-            return response("<script>alert('User is already logged in.');window.location.href='{$redirectUrl}';</script>");
-        }
-        return view('auth.login');
-    })->name('login');
-
-    Route::post('/login', [LoginController::class, 'login']);
-});
+Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -48,7 +37,7 @@ Route::middleware('auth')->group(function () {
 // USER PANEL ROUTES (all with user. prefix)
 Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/', function () {
-        if (!Auth::user() || Auth::user()->role !== 'User' && Auth::user()->is_active) { //Check if the user is disabled or not active
+        if (!Auth::check() || !Auth::user()->is_active || Auth::user()->role !== 'User') { //Check if the user is disabled or not active
             abort(403, 'Unauthorized');
         }
         return view('userPanel.welcomeUser');
@@ -112,11 +101,20 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
 // ADMIN PANEL ROUTES (unchanged, but make sure admin checks are in place)
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/', function () {
-        if (!Auth::user() || Auth::user()->role !== 'Admin' && Auth::user()->is_active) { //checkif the user is admin and not disabled or not active
+        if (!Auth::user() || Auth::user()->role !== 'Admin') {
             abort(403, 'Unauthorized');
         }
         return view('adminPanel.welcomeAdmin');
     })->name('admin.home');
+});
+
+Route::middleware(['auth'])->prefix('user')->group(function () {
+    Route::get('/', function () {
+        if (!Auth::user() || Auth::user()->role !== 'User') {
+            abort(403, 'Unauthorized');
+        }
+        return view('userPanel.welcomeUser');
+    })->name('user.home');
 
     // Training Plan routes
     Route::get('training-plan', function () {
@@ -220,7 +218,3 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
-
-
-
-
