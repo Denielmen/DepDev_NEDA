@@ -111,7 +111,7 @@ class TrainingProfileController extends Controller
                 'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
                 'period_from' => 'required|integer|digits:4',
                 'period_to' => 'required|integer|digits:4|gte:period_from',
-                'implementation_date_from' => 'required|date',
+                'implementation_date_from' => 'nullable|date',
                 'implementation_date_to' => 'nullable|date',
                 'no_of_hours' => 'nullable|numeric',
                 'budget' => 'nullable|numeric',
@@ -179,7 +179,7 @@ class TrainingProfileController extends Controller
             'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
             'period_from' => 'required|integer|digits:4',
             'period_to' => 'required|integer|digits:4|gte:period_from',
-            'implementation_date_from' => 'required|date',
+            'implementation_date_from' => 'nullable|date',
             'implementation_date_to' => 'nullable|date',
             'no_of_hours' => 'nullable|numeric',
             'budget' => 'nullable|numeric',
@@ -209,7 +209,7 @@ class TrainingProfileController extends Controller
                 'core_competency' => $validated['core_competency'] === 'Others' ? $validated['core_competency_input'] : $validated['core_competency'],
                 'period_from' => $validated['period_from'],
                 'period_to' => $validated['period_to'],
-                'implementation_date_from' => $validated['implementation_date_from'],
+                'implementation_date_from' => null, 
                 'implementation_date_to' => $validated['implementation_date_to'] ?? null,
                 'no_of_hours' => $validated['no_of_hours'] ?? null,
                 'budget' => $validated['budget'] ?? null,
@@ -221,7 +221,8 @@ class TrainingProfileController extends Controller
                 'status' => 'Not Yet Implemented'
             ]);
 
-            $year = date('Y', strtotime($validated['implementation_date_from']));
+            // Use current year instead of implementation_date_from
+            $year = date('Y');
             foreach ($validated['participants'] as $participantId) {
                 $training->participants()->attach($participantId, [
                     'year' => $year,
@@ -579,3 +580,6 @@ class TrainingProfileController extends Controller
         }
     }
 }
+
+
+

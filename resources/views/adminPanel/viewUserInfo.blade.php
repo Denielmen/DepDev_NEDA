@@ -97,18 +97,27 @@
             border-bottom: none;
         }
 
+        .content-container {
+            max-width: 1040px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .back-button-container {
+            margin-bottom: 20px;
+        }
         .btn-back {
             background-color: #003366;
-            color: #fff;
+            color: white;
             border: none;
             padding: 8px 25px;
             border-radius: 4px;
             font-weight: 500;
             margin-bottom: 15px;
             text-decoration: none;
-            margin-right: 900px;
-            /* gap: 5px;
-            transition: all 0.3s ease; */
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
         }
         .btn-back:hover {
             background-color: #004080;
@@ -200,83 +209,85 @@
         </div>
         <!-- Main Content -->
         <div class="main-content">
-            <div class="top-actions">
-                <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants.info', ['id' => $user->id]) }}'">
-                    <i class="bi bi-arrow-left"></i>
-                    Back
-                </button>
-            </div>
-            <div class="details-card">
-                <h2 class="details-title">Training Details</h2>
-                <table class="details-table">
-                    <tr>
-                        <td class="label">Title/Area:</td>
-                        <td>{{ $training->title ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Three-Year Period:</td>
-                        <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Competency:</td>
-                        <td>{{ $training->competency->name ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Year of Implementation:</td>
-                        <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Budget (per hour):</td>
-                        <td>{{ $training->budget ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">No. of Hours:</td>
-                        <td>{{ $training->no_of_hours ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Learning Service Provider:</td>
-                        <td>{{ $training->provider ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Development Target:</td>
-                        <td>{{ $training->dev_target ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Performance Goal this Support:</td>
-                        <td>{{ $training->performance_goal ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Objective:</td>
-                        <td>{{ $training->objective ?? '' }}</td>
-                    </tr>
-                    <tr id="pre_rating_row">
-                        <td class="label">Participant Pre-Rating:</td>
-                        <td id="participant_pre_rating_display">{{ $training->participant_pre_rating ?? 'N/A' }}</td>
-                    </tr>
-                    <tr id="post_rating_row">
-                        <td class="label">Participant Post-Rating:</td>
-                        <td id="participant_post_rating_display">{{ $training->participant_post_rating ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Supervisor Pre-Rating:</td>
-                        <td id="supervisor_pre_rating_display">{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Supervisor Post-Rating:</td>
-                        <td>{{ $training->supervisor_post_rating ?? 'N/A' }}</td>
-                    </tr>
-                </table>
-                <div class="eval-buttons">
-                    <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }})">
-                        <i class="bi bi-clipboard-check"></i>
-                        Pre-Eval
+            <div class="content-container">
+                <div class="back-button-container">
+                    <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants.info', ['id' => $user->id]) }}'">
+                        <i class="bi bi-arrow-left"></i>
+                        Back
                     </button>
-                    <a href="{{ route('admin.training.post-evaluation', ['id' => $training->id]) }}" 
-                       class="btn btn-eval btn-post-eval" 
-                       {{ $training->supervisor_post_rating ? 'disabled' : '' }}>
-                        <i class="bi bi-clipboard-data"></i>
-                        Post-Eval
-                    </a>
+                </div>
+                <div class="details-card">
+                    <h2 class="details-title">Training Details</h2>
+                    <table class="details-table">
+                        <tr>
+                            <td class="label">Title/Area:</td>
+                            <td>{{ $training->title ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Three-Year Period:</td>
+                            <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Competency:</td>
+                            <td>{{ $training->competency->name ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Year of Implementation:</td>
+                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Budget (per hour):</td>
+                            <td>{{ $training->budget ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">No. of Hours:</td>
+                            <td>{{ $training->no_of_hours ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Learning Service Provider:</td>
+                            <td>{{ $training->provider ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Development Target:</td>
+                            <td>{{ $training->dev_target ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Performance Goal this Support:</td>
+                            <td>{{ $training->performance_goal ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Objective:</td>
+                            <td>{{ $training->objective ?? '' }}</td>
+                        </tr>
+                        <tr id="pre_rating_row">
+                            <td class="label">Participant Pre-Rating:</td>
+                            <td id="participant_pre_rating_display">{{ $training->participant_pre_rating ?? 'N/A' }}</td>
+                        </tr>
+                        <tr id="post_rating_row">
+                            <td class="label">Participant Post-Rating:</td>
+                            <td id="participant_post_rating_display">{{ $training->participant_post_rating ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Supervisor Pre-Rating:</td>
+                            <td id="supervisor_pre_rating_display">{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Supervisor Post-Rating:</td>
+                            <td>{{ $training->supervisor_post_rating ?? 'N/A' }}</td>
+                        </tr>
+                    </table>
+                    <div class="eval-buttons">
+                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }})">
+                            <i class="bi bi-clipboard-check"></i>
+                            Pre-Eval
+                        </button>
+                        <a href="{{ route('admin.training.post-evaluation', ['id' => $training->id]) }}" 
+                           class="btn btn-eval btn-post-eval" 
+                           {{ $training->supervisor_post_rating ? 'disabled' : '' }}>
+                            <i class="bi bi-clipboard-data"></i>
+                            Post-Eval
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -425,3 +436,4 @@
     </script>
 </body>
 </html> 
+

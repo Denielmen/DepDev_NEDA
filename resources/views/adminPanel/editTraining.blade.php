@@ -177,9 +177,17 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        {{-- <div class="col-md-6">
                             <label for="implementation_date_from" class="form-label">Year of Implementation:</label>
                             <input type="date" class="form-control" id="implementation_date_from" name="implementation_date_from" value="{{ $training->implementation_date_from ? $training->implementation_date_from->format('Y-m-d') : '' }}" required>
+                        </div> --}}
+                         <div class="col-md-6">
+                            <label for="period_from" class="form-label">Three-Year Period:</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="period_from" name="period_from" value="{{ $training->period_from }}" placeholder="From Year" min="2000" max="2100" required onchange="calculateThreeYearPeriod()">
+                                <span class="input-group-text">to</span>
+                                <input type="number" class="form-control" id="period_to" name="period_to" value="{{ $training->period_to }}" placeholder="To Year" min="2000" max="2100" required>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -192,20 +200,11 @@
                             <input type="number" class="form-control" id="no_of_hours" name="no_of_hours" value="{{ $training->no_of_hours }}">
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                    <div class="md-3">
                             <label for="provider" class="form-label">Learning Service Provider:</label>
                             <input type="text" class="form-control" id="provider" name="provider" value="{{ $training->provider }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="period_from" class="form-label">Three-Year Period:</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="period_from" name="period_from" value="{{ $training->period_from }}" placeholder="From Year" min="2000" max="2100" required onchange="calculateThreeYearPeriod()">
-                                <span class="input-group-text">to</span>
-                                <input type="number" class="form-control" id="period_to" name="period_to" value="{{ $training->period_to }}" placeholder="To Year" min="2000" max="2100" required>
-                            </div>
-                        </div>
                     </div>
+
                     <div class="mb-3">
                         <label for="dev_target" class="form-label">Development Target:</label>
                         <textarea class="form-control" id="dev_target" name="dev_target" rows="2">{{ $training->dev_target }}</textarea>
@@ -302,7 +301,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($users as $user)
+                                @foreach($users->where('is_active', true) as $user)
                                 <tr class="participant-row">
                                     <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}</td>
                                     <td>{{ $user->position }}</td>
