@@ -208,6 +208,10 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::post('/training/{id}/post-evaluation/submit', [TrainingProfileController::class, 'submitPostEvaluation'])->name('admin.training.post-evaluation.submit');
     Route::post('/training-plan/{training}/add-participant', [TrainingProfileController::class, 'addParticipant'])
         ->name('admin.training-plan.add-participant');
+
+    // Employee profile edit routes
+    Route::get('/employee/{id}/edit', [App\Http\Controllers\Admin\EmployeeController::class, 'edit'])->name('admin.employee.edit');
+    Route::put('/employee/{id}', [App\Http\Controllers\Admin\EmployeeController::class, 'update'])->name('admin.employee.update');
 });
 
 // Admin reports and exports
