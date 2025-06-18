@@ -240,11 +240,25 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="top-actions">
-                <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants') }}'">
-                    <i class="bi bi-arrow-left"></i>
-                    Back
-                </button>
+            <button class="btn btn-back" onclick="window.location.href='{{ route('admin.participants') }}'">
+                <i class="bi bi-arrow-left"></i>
+                Back
+            </button>
+        </div>
+
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
         <div class="row">
             <!-- User Info Card -->
@@ -253,7 +267,9 @@
                     <div class="user-avatar">
                         <i class="fas fa-user fa-3x text-secondary"></i>
                     </div>
-                    <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
+                    <div id="nameDisplay">
+                        <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
+                    </div>
                     <p class="text-muted mb-0">ID: {{ $user->user_id }}</p>
                     <p class="text-muted mb-0">{{ $user->position }}</p>
                 </div>
@@ -264,32 +280,56 @@
                 <div class="user-info-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Employee Information</h5>
-                        <a href="" class="btn btn-primary">
+                        <button id="editButton" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit
-                        </a>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Salary Grade</label>
-                            <input type="text" class="form-control" value="{{ $user->salary_grade }}" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Years in Goverment</label>
-                            <input type="text" class="form-control" value="{{ $user->years_in_csc }}" readonly>
+                        </button>
+                        <div id="saveCancelButtons" style="display: none;">
+                            <button id="saveButton" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button id="cancelButton" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Division/Unit</label>
-                        <input type="text" class="form-control" value="{{ $user->division }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Position</label>
-                        <input type="text" class="form-control" value="{{ $user->position }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Name of Supervisor (Last, First, MI)</label>
-                        <input type="text" class="form-control" value="{{ $user->superior }}" readonly>
-                    </div>
+                    <form id="employeeForm" action="{{ route('admin.employee.update', $user->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div id="nameEdit" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Salary Grade</label>
+                                <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Years in Government</label>
+                                <input type="number" class="form-control" name="years_in_csc" value="{{ $user->years_in_csc }}" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Division/Unit</label>
+                            <input type="text" class="form-control" name="division" value="{{ $user->division }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Position</label>
+                            <input type="text" class="form-control" name="position" value="{{ $user->position }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name of Supervisor (Last, First, MI)</label>
+                            <input type="text" class="form-control" name="superior" value="{{ $user->superior }}" readonly>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -366,5 +406,62 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editButton = document.getElementById('editButton');
+        const saveCancelButtons = document.getElementById('saveCancelButtons');
+        const saveButton = document.getElementById('saveButton');
+        const cancelButton = document.getElementById('cancelButton');
+        const form = document.getElementById('employeeForm');
+        const inputs = form.querySelectorAll('input[readonly]');
+        const nameDisplay = document.getElementById('nameDisplay');
+        const nameEdit = document.getElementById('nameEdit');
+        const nameInputs = nameEdit.querySelectorAll('input[readonly]');
+        let originalValues = {};
+
+        // Store original values when edit is clicked
+        editButton.addEventListener('click', function() {
+            // Handle main form inputs
+            inputs.forEach(input => {
+                originalValues[input.name] = input.value;
+                input.removeAttribute('readonly');
+            });
+            // Handle name inputs
+            nameInputs.forEach(input => {
+                originalValues[input.name] = input.value;
+                input.removeAttribute('readonly');
+            });
+            // Show name edit fields and hide display
+            nameDisplay.style.display = 'none';
+            nameEdit.style.display = 'block';
+            editButton.style.display = 'none';
+            saveCancelButtons.style.display = 'block';
+        });
+
+        // Restore original values and readonly state when cancel is clicked
+        cancelButton.addEventListener('click', function() {
+            // Handle main form inputs
+            inputs.forEach(input => {
+                input.value = originalValues[input.name];
+                input.setAttribute('readonly', true);
+            });
+            // Handle name inputs
+            nameInputs.forEach(input => {
+                input.value = originalValues[input.name];
+                input.setAttribute('readonly', true);
+            });
+            // Show name display and hide edit fields
+            nameDisplay.style.display = 'block';
+            nameEdit.style.display = 'none';
+            editButton.style.display = 'block';
+            saveCancelButtons.style.display = 'none';
+        });
+
+        // Handle form submission
+        saveButton.addEventListener('click', function() {
+            form.submit();
+        });
+    });
+    </script>
 </body>
 </html>    
