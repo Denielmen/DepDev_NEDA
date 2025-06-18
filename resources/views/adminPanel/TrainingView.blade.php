@@ -268,11 +268,11 @@
                         </tr>
                     </table>
                     <div class="action-buttons">
-                        <a href="{{ route('admin.training-plan.edit', $training) }}" class="btn btn-edit">
+                        <a href="{{ route('admin.training-plan.edit', ['training' => $training->id]) }}" class="btn btn-edit">
                             <i class="bi bi-pencil"></i>
                             Edit
                         </a>
-                        <form action="{{ route('admin.training-plan.destroy', $training->id) }}" method="POST" style="display: inline;">
+                        <form action="{{ route('admin.training-plan.destroy', ['training' => $training->id]) }}" method="POST" style="display: inline;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this training? This action cannot be undone.')">
@@ -287,6 +287,9 @@
     </div>
 </body>
 </html> 
+
+
+
 
 
 

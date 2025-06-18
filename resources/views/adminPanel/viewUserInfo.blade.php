@@ -225,7 +225,7 @@
                         </tr>
                         <tr>
                             <td class="label">Three-Year Period:</td>
-                            <td>From: {{ $training->period_from ?? '' }} To: {{ $training->period_to ?? '' }}</td>
+                            <td> {{ $training->period_from ?? '' }} - {{ $training->period_to ?? '' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Competency:</td>
