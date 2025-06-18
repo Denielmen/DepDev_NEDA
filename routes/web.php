@@ -53,7 +53,7 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training-profile/unprogrammed', [TrainingProfileController::class, 'unprogrammed'])
         ->name('user.training.profile.unprogrammed');
 
-    Route::get('/training-profile/program/{id}', [TrainingProfileController::class, 'show'])
+    Route::get('/training-profile/program/{training}', [TrainingProfileController::class, 'show'])
         ->name('user.training.profile.show');
 
     Route::get('/training-profile/unprogrammed/{id}', [TrainingProfileController::class, 'showUnprogrammed'])
@@ -218,3 +218,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+
+
+
+
+

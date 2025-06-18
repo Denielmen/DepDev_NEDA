@@ -114,6 +114,7 @@
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             padding: 20px;
+            overflow-x: auto;
         }
         .table-container table {
             width: 100%;
@@ -151,7 +152,7 @@
             font-size: 0.9rem;
         }
         .action-btn {
-            padding: 5px 15px;
+            padding: 5px 10px;
             border: none;
             border-radius: 4px;
             font-size: 0.9rem;
@@ -283,6 +284,7 @@
                         <thead>
                             <tr>
                                 <th style="width: 10%;">Status</th>
+                                <th style="width: 15%;">User ID</th>
                                 <th style="width: 25%;">Name</th>
                                 <th style="width: 25%;">Position</th>
                                 <th style="width: 20%;">Action</th>
@@ -298,6 +300,7 @@
                                     <span class="status-indicator {{ $user->is_active ? 'active' : 'inactive' }}"></span>
                                     <span class="status-text">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                                 </td>
+                                <td>{{ $user->user_id }}</td>
                                 <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
                                 <td>{{ $user->position }}</td>
                                 <td>

@@ -29,6 +29,7 @@ class RegisteredUserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'user_id' => 'required|string|unique:users,user_id', // add by deniel
             'last_name' => 'required|string|max:50',
             'first_name' => 'required|string|max:50',
             'mid_init' => 'nullable|string|max:10',
@@ -45,6 +46,7 @@ class RegisteredUserController extends Controller
 
         // Create the user in the database
         $user = User::create([
+            'user_id' => $request->user_id, // Use the user-provided ID add by Deniel
             'last_name' => $request->last_name,
             'first_name' => $request->first_name,
             'mid_init' => $request->mid_init,
@@ -59,10 +61,10 @@ class RegisteredUserController extends Controller
             'is_superior_eligible' => $request->boolean('is_superior_eligible'),
         ]);
 
-        // Update the user_id to include the prefix and the user's ID
-        $user->update([
-            'user_id' => 'DepDev_' . $user->id,
-        ]);
+        // // Update the user_id to include the prefix and the user's ID
+        // $user->update([
+        //     'user_id' => 'DepDev_' . $user->id,
+        // ]);
 
         // If the user is authenticated (admin), redirect back to participants list
         if (auth()->check()) {

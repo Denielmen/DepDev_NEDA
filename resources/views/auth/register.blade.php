@@ -160,7 +160,7 @@
         <!-- Main Content -->
         <div class="main-content">
             <!-- Registration Form admin.Container -->
-            <div class="register-coadmin.ntainer">
+            <div class="register-container">
                 <!-- Header -->
                 <div class="header"admin.>
                     <h1>DEPDEV Learning and Development System</h1>
@@ -192,6 +192,11 @@
 
                     <!-- Position -->
                     <div class="row mb-3">
+                        <div class="col">
+                            <label for="user_id" class="form-label">User ID</label>
+                            <input type="text" id="user_id" name="user_id" class="form-control"
+                                value="{{ old('user_id') }}" required>
+                        </div>
                         <div class="col">
                             <label for="position" class="form-label">Position</label>
                             <input type="text" id="position" name="position" class="form-control"

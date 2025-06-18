@@ -36,12 +36,14 @@ class User extends Authenticatable
     {
         parent::boot();
 
-        static::creating(function ($user) {
-            // Get the next ID
-            $nextId = static::max('id') + 1;
-            // Generate user_id in the format DepDev_ + id
-            $user->user_id = 'DepDev_' . $nextId;
-        });
+        // Remove or comment out this section to prevent auto-generation
+        // static::creating(function ($user) {
+        //     // Get the next ID
+        //     $nextId = static::max('id') + 1;
+        //     // Generate user_id in the format DepDev_ + id
+        //     $user->user_id = 'DepDev_' . $nextId;
+        // });   
+        // Akon gi comment nalang no use naman ini siya noh?
     }
 
     /**
