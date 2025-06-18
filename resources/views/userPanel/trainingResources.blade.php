@@ -198,45 +198,128 @@
                             <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
                         </div>
                     </form>
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th class="text-center">Title</th>
-                                <th class="text-center">Competency</th>
-                                <th class="text-center">Source</th>
-                                <th class="text-center">Date Uploaded</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($materials as $material)
-                                <tr>
-                                    <td class="text-center">{{ $material->title }}</td>
-                                    <td class="text-center">{{ $material->competency->name ?? 'N/A' }}</td>
-                                    <td class="text-center">{{ $material->source }}</td>
-                                    <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-primary btn-sm me-1"
-                                            @if (!$material->file_path) disabled @endif
-                                            onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
-                                            title="@if (!$material->file_path) No file available @endif">
-                                            <i class="fas fa-download"></i> Download File
-                                        </button>
-                                        <button class="btn btn-info btn-sm"
-                                            @if (!$material->link) disabled @endif
-                                            onclick="@if ($material->link) window.open('{{ $material->link }}', '_blank') @else alert('There\'s no link pasted.') @endif"
-                                            title="@if (!$material->link) No link available @endif">
-                                            <i class="fas fa-external-link-alt"></i> Open Link
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center">No training materials found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                    <!-- Tabs for Materials, Links, Certificates -->
+                    <ul class="nav nav-tabs mb-3" id="resourceTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">Materials</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="links-tab" data-bs-toggle="tab" data-bs-target="#links" type="button" role="tab" aria-controls="links" aria-selected="false">Links</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="certificates-tab" data-bs-toggle="tab" data-bs-target="#certificates" type="button" role="tab" aria-controls="certificates" aria-selected="false">Certificates</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="resourceTabsContent">
+                        <!-- Materials Tab -->
+                        <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Title</th>
+                                        <th class="text-center">Competency</th>
+                                        <th class="text-center">Source</th>
+                                        <th class="text-center">Date Uploaded</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($materials as $material)
+                                        <tr>
+                                            <td class="text-center">{{ $material->title }}</td>
+                                            <td class="text-center">{{ $material->competency->name ?? 'N/A' }}</td>
+                                            <td class="text-center">{{ $material->source }}</td>
+                                            <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary btn-sm me-1"
+                                                    @if (!$material->file_path) disabled @endif
+                                                    onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                                    title="@if (!$material->file_path) No file available @endif">
+                                                    <i class="fas fa-download"></i> Download File
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center">No materials found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Links Tab -->
+                        <div class="tab-pane fade" id="links" role="tabpanel" aria-labelledby="links-tab">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Title</th>
+                                        <th class="text-center">Competency</th>
+                                        <th class="text-center">Source</th>
+                                        <th class="text-center">Date Uploaded</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($links as $link)
+                                        <tr>
+                                            <td class="text-center">{{ $link->title }}</td>
+                                            <td class="text-center">{{ $link->competency->name ?? 'N/A' }}</td>
+                                            <td class="text-center">{{ $link->source }}</td>
+                                            <td class="text-center">{{ $link->created_at->format('Y-m-d') }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-info btn-sm"
+                                                    @if (!$link->link) disabled @endif
+                                                    onclick="@if ($link->link) window.open('{{ $link->link }}', '_blank') @else alert('There\'s no link pasted.') @endif"
+                                                    title="@if (!$link->link) No link available @endif">
+                                                    <i class="fas fa-external-link-alt"></i> Open Link
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center">No links found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Certificates Tab -->
+                        <div class="tab-pane fade" id="certificates" role="tabpanel" aria-labelledby="certificates-tab">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Title</th>
+                                        <th class="text-center">Competency</th>
+                                        <th class="text-center">Source</th>
+                                        <th class="text-center">Date Uploaded</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($certificates as $certificate)
+                                        <tr>
+                                            <td class="text-center">{{ $certificate->title }}</td>
+                                            <td class="text-center">{{ $certificate->competency->name ?? 'N/A' }}</td>
+                                            <td class="text-center">{{ $certificate->source }}</td>
+                                            <td class="text-center">{{ $certificate->created_at->format('Y-m-d') }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary btn-sm"
+                                                    @if (!$certificate->file_path) disabled @endif
+                                                    onclick="@if ($certificate->file_path) window.location.href = '{{ route('user.training_materials.download', $certificate->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                                    title="@if (!$certificate->file_path) No file available @endif">
+                                                    <i class="fas fa-download"></i> Download Certificate
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center">No certificates found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

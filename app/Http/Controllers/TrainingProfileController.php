@@ -71,7 +71,7 @@ class TrainingProfileController extends Controller
         // Get participation types for display
         $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
         
-        return view('adminPanel.TrainingView', compact('training', 'participationTypes'));
+        return view('userPanel.trainingProfileShow', compact('training', 'participationTypes'));
     }
 
     public function showUnprogrammed($id)
@@ -341,13 +341,19 @@ class TrainingProfileController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%$search%")
-                  ->orWhere('competency', 'like', "%$search%")
+                  ->orWhereHas('competency', function($subQ) use ($search) {
+                      $subQ->where('name', 'like', "%$search%");
+                  })
                   ->orWhere('source', 'like', "%$search%")
                   ->orWhereDate('created_at', $search);
             });
         }
-        $materials = $query->orderByDesc('created_at')->get();
-        return view('userPanel.trainingResources', compact('materials'));
+        $allMaterials = $query->orderByDesc('created_at')->get();
+        $userId = auth()->id();
+        $materials = $allMaterials->where('type', 'material')->whereNotNull('file_path');
+        $links = $allMaterials->where('type', 'material')->whereNotNull('link');
+        $certificates = $allMaterials->where('type', 'certificate')->where('user_id', $userId);
+        return view('userPanel.trainingResources', compact('materials', 'links', 'certificates'));
     }
 
     public function evalParticipantForm($training_id)
