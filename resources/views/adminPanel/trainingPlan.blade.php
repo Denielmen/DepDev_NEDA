@@ -206,7 +206,7 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>List of Training Plans</h2>
+                <h2>Training Clasification</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -244,7 +244,6 @@
                             <td>{{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <!-- <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view"> -->
                                     <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
@@ -329,3 +328,5 @@
     </script>
 </body>
 </html>
+
+
