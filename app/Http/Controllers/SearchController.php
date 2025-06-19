@@ -38,6 +38,7 @@ class SearchController extends Controller
         $division = $request->input('division');
         $position = $request->input('position');
         $status = $request->input('status');
+        $materialType = $request->input('material_type');
         
         $results = collect();
 
@@ -155,6 +156,13 @@ if (in_array('Training', $types)) {
                 })
                 ->when($competencies, function($q) use ($competencies) {
                     $q->whereIn('competency_id', $competencies);
+                })
+                ->where('type', 'material')
+                ->when($materialType === 'material', function($q) {
+                    $q->whereNotNull('file_path');
+                })
+                ->when($materialType === 'link', function($q) {
+                    $q->whereNotNull('link');
                 })
                 ->get()
                 ->map(function($material) {
