@@ -297,6 +297,6 @@
             });
         @endforeach
     </script>
-</body>
+    </body>
 
 </html>

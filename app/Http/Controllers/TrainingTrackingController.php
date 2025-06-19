@@ -143,6 +143,6 @@ class TrainingTrackingController extends Controller
         }
 
         // 6. Redirect to training list
-        return redirect()->route('user.tracking')->with('success', 'Training data, materials, and certificates uploaded successfully!');
+        return redirect()->route('user.training.profile')->with('success', 'Training data, materials, and certificates uploaded successfully!');
     }
 }
