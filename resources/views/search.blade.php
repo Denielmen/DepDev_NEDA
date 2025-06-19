@@ -228,8 +228,15 @@
                         <!-- Additional Filters -->
                         <div class="col-md-4 training-filter" style="display: none;">
                             <label for="year" class="form-label">Year of Implementation</label>
-                            <input type="number" name="year" id="year" class="form-control" placeholder="YYYY"
-                                min="2000" max="{{ date('Y') }}" value="{{ request('year') }}">
+                            <input type="number" name="year" id="year" class="form-control" placeholder="YYYY" min="2000" value="{{ request('year') }}">
+                        </div>
+                        <div class="col-md-4 training-filter" style="display: none;">
+                            <label for="status" class="form-label">Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">Select Status</option>
+                                <option value="Implemented" {{ request('status') == 'Implemented' ? 'selected' : '' }}>Implemented</option>
+                                <option value="Not Yet Implemented" {{ request('status') == 'Not Yet Implemented' ? 'selected' : '' }}>Not Yet Implemented</option>
+                            </select>
                         </div>
                         <div class="col-md-4 competency-filter" style="display: none;">
                             <label for="competencies" class="form-label">Competencies</label>
