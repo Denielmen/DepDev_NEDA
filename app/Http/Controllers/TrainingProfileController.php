@@ -231,8 +231,20 @@ class TrainingProfileController extends Controller
 
     public function trainingPlan()
     {
-        $trainings = Training::with('participants')->where('type', 'Program')->get();
+        $trainings = Training::with('participants')
+            ->where('type', 'Program')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);// Show 10 trainings per page
         return view('adminPanel.trainingPlan', compact('trainings'));
+    }
+
+    public function trainingPlanUnprogrammed()
+    {
+        $trainings = Training::with('participants')
+            ->where('type', 'Unprogrammed')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10); // Show 10 trainings per page
+        return view('adminPanel.trainingPlanUnProg', compact('trainings'));
     }
 
     public function create()
