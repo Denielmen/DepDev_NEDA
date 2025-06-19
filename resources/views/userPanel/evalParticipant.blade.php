@@ -319,8 +319,7 @@
             <div class="evaluation-container">
                 <div class="evaluation-header">
                     <img src="{{ asset('images/DEPDev_logo_text_center.png') }}" alt="NEDA Logo" class="neda-logo">
-                    <h5>CENTRAL VISAYAS REGION</h5>
-                    <br>
+
                     <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
                     <p>(For Participant)</p>
                 </div>

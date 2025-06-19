@@ -75,24 +75,7 @@
             font-weight: bold;
             margin: 0;
         }
-        .search-box {
-            position: relative;
-            width: 300px;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 8px 15px;
-            padding-right: 35px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-        }
-        .search-box .search-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-        }
+
         .btn-create {
             background-color: #003366;
             color: white;
@@ -317,15 +300,5 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Add search functionality
-        document.querySelector('.search-box input').addEventListener('input', function(e) {
-            // Add a small delay to prevent too many requests
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(() => {
-                this.form.submit();
-            }, 500);
-        });
-    </script>
 </body>
 </html>

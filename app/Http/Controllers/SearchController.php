@@ -39,6 +39,8 @@ class SearchController extends Controller
         $position = $request->input('position');
         $status = $request->input('status');
 
+        $materialType = $request->input('material_type');
+
         $results = collect();
 
         // If no types specified, search all types
@@ -163,6 +165,13 @@ class SearchController extends Controller
                 })
                 ->when($competencies, function ($q) use ($competencies) {
                     $q->whereIn('competency_id', $competencies);
+                })
+                ->where('type', 'material')
+                ->when($materialType === 'material', function($q) {
+                    $q->whereNotNull('file_path');
+                })
+                ->when($materialType === 'link', function($q) {
+                    $q->whereNotNull('link');
                 })
                 ->get()
                 ->map(function ($material) {

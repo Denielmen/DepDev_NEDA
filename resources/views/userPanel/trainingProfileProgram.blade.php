@@ -261,12 +261,12 @@
                             <td class="text-center">
                                 @php
                                     $currentUser = Auth::user();
-                                    $userRole = 'N/A';
+                                    $userRole = 'Resource Speaker';
                                     if ($currentUser) {
                                         $participant = $training->participants->where('id', $currentUser->id)->first();
                                         if ($participant && isset($participant->pivot->participation_type_id)) {
                                             $participationType = $participationTypes->get($participant->pivot->participation_type_id);
-                                            $userRole = $participationType->name ?? 'N/A';
+                                            $userRole = $participationType->name ?? 'Resource Speaker';
                                         }
                                     }
                                 @endphp
@@ -281,14 +281,14 @@
                         @endforeach
                     </tbody>
                 </table>
-                
+
             </div>
             @if($trainings->count())
                 <div class="d-flex justify-content-end mt-3 mb-3">
                     <a href="{{ route('user.training.export', $trainings->first()->id) }}" class="btn btn-info">
                         <i class="bi bi-download me-2"></i>Export
                     </a>
-                </div>  
+                </div>
             @endif
         </div>
     </div>

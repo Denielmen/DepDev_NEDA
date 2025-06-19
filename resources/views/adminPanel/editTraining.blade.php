@@ -154,7 +154,7 @@
                             <input type="text" class="form-control" id="title" name="title" value="{{ $training->title }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="core_competency" class="form-label">Core Competency:</label>
+                            <label for="core_competency" class="form-label">Classification:</label>
                             <select class="form-control" id="core_competency" name="core_competency" required>
                                 <option value="">Select Core Competency...</option>
                                 <option value="Foundational/Mandatory" {{ $training->core_competency === 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
@@ -225,7 +225,8 @@
                                 <div class="d-flex justify-content-between align-items-center mb-1 p-2 border rounded">
                                     <div class="d-flex align-items-center">
                                         <span class="me-2">{{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}</span>
-                                        <span class="badge bg-info">{{ $participationTypes->get($participant->pivot->participation_type_id)->name ?? 'N/A' }}</span>
+                                        <span class="badge bg-info me-1">{{ $participationTypes->get($participant->pivot->participation_type_id)->name ?? 'N/A' }}</span>
+                                        <span class="badge bg-success">CY-{{ $participant->pivot->year ?? '2025' }}</span>
                                     </div>
                                     <div>
                                         <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="{{ $participant->id }}">
@@ -235,6 +236,7 @@
                                 </div>
                                 <input type="hidden" name="participants[]" value="{{ $participant->id }}">
                                 <input type="hidden" name="participation_types[{{ $participant->id }}]" value="{{ $participant->pivot->participation_type_id }}">
+                                <input type="hidden" name="participant_years[{{ $participant->id }}]" value="{{ $participant->pivot->year ?? '2025' }}">
                             @endforeach
                         </div>
                     </div>
@@ -297,6 +299,7 @@
                                     <th>Position</th>
                                     <th>Division</th>
                                     <th>Participation Type</th>
+                                    <th>Year</th>
                                     <th>Select</th>
                                 </tr>
                             </thead>
@@ -312,6 +315,14 @@
                                             @foreach($participationTypes as $type)
                                                 <option value="{{ $type->id }}">{{ $type->name }}</option>
                                             @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-select participant-year" data-user-id="{{ $user->id }}">
+                                            <option value="">Select Year</option>
+                                            <option value="2025">CY-2025</option>
+                                            <option value="2026">CY-2026</option>
+                                            <option value="2027">CY-2027</option>
                                         </select>
                                     </td>
                                     <td>
@@ -346,24 +357,37 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
+            const form = document.querySelector('form[action*="training-plan"]');
             const selectedParticipantsDiv = document.getElementById('selectedParticipants');
             const addSelectedParticipantsBtn = document.getElementById('addSelectedParticipantsBtn');
 
+
+
             // Handle adding selected participants
             addSelectedParticipantsBtn.addEventListener('click', function() {
+                const checkedCheckboxes = document.querySelectorAll('.participant-checkbox:checked');
+
                 const selected = [];
-                document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
+                let hasValidationError = false;
+
+                checkedCheckboxes.forEach((checkbox) => {
                     const userId = checkbox.dataset.userId;
                     const participantRow = checkbox.closest('.participant-row');
                     const participationTypeSelect = participantRow.querySelector('.participation-type');
                     const participationTypeId = participationTypeSelect.value;
+                    const participantYearSelect = participantRow.querySelector('.participant-year');
+                    const participantYear = participantYearSelect.value;
                     const participantName = participantRow.querySelector('td:first-child').textContent;
                     const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
 
-                    // Validate participation type is selected
+                    // Validate participation type and year are selected
                     if (!participationTypeId) {
-                        alert('Please select a participation type for all selected participants.');
+                        hasValidationError = true;
+                        return;
+                    }
+
+                    if (!participantYear) {
+                        hasValidationError = true;
                         return;
                     }
 
@@ -371,10 +395,17 @@
                     selected.push({
                         userId,
                         participationTypeId,
+                        participantYear,
                         participantName,
                         participationTypeName
                     });
                 });
+
+                // Check for validation errors before proceeding
+                if (hasValidationError) {
+                    alert('Please select both participation type and year for all selected participants.');
+                    return;
+                }
 
                 // Add selected participants to the form
                 selected.forEach(participant => {
@@ -392,7 +423,8 @@
                     participantDiv.innerHTML = `
                         <div class="d-flex align-items-center">
                             <span class="me-2">${participant.participantName}</span>
-                            <span class="badge bg-info">${participant.participationTypeName}</span>
+                            <span class="badge bg-info me-1">${participant.participationTypeName}</span>
+                            <span class="badge bg-success">CY-${participant.participantYear}</span>
                         </div>
                         <div>
                             <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.userId}">
@@ -412,11 +444,19 @@
                     participationTypeInput.name = `participation_types[${participant.userId}]`;
                     participationTypeInput.value = participant.participationTypeId;
 
+                    const participantYearInput = document.createElement('input');
+                    participantYearInput.type = 'hidden';
+                    participantYearInput.name = `participant_years[${participant.userId}]`;
+                    participantYearInput.value = participant.participantYear;
+
                     // Add to form
                     selectedParticipantsDiv.appendChild(participantDiv);
                     form.appendChild(participantInput);
                     form.appendChild(participationTypeInput);
+                    form.appendChild(participantYearInput);
                 });
+
+
 
                 // Clear checkboxes and close modal
                 document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
@@ -434,6 +474,7 @@
                     // Remove the hidden inputs for this user
                     form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
                     form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participant_years[${userId}]"]`).forEach(input => input.remove());
 
                     // Remove the participant's div from the display
                     button.closest('.d-flex').remove();

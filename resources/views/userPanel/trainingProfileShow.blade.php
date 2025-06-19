@@ -185,7 +185,7 @@
                          <td class="label">Year of Implementation:</td>
                          <td>
                           {{ $training->implementation_date_from ? $training->implementation_date_from->format('Y') : 'N/A' }}
-                         </td>  
+                         </td>
                     </tr>
                     <tr>
                         <td class="label">Budget (per hour):</td>
@@ -200,13 +200,13 @@
                         <td>
                             @php
                                 $currentUser = Auth::user();
-                                $userRole = 'N/A';
+                                $userRole = 'Resource Speaker';
                                 if ($currentUser) {
                                     $participant = $training->participants->where('id', $currentUser->id)->first();
                                     if ($participant && isset($participant->pivot->participation_type_id)) {
                                         // Look up the participation type name from the collection passed by the controller
                                         $participationType = $participationTypes->get($participant->pivot->participation_type_id);
-                                        $userRole = $participationType->name ?? 'N/A';
+                                        $userRole = $participationType->name ?? 'Resource Speaker';
                                     }
                                 }
                             @endphp
@@ -255,4 +255,4 @@
         </div>
     </div>
 </body>
-</html> 
+</html>

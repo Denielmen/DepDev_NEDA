@@ -236,7 +236,7 @@
                             <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Budget (per hour):</td>
+                            <td class="label">Budget:</td>
                             <td>{{ $training->budget ?? '' }}</td>
                         </tr>
                         <tr>
@@ -277,7 +277,7 @@
                         </tr>
                     </table>
                     <div class="eval-buttons">
-                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training=>id }})">
+                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }})">
                             <i class="bi bi-clipboard-check"></i>
                             Pre-Eval
                         </button>
