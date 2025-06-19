@@ -224,12 +224,22 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Material Type Filter (only for Training Material) -->
+                        <div class="col-md-4 material-type-filter" style="display: none;">
+                            <label for="material_type" class="form-label">Material Type</label>
+                            <select name="material_type" id="material_type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="material" {{ request('material_type') == 'material' ? 'selected' : '' }}>Material</option>
+                                <option value="link" {{ request('material_type') == 'link' ? 'selected' : '' }}>Link</option>
+                            </select>
+                        </div>
                         <!-- Additional Filters -->
                         <div class="col-md-4 training-filter" style="display: none;">
                             <label for="year" class="form-label">Year of Implementation</label>
                             <input type="number" name="year" id="year" class="form-control" placeholder="YYYY" min="2000" value="{{ request('year') }}">
                         </div>
-                        <div class="col-md-4 training-filter" style="display: none;">
+                        <!-- Status Filter (only for Training) -->
+                        <div class="col-md-4 training-status-filter" style="display: none;">
                             <label for="status" class="form-label">Status</label>
                             <select name="status" id="status" class="form-select">
                                 <option value="">Select Status</option>
@@ -385,7 +395,8 @@
                                         <th>#</th>
                                         <th>Title</th>
                                         <th>Uploader</th>
-                                        <th>Matched By</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -401,41 +412,22 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @php
-                                                    $matchedBy = [];
-                                                    if (str_contains($result->title ?? '', request('keyword'))) {
-                                                        $matchedBy[] = 'Title';
-                                                    }
-                                                    if (
-                                                        $result->user &&
-                                                        (str_contains(
-                                                            $result->user->first_name ?? '',
-                                                            request('keyword'),
-                                                        ) ||
-                                                            str_contains(
-                                                                $result->user->last_name ?? '',
-                                                                request('keyword'),
-                                                            ))
-                                                    ) {
-                                                        $matchedBy[] = 'Uploader Name';
-                                                    }
-                                                    if (
-                                                        $result->competency &&
-                                                        str_contains(
-                                                            $result->competency->name ?? '',
-                                                            request('keyword'),
-                                                        )
-                                                    ) {
-                                                        $matchedBy[] = 'Competency';
-                                                    }
-                                                    if (
-                                                        $result->training &&
-                                                        str_contains($result->training->title ?? '', request('keyword'))
-                                                    ) {
-                                                        $matchedBy[] = 'Training Title';
-                                                    }
-                                                @endphp
-                                                {{ implode(', ', $matchedBy) }}
+                                                @if ($result->file_path)
+                                                    Material
+                                                @elseif ($result->link)
+                                                    Link
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($result->file_path)
+                                                    <a href="{{ asset($result->file_path) }}" download class="btn btn-sm btn-info">Download</a>
+                                                @elseif ($result->link)
+                                                    <a href="{{ $result->link }}" target="_blank" class="btn btn-sm btn-primary">Open Link</a>
+                                                @else
+                                                    N/A
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -501,6 +493,27 @@
                     this.closest('form').submit();
                 }
             });
+        });
+        function toggleMaterialTypeFilter() {
+            const materialCheckbox = document.getElementById('type_material');
+            const materialTypeFilter = document.querySelector('.material-type-filter');
+            const trainingStatusFilter = document.querySelector('.training-status-filter');
+            const trainingCheckbox = document.getElementById('type_training');
+            if (materialCheckbox && materialCheckbox.checked) {
+                materialTypeFilter.style.display = '';
+                trainingStatusFilter.style.display = 'none';
+            } else if (trainingCheckbox && trainingCheckbox.checked) {
+                materialTypeFilter.style.display = 'none';
+                trainingStatusFilter.style.display = '';
+            } else {
+                materialTypeFilter.style.display = 'none';
+                trainingStatusFilter.style.display = 'none';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleMaterialTypeFilter();
+            document.getElementById('type_material').addEventListener('change', toggleMaterialTypeFilter);
+            document.getElementById('type_training').addEventListener('change', toggleMaterialTypeFilter);
         });
     </script>
 </body>
