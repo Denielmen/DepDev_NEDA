@@ -335,7 +335,7 @@
     const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
     for (let i = 1; i < tr.length; i++) {
-        const nameCell = tr[i].getElementsByTagName('td')[1]; // Name column
+        const nameCell = tr[i].getElementsByTagName('td')[2]; 
         const statusCell = tr[i].getElementsByTagName('td')[0]; // Status column
         
         if (nameCell && statusCell) {
@@ -412,6 +412,8 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>
+
+
 
 
 

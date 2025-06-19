@@ -439,17 +439,25 @@
                 });
 
                 const selected = [];
+                // Get the period_from value to use as the year
+                let periodFromYear = parseInt(document.getElementById('period_from').value);
+                
+                // If period_from is less than 2025, set it to 2025
+                if (periodFromYear <= 2025) {
+                    periodFromYear = 2025;
+                }
+                
                 document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
                     const userId = checkbox.dataset.userId;
                     const participantRow = checkbox.closest('.participant-row');
                     const participationTypeSelect = participantRow.querySelector('.participation-type');
                     const participationTypeId = participationTypeSelect.value;
                     const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
-                    const userName = participantRow.querySelector('td').textContent.trim(); // Get name from the first cell
+                    const userName = participantRow.querySelector('td').textContent.trim();
 
                     // Only add if a participation type is selected and it's not the default empty option
                     if (participationTypeId && participationTypeId !== '') {
-                         selected.push({
+                        selected.push({
                             id: userId,
                             name: userName,
                             participation_type_id: participationTypeId,
@@ -468,7 +476,13 @@
                         participationTypeInput.name = `participation_types[${userId}]`;
                         participationTypeInput.value = participationTypeId;
                         form.appendChild(participationTypeInput);
-
+                        
+                        // Add a hidden input for the year based on period_from (minimum 2025)
+                        const yearInput = document.createElement('input');
+                        yearInput.type = 'hidden';
+                        yearInput.name = `participant_years[${userId}]`;
+                        yearInput.value = periodFromYear;
+                        form.appendChild(yearInput);
                     }
                 });
 
@@ -692,6 +706,8 @@
 
 </body>
 </html>
+
+
 
 
 

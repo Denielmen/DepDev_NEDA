@@ -180,7 +180,7 @@
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Participants</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
             <a href="{{ route('admin.search.index') }}" class="active"><i class="bi bi-search me-2"></i>Search</a>
         </div>
@@ -189,7 +189,7 @@
         <div class="main-content">
             <div class="search-card">
                 <div class="search-header">
-                    <h4 class="mb-0"><i class="bi bi-search me-2"></i>Search and Export</h4>
+                    <h4 class="mb-0"><i class="bi bi-search me-2"></i>Customize Reports</h4>
                 </div>
                 <form action="{{ route('admin.search.results') }}" method="GET">
                     <div class="row g-3">

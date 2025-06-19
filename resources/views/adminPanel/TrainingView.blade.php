@@ -260,6 +260,11 @@
                                                 {{ $participationTypes[$participant->pivot->participation_type_id]->name ?? 'N/A' }}
                                             </span>
                                         @endif
+                                        @if($participant->pivot && $participant->pivot->year)
+                                            <span class="badge bg-secondary">
+                                                CY-{{ $participant->pivot->year }}
+                                            </span>
+                                        @endif
                                     </div>
                                 @empty
                                     <div class="text-muted">No participants found.</div>
