@@ -100,21 +100,17 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
 
 // ADMIN PANEL ROUTES (unchanged, but make sure admin checks are in place)
 Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('/', function () {
-        if (!Auth::user() || Auth::user()->role !== 'Admin' || !Auth::user()->is_active) {
-            abort(403, 'Unauthorized');
-        }
-        return view('adminPanel.welcomeAdmin');
-    })->name('admin.home');
-// });
+    Route::get('/', [App\Http\Controllers\AdminController::class, 'welcomeAdmin'])->name('admin.home');
 
-// Route::middleware(['auth'])->prefix('user')->group(function () {
-//     Route::get('/', function () {
-//         if (!Auth::user() || Auth::user()->role !== 'User') {
-//             abort(403, 'Unauthorized');
-//         }
-//         return view('userPanel.welcomeUser');
-//     })->name('user.home');
+    // });
+
+    // Route::middleware(['auth'])->prefix('user')->group(function () {
+    //     Route::get('/', function () {
+    //         if (!Auth::user() || Auth::user()->role !== 'User') {
+    //             abort(403, 'Unauthorized');
+    //         }
+    //         return view('userPanel.welcomeUser');
+    //     })->name('user.home');
 
     // Training Plan routes
     Route::get('training-plan', function () {
@@ -222,9 +218,3 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
-
-
-
-
-
-

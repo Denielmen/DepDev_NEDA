@@ -74,14 +74,15 @@
             background-position: center;
             background-repeat: no-repeat;
             height: 92vh;
+            margin-left: 270px;
+            /* Sidebar width */
+            margin-top: 60px;
         }
 
         .header {
-            padding: 1rem;
             text-align: center;
             background-color: #f8f9fa;
             opacity: 0.7;
-            margin-left: 270px;
             margin-right: 0%;
         }
 
@@ -241,53 +242,61 @@
                 <p>Please select a feature from the menu to begin your learning and development journey.</p>
             </div>
 
-            <div class="menu-cards">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="flex">
-                            <div class="col-md-4">
-                                <div class="card text-center">
-                                    <a href="{{ route('admin.training-plan') }}" class="text-decoration-none">
-                                        <h5>Training Plan</h5>
-                                        <p>Outline Training Programs for Staff Development and Growth</p>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card text-center">
-                                    <a href="{{ route('admin.participants') }}" class="text-decoration-none">
-                                        <h5>Employee's Profile</h5>
-                                        <p>List of all the Staff.</p>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex">
-                            <div class="col-md-4">
-                                <div class="card text-center">
-                                    <a href="{{ route('admin.reports') }}" class="text-decoration-none">
-                                        <h5>Reports</h5>
-                                        <p>View and Export Report.</p>
-                                    </a>
-                                </div>
-                            </div>
+            <!-- Chart.js CDN -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-                            <div class="col-md-4">
-                                <div class="card text-center">
-                                    <a href="{{ route('admin.search.index') }}" class="text-decoration-none">
-                                        <h5>Search</h5>
-                                        <p>Search and Export Custom Reports.</p>
-                                    </a>
+            <div class="container mt-4">
+                <div class="row g-2 justify-content-center">
+                    @foreach ($competencyCharts as $cid => $yearly)
+                        @if (collect($yearly)->filter()->count() > 0)
+                            <div class="col-6 col-md-4 col-lg-3 d-flex align-items-stretch">
+                                <div class="card text-center p-1 w-100" style="min-width:140px; max-width:200px;">
+                                    <h6 class="mb-1" style="font-size: 1rem;">
+                                        {{ $competencyLabels[$cid] ?? 'Competency' }}</h6>
+                                    <canvas id="barChart{{ $cid }}" width="120" height="80"
+                                        style="margin:0 auto;"></canvas>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        @endif
+                    @endforeach
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        @foreach ($competencyCharts as $cid => $yearly)
+            new Chart(document.getElementById('barChart{{ $cid }}'), {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode(array_keys($yearly)) !!},
+                    datasets: [{
+                        label: 'Avg User Rating',
+                        data: {!! json_encode(array_values($yearly)) !!},
+                        backgroundColor: '#4e73df'
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 4
+                        }
+                    }
+                }
+            });
+        @endforeach
+    </script>
 </body>
 
 </html>

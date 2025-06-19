@@ -258,23 +258,29 @@
                     Training Effectiveness
                 </div>
                 <div class="form-container">
-                    <!-- Chart.js CDN -->
+
                     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
                     <div class="container my-4">
+                        <div class="row g-3 justify-content-center">
+                            @foreach ($competencyCharts as $cid => $yearly)
+                                @if (collect($yearly)->filter()->count() > 0)
+                                    <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+                                        <div class="card text-center p-2 w-100"
+                                            style="min-width:180px; max-width:260px;">
+                                            <h6 class="mb-2" style="font-size: 1.1rem;">
+                                                {{ $competencyLabels[$cid] ?? 'Competency' }}
+                                            </h6>
+                                            <canvas id="competencyBar{{ $cid }}" width="200" height="120"
+                                                style="margin:0 auto;"></canvas>
 
-                        <div class="row">
-                            @foreach ($competencyCharts as $cid => $data)
-                                <div
-                                    class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3 d-flex flex-column align-items-center">
-                                    <h6 class="text-center mb-2" style="font-size: 1rem;">
-                                        {{ $competencyLabels[$cid] ?? 'Competency' }}</h6>
-                                    <canvas id="competencyPie{{ $cid }}" width="120"
-                                        height="120"></canvas>
-                                </div>
+                                        </div>
+                                    </div>
+                                @endif
                             @endforeach
                         </div>
                     </div>
+
 
                     <!-- Trainings Table -->
                     <div class="table-responsive">
@@ -681,16 +687,25 @@
                 });
             });
         </script>
+
+
         <script>
-            @foreach ($competencyCharts as $cid => $data)
-                new Chart(document.getElementById('competencyPie{{ $cid }}'), {
-                    type: 'pie',
+            @foreach ($competencyCharts as $cid => $yearly)
+                new Chart(document.getElementById('competencyBar{{ $cid }}'), {
+                    type: 'bar',
                     data: {
-                        labels: ['Pre', 'Post'],
+                        labels: {!! json_encode(array_keys($yearly)) !!},
                         datasets: [{
-                            data: [{{ $data['pre'] }}, {{ $data['post'] }}],
-                            backgroundColor: ['#36b9cc', '#4e73df'],
-                        }]
+                                label: 'Pre',
+                                data: {!! json_encode(array_column($yearly, 'pre')) !!},
+                                backgroundColor: '#36b9cc'
+                            },
+                            {
+                                label: 'Post',
+                                data: {!! json_encode(array_column($yearly, 'post')) !!},
+                                backgroundColor: '#4e73df'
+                            }
+                        ]
                     },
                     options: {
                         responsive: false,
@@ -700,6 +715,12 @@
                             },
                             title: {
                                 display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 4
                             }
                         }
                     }

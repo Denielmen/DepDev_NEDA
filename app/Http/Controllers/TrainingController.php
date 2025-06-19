@@ -40,16 +40,30 @@ class TrainingController extends Controller
         $competencyCharts = [];
         foreach ($competencyIds as $cid) {
             $compTrainings = $trainings->where('competency_id', $cid);
-            $preAvg = round($compTrainings->avg(function ($t) {
-                return $t->participant_pre_rating ?? $t->supervisor_pre_rating;
-            }), 2);
-            $postAvg = round($compTrainings->avg(function ($t) {
-                return $t->participant_post_rating ?? $t->supervisor_post_rating;
-            }), 2);
-            $competencyCharts[$cid] = [
-                'pre' => $preAvg,
-                'post' => $postAvg,
-            ];
+
+            // Group by year
+            $yearly = [];
+            foreach (
+                $compTrainings->groupBy(function ($t) {
+                    return $t->implementation_date_from
+                        ? date('Y', strtotime($t->implementation_date_from))
+                        : null;
+                }) as $year => $yearTrainings
+            ) {
+                if ($year) {
+                    $preAvg = round($yearTrainings->avg(function ($t) {
+                        return $t->participant_pre_rating ?? $t->supervisor_pre_rating;
+                    }), 2);
+                    $postAvg = round($yearTrainings->avg(function ($t) {
+                        return $t->participant_post_rating ?? $t->supervisor_post_rating;
+                    }), 2);
+                    $yearly[$year] = [
+                        'pre' => $preAvg,
+                        'post' => $postAvg,
+                    ];
+                }
+            }
+            $competencyCharts[$cid] = $yearly;
         }
 
         $competencyLabels = \App\Models\Competency::whereIn('id', $competencyIds)->pluck('name', 'id');

@@ -45,7 +45,7 @@ class TrainingTrackingController extends Controller
             'courseTitle'          => 'required',
             'training_title'       => 'required_if:courseTitle,other',
             'competency_id'        => 'required|exists:competencies,id',
-            'participation_type_id'=> 'required|exists:participation_types,id',
+            'participation_type_id' => 'required|exists:participation_types,id',
             'no_of_hours'          => 'required|numeric',
             'expenses'             => 'required|numeric',
             'provider'             => 'required',
@@ -79,7 +79,7 @@ class TrainingTrackingController extends Controller
                 $training->implementation_date_to = $request->input('implementation_date_to');
                 $training->save();
                 // Attach participant if not already attached
-                if (!$training->participants()->where('user_id', Auth::id())->exists()) {
+                if (!$training->participants()->where('training_participants.user_id', Auth::id())->exists()) {
                     $training->participants()->attach(Auth::id(), [
                         'participation_type_id' => $request->input('participation_type_id'),
                         'year' => date('Y')

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TrainingsExport;
+use App\Models\Competency;
 
 class AdminController extends Controller
 {
@@ -18,12 +19,12 @@ class AdminController extends Controller
         return view('adminPanel.viewUserInfo', compact('training', 'user'));
     }
 
-   public function viewUserInfoUnprog($id)
-{
-    $training = Training::findOrFail($id);
-    $user = User::findOrFail($training->user_id); // Get the creator of the training
-    return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
-}
+    public function viewUserInfoUnprog($id)
+    {
+        $training = Training::findOrFail($id);
+        $user = User::findOrFail($training->user_id); // Get the creator of the training
+        return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
+    }
 
     public function reports()
     {
@@ -74,4 +75,42 @@ class AdminController extends Controller
 
         return view('adminPanel.listOfUser', compact('users', 'positions'));
     }
-} 
+
+    public function welcomeAdmin()
+    {
+        // Get all programmed trainings with ratings and competencies
+        $trainings = Training::with(['competency', 'participants'])
+            ->where('type', 'Program')
+            ->get();
+
+        // Group by competency
+        $competencyCharts = [];
+        $competencyLabels = Competency::pluck('name', 'id');
+
+        foreach ($trainings->groupBy('competency_id') as $cid => $groupedTrainings) {
+            // Group by year
+            $yearly = [];
+            foreach (
+                $groupedTrainings->groupBy(function ($t) {
+                    return $t->implementation_date_from
+                        ? date('Y', strtotime($t->implementation_date_from))
+                        : null; // or return 'No Date' if you want a label
+                }) as $year => $yearTrainings
+            ) {
+                // Average all ratings for this year and competency
+                $ratings = [];
+                foreach ($yearTrainings as $training) {
+                    if ($training->participant_post_rating !== null) {
+                        $ratings[] = $training->participant_post_rating;
+                    } elseif ($training->supervisor_post_rating !== null) {
+                        $ratings[] = $training->supervisor_post_rating;
+                    }
+                }
+                $yearly[$year] = count($ratings) ? round(array_sum($ratings) / count($ratings), 2) : null;
+            }
+            $competencyCharts[$cid] = $yearly;
+        }
+
+        return view('adminPanel.welcomeAdmin', compact('competencyCharts', 'competencyLabels'));
+    }
+}
