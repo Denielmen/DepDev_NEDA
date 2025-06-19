@@ -320,7 +320,6 @@
             <div class="evaluation-container">
                 <div class="evaluation-header">
                     <img src="{{ asset('images/DEPDev_logo_text_center.png') }}" alt="NEDA Logo" class="neda-logo">
-                    <h4>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT</h4>
                     <h5>CENTRAL VISAYAS REGION</h5>
                     <br>
                     <h6>VIEW PARTICIPANT POST-EVALUATION OF TRAINING EFFECTIVENESS</h6>
@@ -490,4 +489,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
-</html> 
+</html>

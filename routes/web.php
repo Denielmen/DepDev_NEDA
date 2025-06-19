@@ -12,6 +12,9 @@ use App\Http\Controllers\TrainingTrackingController;
 use App\Http\Controllers\TrainingMaterialController;
 use Illuminate\Support\Facades\Auth;
 //remove lines 48-50 before deployment
+
+//GET /register: shows the registration form.]
+//POST /register: processes the registration.
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
@@ -24,6 +27,8 @@ Route::get('/', function () {
         return response("<script>alert('User is already logged in.');window.location.href='{$redirectUrl}';</script>");
     }
 });
+
+//Handles the login request.
 Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware('auth')->group(function () {

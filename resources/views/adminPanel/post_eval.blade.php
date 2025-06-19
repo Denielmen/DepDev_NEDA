@@ -117,7 +117,7 @@
             margin-bottom: 15px;
             text-decoration: none;
             margin-right: 900px;
-            
+
         }
         .btn-back:hover {
             background-color: #004080;
@@ -278,9 +278,9 @@
     <!-- Sidebar -->
     <div class="sidebar">
             <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
@@ -314,7 +314,7 @@
 
           <div class="instruction-container">
             <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong>
-            <br> (4) Very Satisfied, (3) Satisfied, (2) Dissatisfied, (1) Very Dissatisfied.</p> 
+            <br> (4) Very Satisfied, (3) Satisfied, (2) Dissatisfied, (1) Very Dissatisfied.</p>
           </div>
 
           <table>
