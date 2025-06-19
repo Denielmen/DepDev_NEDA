@@ -55,7 +55,7 @@
             font-weight: bold;
         }
         .main-content {
-            background: #e9f0fb; 
+            background: #e9f0fb;
             min-height: calc(100vh - 56px);
             margin-left: 270px; /* Match sidebar width */
             width: calc(100% - 270px);
@@ -79,7 +79,7 @@
         }
         .search-box input {
             width: 100%;
-            padding: 8px 15px; 
+            padding: 8px 15px;
             padding-right: 35px;
             border: 1px solid #ced4da;
             border-radius: 5px;
@@ -92,21 +92,21 @@
             color: #6c757d;
         }
         .table-container {
-            overflow-x: auto; 
+            overflow-x: auto;
             max-height: 500px;
         }
         .training-table {
             min-width: 1000px;
         }
         .table-header {
-            background: #002e67 !important; 
-            color: #fff !important; 
+            background: #002e67 !important;
+            color: #fff !important;
             font-weight: bold;
-            
+
         }
         .category-header {
-            background: #133b6b !important; 
-            color: #fff  !important; 
+            background: #133b6b !important;
+            color: #fff  !important;
             font-weight: bold;
         }
     </style>
@@ -116,7 +116,7 @@
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
@@ -144,9 +144,9 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-        <a href="{{ route('admin.reports') }}" class="active"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+        <a href="{{ route('admin.reports') }}" class="active"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
         <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
 

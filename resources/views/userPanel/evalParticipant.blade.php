@@ -319,7 +319,6 @@
             <div class="evaluation-container">
                 <div class="evaluation-header">
                     <img src="{{ asset('images/DEPDev_logo_text_center.png') }}" alt="NEDA Logo" class="neda-logo">
-                    <h4>DEPARTMENT OF ECONOMY, PLANNING, AND DEVELOPMENT</h4>
                     <h5>CENTRAL VISAYAS REGION</h5>
                     <br>
                     <h6>EVALUATION OF TRAINING EFFECTIVENESS</h6>
@@ -329,7 +328,7 @@
                 <form method="POST" action="{{ route('user.training.submit.participant.evaluation', ['id' => $training->id]) }}" class="evaluation-form">
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->id }}">
-                    <input type="hidden" name="type" value="participant_post"> 
+                    <input type="hidden" name="type" value="participant_post">
 
                     <div class="instruction-container">
                         <p><strong>Please tick the circle which best describes your evaluation of the program. You have 4 choices to choose from:</strong> (4) Very Satisfied; (3) Satisfied; <br>(2) Dissatisfied; (1) Very Dissatisfied.</p>

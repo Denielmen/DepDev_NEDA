@@ -41,7 +41,7 @@
             width: 270px;
             padding-top: 20px;
             position: fixed;
-            top: 56px;      
+            top: 56px;
             left: 0;
         }
         .sidebar a {
@@ -214,7 +214,7 @@
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('admin.home') }}">
-                <img src="/images/neda-logo.png" alt="NEDA Logo">
+                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
@@ -243,16 +243,16 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
             <div class="list-title">
-                <h2>List of Employee's</h2>
+                <h2>List of Employees</h2>
             </div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -335,13 +335,13 @@
     const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
     for (let i = 1; i < tr.length; i++) {
-        const nameCell = tr[i].getElementsByTagName('td')[2]; 
+        const nameCell = tr[i].getElementsByTagName('td')[2];
         const statusCell = tr[i].getElementsByTagName('td')[0]; // Status column
-        
+
         if (nameCell && statusCell) {
             const nameValue = nameCell.textContent || nameCell.innerText;
             const statusText = statusCell.textContent || statusCell.innerText;
-            
+
             // Only search within the current tab's status (active or inactive)
             if (statusText.includes(statusFilter)) {
                 if (nameValue.toUpperCase().indexOf(filter) > -1) {
@@ -365,9 +365,9 @@ function sortUsers() {
     const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
     tr.forEach(row => {
-        const userPosition = row.getElementsByTagName('td')[2].textContent; // Position column
+        const userPosition = row.getElementsByTagName('td')[3].textContent; // Position column
         const statusText = row.getElementsByTagName('td')[0].textContent; // Status column
-        
+
         // Only sort within the current tab's status (active or inactive)
         if (statusText.includes(statusFilter)) {
             if (position === 'all' || userPosition.trim() === position.trim()) {
@@ -386,16 +386,16 @@ function sortUsers() {
     document.getElementById('active-tab').classList.remove('active');
     document.getElementById('inactive-tab').classList.remove('active');
     document.getElementById(status + '-tab').classList.add('active');
-    
+
     // Filter table rows
     const table = document.querySelector('.table-container table');
     const tr = table.getElementsByTagName('tr');
-    
+
     for (let i = 1; i < tr.length; i++) {
         const statusCell = tr[i].getElementsByTagName('td')[0];
         if (statusCell) {
             const statusText = statusCell.textContent.trim();
-            if ((status === 'active' && statusText.includes('Active')) || 
+            if ((status === 'active' && statusText.includes('Active')) ||
                 (status === 'inactive' && statusText.includes('Inactive'))) {
                 tr[i].style.display = '';
             } else {

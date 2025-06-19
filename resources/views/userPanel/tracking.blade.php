@@ -344,7 +344,11 @@
                                 <select id="alignedTraining" name="courseTitle" class="form-control" required>
                                     <option value="" disabled selected>Select aligned training</option>
                                     @foreach ($programmedTrainings as $training)
-                                        <option value="{{ $training->id }}">{{ $training->title }}</option>
+                                        @if(is_null($training->participant_pre_rating))
+                                            <option value="{{ $training->id }}" disabled>{{ $training->title }} <span style='color:#dc3545;'>(Pre-Evaluation Required)</span></option>
+                                        @else
+                                            <option value="{{ $training->id }}">{{ $training->title }}</option>
+                                        @endif
                                     @endforeach
                                     <option value="other">Others</option>
                                 </select>

@@ -141,12 +141,15 @@ class TrainingProfileController extends Controller
 
             // Handle participants
             if ($request->has('participants')) {
+                // Get current year for the pivot table
+                $currentYear = date('Y');
+
                 // Prepare the participants data with pivot attributes
                 $participants = [];
                 foreach ($request->participants as $userId) {
                     $participants[$userId] = [
                         'participation_type_id' => $request->input("participation_types.$userId"),
-                        'year' => $request->input("participant_years.$userId", date('Y'))
+                        'year' => $currentYear
                     ];
                 }
 
@@ -236,9 +239,11 @@ class TrainingProfileController extends Controller
                 'status' => 'Not Yet Implemented'
             ]);
 
+            // Use current year instead of implementation_date_from
+            $year = date('Y');
             foreach ($validated['participants'] as $participantId) {
                 $training->participants()->attach($participantId, [
-                    'year' => $validated['participant_years'][$participantId] ?? $validated['period_from'],
+                    'year' => $year,
                     'participation_type_id' => $validated['participation_types'][$participantId]
                 ]);
             }
@@ -294,17 +299,17 @@ class TrainingProfileController extends Controller
         }
     }
 
-    public function destroy(Training $training)
-    {
-        // First detach all participants to avoid foreign key constraint issues
-        $training->participants()->detach();
+   public function destroy(Training $training)
+{
+    // First detach all participants to avoid foreign key constraint issues
+    $training->participants()->detach();
 
-        // Then delete the training
-        $training->delete();
+    // Then delete the training
+    $training->delete();
 
-        return redirect()->route('admin.training-plan')
-            ->with('success', 'Training deleted successfully.');
-    }
+    return redirect()->route('admin.training-plan')
+        ->with('success', 'Training deleted successfully.');
+}
 
     public function rateParticipant(Request $request, $id)
     {
@@ -352,13 +357,18 @@ class TrainingProfileController extends Controller
     {
         $query = TrainingMaterial::query();
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%$search%")
-                    ->orWhereHas('competency', function ($subQ) use ($search) {
-                        $subQ->where('name', 'like', "%$search%");
-                    })
-                    ->orWhere('source', 'like', "%$search%")
-                    ->orWhereDate('created_at', $search);
+            $query->where(function($q) use ($search) {
+                if (preg_match('/^\\d{4}$/', $search)) {
+                    // If search is a 4-digit year, filter by year only
+                    $q->whereYear('created_at', $search);
+                } else {
+                    $q->where('title', 'like', "%$search%")
+                      ->orWhereHas('competency', function($subQ) use ($search) {
+                          $subQ->where('name', 'like', "%$search%");
+                      })
+                      ->orWhere('source', 'like', "%$search%")
+                      ->orWhereDate('created_at', $search);
+                }
             });
         }
         $allMaterials = $query->orderByDesc('created_at')->get();

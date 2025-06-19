@@ -13,7 +13,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            
+
         }
         .navbar {
             background-color:rgb(255, 255, 255);
@@ -40,7 +40,7 @@
             width: 270px;
             padding-top: 20px;
             position: fixed;
-            top: 56px;  /* to fix the navbar */ 
+            top: 56px;  /* to fix the navbar */
         }
         .sidebar a {
             color: white;
@@ -101,6 +101,10 @@
             font-size: 0.9rem;
         }
 
+        .dot{
+            color: red;
+        }
+
         .form-group {
             margin-bottom: 1rem;
         }
@@ -147,9 +151,9 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
@@ -167,18 +171,18 @@
 
                     {{-- Core Competency Field --}}
                     <div class="form-group row mb-3">
-                        <label for="core_competency" class="col-md-4 col-form-label text-md-right">{{ __('Core Competency') }}</label>
+                        <label for="core_competency" class="col-md-4 col-form-label text-md-right">{{ __('Classification ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <select class="form-control @error('core_competency') is-invalid @enderror" id="core_competency" name="core_competency" required onchange="toggleCoreCompetencyInput()">
-                                <option value="">Select Core Competency...</option>
+                                <option value="">--Select Classification--</option>
                                 <option value="Foundational/Mandatory" {{ old('core_competency') == 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
                                 <option value="Competency Enhancement" {{ old('core_competency') == 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
                                 <option value="Leadership/Executive Development" {{ old('core_competency') == 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
                                 <option value="Gender and Development (GAD)-Related" {{ old('core_competency') == 'Gender and Development (GAD)-Related' ? 'selected' : '' }}>Gender and Development (GAD)-Related</option>
                                 <option value="Others" {{ old('core_competency') == 'Others' ? 'selected' : '' }}>Others</option>
                             </select>
-                            <input type="text" class="form-control mt-2 @error('core_competency') is-invalid @enderror" 
-                                id="core_competency_input" name="core_competency_input" 
+                            <input type="text" class="form-control mt-2 @error('core_competency') is-invalid @enderror"
+                                id="core_competency_input" name="core_competency_input"
                                 placeholder="Enter core competency" value="{{ old('core_competency_input') }}" style="display: none;">
                             @error('core_competency')
                                 <span class="invalid-feedback" role="alert">
@@ -189,7 +193,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="title" class="col-md-4 col-form-label text-md-right">{{ __('Title/Area') }}</label>
+                        <label for="title" class="col-md-4 col-form-label text-md-right">{{ __('Title/Area ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="title" type="text" class="form-control @error('title') is-invalid @enderror" name="title" value="{{ old('title') }}" required autocomplete="title" autofocus>
                             @error('title')
@@ -201,7 +205,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency') }}</label>
+                        <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <select id="competency" class="form-control @error('competency_id') is-invalid @enderror" name="competency_id" required>
                                 <option value="">Select Competency</option>
@@ -219,10 +223,10 @@
                         </div>
                     </div>
 
-                   
+
 
                     <div class="form-group row mb-3">
-                        <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From') }}</label>
+                        <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="period_from" type="number" min="2000" max="2100" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required onchange="setPeriodTo()" placeholder="YYYY">
                             @error('period_from')
@@ -234,7 +238,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="period_to" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period To') }}</label>
+                        <label for="period_to" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period To ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="period_to" type="number" min="2000" max="2100" class="form-control @error('period_to') is-invalid @enderror" name="period_to" value="{{ old('period_to') }}" required placeholder="YYYY">
                             @error('period_to')
@@ -246,7 +250,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget') }}</label>
+                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-text">₱</span>
@@ -261,7 +265,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Total Number of Hours') }}</label>
+                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Total Number of Hours ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="no_of_hours" type="number" class="form-control @error('no_of_hours') is-invalid @enderror" name="no_of_hours" value="{{ old('no_of_hours') }}">
                             @error('no_of_hours')
@@ -274,7 +278,7 @@
 
 
                     <div class="form-group row mb-3">
-                        <label for="provider" class="col-md-4 col-form-label text-md-right">{{ __('Learning Service Provider') }}</label>
+                        <label for="provider" class="col-md-4 col-form-label text-md-right">{{ __('Learning Service Provider ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="provider" type="text" class="form-control @error('provider') is-invalid @enderror" name="provider" value="{{ old('provider') }}">
                             @error('provider')
@@ -325,7 +329,7 @@
 
 
                     <div class="form-group row mb-3">
-                        <label for="participants" class="col-md-4 col-form-label text-md-right">{{ __('Participants') }}</label>
+                        <label for="participants" class="col-md-4 col-form-label text-md-right">{{ __('Participants ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <div id="selectedParticipants" class="mb-2">
                                 <!-- Selected participants will be displayed here -->
@@ -441,12 +445,12 @@
                 const selected = [];
                 // Get the period_from value to use as the year
                 let periodFromYear = parseInt(document.getElementById('period_from').value);
-                
+
                 // If period_from is less than 2025, set it to 2025
                 if (periodFromYear <= 2025) {
                     periodFromYear = 2025;
                 }
-                
+
                 document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
                     const userId = checkbox.dataset.userId;
                     const participantRow = checkbox.closest('.participant-row');
@@ -476,7 +480,7 @@
                         participationTypeInput.name = `participation_types[${userId}]`;
                         participationTypeInput.value = participationTypeId;
                         form.appendChild(participationTypeInput);
-                        
+
                         // Add a hidden input for the year based on period_from (minimum 2025)
                         const yearInput = document.createElement('input');
                         yearInput.type = 'hidden';
@@ -490,7 +494,7 @@
                 selected.forEach(participant => {
                     const participantDiv = document.createElement('div');
                     participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
-                    
+
                     participantDiv.innerHTML = `
                         <div class="d-flex align-items-center">
                             <span class="me-2">${participant.name}</span>
@@ -521,7 +525,7 @@
                 if (e.target.closest('.remove-participant')) {
                     const button = e.target.closest('.remove-participant');
                     const userId = button.dataset.userId;
-                    
+
                     // Remove the hidden inputs for this user
                     form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
                     form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
@@ -531,7 +535,7 @@
                     if (checkboxInModal) {
                         checkboxInModal.checked = false;
                     }
-                    
+
                     // Remove the participant's div from the display
                     button.closest('.d-flex').remove();
 
@@ -563,9 +567,9 @@
             // Form validation and submission - Keep this, ensure it reads from the hidden inputs
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 console.log('Form submission started');
-                
+
                 // Validate required fields
                 const requiredFields = form.querySelectorAll('[required]');
                 let isValid = true;
@@ -686,14 +690,14 @@
                 const nameCell = rows[i].getElementsByTagName('td')[0];
                 const positionCell = rows[i].getElementsByTagName('td')[1];
                 const divisionCell = rows[i].getElementsByTagName('td')[2];
-                
+
                 if (nameCell && positionCell && divisionCell) {
                     const nameText = nameCell.textContent || nameCell.innerText;
                     const positionText = positionCell.textContent || positionCell.innerText;
                     const divisionText = divisionCell.textContent || divisionCell.innerText;
-                    
-                    if (nameText.toUpperCase().indexOf(filter) > -1 || 
-                        positionText.toUpperCase().indexOf(filter) > -1 || 
+
+                    if (nameText.toUpperCase().indexOf(filter) > -1 ||
+                        positionText.toUpperCase().indexOf(filter) > -1 ||
                         divisionText.toUpperCase().indexOf(filter) > -1) {
                         rows[i].style.display = '';
                     } else {
