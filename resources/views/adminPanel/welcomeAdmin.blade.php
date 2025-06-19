@@ -75,8 +75,6 @@
             background-repeat: no-repeat;
             height: 92vh;
             margin-left: 270px;
-            /* Sidebar width */
-            margin-top: 60px;
         }
 
         .header {
@@ -84,6 +82,7 @@
             background-color: #f8f9fa;
             opacity: 0.7;
             margin-right: 0%;
+            padding: 16px;
         }
 
         .header img {
@@ -297,6 +296,6 @@
             });
         @endforeach
     </script>
-    </body>
+</body>
 
 </html>
