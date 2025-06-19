@@ -143,8 +143,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         ->name('admin.training-plan.show');
 
     Route::get('training-plan/{id}', function ($id) {
-        $training = \App\Models\Training::findOrFail($id);
-        return view('adminPanel.TrainingView', compact('training'));
+        $training = \App\Models\Training::with(['participants' => function ($query) {
+            $query->withPivot('participation_type_id', 'year');
+        }])->findOrFail($id);
+        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
+        return view('adminPanel.TrainingView', compact('training', 'participationTypes'));
     })->name('admin.training.view');
 
     Route::get('training-plan/unprogrammed/{id}', function ($id) {

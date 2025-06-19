@@ -246,11 +246,15 @@
                             <td class="label">Participants:</td>
                             <td>
                                 @php
-                                    // Force a fresh reload of the participants relationship
+                                    // Force a fresh reload of the participants relationship with pivot data
                                     $training->load(['participants' => function($query) {
-                                        $query->orderBy('last_name')->orderBy('first_name');
+                                        $query->withPivot('participation_type_id', 'year')
+                                              ->orderBy('last_name')->orderBy('first_name');
                                     }]);
                                 @endphp
+
+
+
 
                                 @forelse ($training->participants as $participant)
                                     <div class="mb-1">
@@ -265,6 +269,7 @@
                                                 CY-{{ $participant->pivot->year }}
                                             </span>
                                         @endif
+
                                     </div>
                                 @empty
                                     <div class="text-muted">No participants found.</div>

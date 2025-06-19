@@ -117,7 +117,8 @@ class TrainingProfileController extends Controller
 
         // Eager load the participants relationship with their pivot data
         $training->load(['participants' => function ($query) {
-            $query->orderBy('last_name')->orderBy('first_name');
+            $query->withPivot('participation_type_id', 'year')
+                  ->orderBy('last_name')->orderBy('first_name');
         }, 'competency']);
 
         // Get participation types for display
@@ -149,6 +150,8 @@ class TrainingProfileController extends Controller
 
     public function update(Request $request, Training $training)
     {
+
+
         try {
             // $training = Training::findOrFail($id);
 
@@ -169,40 +172,57 @@ class TrainingProfileController extends Controller
                 'type' => 'required|in:Program,Unprogrammed',
                 'participants' => 'nullable|array',
                 'participants.*' => 'exists:users,id',
-                'participation_types' => 'nullable|array'
+                'participation_types' => 'nullable|array',
+                'participation_types.*' => 'exists:participation_types,id',
+                'participant_years' => 'nullable|array',
+                'participant_years.*' => 'integer|in:2025,2026,2027'
             ]);
+
+            // Additional validation for participants and participation types
+            if ($request->has('participants') && !empty($request->participants)) {
+                foreach ($request->participants as $participantId) {
+                    if (
+                        !isset($request->participation_types[$participantId]) ||
+                        !ParticipationType::find($request->participation_types[$participantId])
+                    ) {
+                        return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
+                    }
+
+                    if (
+                        !isset($request->participant_years[$participantId]) ||
+                        !in_array($request->participant_years[$participantId], [2025, 2026, 2027])
+                    ) {
+                        return back()->withInput()->withErrors(['participants' => 'All participants must have a valid year (2025, 2026, or 2027).']);
+                    }
+                }
+            }
 
             // Update training details
             $training->update($validated);
 
             // Handle participants
             if ($request->has('participants')) {
-                // Get current year for the pivot table
-                $currentYear = date('Y');
-
                 // Prepare the participants data with pivot attributes
                 $participants = [];
                 foreach ($request->participants as $userId) {
                     $participants[$userId] = [
                         'participation_type_id' => $request->input("participation_types.$userId"),
-                        'year' => $currentYear
+                        'year' => $request->input("participant_years.$userId", 2025) // Default to 2025 if not specified
                     ];
                 }
 
-                // Debug information
-                Log::info('Updating training participants', [
-                    'training_id' => $training->id,
-                    'participants' => $participants
-                ]);
+
 
                 // Sync participants (this will remove any participants not in the array)
                 $training->participants()->sync($participants);
+
+
             } else {
                 // If no participants were selected, detach all
                 $training->participants()->detach();
             }
 
-            return redirect()->route('admin.training-plan')->with('success', 'Training updated successfully.');
+            return redirect()->route('admin.training.view', $training->id)->with('success', 'Training updated successfully.');
         } catch (\Exception $e) {
             Log::error('Training update error: ' . $e->getMessage());
             return back()->withInput()->withErrors(['error' => 'Failed to update training: ' . $e->getMessage()]);
@@ -244,6 +264,7 @@ class TrainingProfileController extends Controller
             'participants' => 'required|array|min:1',
             'participants.*' => 'exists:users,id',
             'participation_types' => 'required|array',
+            'participant_years' => 'required|array',
         ]);
 
         foreach ($validated['participants'] as $participantId) {
@@ -275,11 +296,9 @@ class TrainingProfileController extends Controller
                 'status' => 'Not Yet Implemented'
             ]);
 
-            // Use current year instead of implementation_date_from
-            $year = date('Y');
             foreach ($validated['participants'] as $participantId) {
                 $training->participants()->attach($participantId, [
-                    'year' => $year,
+                    'year' => $validated['participant_years'][$participantId] ?? $validated['period_from'],
                     'participation_type_id' => $validated['participation_types'][$participantId]
                 ]);
             }
@@ -644,3 +663,10 @@ class TrainingProfileController extends Controller
         }
     }
 }
+
+
+
+
+
+
+
