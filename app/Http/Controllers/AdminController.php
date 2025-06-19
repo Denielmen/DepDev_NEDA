@@ -70,7 +70,9 @@ class AdminController extends Controller
 
     public function participants()
     {
-        $users = User::all();
+        $users = User::orderBy('is_active', 'desc')
+            ->orderBy('last_name', 'asc')
+            ->paginate(5); // Show 15 users per page
         $positions = User::distinct()->pluck('position')->filter()->values()->toArray();
 
         return view('adminPanel.listOfUser', compact('users', 'positions'));

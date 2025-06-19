@@ -207,6 +207,51 @@
             background-color: #003366;
             color: white;
         }
+
+        /* Pagination Styling */
+        .pagination-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .pagination-links .pagination {
+            margin: 0;
+        }
+
+        .pagination-links .page-link {
+            color: #003366;
+            border-color: #dee2e6;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .pagination-links .page-link:hover {
+            color: #004080;
+            background-color: #e7f1ff;
+            border-color: #003366;
+        }
+
+        .pagination-links .page-item.active .page-link {
+            background-color: #003366;
+            border-color: #003366;
+            color: white;
+        }
+
+        .pagination-links .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+
+        /* Style Previous/Next buttons with simple text */
+        .pagination-links .page-item:first-child .page-link {
+            border-top-left-radius: 0.375rem;
+            border-bottom-left-radius: 0.375rem;
+        }
+
+        .pagination-links .page-item:last-child .page-link {
+            border-top-right-radius: 0.375rem;
+            border-bottom-right-radius: 0.375rem;
+        }
     </style>
 </head>
 <body>
@@ -261,7 +306,7 @@
                     </a>
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
-                        <input type="text" placeholder="Search..." id="searchInput" onkeyup="searchUsers()">
+                        <input type="text" placeholder="Search current page..." id="searchInput" onkeyup="searchUsers()">
                     </div>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
@@ -291,10 +336,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($users->sortBy([
-                                ['is_active', 'desc'],
-                                ['last_name', 'asc']
-                            ]) as $user)
+                            @foreach($users as $user)
                             <tr>
                                 <td>
                                     <span class="status-indicator {{ $user->is_active ? 'active' : 'inactive' }}"></span>
@@ -320,6 +362,46 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination Info and Links -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="pagination-info">
+                        <small class="text-muted">
+                            Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }}
+                            of {{ $users->total() }} employees
+                        </small>
+                    </div>
+                    <div class="pagination-links">
+                        @if ($users->hasPages())
+                            <nav aria-label="Pagination Navigation">
+                                <ul class="pagination">
+                                    {{-- Previous Page Link --}}
+                                    @if ($users->onFirstPage())
+                                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                    @else
+                                        <li class="page-item"><a class="page-link" href="{{ $users->previousPageUrl() }}">Previous</a></li>
+                                    @endif
+
+                                    {{-- Pagination Elements --}}
+                                    @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
+                                        @if ($page == $users->currentPage())
+                                            <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
+                                        @else
+                                            <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Next Page Link --}}
+                                    @if ($users->hasMorePages())
+                                        <li class="page-item"><a class="page-link" href="{{ $users->nextPageUrl() }}">Next</a></li>
+                                    @else
+                                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                    @endif
+                                </ul>
+                            </nav>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -327,34 +409,34 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function searchUsers() {
-    const input = document.getElementById('searchInput');
-    const filter = input.value.toUpperCase();
-    const table = document.querySelector('.table-container table');
-    const tr = table.getElementsByTagName('tr');
-    const activeTab = document.querySelector('.tab-button.active').id;
-    const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.querySelector('.table-container table');
+            const tr = table.getElementsByTagName('tr');
+            const activeTab = document.querySelector('.tab-button.active').id;
+            const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
-    for (let i = 1; i < tr.length; i++) {
-        const nameCell = tr[i].getElementsByTagName('td')[2];
-        const statusCell = tr[i].getElementsByTagName('td')[0]; // Status column
+            for (let i = 1; i < tr.length; i++) {
+                const nameCell = tr[i].getElementsByTagName('td')[2];
+                const statusCell = tr[i].getElementsByTagName('td')[0]; // Status column
 
-        if (nameCell && statusCell) {
-            const nameValue = nameCell.textContent || nameCell.innerText;
-            const statusText = statusCell.textContent || statusCell.innerText;
+                if (nameCell && statusCell) {
+                    const nameValue = nameCell.textContent || nameCell.innerText;
+                    const statusText = statusCell.textContent || statusCell.innerText;
 
-            // Only search within the current tab's status (active or inactive)
-            if (statusText.includes(statusFilter)) {
-                if (nameValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = '';
-                } else {
-                    tr[i].style.display = 'none';
+                    // Only search within the current tab's status (active or inactive)
+                    if (statusText.includes(statusFilter)) {
+                        if (nameValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = '';
+                        } else {
+                            tr[i].style.display = 'none';
+                        }
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
                 }
-            } else {
-                tr[i].style.display = 'none';
             }
         }
-    }
-}
 
 function sortUsers() {
     const select = document.getElementById('sort-by');
