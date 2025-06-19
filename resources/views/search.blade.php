@@ -307,166 +307,156 @@
                 </form>
             </div>
             <!-- Results Section -->
-            @if ($results->where('search_type', 'training')->isNotEmpty())
-                <div class="card mb-3">
-                    <div class="card-header bg-primary text-white">
-                        <i class="bi bi-file-earmark-text me-2"></i>Training Found
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Training Title</th>
-                                    <th>Participants</th>
-                                    <th>Status</th>
-                                    <th>Type</th> <!-- New column -->
-                                    <th>Training Materials</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($results->where('search_type', 'training') as $result)
+            <div class="results-table">
+                <!-- Results content here -->
+                @if ($results->where('search_type', 'training')->isNotEmpty())
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <i class="bi bi-file-earmark-text me-2"></i>Training Found
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
                                     <tr>
-                                        <td>{{ $result->title }}</td>
-                                        <td>
-                                            @if ($result->participants)
-                                                @foreach ($result->participants as $participant)
-                                                    {{ $participant['name'] }}<br>
-                                                @endforeach
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @php
-                                                $isImplemented =
-                                                    $result->period_to &&
-                                                    \Carbon\Carbon::parse($result->period_to)->isPast();
-                                                $statusText = $isImplemented ? 'Implemented' : 'Not Yet Implemented';
-                                            @endphp
-                                            {{ $statusText }}
-                                        </td>
-                                        <td>
-                                            {{ $result->type === 'Program' ? 'Programmed' : 'Unprogrammed' }}
-                                        </td>
-                                        <td>
-                                            @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
-                                                @foreach ($result->relatedMaterials as $material)
-                                                    @if ($material->file_path)
-                                                        <a href="{{ asset($material->file_path) }}"
-                                                            download>{{ $material->title }}</a>
-                                                        (Material)
-                                                        <br>
-                                                    @elseif ($material->link)
-                                                        <a href="{{ $material->link }}"
-                                                            target="_blank">{{ $material->title }}</a>
-                                                        (Link)<br>
-                                                    @else
-                                                        {{ $material->title }}<br>
-                                                    @endif
-                                                @endforeach
-                                            @else
-                                                No training materials available
-                                            @endif
-                                        </td>
+                                        <th>Training Title</th>
+                                        <th>Participants</th>
+                                        <th>Training Materials</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($results->where('search_type', 'training') as $result)
+                                        <tr>
+                                            <td>{{ $result->title }}</td>
+                                            <td>
+                                                @if ($result->participants)
+                                                    @foreach ($result->participants as $participant)
+                                                        {{ $loop->iteration }}. {{ $participant['name'] }}<br>
+                                                    @endforeach
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
+                                                    @foreach ($result->relatedMaterials as $material)
+                                                        @if ($material->file_path)
+                                                            {{ $loop->iteration }}. <a
+                                                                href="{{ asset($material->file_path) }}"
+                                                                download>{{ $material->title }}</a><br>
+                                                        @else
+                                                            {{ $material->title }} (No file available)<br>
+                                                        @endif
+                                                    @endforeach
+                                                @else
+                                                    No training materials available
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            @endif
-            <!-- Users Results -->
-            @if ($results->where('search_type', 'user')->isNotEmpty())
-                <div class="card mb-3">
-                    <div class="card-header bg-primary text-white">
-                        <i class="bi bi-people me-2"></i>Users Found
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Position</th>
-                                    <th>Division</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($results->where('search_type', 'user') as $index => $result)
+                @endif
+                <!-- Users Results -->
+                @if ($results->where('search_type', 'user')->isNotEmpty())
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <i class="bi bi-people me-2"></i>Users Found
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
                                     <tr>
-                                        <td>{{ $result->last_name . ', ' . $result->first_name . ' ' . $result->mid_init . '.' ?? 'N/A' }}
-                                        </td>
-                                        <td>{{ $result->position ?? 'N/A' }}</td>
-                                        <td>{{ $result->division ?? 'N/A' }}</td>
-                                        </td>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Division</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($results->where('search_type', 'user') as $index => $result)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $result->last_name . ', ' . $result->first_name . ' ' . $result->mid_init . '.' ?? 'N/A' }}
+                                            </td>
+                                            <td>{{ $result->position ?? 'N/A' }}</td>
+                                            <td>{{ $result->division ?? 'N/A' }}</td>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            @endif
-            <!-- Training Materials Results -->
-            @if ($results->where('search_type', 'training_material')->isNotEmpty())
-                <div class="card mb-3">
-                    <div class="card-header bg-primary text-white">
-                        <i class="bi bi-file-earmark-text me-2"></i>Training Materials Found
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Uploader</th>
-                                    <th>Type</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($results->where('search_type', 'training_material') as $index => $result)
+                @endif
+                <!-- Training Materials Results -->
+                @if ($results->where('search_type', 'training_material')->isNotEmpty())
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <i class="bi bi-file-earmark-text me-2"></i>Training Materials Found
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
                                     <tr>
-                                        <td>{{ $result->title ?? 'N/A' }}</td>
-                                        <td>
-                                            @if ($result->user)
-                                                {{ $result->user->last_name . ', ' . $result->user->first_name . ' ' . $result->user->mid_init . '.' }}
-                                            @else
-                                                N/A
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($result->file_path)
-                                                Material
-                                            @elseif ($result->link)
-                                                Link
-                                            @else
-                                                N/A
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($result->file_path)
-                                                <a href="{{ asset($result->file_path) }}" download
-                                                    class="btn btn-sm btn-info">Download</a>
-                                            @elseif ($result->link)
-                                                <a href="{{ $result->link }}" target="_blank"
-                                                    class="btn btn-sm btn-primary">Open Link</a>
-                                            @else
-                                                N/A
-                                            @endif
-                                        </td>
+                                        <th>#</th>
+                                        <th>Title</th>
+                                        <th>Uploader</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($results->where('search_type', 'training_material') as $index => $result)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $result->title ?? 'N/A' }}</td>
+                                            <td>
+                                                @if ($result->user)
+                                                    {{ $result->user->last_name . ', ' . $result->user->first_name . ' ' . $result->user->mid_init . '.' }}
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($result->file_path)
+                                                    Material
+                                                @elseif ($result->link)
+                                                    Link
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($result->file_path)
+                                                    <a href="{{ asset($result->file_path) }}" download class="btn btn-sm btn-info">Download</a>
+                                                @elseif ($result->link)
+                                                    <a href="{{ $result->link }}" target="_blank" class="btn btn-sm btn-primary">Open Link</a>
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            @endif
-            <!-- No Results Message -->
-            @if ($results->isEmpty())
-                <div class="card text-center py-4">
-                    <div class="card-body">
-                        <i class="bi bi-search me-2"></i>No results found.
+                @endif
+                <!-- No Results Message -->
+                @if ($results->isEmpty())
+                    <div class="card text-center py-4">
+                        <div class="card-body">
+                            <i class="bi bi-search me-2"></i>No results found.
+                        </div>
                     </div>
-                </div>
-            @endif
+                @endif
+                @if ($results instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    <div class="d-flex justify-content-center mt-3">
+                        {{ $results->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+            </div>
         </div>
-    </div>
     </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -173,12 +173,12 @@ class SearchController extends Controller
                 ->when($materialType === 'link', function($q) {
                     $q->whereNotNull('link');
                 })
-                ->get()
-                ->map(function ($material) {
-                    $material->search_type = 'training_material';
-                    return $material;
-                });
-            $results = $results->concat($materials);
+                ->paginate(10);
+            $materials->getCollection()->transform(function($material) {
+                $material->search_type = 'training_material';
+                return $material;
+            });
+            $results = $materials;
         }
 
         // Get all data needed for the view
