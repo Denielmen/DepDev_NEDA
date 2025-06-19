@@ -95,6 +95,9 @@
             color: #003366;
             font-weight: bold;
         }
+        .dot {
+            color: red;
+        }
 
         .header p {
             font-size: 0.9rem;
@@ -150,10 +153,9 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's
-                Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
@@ -174,12 +176,12 @@
                     <!-- Name Fields -->
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="last_name" class="form-label">Last Name</label>
+                            <label for="last_name" class="form-label">Last Name <span class="dot">*</span></label>
                             <input type="text" id="last_name" name="last_name" class="form-control"
                                 value="{{ old('last_name') }}" required>
                         </div>
                         <div class="col">
-                            <label for="first_name" class="form-label">First Name</label>
+                            <label for="first_name" class="form-label">First Name <span class="dot">*</span></label>
                             <input type="text" id="first_name" name="first_name" class="form-control"
                                 value="{{ old('first_name') }}" required>
                         </div>
@@ -193,12 +195,12 @@
                     <!-- Position -->
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="user_id" class="form-label">User ID</label>
+                            <label for="user_id" class="form-label">User ID <span class="dot">*</span></label>
                             <input type="text" id="user_id" name="user_id" class="form-control"
                                 value="{{ old('user_id') }}" required>
                         </div>
                         <div class="col">
-                            <label for="position" class="form-label">Position</label>
+                            <label for="position" class="form-label">Position <span class="dot">*</span></label>
                             <input type="text" id="position" name="position" class="form-control"
                                 value="{{ old('position') }}" required>
                         </div>
@@ -207,12 +209,12 @@
                     <!-- Years in Position and CSC -->
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="years_in_position" class="form-label">Years in Position</label>
+                            <label for="years_in_position" class="form-label">Years in Position <span class="dot">*</span></label>
                             <input type="number" id="years_in_position" name="years_in_position" class="form-control"
                                 value="{{ old('years_in_position') }}" required>
                         </div>
                         <div class="col">
-                            <label for="years_in_csc" class="form-label">Years in Goverment</label>
+                            <label for="years_in_csc" class="form-label">Years in Goverment <span class="dot">*</span></label>
                             <input type="number" id="years_in_csc" name="years_in_csc" class="form-control"
                                 value="{{ old('years_in_csc') }}" required>
                         </div>
@@ -221,12 +223,12 @@
                     <!-- Division and Salary Grade -->
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="division" class="form-label">Division/Unit</label>
+                            <label for="division" class="form-label">Division/Unit <span class="dot">*</span></label>
                             <input type="text" id="division" name="division" class="form-control"
                                 value="{{ old('division') }}" required>
                         </div>
                         <div class="col">
-                            <label for="salary_grade" class="form-label">Salary Grade</label>
+                            <label for="salary_grade" class="form-label">Salary Grade <span class="dot">*</span></label>
                             <input type="number" id="salary_grade" name="salary_grade" class="form-control"
                                 value="{{ old('salary_grade') }}" required>
                         </div>
@@ -235,7 +237,7 @@
                     <!-- Role and Superior -->
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="role" class="form-label">Role</label>
+                            <label for="role" class="form-label">Role <span class="dot">*</span></label>
                             <select id="role" name="role" class="form-control" required>
                                 <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>Admin</option>
                                 <option value="User" {{ old('role') == 'User' ? 'selected' : '' }}>User</option>
@@ -270,13 +272,13 @@
 
                     <!-- Password -->
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
+                        <label for="password" class="form-label">Password <span class="dot">*</span></label>
                         <input type="password" id="password" name="password" class="form-control" required>
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="mb-3">
-                        <label for="password_confirmation" class="form-label">Confirm Password</label>
+                        <label for="password_confirmation" class="form-label">Confirm Password <span class="dot">*</span></label>
                         <input type="password" id="password_confirmation" name="password_confirmation"
                             class="form-control" required>
                     </div>

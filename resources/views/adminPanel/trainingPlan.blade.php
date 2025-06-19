@@ -16,7 +16,7 @@
             background-color: rgb(187, 219, 252);
             padding-top: 60px; /* Adjust this value based on your navbar height */
         }
-        .navbar {   
+        .navbar {
             background-color: #fff;
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
@@ -197,16 +197,16 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>Training Clasification</h2>
+                <h2>Training Program</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -244,6 +244,7 @@
                             <td>{{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
+                                    <!-- <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view"> -->
                                     <a href="{{ route('admin.training.view', $training->id) }}" class="btn btn-view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
@@ -328,5 +329,3 @@
     </script>
 </body>
 </html>
-
-

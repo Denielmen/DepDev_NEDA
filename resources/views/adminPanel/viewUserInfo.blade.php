@@ -40,7 +40,7 @@
             width: 270px;
             padding-top: 20px;
             position: fixed;
-            top: 56px;      
+            top: 56px;
             left: 0;
         }
         .sidebar a {
@@ -202,9 +202,9 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
         <!-- Main Content -->
@@ -277,12 +277,12 @@
                         </tr>
                     </table>
                     <div class="eval-buttons">
-                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }})">
+                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training=>id }})">
                             <i class="bi bi-clipboard-check"></i>
                             Pre-Eval
                         </button>
-                        <a href="{{ route('admin.training.post-evaluation', ['id' => $training->id]) }}" 
-                           class="btn btn-eval btn-post-eval" 
+                        <a href="{{ route('admin.training.post-evaluation', ['id' => $training->id]) }}"
+                           class="btn btn-eval btn-post-eval"
                            {{ $training->supervisor_post_rating ? 'disabled' : '' }}>
                             <i class="bi bi-clipboard-data"></i>
                             Post-Eval
@@ -435,5 +435,5 @@
         });
     </script>
 </body>
-</html> 
+</html>
 

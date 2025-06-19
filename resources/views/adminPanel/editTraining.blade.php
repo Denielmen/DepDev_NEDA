@@ -130,9 +130,9 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employee's Profile</a>
-            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Reports</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
 
@@ -145,7 +145,7 @@
                 <h4 class="text-center mb-4">Training Information</h4>
                 <form action="{{ route('admin.training-plan.update', $training) }}" method="POST">
                     @csrf
-                    @method('PUT') 
+                    @method('PUT')
                     <input type="hidden" name="type" value="{{ $training->type }}">
                     <input type="hidden" name="id" value="{{ $training->id }}">
                     <div class="row mb-3">
@@ -430,11 +430,11 @@
                 if (e.target.closest('.remove-participant')) {
                     const button = e.target.closest('.remove-participant');
                     const userId = button.dataset.userId;
-                    
+
                     // Remove the hidden inputs for this user
                     form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
                     form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
-                    
+
                     // Remove the participant's div from the display
                     button.closest('.d-flex').remove();
                 }
