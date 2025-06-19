@@ -154,7 +154,7 @@
                             <input type="text" class="form-control" id="title" name="title" value="{{ $training->title }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="core_competency" class="form-label">Core Competency:</label>
+                            <label for="core_competency" class="form-label">Classification:</label>
                             <select class="form-control" id="core_competency" name="core_competency" required>
                                 <option value="">Select Core Competency...</option>
                                 <option value="Foundational/Mandatory" {{ $training->core_competency === 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>

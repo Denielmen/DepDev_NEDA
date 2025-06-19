@@ -47,7 +47,6 @@
         .user-menu {
             color: black !important;
             background-color: white !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar {
