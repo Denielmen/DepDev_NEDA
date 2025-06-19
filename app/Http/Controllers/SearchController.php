@@ -37,6 +37,7 @@ class SearchController extends Controller
         $competencies = $request->input('competencies', []);
         $division = $request->input('division');
         $position = $request->input('position');
+        $status = $request->input('status');
         
         $results = collect();
 
@@ -70,7 +71,7 @@ class SearchController extends Controller
 // Search trainings
 if (in_array('Training', $types)) {
     $trainings = Training::query()
-        ->with('trainingMaterials') // Eager load trainingMaterials
+        ->with('trainingMaterials')
         ->when($query, function ($q) use ($query) {
             $q->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
@@ -94,28 +95,47 @@ if (in_array('Training', $types)) {
         ->when($competencies, function ($q) use ($competencies) {
             $q->whereIn('competency_id', $competencies);
         })
-        ->with('participants') // Eager load participants
+        ->when($status, function ($q) use ($status, $year) {
+            if ($status === 'Implemented') {
+                if ($year) {
+                    $q->whereNotNull('implementation_date_to')
+                      ->whereYear('implementation_date_from', '<=', $year)
+                      ->whereYear('implementation_date_to', '>=', $year);
+                } else {
+                    $q->whereNotNull('implementation_date_to');
+                }
+            } elseif ($status === 'Not Yet Implemented') {
+                if ($year) {
+                    $q->whereNull('implementation_date_to')
+                      ->where(function($q2) use ($year) {
+                          $q2->whereYear('period_from', '<=', $year)
+                             ->whereYear('period_to', '>=', $year);
+                      })
+                      ->orWhere('status', 'Pending')
+                      ->orWhere('status', 'Not Yet Implemented');
+                } else {
+                    $q->whereNull('implementation_date_to')
+                      ->orWhere('status', 'Pending')
+                      ->orWhere('status', 'Not Yet Implemented');
+                }
+            }
+        })
+        ->with('participants')
         ->get()
         ->map(function ($training) {
             $training->search_type = 'training';
-
-            // Map participants
             $training->participants = $training->participants->map(function ($participant) {
                 return [
                     'id' => $participant->id,
                     'name' => $participant->first_name . ' ' . $participant->last_name,
                 ];
             });
-
-            // Include training materials uploaded by users that match the training title and source
             $training->relatedMaterials = TrainingMaterial::query()
-                ->where('title', 'like', "%{$training->title}%") // Match materials by title
-                ->where('source', 'like', "%{$training->source}%") // Verify source matches
+                ->where('title', 'like', "%{$training->title}%")
+                ->where('source', 'like', "%{$training->source}%")
                 ->get();
-
             return $training;
         });
-
     $results = $results->concat($trainings);
 }
 
