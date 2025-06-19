@@ -281,7 +281,9 @@
                         @endforeach
                     </tbody>
                 </table>
-
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $trainings->links('pagination::bootstrap-5') }}
+                </div>
             </div>
             @if($trainings->count())
                 <div class="d-flex justify-content-end mt-3 mb-3">

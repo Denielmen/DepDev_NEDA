@@ -71,9 +71,9 @@ class TrainingProfileController extends Controller
         $search = $request->input('search');
         $trainings = Training::where('type', 'Unprogrammed')
             ->where(function ($query) use ($userId) {
-                $query->where('user_id', $userId) // Creator of the training
+                $query->where('user_id', $userId)
                     ->orWhereHas('participants', function ($q) use ($userId) {
-                        $q->where('users.id', $userId); // User is a participant
+                        $q->where('users.id', $userId);
                     });
             })
             ->when($search, function ($q) use ($search) {
@@ -414,7 +414,6 @@ class TrainingProfileController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 if (preg_match('/^\\d{4}$/', $search)) {
-                    // If search is a 4-digit year, filter by year only
                     $q->whereYear('created_at', $search);
                 } else {
                     $q->where('title', 'like', "%$search%")
@@ -426,12 +425,12 @@ class TrainingProfileController extends Controller
                 }
             });
         }
-        $allMaterials = $query->orderByDesc('created_at')->get();
+        $allMaterials = $query->orderByDesc('created_at')->paginate(10);
         $userId = Auth::id();
         $materials = $allMaterials->where('type', 'material')->whereNotNull('file_path');
         $links = $allMaterials->where('type', 'material')->whereNotNull('link');
         $certificates = $allMaterials->where('type', 'certificate')->where('user_id', $userId);
-        return view('userPanel.trainingResources', compact('materials', 'links', 'certificates'));
+        return view('userPanel.trainingResources', compact('materials', 'links', 'certificates', 'allMaterials'));
     }
 
     public function evalParticipantForm($training_id)
@@ -661,6 +660,24 @@ class TrainingProfileController extends Controller
             Log::error("Failed to save supervisor post-evaluation for training {$id}: " . $e->getMessage(), ['exception' => $e]);
             return redirect()->back()->with('error', 'Failed to save supervisor post-evaluation.');
         }
+    }
+
+    public function effectiveness(Request $request)
+    {
+        $userId = Auth::id();
+        $search = $request->input('search');
+        $trainings = Training::where('type', 'Program')
+            ->whereHas('participants', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            })
+            ->when($search, function ($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhereHas('competency', function ($subQ) use ($search) {
+                      $subQ->where('name', 'like', "%$search%");
+                  });
+            })
+            ->paginate(1);
+        return view('userPanel.trainingEffectiveness', compact('trainings'));
     }
 }
 

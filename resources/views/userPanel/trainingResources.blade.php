@@ -246,6 +246,11 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                            @if(isset($allMaterials))
+                                <div class="d-flex justify-content-center mt-3">
+                                    {{ $allMaterials->links('pagination::bootstrap-5') }}
+                                </div>
+                            @endif
                         </div>
                         <!-- Links Tab -->
                         <div class="tab-pane fade" id="links" role="tabpanel" aria-labelledby="links-tab">
