@@ -254,9 +254,26 @@
 
             <div class="form-container">
 
+                <div class="form-title">
+                    Training Effectiveness
+                </div>
                 <div class="form-container">
-                    <div class="form-title">
-                        Training Effectiveness
+                    <!-- Chart.js CDN -->
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                    <div class="container my-4">
+
+                        <div class="row">
+                            @foreach ($competencyCharts as $cid => $data)
+                                <div
+                                    class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3 d-flex flex-column align-items-center">
+                                    <h6 class="text-center mb-2" style="font-size: 1rem;">
+                                        {{ $competencyLabels[$cid] ?? 'Competency' }}</h6>
+                                    <canvas id="competencyPie{{ $cid }}" width="120"
+                                        height="120"></canvas>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
 
                     <!-- Trainings Table -->
@@ -283,8 +300,16 @@
                                         <td>
                                             @php
                                                 $pre_rating_display_value = 'Empty';
-                                                if ($training->participant_pre_rating && $training->supervisor_pre_rating) {
-                                                    $pre_rating_display_value = round(($training->participant_pre_rating + $training->supervisor_pre_rating) / 2, 2);
+                                                if (
+                                                    $training->participant_pre_rating &&
+                                                    $training->supervisor_pre_rating
+                                                ) {
+                                                    $pre_rating_display_value = round(
+                                                        ($training->participant_pre_rating +
+                                                            $training->supervisor_pre_rating) /
+                                                            2,
+                                                        2,
+                                                    );
                                                 } elseif ($training->participant_pre_rating !== null) {
                                                     $pre_rating_display_value = $training->participant_pre_rating;
                                                 } elseif ($training->supervisor_pre_rating !== null) {
@@ -296,8 +321,16 @@
                                         <td>
                                             @php
                                                 $post_rating_value = null;
-                                                if ($training->participant_post_rating && $training->supervisor_post_rating) {
-                                                    $post_rating_value = round(($training->participant_post_rating + $training->supervisor_post_rating) / 2, 2);
+                                                if (
+                                                    $training->participant_post_rating &&
+                                                    $training->supervisor_post_rating
+                                                ) {
+                                                    $post_rating_value = round(
+                                                        ($training->participant_post_rating +
+                                                            $training->supervisor_post_rating) /
+                                                            2,
+                                                        2,
+                                                    );
                                                 } elseif ($training->participant_post_rating) {
                                                     $post_rating_value = $training->participant_post_rating;
                                                 } elseif ($training->supervisor_post_rating) {
@@ -313,8 +346,14 @@
                                         <td>
                                             @php
                                                 $average_rating = 'Empty';
-                                                if ($pre_rating_display_value !== 'Empty' && $post_rating_value !== null) {
-                                                    $average_rating = round(($pre_rating_display_value + $post_rating_value) / 2, 2);
+                                                if (
+                                                    $pre_rating_display_value !== 'Empty' &&
+                                                    $post_rating_value !== null
+                                                ) {
+                                                    $average_rating = round(
+                                                        ($pre_rating_display_value + $post_rating_value) / 2,
+                                                        2,
+                                                    );
                                                 } elseif ($pre_rating_display_value !== 'Empty') {
                                                     $average_rating = $pre_rating_display_value;
                                                 } elseif ($post_rating_value !== null) {
@@ -326,43 +365,58 @@
                                         <td>
                                             @php
                                                 $isParticipantPreEvaluated = $training->participant_pre_rating !== null;
-                                                $isParticipantPostEvaluated = $training->participant_post_rating !== null;
+                                                $isParticipantPostEvaluated =
+                                                    $training->participant_post_rating !== null;
                                             @endphp
 
                                             @if ($training->status == 'Implemented')
                                                 @php
-                                                    $postButtonClass = $isParticipantPostEvaluated ? 'disabled-button' : '';
-                                                    $postButtonAttributes = $isParticipantPostEvaluated ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your post-evaluation."' : '';
-                                                    $activePostButtonAttributes = $isParticipantPostEvaluated ? '' : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once." ';
+                                                    $postButtonClass = $isParticipantPostEvaluated
+                                                        ? 'disabled-button'
+                                                        : '';
+                                                    $postButtonAttributes = $isParticipantPostEvaluated
+                                                        ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your post-evaluation."'
+                                                        : '';
+                                                    $activePostButtonAttributes = $isParticipantPostEvaluated
+                                                        ? ''
+                                                        : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once." ';
                                                 @endphp
                                                 <span class="disabled-button-wrapper" {!! $postButtonAttributes !!}>
                                                     <a href="{{ route('user.evalParticipant', ['training_id' => $training->id, 'type' => 'participant_post']) }}"
                                                         class="btn btn-primary btn-sm {!! $postButtonClass !!}"
-                                                        {{ $isParticipantPostEvaluated ? 'tabindex=-1 aria-disabled=true' : '' }} {!! $activePostButtonAttributes !!}>
+                                                        {{ $isParticipantPostEvaluated ? 'tabindex=-1 aria-disabled=true' : '' }}
+                                                        {!! $activePostButtonAttributes !!}>
                                                         Post-Evaluation
                                                     </a>
                                                 </span>
                                             @else
                                                 @php
-                                                    $preButtonClass = $isParticipantPreEvaluated ? 'disabled-button' : '';
-                                                    $preButtonAttributes = $isParticipantPreEvaluated ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your pre-evaluation."' : '';
-                                                    $activePreButtonAttributes = $isParticipantPreEvaluated ? '' : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once." ';
+                                                    $preButtonClass = $isParticipantPreEvaluated
+                                                        ? 'disabled-button'
+                                                        : '';
+                                                    $preButtonAttributes = $isParticipantPreEvaluated
+                                                        ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your pre-evaluation."'
+                                                        : '';
+                                                    $activePreButtonAttributes = $isParticipantPreEvaluated
+                                                        ? ''
+                                                        : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once." ';
                                                 @endphp
                                                 <span class="disabled-button-wrapper" {!! $preButtonAttributes !!}>
                                                     <a href="#"
                                                         class="btn btn-primary btn-sm {!! $preButtonClass !!}"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#preEvaluationModal"
+                                                        data-bs-toggle="modal" data-bs-target="#preEvaluationModal"
                                                         data-training-id="{{ $training->id }}"
                                                         data-evaluation-type="participant_pre"
-                                                        {{ $isParticipantPreEvaluated ? 'tabindex=-1 aria-disabled=true' : '' }} {!! $activePreButtonAttributes !!}>
+                                                        {{ $isParticipantPreEvaluated ? 'tabindex=-1 aria-disabled=true' : '' }}
+                                                        {!! $activePreButtonAttributes !!}>
                                                         Pre-Evaluation
                                                     </a>
                                                 </span>
                                             @endif
                                         </td>
                                         <td>
-                                            <select class="form-select form-select-sm view-evaluation-select" data-training-id="{{ $training->id }}">
+                                            <select class="form-select form-select-sm view-evaluation-select"
+                                                data-training-id="{{ $training->id }}">
                                                 <option value="">Select Evaluation</option>
                                                 <option value="participant_pre">Own Pre-Evaluation</option>
                                                 <option value="participant_post">Own Post-Evaluation</option>
@@ -382,7 +436,8 @@
         </div>
 
         <!-- Pre-Evaluation Modal -->
-        <div class="modal fade" id="preEvaluationModal" tabindex="-1" aria-labelledby="preEvaluationModalLabel" aria-hidden="true">
+        <div class="modal fade" id="preEvaluationModal" tabindex="-1" aria-labelledby="preEvaluationModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -391,7 +446,8 @@
                     </div>
                     <div class="modal-body">
                         <!-- Message area for "No data" -->
-                        <div id="preEvaluationNoDataMessage" class="alert alert-info text-center" style="display: none;">
+                        <div id="preEvaluationNoDataMessage" class="alert alert-info text-center"
+                            style="display: none;">
                             No pre-evaluation data found for this training.
                         </div>
                         <form method="POST" id="preEvaluationForm">
@@ -407,7 +463,10 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td style="width: 70%;">In a scale 1-4 (4 is being the highest), please tick the circle which describes the proficiency level of your subordinate after participation in this course.</td>
+                                            <td style="width: 70%;">In a scale 1-4 (4 is being the highest), please
+                                                tick
+                                                the circle which describes the proficiency level of your subordinate
+                                                after participation in this course.</td>
                                             <td>1</td>
                                             <td>2</td>
                                             <td>3</td>
@@ -415,10 +474,14 @@
                                         </tr>
                                         <tr>
                                             <td></td>
-                                            <td><input class="form-check-input" type="radio" name="proficiency_level" id="proficiency1" value="1"></td>
-                                            <td><input class="form-check-input" type="radio" name="proficiency_level" id="proficiency2" value="2"></td>
-                                            <td><input class="form-check-input" type="radio" name="proficiency_level" id="proficiency3" value="3"></td>
-                                            <td><input class="form-check-input" type="radio" name="proficiency_level" id="proficiency4" value="4"></td>
+                                            <td><input class="form-check-input" type="radio"
+                                                    name="proficiency_level" id="proficiency1" value="1"></td>
+                                            <td><input class="form-check-input" type="radio"
+                                                    name="proficiency_level" id="proficiency2" value="2"></td>
+                                            <td><input class="form-check-input" type="radio"
+                                                    name="proficiency_level" id="proficiency3" value="3"></td>
+                                            <td><input class="form-check-input" type="radio"
+                                                    name="proficiency_level" id="proficiency4" value="4"></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -427,15 +490,15 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" form="preEvaluationForm" class="btn btn-primary" id="submitPreEvaluation">Submit</button>
+                        <button type="submit" form="preEvaluationForm" class="btn btn-primary"
+                            id="submitPreEvaluation">Submit</button>
                     </div>
                 </div>
             </div>
         </div>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 const preEvaluationModal = document.getElementById('preEvaluationModal');
                 const preEvaluationForm = document.getElementById('preEvaluationForm');
                 const submitPreEvaluationButton = document.getElementById('submitPreEvaluation');
@@ -444,16 +507,18 @@
 
                 // Initialize tooltips
                 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                  return new bootstrap.Tooltip(tooltipTriggerEl)
+                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
                 })
                 console.log(`Initialized ${tooltipList.length} Bootstrap tooltips.`);
 
-                preEvaluationModal.addEventListener('show.bs.modal', function (event) {
+                preEvaluationModal.addEventListener('show.bs.modal', function(event) {
                     const button = event.relatedTarget;
                     const trainingId = button.getAttribute('data-training-id');
-                    const type = button.getAttribute('data-evaluation-type'); // 'participant_pre' for submission
-                    const isViewMode = button.classList.contains('view-evaluation-option'); // Check if from view dropdown
+                    const type = button.getAttribute(
+                        'data-evaluation-type'); // 'participant_pre' for submission
+                    const isViewMode = button.classList.contains(
+                        'view-evaluation-option'); // Check if from view dropdown
 
                     document.getElementById('modalTrainingId').value = trainingId;
                     document.getElementById('modalEvaluationType').value = type;
@@ -480,7 +545,8 @@
                             method: 'GET',
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content')
                             }
                         });
                         const data = await response.json();
@@ -520,20 +586,23 @@
                             tempButton.setAttribute('data-evaluation-type', selectedType);
                             tempButton.classList.add('view-evaluation-option'); // Mark as view mode
                             // Programmatically click the temporary button to trigger modal show event
-                            document.body.appendChild(tempButton); // Needs to be in DOM to trigger modal
+                            document.body.appendChild(
+                                tempButton); // Needs to be in DOM to trigger modal
                             tempButton.click();
                             document.body.removeChild(tempButton); // Clean up
-                        } else if (selectedType === 'participant_post' || selectedType === 'supervisor_post') {
+                        } else if (selectedType === 'participant_post' || selectedType ===
+                            'supervisor_post') {
                             // For post-evaluations, redirect to a new view-only page
                             if (selectedType) {
-                                window.location.href = `{{ url('user/evaluation/view') }}/${trainingId}/${selectedType}`;
+                                window.location.href =
+                                    `{{ url('user/evaluation/view') }}/${trainingId}/${selectedType}`;
                             }
                         }
                         this.value = ''; // Reset dropdown
                     });
                 });
 
-                submitPreEvaluationButton.addEventListener('click', function (e) {
+                submitPreEvaluationButton.addEventListener('click', function(e) {
                     e.preventDefault(); // Prevent default form submission
 
                     const formData = new FormData(preEvaluationForm);
@@ -547,59 +616,96 @@
                     }
 
                     fetch(preEvaluationForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ training_id: trainingId, type: type, rating: rating })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message); // Show success message
-                            bootstrap.Modal.getInstance(preEvaluationModal).hide(); // Close modal
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content'),
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                training_id: trainingId,
+                                type: type,
+                                rating: rating
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message); // Show success message
+                                bootstrap.Modal.getInstance(preEvaluationModal).hide(); // Close modal
 
-                            // Update the table row dynamically
-                            const row = document.querySelector(`tr[data-training-id="${trainingId}"]`);
-                            if (row) {
-                                // Assuming the order of columns is consistent
-                                // Training Title, Status, Pre-Evaluation Rating, Post-Evaluation Rating, Average, Evaluation, View Evaluations
-                                const preRatingCell = row.children[2]; // Index 2 for Pre-Evaluation Rating
-                                const postRatingCell = row.children[3]; // Index 3 for Post-Evaluation Rating
-                                const averageCell = row.children[4];    // Index 4 for Average
+                                // Update the table row dynamically
+                                const row = document.querySelector(`tr[data-training-id="${trainingId}"]`);
+                                if (row) {
+                                    // Assuming the order of columns is consistent
+                                    // Training Title, Status, Pre-Evaluation Rating, Post-Evaluation Rating, Average, Evaluation, View Evaluations
+                                    const preRatingCell = row.children[
+                                        2]; // Index 2 for Pre-Evaluation Rating
+                                    const postRatingCell = row.children[
+                                        3]; // Index 3 for Post-Evaluation Rating
+                                    const averageCell = row.children[4]; // Index 4 for Average
 
-                                if (type === 'participant_pre') {
-                                    preRatingCell.textContent = data.pre_rating !== null ? data.pre_rating : 'Empty';
-                                } else if (type === 'participant_post') {
-                                    postRatingCell.textContent = data.post_rating !== null ? data.post_rating : 'Empty';
+                                    if (type === 'participant_pre') {
+                                        preRatingCell.textContent = data.pre_rating !== null ? data
+                                            .pre_rating : 'Empty';
+                                    } else if (type === 'participant_post') {
+                                        postRatingCell.textContent = data.post_rating !== null ? data
+                                            .post_rating : 'Empty';
+                                    }
+
+                                    // Recalculate and update Average if both are available
+                                    const currentPre = parseFloat(preRatingCell.textContent) || 0;
+                                    const currentPost = parseFloat(postRatingCell.textContent) || 0;
+
+                                    if (preRatingCell.textContent !== 'Empty' && postRatingCell
+                                        .textContent !== 'Empty') {
+                                        averageCell.textContent = ((currentPre + currentPost) / 2).toFixed(
+                                            2);
+                                    } else if (preRatingCell.textContent !== 'Empty') {
+                                        averageCell.textContent = currentPre.toFixed(2);
+                                    } else if (postRatingCell.textContent !== 'Empty') {
+                                        averageCell.textContent = currentPost.toFixed(2);
+                                    } else {
+                                        averageCell.textContent = 'Empty';
+                                    }
                                 }
-
-                                // Recalculate and update Average if both are available
-                                const currentPre = parseFloat(preRatingCell.textContent) || 0;
-                                const currentPost = parseFloat(postRatingCell.textContent) || 0;
-
-                                if (preRatingCell.textContent !== 'Empty' && postRatingCell.textContent !== 'Empty') {
-                                    averageCell.textContent = ((currentPre + currentPost) / 2).toFixed(2);
-                                } else if (preRatingCell.textContent !== 'Empty') {
-                                    averageCell.textContent = currentPre.toFixed(2);
-                                } else if (postRatingCell.textContent !== 'Empty') {
-                                    averageCell.textContent = currentPost.toFixed(2);
-                                } else {
-                                    averageCell.textContent = 'Empty';
-                                }
+                            } else {
+                                alert('Error: ' + data.message + (data.errors ? '\n' + JSON.stringify(data
+                                    .errors, null, 2) : ''));
                             }
-                        } else {
-                            alert('Error: ' + data.message + (data.errors ? '\n' + JSON.stringify(data.errors, null, 2) : ''));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error during pre-evaluation submission:', error);
-                        alert('An unexpected error occurred. Please try again.');
-                    });
+                        })
+                        .catch(error => {
+                            console.error('Error during pre-evaluation submission:', error);
+                            alert('An unexpected error occurred. Please try again.');
+                        });
                 });
             });
         </script>
-    </body>
+        <script>
+            @foreach ($competencyCharts as $cid => $data)
+                new Chart(document.getElementById('competencyPie{{ $cid }}'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Pre', 'Post'],
+                        datasets: [{
+                            data: [{{ $data['pre'] }}, {{ $data['post'] }}],
+                            backgroundColor: ['#36b9cc', '#4e73df'],
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            title: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            @endforeach
+        </script>
+</body>
 
 </html>
