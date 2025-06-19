@@ -167,6 +167,37 @@
         .btn-eval i {
             font-size: 1.2rem;
         }
+        .btn-outline-primary {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .certificate-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .certificate-item {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .certificate-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .certificate-preview {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
+        .no-certificates {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
     </style>
 </head>
 <body>
@@ -216,7 +247,10 @@
                         Back
                     </button>
                 </div>
-                <div class="details-card">
+                <div class="details-card position-relative">
+                    <button class="btn btn-outline-primary position-absolute top-0 end-0 m-3" data-bs-toggle="modal" data-bs-target="#certificateModal" title="View Certificate">
+                        <i class="bi bi-eye"></i>
+                    </button>
                     <h2 class="details-title">Training Details</h2>
                     <table class="details-table">
                         <tr>
@@ -336,6 +370,102 @@
             </div>
         </div>
     </div>
+
+    <!-- Certificate Modal -->
+    <div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="certificateModalLabel">Training Certificates</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="certificate-container">
+                        @php
+                            $certificates = \App\Models\TrainingMaterial::where('training_id', $training->id)
+                                ->where('type', 'certificate')
+                                ->get();
+
+                            // Check if there are orphaned certificates that might belong to this training
+                            $orphanedCertificates = \App\Models\TrainingMaterial::where('type', 'certificate')
+                                ->where('user_id', $user->id)
+                                ->whereNull('training_id')
+                                ->get();
+                        @endphp
+
+                        @if($certificates->isEmpty())
+                            <div class="no-certificates">
+                                <i class="bi bi-file-earmark-x" style="font-size: 3rem; color: #dee2e6;"></i>
+                                <h5 class="mt-3">No Certificates Found</h5>
+                                <p>No certificates have been uploaded for this training yet.</p>
+
+                                @if($orphanedCertificates->count() > 0)
+                                    <div class="alert alert-warning mt-3">
+                                        <h6><i class="bi bi-exclamation-triangle"></i> Found {{ $orphanedCertificates->count() }} unlinked certificate(s)</h6>
+                                        <p class="mb-2">There are certificates that might belong to this training but are not properly linked.</p>
+                                        <button type="button" class="btn btn-sm btn-warning" onclick="fixCertificates()">
+                                            <i class="bi bi-tools"></i> Try to Fix Certificates
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            @foreach($certificates as $certificate)
+                                <div class="certificate-item">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1">{{ $certificate->title }}</h6>
+                                            <small class="text-muted">
+                                                Uploaded: {{ $certificate->created_at->format('M d, Y') }}
+                                            </small>
+                                        </div>
+                                        @if($certificate->file_path)
+                                            <a href="{{ asset('storage/' . $certificate->file_path) }}"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-download"></i> Download
+                                            </a>
+                                        @endif
+                                    </div>
+
+                                    @if($certificate->file_path)
+                                        @php
+                                            $fileExtension = pathinfo($certificate->file_path, PATHINFO_EXTENSION);
+                                        @endphp
+
+                                        @if(in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png']))
+                                            <div class="text-center">
+                                                <img src="{{ asset('storage/' . $certificate->file_path) }}"
+                                                     alt="Certificate"
+                                                     class="certificate-preview img-fluid">
+                                            </div>
+                                        @elseif(strtolower($fileExtension) === 'pdf')
+                                            <div class="text-center">
+                                                <iframe src="{{ asset('storage/' . $certificate->file_path) }}"
+                                                        width="100%"
+                                                        height="400px"
+                                                        style="border: 1px solid #ddd;">
+                                                </iframe>
+                                            </div>
+                                        @else
+                                            <div class="alert alert-info">
+                                                <i class="bi bi-file-earmark"></i>
+                                                Certificate file available for download ({{ strtoupper($fileExtension) }} format)
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const evaluationModal = new bootstrap.Modal(document.getElementById('evaluationModal'));
@@ -433,7 +563,31 @@
                 });
             }
         });
+
+        function fixCertificates() {
+            if (confirm('This will try to automatically link unlinked certificates to their corresponding trainings. Continue?')) {
+                fetch('{{ route("admin.fixCertificates") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    // Reload the page to see the updated certificates
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while fixing certificates.');
+                });
+            }
+        }
     </script>
 </body>
 </html>
+
+
 

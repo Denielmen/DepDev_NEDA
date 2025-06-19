@@ -395,7 +395,7 @@
                             {{ $participationTypeName }}
                         </td>
                         <td>
-                            <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
+                            <a href="{{ route('admin.viewUserInfo', ['training_id' => $training->id, 'user_id' => $user->id]) }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
                     @endforeach
