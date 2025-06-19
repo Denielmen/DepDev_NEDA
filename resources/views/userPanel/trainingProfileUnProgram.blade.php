@@ -194,8 +194,12 @@
                     <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
                 <div class="search-box">
-                    <input type="text" placeholder="Search...">
-                    <i class="bi bi-search search-icon"></i>
+                    <form method="GET" action="{{ route('user.training.profile.unprogrammed') }}">
+                        <input type="text" name="search" placeholder="Search by title or competency..." value="{{ request('search') }}">
+                        <button type="submit" style="border:none;background:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);">
+                            <i class="bi bi-search search-icon"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
 
