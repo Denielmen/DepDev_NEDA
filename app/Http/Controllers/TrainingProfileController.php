@@ -14,28 +14,61 @@ use Illuminate\Support\Facades\Log;
 
 class TrainingProfileController extends Controller
 {
-    public function program()
+    public function program(Request $request)
     {
         $competencies = Competency::orderBy('name')->get();
         $userId = Auth::id();
-        $trainings = Training::where('type', 'Program')
-            ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
-            ->orderBy('status')
-            // Eager load the specific participant for the current user, without trying to load participationType on User model
-            ->with(['participants' => function ($query) use ($userId) {
-                $query->where('users.id', $userId);
-            }])
-            ->paginate(10);
+        $search = $request->input('search');
 
-        // Load all participation types once for efficient lookup in the view
+        $trainings = Training::where(function ($q) use ($search) {
+            $q->where('type', 'Program');
+
+            if ($search) {
+                $q->where(function ($q2) use ($search) {
+                    $q2->where('title', 'like', "%$search%")
+                        ->orWhereHas('competency', function ($subQ) use ($search) {
+                            $subQ->where('name', 'like', "%$search%");
+                        });
+
+                    if (preg_match('/^\\d{4}$/', $search)) {
+                        $year = (int)$search;
+                        $q2->orWhere(function($q3) use ($year) {
+                            $q3->whereNotNull('implementation_date_from')
+                                ->whereNotNull('implementation_date_to')
+                                ->whereYear('implementation_date_from', '<=', $year)
+                                ->whereYear('implementation_date_to', '>=', $year);
+                        })
+                        ->orWhere(function($q3) use ($year) {
+                            $q3->whereNotNull('period_from')
+                                ->whereNotNull('period_to')
+                                ->where('period_from', '<=', $year)
+                                ->where('period_to', '>=', $year);
+                        });
+                    } else {
+                        $q2->orWhere('implementation_date_from', 'like', "%$search%")
+                            ->orWhere('implementation_date_to', 'like', "%$search%")
+                            ->orWhere('period_from', 'like', "%$search%")
+                            ->orWhere('period_to', 'like', "%$search%");
+                    }
+                });
+            }
+        })
+        ->with(['participants' => function ($query) use ($userId) {
+            $query->where('users.id', $userId);
+        }, 'competency'])
+        ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
+        ->orderBy('status')
+        ->paginate(10);
+
         $participationTypes = ParticipationType::all()->keyBy('id');
 
         return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies', 'participationTypes'));
     }
 
-    public function unprogrammed()
+    public function unprogrammed(Request $request)
     {
         $userId = Auth::id();
+        $search = $request->input('search');
         $trainings = Training::where('type', 'Unprogrammed')
             ->where(function ($query) use ($userId) {
                 $query->where('user_id', $userId) // Creator of the training
@@ -43,17 +76,20 @@ class TrainingProfileController extends Controller
                         $q->where('users.id', $userId); // User is a participant
                     });
             })
-            // Eager load the specific participant for the current user, without trying to load participationType on User model
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%$search%")
+                      ->orWhereHas('competency', function ($subQ) use ($search) {
+                          $subQ->where('name', 'like', "%$search%");
+                      });
+                });
+            })
             ->with(['participants' => function ($query) use ($userId) {
                 $query->where('users.id', $userId);
             }])
             ->paginate(10);
 
-        // Load all participation types once for efficient lookup in the view
         $participationTypes = ParticipationType::all()->keyBy('id');
-
-        // Temporarily dump the trainings collection for debugging (keep commented until resolved)
-        // dd($trainings);
 
         return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
