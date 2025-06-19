@@ -357,12 +357,17 @@ class TrainingProfileController extends Controller
         $query = TrainingMaterial::query();
         if ($search = $request->input('search')) {
             $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%$search%")
-                  ->orWhereHas('competency', function($subQ) use ($search) {
-                      $subQ->where('name', 'like', "%$search%");
-                  })
-                  ->orWhere('source', 'like', "%$search%")
-                  ->orWhereDate('created_at', $search);
+                if (preg_match('/^\\d{4}$/', $search)) {
+                    // If search is a 4-digit year, filter by year only
+                    $q->whereYear('created_at', $search);
+                } else {
+                    $q->where('title', 'like', "%$search%")
+                      ->orWhereHas('competency', function($subQ) use ($search) {
+                          $subQ->where('name', 'like', "%$search%");
+                      })
+                      ->orWhere('source', 'like', "%$search%")
+                      ->orWhereDate('created_at', $search);
+                }
             });
         }
         $allMaterials = $query->orderByDesc('created_at')->get();
