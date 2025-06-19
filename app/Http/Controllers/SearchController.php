@@ -22,10 +22,10 @@ class SearchController extends Controller
         $divisions = User::select('division')->distinct()->pluck('division');
         $positions = User::select('position')->distinct()->pluck('position');
         $competencies = Competency::all();
-        
+
         // Initialize empty results collection
         $results = new Collection();
-        
+
         return view('search', compact('divisions', 'positions', 'competencies', 'results'));
     }
 
@@ -38,7 +38,7 @@ class SearchController extends Controller
         $division = $request->input('division');
         $position = $request->input('position');
         $status = $request->input('status');
-        
+
         $results = collect();
 
         // If no types specified, search all types
@@ -49,115 +49,123 @@ class SearchController extends Controller
         // Search users
         if (in_array('User', $types)) {
             $users = User::query()
-                ->when($query, function($q) use ($query) {
-                    $q->where(function($q) use ($query) {
+                ->when($query, function ($q) use ($query) {
+                    $q->where(function ($q) use ($query) {
                         $q->where('first_name', 'like', "%{$query}%")
-                          ->orWhere('last_name', 'like', "%{$query}%");
+                            ->orWhere('last_name', 'like', "%{$query}%");
                     });
                 })
-                ->when($division, function($q) use ($division) {
+                ->when($division, function ($q) use ($division) {
                     $q->where('division', $division);
                 })
-                ->when($position, function($q) use ($position) {
+                ->when($position, function ($q) use ($position) {
                     $q->where('position', $position);
                 })
                 ->get()
-                ->map(function($user) {
+                ->map(function ($user) {
                     $user->search_type = 'user';
                     return $user;
                 });
             $results = $results->concat($users);
         }
-// Search trainings
-if (in_array('Training', $types)) {
-    $trainings = Training::query()
-        ->with('trainingMaterials')
-        ->when($query, function ($q) use ($query) {
-            $q->where(function ($q) use ($query) {
-                $q->where('title', 'like', "%{$query}%")
-                  ->orWhereHas('participants', function ($subQ) use ($query) {
-                      $subQ->where(function ($subQ) use ($query) {
-                          $subQ->where('first_name', 'like', "%{$query}%")
-                              ->orWhere('last_name', 'like', "%{$query}%");
-                      });
-                  })
-                  ->orWhereHas('competency', function ($subQ) use ($query) {
-                      $subQ->where('name', 'like', "%{$query}%");
-                  });
-            });
-        })
-        ->when($year, function ($q) use ($year) {
-            $q->where(function ($q) use ($year) {
-                $q->whereYear('period_from', '<=', $year)
-                  ->whereYear('period_to', '>=', $year);
-            });
-        })
-        ->when($competencies, function ($q) use ($competencies) {
-            $q->whereIn('competency_id', $competencies);
-        })
-        ->when($status, function ($q) use ($status, $year) {
-            if ($status === 'Implemented') {
-                if ($year) {
-                    $q->whereNotNull('implementation_date_to')
-                      ->whereYear('implementation_date_from', '<=', $year)
-                      ->whereYear('implementation_date_to', '>=', $year);
-                } else {
-                    $q->whereNotNull('implementation_date_to');
-                }
-            } elseif ($status === 'Not Yet Implemented') {
-                if ($year) {
-                    $q->whereNull('implementation_date_to')
-                      ->where(function($q2) use ($year) {
-                          $q2->whereYear('period_from', '<=', $year)
-                             ->whereYear('period_to', '>=', $year);
-                      })
-                      ->orWhere('status', 'Pending')
-                      ->orWhere('status', 'Not Yet Implemented');
-                } else {
-                    $q->whereNull('implementation_date_to')
-                      ->orWhere('status', 'Pending')
-                      ->orWhere('status', 'Not Yet Implemented');
-                }
-            }
-        })
-        ->with('participants')
-        ->get()
-        ->map(function ($training) {
-            $training->search_type = 'training';
-            $training->participants = $training->participants->map(function ($participant) {
-                return [
-                    'id' => $participant->id,
-                    'name' => $participant->first_name . ' ' . $participant->last_name,
-                ];
-            });
-            $training->relatedMaterials = TrainingMaterial::query()
-                ->where('title', 'like', "%{$training->title}%")
-                ->where('source', 'like', "%{$training->source}%")
-                ->get();
-            return $training;
-        });
-    $results = $results->concat($trainings);
-}
+        // Search trainings
+        if (in_array('Training', $types)) {
+            $trainings = Training::query()
+                ->when($year, function ($q) use ($year) {
+                    $q->where(function ($q) use ($year) {
+                        $q->where(function ($subQ) use ($year) {
+                            // For Program type: year between period_from and period_to
+                            $subQ->where('type', 'Program')
+                                ->whereYear('period_from', '<=', $year)
+                                ->whereYear('period_to', '>=', $year);
+                        })
+                            ->orWhere(function ($subQ) use ($year) {
+                                // For Unprogrammed type: year matches implementation_date
+                                $subQ->where('type', 'Unprogrammed')
+                                    ->whereYear('implementation_date_from', '=', $year);
+                            });
+                    });
+                })
+                ->when($query, function ($q) use ($query) {
+                    $q->where(function ($q) use ($query) {
+                        $q->where('title', 'like', "%{$query}%")
+                            ->orWhereHas('participants', function ($subQ) use ($query) {
+                                $subQ->where(function ($subQ) use ($query) {
+                                    $subQ->where('first_name', 'like', "%{$query}%")
+                                        ->orWhere('last_name', 'like', "%{$query}%");
+                                });
+                            })
+                            ->orWhereHas('competency', function ($subQ) use ($query) {
+                                $subQ->where('name', 'like', "%{$query}%");
+                            });
+                    });
+                })
+                ->when($competencies, function ($q) use ($competencies) {
+                    $q->whereIn('competency_id', $competencies);
+                })
+                ->when($status, function ($q) use ($status, $year) {
+                    if ($status === 'Implemented') {
+                        if ($year) {
+                            $q->whereNotNull('period_to')
+                                ->whereYear('period_from', '<=', $year)
+                                ->whereYear('period_to', '>=', $year);
+                        } else {
+                            $q->whereNotNull('period_to');
+                        }
+                    } elseif ($status === 'Not Yet Implemented') {
+                        if ($year) {
+                            $q->whereNull('period_to')
+                                ->where(function ($q2) use ($year) {
+                                    $q2->whereYear('period_from', '<=', $year)
+                                        ->whereYear('period_to', '>=', $year);
+                                })
+                                ->orWhere('status', 'Pending')
+                                ->orWhere('status', 'Not Yet Implemented');
+                        } else {
+                            $q->whereNull('period_to')
+                                ->orWhere('status', 'Pending')
+                                ->orWhere('status', 'Not Yet Implemented');
+                        }
+                    }
+                })
+                ->with('participants')
+                ->get()
+                ->map(function ($training) {
+                    $training->search_type = 'training';
+                    $training->participants = $training->participants->map(function ($participant) {
+                        return [
+                            'id' => $participant->id,
+                            'name' => $participant->first_name . ' ' . $participant->last_name,
+                        ];
+                    });
+                    $training->relatedMaterials = TrainingMaterial::query()
+                        ->where('title', 'like', "%{$training->title}%")
+                        ->where('source', 'like', "%{$training->source}%")
+                        ->get();
+                    return $training;
+                });
+            $results = $results->concat($trainings);
+        }
 
         // Search training materials
         if (in_array('Training Material', $types)) {
             $materials = TrainingMaterial::query()
-                ->when($query, function($q) use ($query) {
-                    $q->where(function($q) use ($query) {
+                ->when($query, function ($q) use ($query) {
+                    $q->where(function ($q) use ($query) {
                         $q->where('title', 'like', "%{$query}%")
-                          ->orWhereHas('competency', function($subQ) use ($query) {
-                              $subQ->where('name', 'like', "%{$query}%");
-                          })
-                          ->orWhereHas('training', function($subQ) use ($query) {
-                              $subQ->where('title', 'like', "%{$query}%");
-                          });
+                            ->orWhereHas('competency', function ($subQ) use ($query) {
+                                $subQ->where('name', 'like', "%{$query}%");
+                            })
+                            ->orWhereHas('training', function ($subQ) use ($query) {
+                                $subQ->where('title', 'like', "%{$query}%");
+                            });
                     });
                 })
-                ->when($competencies, function($q) use ($competencies) {
+                ->when($competencies, function ($q) use ($competencies) {
                     $q->whereIn('competency_id', $competencies);
                 })
                 ->get()
-                ->map(function($material) {
+                ->map(function ($material) {
                     $material->search_type = 'training_material';
                     return $material;
                 });
@@ -168,7 +176,7 @@ if (in_array('Training', $types)) {
         $divisions = User::select('division')->distinct()->pluck('division');
         $positions = User::select('position')->distinct()->pluck('position');
         $competencies = Competency::all();
-        
+
         // Create a map of competency IDs to names for the filter tags
         $availableCompetencies = $competencies->pluck('name', 'id')->toArray();
 
@@ -200,7 +208,7 @@ if (in_array('Training', $types)) {
                 $trainingQuery->where('title', 'like', "%{$keyword}%");
             }
             if ($year) {
-                $trainingQuery->whereYear('implementation_date_from', $year);
+                $trainingQuery->whereYear('implementation_date_from', '=', $year);
             }
             if (!empty($competencies)) {
                 $trainingQuery->whereIn('competency_id', $competencies);
@@ -217,10 +225,10 @@ if (in_array('Training', $types)) {
         if (empty($types) || in_array('User', $types)) {
             $userQuery = User::query();
             if ($keyword) {
-                $userQuery->where(function($query) use ($keyword) {
+                $userQuery->where(function ($query) use ($keyword) {
                     $query->where('first_name', 'like', "%{$keyword}%")
-                          ->orWhere('last_name', 'like', "%{$keyword}%")
-                          ->orWhere('mid_init', 'like', "%{$keyword}%");
+                        ->orWhere('last_name', 'like', "%{$keyword}%")
+                        ->orWhere('mid_init', 'like', "%{$keyword}%");
                 });
             }
             if ($division) {
@@ -258,7 +266,7 @@ if (in_array('Training', $types)) {
         } else if ($format === 'excel') {
             return Excel::download(new SearchExport($results), 'search-results.xlsx');
         }
-        
+
         return back()->with('error', 'Invalid export format');
     }
 }

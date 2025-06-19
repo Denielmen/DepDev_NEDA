@@ -228,14 +228,18 @@
                         <!-- Additional Filters -->
                         <div class="col-md-4 training-filter" style="display: none;">
                             <label for="year" class="form-label">Year of Implementation</label>
-                            <input type="number" name="year" id="year" class="form-control" placeholder="YYYY" min="2000" value="{{ request('year') }}">
+                            <input type="number" name="year" id="year" class="form-control" placeholder="YYYY"
+                                min="2000" value="{{ request('year') }}">
                         </div>
                         <div class="col-md-4 training-filter" style="display: none;">
                             <label for="status" class="form-label">Status</label>
                             <select name="status" id="status" class="form-select">
                                 <option value="">Select Status</option>
-                                <option value="Implemented" {{ request('status') == 'Implemented' ? 'selected' : '' }}>Implemented</option>
-                                <option value="Not Yet Implemented" {{ request('status') == 'Not Yet Implemented' ? 'selected' : '' }}>Not Yet Implemented</option>
+                                <option value="Implemented"
+                                    {{ request('status') == 'Implemented' ? 'selected' : '' }}>Implemented</option>
+                                <option value="Not Yet Implemented"
+                                    {{ request('status') == 'Not Yet Implemented' ? 'selected' : '' }}>Not Yet
+                                    Implemented</option>
                             </select>
                         </div>
                         <div class="col-md-4 competency-filter" style="display: none;">
@@ -292,168 +296,179 @@
                 </form>
             </div>
             <!-- Results Section -->
-            <div class="results-table">
-                <!-- Results content here -->
-                @if ($results->where('search_type', 'training')->isNotEmpty())
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <i class="bi bi-file-earmark-text me-2"></i>Training Found
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Training Title</th>
-                                        <th>Participants</th>
-                                        <th>Training Materials</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($results->where('search_type', 'training') as $result)
-                                        <tr>
-                                            <td>{{ $result->title }}</td>
-                                            <td>
-                                                @if ($result->participants)
-                                                    @foreach ($result->participants as $participant)
-                                                        {{ $loop->iteration }}. {{ $participant['name'] }}<br>
-                                                    @endforeach
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
-                                                    @foreach ($result->relatedMaterials as $material)
-                                                        @if ($material->file_path)
-                                                            {{ $loop->iteration }}. <a
-                                                                href="{{ asset($material->file_path) }}"
-                                                                download>{{ $material->title }}</a><br>
-                                                        @else
-                                                            {{ $material->title }} (No file available)<br>
-                                                        @endif
-                                                    @endforeach
-                                                @else
-                                                    No training materials available
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+            @if ($results->where('search_type', 'training')->isNotEmpty())
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-file-earmark-text me-2"></i>Training Found
                     </div>
-                @endif
-                <!-- Users Results -->
-                @if ($results->where('search_type', 'user')->isNotEmpty())
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <i class="bi bi-people me-2"></i>Users Found
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Training Title</th>
+                                    <th>Participants</th>
+                                    <th>Status</th>
+                                    <th>Type</th> <!-- New column -->
+                                    <th>Training Materials</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($results->where('search_type', 'training') as $result)
                                     <tr>
-                                        <th>#</th>
-                                        <th>Name</th>
-                                        <th>Position</th>
-                                        <th>Division</th>
+                                        <td>{{ $result->title }}</td>
+                                        <td>
+                                            @if ($result->participants)
+                                                @foreach ($result->participants as $participant)
+                                                    {{ $participant['name'] }}<br>
+                                                @endforeach
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @php
+                                                $isImplemented =
+                                                    $result->period_to &&
+                                                    \Carbon\Carbon::parse($result->period_to)->isPast();
+                                                $statusText = $isImplemented ? 'Implemented' : 'Not Yet Implemented';
+                                            @endphp
+                                            {{ $statusText }}
+                                        </td>
+                                        <td>
+                                            {{ $result->type === 'Program' ? 'Programmed' : 'Unprogrammed' }}
+                                        </td>
+                                        <td>
+                                            @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
+                                                @foreach ($result->relatedMaterials as $material)
+                                                    @if ($material->file_path)
+                                                        <a href="{{ asset($material->file_path) }}"
+                                                            download>{{ $material->title }}</a>
+                                                        (Material)
+                                                        <br>
+                                                    @elseif ($material->link)
+                                                        <a href="{{ $material->link }}"
+                                                            target="_blank">{{ $material->title }}</a>
+                                                        (Link)<br>
+                                                    @else
+                                                        {{ $material->title }}<br>
+                                                    @endif
+                                                @endforeach
+                                            @else
+                                                No training materials available
+                                            @endif
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($results->where('search_type', 'user') as $index => $result)
-                                        <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $result->last_name . ', ' . $result->first_name . ' ' . $result->mid_init . '.' ?? 'N/A' }}
-                                            </td>
-                                            <td>{{ $result->position ?? 'N/A' }}</td>
-                                            <td>{{ $result->division ?? 'N/A' }}</td>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                @endif
-                <!-- Training Materials Results -->
-                @if ($results->where('search_type', 'training_material')->isNotEmpty())
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <i class="bi bi-file-earmark-text me-2"></i>Training Materials Found
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
+                </div>
+            @endif
+            <!-- Users Results -->
+            @if ($results->where('search_type', 'user')->isNotEmpty())
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-people me-2"></i>Users Found
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Position</th>
+                                    <th>Division</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($results->where('search_type', 'user') as $index => $result)
                                     <tr>
-                                        <th>#</th>
-                                        <th>Title</th>
-                                        <th>Uploader</th>
-                                        <th>Matched By</th>
+                                        <td>{{ $result->last_name . ', ' . $result->first_name . ' ' . $result->mid_init . '.' ?? 'N/A' }}
+                                        </td>
+                                        <td>{{ $result->position ?? 'N/A' }}</td>
+                                        <td>{{ $result->division ?? 'N/A' }}</td>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($results->where('search_type', 'training_material') as $index => $result)
-                                        <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $result->title ?? 'N/A' }}</td>
-                                            <td>
-                                                @if ($result->user)
-                                                    {{ $result->user->last_name . ', ' . $result->user->first_name . ' ' . $result->user->mid_init . '.' }}
-                                                @else
-                                                    N/A
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $matchedBy = [];
-                                                    if (str_contains($result->title ?? '', request('keyword'))) {
-                                                        $matchedBy[] = 'Title';
-                                                    }
-                                                    if (
-                                                        $result->user &&
-                                                        (str_contains(
-                                                            $result->user->first_name ?? '',
-                                                            request('keyword'),
-                                                        ) ||
-                                                            str_contains(
-                                                                $result->user->last_name ?? '',
-                                                                request('keyword'),
-                                                            ))
-                                                    ) {
-                                                        $matchedBy[] = 'Uploader Name';
-                                                    }
-                                                    if (
-                                                        $result->competency &&
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+            <!-- Training Materials Results -->
+            @if ($results->where('search_type', 'training_material')->isNotEmpty())
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-file-earmark-text me-2"></i>Training Materials Found
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Uploader</th>
+                                    <th>Matched By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($results->where('search_type', 'training_material') as $index => $result)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $result->title ?? 'N/A' }}</td>
+                                        <td>
+                                            @if ($result->user)
+                                                {{ $result->user->last_name . ', ' . $result->user->first_name . ' ' . $result->user->mid_init . '.' }}
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @php
+                                                $matchedBy = [];
+                                                if (str_contains($result->title ?? '', request('keyword'))) {
+                                                    $matchedBy[] = 'Title';
+                                                }
+                                                if (
+                                                    $result->user &&
+                                                    (str_contains(
+                                                        $result->user->first_name ?? '',
+                                                        request('keyword'),
+                                                    ) ||
                                                         str_contains(
-                                                            $result->competency->name ?? '',
+                                                            $result->user->last_name ?? '',
                                                             request('keyword'),
-                                                        )
-                                                    ) {
-                                                        $matchedBy[] = 'Competency';
-                                                    }
-                                                    if (
-                                                        $result->training &&
-                                                        str_contains($result->training->title ?? '', request('keyword'))
-                                                    ) {
-                                                        $matchedBy[] = 'Training Title';
-                                                    }
-                                                @endphp
-                                                {{ implode(', ', $matchedBy) }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                                        ))
+                                                ) {
+                                                    $matchedBy[] = 'Uploader Name';
+                                                }
+                                                if (
+                                                    $result->competency &&
+                                                    str_contains($result->competency->name ?? '', request('keyword'))
+                                                ) {
+                                                    $matchedBy[] = 'Competency';
+                                                }
+                                                if (
+                                                    $result->training &&
+                                                    str_contains($result->training->title ?? '', request('keyword'))
+                                                ) {
+                                                    $matchedBy[] = 'Training Title';
+                                                }
+                                            @endphp
+                                            {{ implode(', ', $matchedBy) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                @endif
-                <!-- No Results Message -->
-                @if ($results->isEmpty())
-                    <div class="card text-center py-4">
-                        <div class="card-body">
-                            <i class="bi bi-search me-2"></i>No results found.
-                        </div>
+                </div>
+            @endif
+            <!-- No Results Message -->
+            @if ($results->isEmpty())
+                <div class="card text-center py-4">
+                    <div class="card-body">
+                        <i class="bi bi-search me-2"></i>No results found.
                     </div>
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
     </div>
     </div>
