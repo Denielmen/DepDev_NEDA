@@ -106,15 +106,15 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         }
         return view('adminPanel.welcomeAdmin');
     })->name('admin.home');
-});
+// });
 
-Route::middleware(['auth'])->prefix('user')->group(function () {
-    Route::get('/', function () {
-        if (!Auth::user() || Auth::user()->role !== 'User') {
-            abort(403, 'Unauthorized');
-        }
-        return view('userPanel.welcomeUser');
-    })->name('user.home');
+// Route::middleware(['auth'])->prefix('user')->group(function () {
+//     Route::get('/', function () {
+//         if (!Auth::user() || Auth::user()->role !== 'User') {
+//             abort(403, 'Unauthorized');
+//         }
+//         return view('userPanel.welcomeUser');
+//     })->name('user.home');
 
     // Training Plan routes
     Route::get('training-plan', function () {
@@ -138,7 +138,7 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
         ->name('admin.training-plan.remove-participant');
     Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])
         ->name('admin.training-plan.destroy');
-    Route::get('/training-plan/{training}', [TrainingProfileController::class, 'show'])
+    Route::get('/training-plan/{training}', [TrainingProfileController::class, 'adminShow'])
         ->name('admin.training-plan.show');
 
     Route::get('training-plan/{id}', function ($id) {

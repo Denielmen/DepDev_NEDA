@@ -62,18 +62,34 @@ class TrainingProfileController extends Controller
     {
         // Force a fresh reload of the participants relationship
         $training->refresh();
-        
+
         // Eager load the participants relationship with their pivot data
         $training->load(['participants' => function($query) {
             $query->orderBy('last_name')->orderBy('first_name');
         }, 'competency']);
-        
+
         // Get participation types for display
-        $participationTypes = \App\Models\ParticipationType::all()->keyBy('id');
-        
+        $participationTypes = ParticipationType::all()->keyBy('id');
+
         return view('userPanel.trainingProfileShow', compact('training', 'participationTypes'));
     }
 
+    public function adminShow(Training $training)
+    {
+        // Force a fresh reload of the participants relationship
+        $training->refresh();
+
+        // Eager load the participants relationship with their pivot data
+        $training->load(['participants' => function($query) {
+            $query->orderBy('last_name')->orderBy('first_name');
+        }, 'competency']);
+
+        // Get participation types for display
+        $participationTypes = ParticipationType::all()->keyBy('id');
+
+        return view('adminPanel.TrainingView', compact('training', 'participationTypes'));
+    }
+    
     public function showUnprogrammed($id)
     {
         $training = Training::where('type', 'Unprogrammed')->findOrFail($id);
@@ -130,17 +146,20 @@ class TrainingProfileController extends Controller
 
             // Handle participants
             if ($request->has('participants')) {
-                // Get current year for the pivot table
-                $currentYear = date('Y');
-                
                 // Prepare the participants data with pivot attributes
                 $participants = [];
                 foreach ($request->participants as $userId) {
                     $participants[$userId] = [
                         'participation_type_id' => $request->input("participation_types.$userId"),
-                        'year' => $currentYear
+                        'year' => $request->input("participant_years.$userId", date('Y'))
                     ];
                 }
+                
+                // Debug information
+                \Log::info('Updating training participants', [
+                    'training_id' => $training->id,
+                    'participants' => $participants
+                ]);
                 
                 // Sync participants (this will remove any participants not in the array)
                 $training->participants()->sync($participants);
@@ -221,11 +240,9 @@ class TrainingProfileController extends Controller
                 'status' => 'Not Yet Implemented'
             ]);
 
-            // Use current year instead of implementation_date_from
-            $year = date('Y');
             foreach ($validated['participants'] as $participantId) {
                 $training->participants()->attach($participantId, [
-                    'year' => $year,
+                    'year' => $validated['participant_years'][$participantId] ?? $validated['period_from'],
                     'participation_type_id' => $validated['participation_types'][$participantId]
                 ]);
             }

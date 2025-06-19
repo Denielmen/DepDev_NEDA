@@ -154,7 +154,7 @@
     <div class="main-content p-4">
         <div class="content-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="mb-0">Training Reports</h2>
+                <h2 class="mb-0">Training Plan</h2>
                 <div class="search-box">
                     <i class="bi bi-search search-icon"></i>
                     <input type="text" placeholder="Search...">
