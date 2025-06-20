@@ -189,6 +189,52 @@
             padding: 8px 25px;
             border-radius: 4px;
         }
+
+        /* Pagination Styling */
+        .pagination-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .pagination-links .pagination {
+            margin: 0;
+        }
+
+        .pagination-links .page-link {
+            color: #003366;
+            border-color: #dee2e6;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .pagination-links .page-link:hover {
+            color: #004080;
+            background-color: #e7f1ff;
+            border-color: #003366;
+        }
+
+        .pagination-links .page-item.active .page-link {
+            background-color: #003366;
+            border-color: #003366;
+            color: white;
+        }
+
+        .pagination-links .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+
+        /* Style Previous/Next buttons with simple text */
+        .pagination-links .page-item:first-child .page-link {
+            border-top-left-radius: 0.375rem;
+            border-bottom-left-radius: 0.375rem;
+        }
+
+        .pagination-links .page-item:last-child .page-link {
+            border-top-right-radius: 0.375rem;
+            border-bottom-right-radius: 0.375rem;
+        }
     </style>
 </head>
 <body>
@@ -375,6 +421,48 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Pagination Info and Links -->
+                @if(!$unprogrammedTrainings->isEmpty())
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="pagination-info">
+                            <small class="text-muted">
+                                Showing {{ $unprogrammedTrainings->firstItem() ?? 0 }} to {{ $unprogrammedTrainings->lastItem() ?? 0 }}
+                                of {{ $unprogrammedTrainings->total() }} unprogrammed trainings
+                            </small>
+                        </div>
+                        <div class="pagination-links">
+                            @if ($unprogrammedTrainings->hasPages())
+                                <nav aria-label="Pagination Navigation">
+                                    <ul class="pagination">
+                                        {{-- Previous Page Link --}}
+                                        @if ($unprogrammedTrainings->onFirstPage())
+                                            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                        @else
+                                            <li class="page-item"><a class="page-link" href="{{ $unprogrammedTrainings->previousPageUrl() }}">Previous</a></li>
+                                        @endif
+
+                                        {{-- Pagination Elements --}}
+                                        @foreach ($unprogrammedTrainings->getUrlRange(1, $unprogrammedTrainings->lastPage()) as $page => $url)
+                                            @if ($page == $unprogrammedTrainings->currentPage())
+                                                <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
+                                            @else
+                                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                            @endif
+                                        @endforeach
+
+                                        {{-- Next Page Link --}}
+                                        @if ($unprogrammedTrainings->hasMorePages())
+                                            <li class="page-item"><a class="page-link" href="{{ $unprogrammedTrainings->nextPageUrl() }}">Next</a></li>
+                                        @else
+                                            <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                        @endif
+                                    </ul>
+                                </nav>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             @endif
         </div>
     </main>

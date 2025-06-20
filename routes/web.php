@@ -118,15 +118,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     //     })->name('user.home');
 
     // Training Plan routes
-    Route::get('training-plan', function () {
-        $trainings = \App\Models\Training::where('type', 'Program')->get();
-        return view('adminPanel.trainingPlan', compact('trainings'));
-    })->name('admin.training-plan');
 
-    Route::get('training-plan/unprogrammed', function () {
-        $trainings = \App\Models\Training::where('type', 'Unprogrammed')->get();
-        return view('adminPanel.trainingPlanUnProg', compact('trainings'));
-    })->name('admin.training-plan.unprogrammed');
+    Route::get('training-plan/unprogrammed', [TrainingProfileController::class, 'trainingPlanUnprogrammed'])->name('admin.training-plan.unprogrammed');
 
     Route::get('training-plan/create', [TrainingProfileController::class, 'create'])->name('admin.training-plan.create');
     Route::post('training-plan/store', [TrainingProfileController::class, 'store'])->name('admin.training-plan.store');
@@ -174,7 +167,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             ->with(['participants' => function ($query) use ($user) {
                 $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
             }])
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(5); // Show 10 trainings per page
         return view('adminPanel.userInfo', compact('user', 'programmedTrainings'));
     })->name('admin.participants.info');
 
@@ -188,7 +182,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
                     });
             })
             ->with(['competency', 'participants'])
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(5); // Show 10 trainings per page
         return view('adminPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
     })->name('admin.participants.info.unprogrammed');
 
