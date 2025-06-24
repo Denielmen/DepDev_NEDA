@@ -141,6 +141,28 @@
             cursor: pointer;
             margin-left: 5px;
         }
+
+        .custom-clear-btn {
+            color: #003366 !important;
+            border: 1px solid #003366 !important;
+            background: transparent !important;
+            transition: background 0.2s, color 0.2s, border 0.2s;
+        }
+
+        .custom-clear-btn .bi {
+            color: #003366 !important;
+            transition: color 0.2s;
+        }
+
+        .custom-clear-btn:hover, .custom-clear-btn:focus {
+            color: #fff !important;
+            background: #003366 !important;
+            border-color: #003366 !important;
+        }
+
+        .custom-clear-btn:hover .bi, .custom-clear-btn:focus .bi {
+            color: #fff !important;
+        }
     </style>
 </head>
 
@@ -290,16 +312,21 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-between mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search me-2"></i>Search
-                        </button>
+                        <div class="d-flex">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Search
+                            </button>
+                            <button type="button" class="btn btn-outline-primary custom-clear-btn ms-2" id="clear-search">
+                                <i class="bi bi-x-circle me-1"></i>Clear
+                            </button>
+                        </div>
                         <div>
                             <a href="{{ route('search.export', array_merge(['format' => 'pdf'], request()->query())) }}"
-                                class="btn btn-danger me-2">
+                               class="btn btn-danger me-2">
                                 <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
                             </a>
                             <a href="{{ route('search.export', array_merge(['format' => 'excel'], request()->query())) }}"
-                                class="btn btn-success">
+                               class="btn btn-success">
                                 <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
                             </a>
                         </div>
@@ -309,53 +336,84 @@
             <!-- Results Section -->
             <div class="results-table">
                 <!-- Results content here -->
+                <!-- ...your previous code... -->
                 @if ($results->where('search_type', 'training')->isNotEmpty())
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <i class="bi bi-file-earmark-text me-2"></i>Training Found
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Training Title</th>
-                                        <th>Participants</th>
-                                        <th>Training Materials</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($results->where('search_type', 'training') as $result)
-                                        <tr>
-                                            <td>{{ $result->title }}</td>
-                                            <td>
-                                                @if ($result->participants)
-                                                    @foreach ($result->participants as $participant)
-                                                        {{ $loop->iteration }}. {{ $participant['name'] }}<br>
-                                                    @endforeach
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
-                                                    @foreach ($result->relatedMaterials as $material)
-                                                        @if ($material->file_path)
-                                                            {{ $loop->iteration }}. <a
-                                                                href="{{ asset($material->file_path) }}"
-                                                                download>{{ $material->title }}</a><br>
-                                                        @else
-                                                            {{ $material->title }} (No file available)<br>
-                                                        @endif
-                                                    @endforeach
-                                                @else
-                                                    No training materials available
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-file-earmark-text me-2"></i>Training Found
                     </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th>Training Title</th>
+                                <th>Participants</th>
+                                <th>Training Materials</th>
+                                <th>Status</th>
+                                <th>Last Modified</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach ($results->where('search_type', 'training') as $result)
+                            <tr>
+                                <td>{{ $result->title }}</td>
+                                <td>
+                                    @if ($result->participants)
+                                    @foreach ($result->participants as $participant)
+                                    {{ $loop->iteration }}. {{ $participant['name'] }}<br>
+                                    @endforeach
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
+                                    @foreach ($result->relatedMaterials as $material)
+                                    @if ($material->file_path)
+                                    {{ $loop->iteration }}.
+                                    <a href="{{ asset($material->file_path) }}" download>
+                                        {{ $material->title }}
+                                    </a><br>
+                                    @else
+                                    {{ $material->title }} (No file available)<br>
+                                    @endif
+                                    @endforeach
+                                    @else
+                                    No training materials available
+                                    @endif
+                                </td>
+                                <td>
+                                    {{-- Prefer status from DB, fallback to logic --}}
+                                    @php
+                                    $status = $result->status ?? 'Not Implemented';
+                                    // Optionally: Fallback logic if status is not provided
+                                    if (!isset($result->status)) {
+                                    $implemented = false;
+                                    // Here, use your actual TTH relation, e.g. $result->trainingTrackingHistories
+                                    if (
+                                    (!empty($result->participants)) ||
+                                    (isset($result->trainingTrackingHistories) && $result->trainingTrackingHistories->count() > 0)
+                                    ) {
+                                    $implemented = true;
+                                    }
+                                    $status = $implemented ? 'Implemented' : 'Not Implemented';
+                                    }
+                                    @endphp
+                                    {{ $status }}
+                                </td>
+                                <td>
+                                    @if ($result->updated_at && $result->updated_at != $result->created_at)
+                                    {{ $result->updated_at->format('Y-m-d H:i') }}
+                                    @else
+                                    {{ $result->created_at ? $result->created_at->format('Y-m-d H:i') : 'N/A' }}
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 @endif
+                <!-- ...your subsequent code... -->
                 <!-- Users Results -->
                 @if ($results->where('search_type', 'user')->isNotEmpty())
                     <div class="card mb-3">
@@ -526,6 +584,26 @@
             toggleMaterialTypeFilter();
             document.getElementById('type_material').addEventListener('change', toggleMaterialTypeFilter);
             document.getElementById('type_training').addEventListener('change', toggleMaterialTypeFilter);
+        });
+
+        document.getElementById('clear-search').addEventListener('click', function () {
+            const form = this.closest('form');
+            // Reset all form fields
+            form.reset();
+
+            // For multi-selects, clear selection
+            const multiselects = form.querySelectorAll('select[multiple]');
+            multiselects.forEach(sel => {
+                for (const option of sel.options) {
+                    option.selected = false;
+                }
+            });
+
+            // Uncheck all checkboxes
+            form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+            // Submit form with no params (redirect to base search)
+            window.location.href = '{{ route('admin.search.index') }}';
         });
     </script>
 </body>
