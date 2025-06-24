@@ -302,11 +302,11 @@
                             <td id="participant_post_rating_display">{{ $training->participant_post_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Supervisor Pre-Rating:</td>
+                            <td class="label">Supervisor Pre-Evaluation Rating:</td>
                             <td id="supervisor_pre_rating_display">{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Supervisor Post-Rating:</td>
+                            <td class="label">Supervisor Post-Evaluation Rating:</td>
                             <td>{{ $training->supervisor_post_rating ?? 'N/A' }}</td>
                         </tr>
                     </table>

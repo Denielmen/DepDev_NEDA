@@ -18,7 +18,7 @@ class AdminMiddleware
     {
         // Check if the user is authenticated and has admin privileges
         // Assuming you have an 'is_admin' column (boolean) in your 'users' table
-        if (Auth::check() && Auth::user()->is_admin) {
+        if (Auth::check() && Auth::user()->role == 'Admin') {
             return $next($request);
         }
 
