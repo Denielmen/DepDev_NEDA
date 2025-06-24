@@ -300,11 +300,18 @@
                                     <th>Division</th>
                                     <th>Participation Type</th>
                                     <th>Year</th>
-                                    <th>Select</th>
+                                    <th>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="selectAllParticipants">
+                                            <label class="form-check-label" for="selectAllParticipants">
+                                                Select All
+                                            </label>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach($users->where('is_active', true) as $user)
+                            <tbody id="participantTableBody">
+                                @foreach($users as $user)
                                 <tr class="participant-row">
                                     <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}</td>
                                     <td>{{ $user->position }}</td>
@@ -333,8 +340,49 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination Controls -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div id="participantPaginationInfo" class="text-muted">
+                            Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ $users->total() }} participants
+                        </div>
+                        <nav aria-label="Participant pagination">
+                            <ul class="pagination pagination-sm mb-0" id="participantPagination">
+                                @if ($users->onFirstPage())
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                @else
+                                    <li class="page-item"><a class="page-link" href="#" data-page="{{ $users->currentPage() - 1 }}">Previous</a></li>
+                                @endif
+
+                                @for ($i = 1; $i <= $users->lastPage(); $i++)
+                                    @if ($i == $users->currentPage())
+                                        <li class="page-item active"><span class="page-link">{{ $i }}</span></li>
+                                    @else
+                                        <li class="page-item"><a class="page-link" href="#" data-page="{{ $i }}">{{ $i }}</a></li>
+                                    @endif
+                                @endfor
+
+                                @if ($users->hasMorePages())
+                                    <li class="page-item"><a class="page-link" href="#" data-page="{{ $users->currentPage() + 1 }}">Next</a></li>
+                                @else
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                @endif
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- Loading indicator -->
+                    <div id="participantLoading" class="text-center py-3" style="display: none;">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">Loading participants...</span>
+                    </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="removeAllSelectionBtn">
+                        <i class="bi bi-x-circle"></i> Remove All Selection
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="addSelectedParticipantsBtn">Add Selected</button>
                 </div>
@@ -360,6 +408,181 @@
             const form = document.querySelector('form[action*="training-plan"]');
             const selectedParticipantsDiv = document.getElementById('selectedParticipants');
             const addSelectedParticipantsBtn = document.getElementById('addSelectedParticipantsBtn');
+            const selectAllCheckbox = document.getElementById('selectAllParticipants');
+            const removeAllSelectionBtn = document.getElementById('removeAllSelectionBtn');
+            const participantCheckboxes = document.querySelectorAll('.participant-checkbox');
+
+            // Initialize event listeners
+            initializeParticipantEventListeners();
+
+            // Handle Remove All Selection functionality
+            removeAllSelectionBtn.addEventListener('click', function() {
+                document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            });
+
+            // Handle search functionality
+            const participantSearch = document.getElementById('participantSearch');
+            let searchTimeout;
+
+            participantSearch.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    loadParticipants(1, this.value);
+                }, 300);
+            });
+
+            // Handle pagination clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('#participantPagination a.page-link')) {
+                    e.preventDefault();
+                    const page = e.target.getAttribute('data-page');
+                    const search = participantSearch.value;
+                    loadParticipants(page, search);
+                }
+            });
+
+            // Function to load participants via AJAX
+            function loadParticipants(page = 1, search = '') {
+                const loading = document.getElementById('participantLoading');
+                const tableBody = document.getElementById('participantTableBody');
+                const paginationInfo = document.getElementById('participantPaginationInfo');
+                const pagination = document.getElementById('participantPagination');
+
+                loading.style.display = 'block';
+                tableBody.style.opacity = '0.5';
+
+                fetch(`{{ route('admin.getParticipants') }}?page=${page}&search=${encodeURIComponent(search)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update table body
+                        tableBody.innerHTML = '';
+                        data.users.forEach(user => {
+                            const row = createParticipantRow(user, data.participation_types);
+                            tableBody.appendChild(row);
+                        });
+
+                        // Update pagination info
+                        paginationInfo.textContent = `Showing ${data.pagination.from || 0} to ${data.pagination.to || 0} of ${data.pagination.total} participants`;
+
+                        // Update pagination controls
+                        updatePaginationControls(data.pagination);
+
+                        // Re-initialize event listeners for new elements
+                        initializeParticipantEventListeners();
+
+                        loading.style.display = 'none';
+                        tableBody.style.opacity = '1';
+                    })
+                    .catch(error => {
+                        console.error('Error loading participants:', error);
+                        loading.style.display = 'none';
+                        tableBody.style.opacity = '1';
+                        alert('Error loading participants. Please try again.');
+                    });
+            }
+
+            // Function to create participant row
+            function createParticipantRow(user, participationTypes) {
+                const row = document.createElement('tr');
+                row.className = 'participant-row';
+
+                let participationTypeOptions = '<option value="">Select Type</option>';
+                participationTypes.forEach(type => {
+                    participationTypeOptions += `<option value="${type.id}">${type.name}</option>`;
+                });
+
+                row.innerHTML = `
+                    <td>${user.last_name}, ${user.first_name} ${user.mid_init || ''}</td>
+                    <td>${user.position || ''}</td>
+                    <td>${user.division || ''}</td>
+                    <td>
+                        <select class="form-select participation-type" data-user-id="${user.id}">
+                            ${participationTypeOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-select participant-year" data-user-id="${user.id}">
+                            <option value="">Select Year</option>
+                            <option value="2025">CY-2025</option>
+                            <option value="2026">CY-2026</option>
+                            <option value="2027">CY-2027</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="checkbox" class="form-check-input participant-checkbox" data-user-id="${user.id}">
+                    </td>
+                `;
+
+                return row;
+            }
+
+            // Function to update pagination controls
+            function updatePaginationControls(pagination) {
+                const paginationContainer = document.getElementById('participantPagination');
+                let paginationHTML = '';
+
+                // Previous button
+                if (pagination.current_page === 1) {
+                    paginationHTML += '<li class="page-item disabled"><span class="page-link">Previous</span></li>';
+                } else {
+                    paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${pagination.current_page - 1}">Previous</a></li>`;
+                }
+
+                // Page numbers
+                for (let i = 1; i <= pagination.last_page; i++) {
+                    if (i === pagination.current_page) {
+                        paginationHTML += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+                    } else {
+                        paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+                    }
+                }
+
+                // Next button
+                if (pagination.current_page === pagination.last_page) {
+                    paginationHTML += '<li class="page-item disabled"><span class="page-link">Next</span></li>';
+                } else {
+                    paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${pagination.current_page + 1}">Next</a></li>`;
+                }
+
+                paginationContainer.innerHTML = paginationHTML;
+            }
+
+            // Function to initialize event listeners for participant elements
+            function initializeParticipantEventListeners() {
+                const newSelectAllCheckbox = document.getElementById('selectAllParticipants');
+                const newParticipantCheckboxes = document.querySelectorAll('.participant-checkbox');
+
+                // Re-bind Select All functionality
+                newSelectAllCheckbox.removeEventListener('change', handleSelectAll);
+                newSelectAllCheckbox.addEventListener('change', handleSelectAll);
+
+                // Re-bind individual checkbox functionality
+                newParticipantCheckboxes.forEach(checkbox => {
+                    checkbox.removeEventListener('change', handleIndividualCheckbox);
+                    checkbox.addEventListener('change', handleIndividualCheckbox);
+                });
+            }
+
+            // Event handler functions
+            function handleSelectAll() {
+                const isChecked = this.checked;
+                document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+            }
+
+            function handleIndividualCheckbox() {
+                const checkedCount = document.querySelectorAll('.participant-checkbox:checked').length;
+                const totalCount = document.querySelectorAll('.participant-checkbox').length;
+                const selectAllCheckbox = document.getElementById('selectAllParticipants');
+
+                selectAllCheckbox.checked = checkedCount === totalCount;
+                selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+            }
 
 
 
