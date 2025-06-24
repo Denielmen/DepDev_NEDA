@@ -20,8 +20,11 @@ class TrainingProfileController extends Controller
         $userId = Auth::id();
         $search = $request->input('search');
 
-        $trainings = Training::where(function ($q) use ($search) {
-            $q->where('type', 'Program');
+        $trainings = Training::where(function ($q) use ($search, $userId) {
+            $q->where('type', 'Program')
+              ->whereHas('participants', function ($participantQuery) use ($userId) {
+                  $participantQuery->where('users.id', $userId);
+              });
 
             if ($search) {
                 $q->where(function ($q2) use ($search) {
@@ -96,6 +99,13 @@ class TrainingProfileController extends Controller
 
     public function show(Training $training)
     {
+        $userId = Auth::id();
+
+        // Check if the user is a participant in this training
+        if (!$training->participants()->where('users.id', $userId)->exists()) {
+            abort(403, 'You are not authorized to view this training.');
+        }
+
         // Force a fresh reload of the participants relationship
         $training->refresh();
 
@@ -421,6 +431,20 @@ class TrainingProfileController extends Controller
         ]);
 
         $training = Training::findOrFail($id);
+        $user = Auth::user();
+
+        $isSupervisorAction = in_array($request->type, ['supervisor_pre', 'supervisor_post']);
+        $isParticipantAction = in_array($request->type, ['participant_pre', 'participant_post']);
+
+        // Check for supervisor actions: user must have admin role
+        if ($isSupervisorAction && $user->role !== 'Admin') {
+            return response()->json(['success' => false, 'message' => 'You are not authorized to perform supervisor ratings.'], 403);
+        }
+
+        // Check for participant actions: user must be a participant
+        if ($isParticipantAction && !$training->participants()->where('users.id', $user->id)->exists()) {
+            return response()->json(['success' => false, 'message' => 'You are not authorized to rate this training.'], 403);
+        }
 
         if ($request->type === 'participant_pre') {
             $training->participant_pre_rating = $request->rating;
@@ -481,6 +505,13 @@ class TrainingProfileController extends Controller
     public function evalParticipantForm($training_id)
     {
         $training = Training::findOrFail($training_id);
+        $userId = Auth::id();
+
+        // Check if the user is a participant in this training
+        if (!$training->participants()->where('users.id', $userId)->exists()) {
+            abort(403, 'You are not authorized to evaluate this training.');
+        }
+
         return view('userPanel.evalParticipant', compact('training'));
     }
 
@@ -537,6 +568,13 @@ class TrainingProfileController extends Controller
         }
 
         $training = Training::findOrFail($id);
+        $userId = Auth::id();
+
+        // Check if the user is a participant in this training
+        if (!$training->participants()->where('users.id', $userId)->exists()) {
+            return response()->json(['success' => false, 'message' => 'You are not authorized to evaluate this training.'], 403);
+        }
+
         Log::debug('Training found:', ['id' => $training->id, 'title' => $training->title]);
 
         // Collect all numeric ratings for averaging
@@ -721,8 +759,49 @@ class TrainingProfileController extends Controller
                       $subQ->where('name', 'like', "%$search%");
                   });
             })
-            ->paginate(1);
-        return view('userPanel.trainingEffectiveness', compact('trainings'));
+            ->paginate(5);
+
+        // Get all competencies used in user's trainings for charts
+        $allUserTrainings = Training::where('type', 'Program')
+            ->whereHas('participants', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            })
+            ->get();
+
+        $competencyIds = $allUserTrainings->pluck('competency_id')->unique()->filter();
+
+        $competencyCharts = [];
+        foreach ($competencyIds as $cid) {
+            $compTrainings = $allUserTrainings->where('competency_id', $cid);
+
+            // Group by year
+            $yearly = [];
+            foreach (
+                $compTrainings->groupBy(function ($t) {
+                    return $t->implementation_date_from
+                        ? date('Y', strtotime($t->implementation_date_from))
+                        : null;
+                }) as $year => $yearTrainings
+            ) {
+                if ($year) {
+                    $preAvg = round($yearTrainings->avg(function ($t) {
+                        return $t->participant_pre_rating ?? $t->supervisor_pre_rating;
+                    }), 2);
+                    $postAvg = round($yearTrainings->avg(function ($t) {
+                        return $t->participant_post_rating ?? $t->supervisor_post_rating;
+                    }), 2);
+                    $yearly[$year] = [
+                        'pre' => $preAvg,
+                        'post' => $postAvg,
+                    ];
+                }
+            }
+            $competencyCharts[$cid] = $yearly;
+        }
+
+        $competencyLabels = Competency::whereIn('id', $competencyIds)->pluck('name', 'id');
+
+        return view('userPanel.trainingEffectiveness', compact('trainings', 'competencyCharts', 'competencyLabels'));
     }
 }
 

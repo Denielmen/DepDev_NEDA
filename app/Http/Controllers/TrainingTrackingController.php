@@ -11,10 +11,14 @@ class TrainingTrackingController extends Controller
 {
     public function index()
     {
-        // Fetch all programmed trainings that are not implemented
+        // Fetch programmed trainings that are not implemented and where the user is a participant
         $competencies = \App\Models\Competency::all();
+        $userId = Auth::id();
         $programmedTrainings = Training::where('type', 'Program')
             ->where('status', '!=', 'Implemented')
+            ->whereHas('participants', function ($query) use ($userId) {
+                $query->where('users.id', $userId);
+            })
             ->get();
         $participationTypes = \App\Models\ParticipationType::all();
 

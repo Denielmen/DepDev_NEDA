@@ -74,7 +74,7 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
         ->name('user.tracking.store');
 
 
-    Route::get('user/training-effectiveness', [TrainingController::class, 'showTrainingEffectiveness'])->name('user.training.effectiveness');
+    Route::get('user/training-effectiveness', [TrainingProfileController::class, 'effectiveness'])->name('user.training.effectiveness');
     Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
         ->name('user.training.resources');
 
