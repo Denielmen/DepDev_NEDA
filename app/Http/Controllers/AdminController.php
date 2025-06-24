@@ -12,10 +12,15 @@ use App\Models\Competency;
 
 class AdminController extends Controller
 {
-    public function viewUserInfo($id)
+    public function viewUserInfo($training_id, $user_id)
     {
-        $training = Training::findOrFail($id);
-        $user = $training->participants->first(); // Get the first participant
+        $training = Training::findOrFail($training_id);
+        $user = User::findOrFail($user_id);
+
+        // Fix certificates that don't have training_id set
+        // This will link certificates to trainings based on title and user
+        $this->fixCertificateTrainingIds($training, $user);
+
         return view('adminPanel.viewUserInfo', compact('training', 'user'));
     }
 
@@ -24,6 +29,63 @@ class AdminController extends Controller
         $training = Training::findOrFail($id);
         $user = User::findOrFail($training->user_id); // Get the creator of the training
         return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
+    }
+    // public function viewUserInfoUnprog($training_id, $user_id)
+    // {
+    //     $training = \App\Models\Training::findOrFail($training_id);
+    //     $user = \App\Models\User::findOrFail($user_id);
+
+    //     // Fix certificates that don't have training_id set
+    //     // This will link certificates to trainings based on title and user
+    //     $this->fixCertificateTrainingIds($training, $user);
+
+    //     return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
+    // }
+
+    private function fixCertificateTrainingIds($training, $user)
+    {
+        // Find certificates that don't have training_id set but match this training
+        $orphanedCertificates = \App\Models\TrainingMaterial::where('type', 'certificate')
+            ->where('user_id', $user->id)
+            ->whereNull('training_id')
+            ->where(function($query) use ($training) {
+                $query->where('title', 'like', '%' . $training->title . '%')
+                      ->orWhere('title', $training->title . ' Certificate');
+            })
+            ->get();
+
+        foreach ($orphanedCertificates as $certificate) {
+            $certificate->update(['training_id' => $training->id]);
+        }
+    }
+
+    public function fixAllCertificates()
+    {
+        // This method will try to fix all orphaned certificates
+        $orphanedCertificates = \App\Models\TrainingMaterial::where('type', 'certificate')
+            ->whereNull('training_id')
+            ->get();
+
+        $fixed = 0;
+        foreach ($orphanedCertificates as $certificate) {
+            // Try to find a matching training based on title and user
+            $possibleTrainings = Training::where('user_id', $certificate->user_id)
+                ->where(function($query) use ($certificate) {
+                    $certTitle = str_replace(' Certificate', '', $certificate->title);
+                    $query->where('title', 'like', '%' . $certTitle . '%')
+                          ->orWhere('title', $certTitle);
+                })
+                ->get();
+
+            if ($possibleTrainings->count() == 1) {
+                $certificate->update(['training_id' => $possibleTrainings->first()->id]);
+                $fixed++;
+            }
+        }
+
+        return response()->json([
+            'message' => "Fixed {$fixed} certificates out of {$orphanedCertificates->count()} orphaned certificates."
+        ]);
     }
 
     public function reports()

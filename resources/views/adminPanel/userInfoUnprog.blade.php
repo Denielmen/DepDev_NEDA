@@ -394,23 +394,28 @@
                             <td>{{ $training->no_of_hours }}</td>
                             <td>{{ $training->provider }}</td>
                             <td>{{ $training->status }}</td>
+                             <td>
+                            @php
+                                $participationTypeName = 'N/A';
+                                // Find the participant pivot data for the current user in this training
+                                $participantPivot = $training->participants->first(function ($participant) use ($user) {
+                                    return $participant->id === $user->id;
+                                });
+
+                                if ($participantPivot && $participantPivot->pivot) {
+                                    // Now that we have the pivot, get the participation type ID
+                                    $participationTypeId = $participantPivot->pivot->participation_type_id;
+                                    // Find the participation type name using the ID
+                                    $participationType = \App\Models\ParticipationType::find($participationTypeId);
+                                    if ($participationType) {
+                                        $participationTypeName = $participationType->name;
+                                    }
+                                }
+                            @endphp
+                            {{ $participationTypeName }}
+                        </td>
                             <td>
-                                @if($training->user_id == $user->id)
-                                    Creator
-                                @else
-                                    @php
-                                        $participant = $training->participants->where('id', $user->id)->first();
-                                        $participationType = $participant ? $participant->pivot->participation_type_id : null;
-                                    @endphp
-                                    @if($participationType)
-                                        {{ \App\Models\ParticipationType::find($participationType)->name }}
-                                    @else
-                                        N/A
-                                    @endif
-                                @endif
-                            </td>
-                            <td>
-                                <a href="{{ route('admin.viewUserInfoUnprog', ['id' => $training->id]) }}" class="btn btn-primary">View</a>
+                                <a href="{{ route('admin.viewUserInfoUnprog', ['training_id' => $training->id, 'user_id' => $user->id]) }}" class="btn btn-primary">View</a>
                             </td>
                         </tr>
                         @endforeach
@@ -523,3 +528,4 @@
     </script>
 </body>
 </html>
+

@@ -198,8 +198,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('admin.profile.destroy');
     Route::patch('/users/{user}/toggle-status', [App\Http\Controllers\Admin\AccountController::class, 'toggleStatus'])
         ->name('admin.toggleUserStatus');
-    Route::get('viewUserInfo/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('admin.viewUserInfo');
-    Route::get('viewUserInfoUnprog/{id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('admin.viewUserInfoUnprog');
+    Route::get('/training-details/{training_id}/user/{user_id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('admin.viewUserInfo');
+    Route::get('/training-details/unprogrammed/{training_id}/user/{user_id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('admin.viewUserInfoUnprog');
+    Route::post('/fix-certificates', [App\Http\Controllers\AdminController::class, 'fixAllCertificates'])->name('admin.fixCertificates');
     Route::get('/training/{id}/post-evaluation', [TrainingProfileController::class, 'postEvaluation'])
         ->name('admin.training.post-evaluation');
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
