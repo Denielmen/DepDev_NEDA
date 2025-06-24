@@ -139,7 +139,7 @@ class TrainingProfileController extends Controller
         $training = Training::findOrFail($training->id);
         $competencies = Competency::orderBy('name')->get();
         $participationTypes = ParticipationType::all()->keyBy('id');
-        $users = User::orderBy('last_name')->get();
+        $users = User::where('is_active', true)->orderBy('last_name')->paginate(5);
 
         $training->load(['participants' => function ($query) {
             $query->withPivot('participation_type_id', 'year');
@@ -250,7 +250,7 @@ class TrainingProfileController extends Controller
     public function create()
     {
         $competencies = Competency::orderBy('name')->get();
-        $users = User::orderBy('last_name')->get();
+        $users = User::where('is_active', true)->orderBy('last_name')->paginate(5);
         $participationTypes = ParticipationType::all()->keyBy('id');
         return view('adminPanel.createTraining', compact('competencies', 'users', 'participationTypes'));
     }
@@ -321,6 +321,39 @@ class TrainingProfileController extends Controller
             DB::rollBack();
             return back()->withInput()->withErrors(['error' => 'Failed to create training: ' . $e->getMessage()]);
         }
+    }
+
+    public function getParticipants(Request $request)
+    {
+        $search = $request->get('search', '');
+        $page = $request->get('page', 1);
+
+        $query = User::where('is_active', true)->orderBy('last_name');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('last_name', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('position', 'like', "%{$search}%")
+                  ->orWhere('division', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->paginate(5, ['*'], 'page', $page);
+        $participationTypes = ParticipationType::all();
+
+        return response()->json([
+            'users' => $users->items(),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+                'from' => $users->firstItem(),
+                'to' => $users->lastItem(),
+            ],
+            'participation_types' => $participationTypes
+        ]);
     }
 
     public function addParticipant(Training $training, Request $request)
