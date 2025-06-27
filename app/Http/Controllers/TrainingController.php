@@ -30,9 +30,21 @@ class TrainingController extends Controller
     }
 
 
-    public function showTrainingEffectiveness()
+    public function showTrainingEffectiveness(Request $request)
     {
-        $trainings = \App\Models\Training::where('type', 'Program')->get();
+        $sort = $request->input('sort', 'title');
+        $order = $request->input('order', 'asc');
+        $trainingsQuery = \App\Models\Training::where('type', 'Program');
+        if ($sort === 'title') {
+            $trainingsQuery->orderBy('title', $order);
+        } elseif ($sort === 'created_at') {
+            $trainingsQuery->orderBy('created_at', $order);
+        } elseif ($sort === 'status') {
+            $trainingsQuery->orderByRaw("CASE WHEN status = 'Implemented' THEN 0 ELSE 1 END $order");
+        } else {
+            $trainingsQuery->orderBy('title', 'asc');
+        }
+        $trainings = $trainingsQuery->get();
 
         // Get all competencies used in trainings
         $competencyIds = $trainings->pluck('competency_id')->unique()->filter();

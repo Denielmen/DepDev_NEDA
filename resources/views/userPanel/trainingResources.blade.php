@@ -191,52 +191,63 @@
             </div>
             <div class="resources-card-wrapper">
                 <div class="resources-card">
-                    <form class="search-bar mb-4" method="GET">
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="search"
-                                placeholder="Search by title, competency, source, or date...">
-                            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                    <div class="d-flex align-items-center mb-3 flex-wrap">
+                        <ul class="nav nav-tabs me-2 mb-0">
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->get('tab', 'materials') == 'materials' ? 'active' : '' }}" href="?tab=materials">Materials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->get('tab') == 'links' ? 'active' : '' }}" href="?tab=links">Links</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->get('tab') == 'certificates' ? 'active' : '' }}" href="?tab=certificates">Certificates</a>
+                            </li>
+                        </ul>
+                        <div class="dropdown ms-2 mb-0">
+                            <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-funnel-fill me-1"></i> Filter
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                                <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=title&order=asc">Title (A-Z)</a></li>
+                                <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=title&order=desc">Title (Z-A)</a></li>
+                                <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=created_at&order=desc">Date Uploaded (Newest)</a></li>
+                                <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=created_at&order=asc">Date Uploaded (Oldest)</a></li>
+                            </ul>
                         </div>
-                    </form>
-                    <!-- Tabs for Materials, Links, Certificates -->
-                    <ul class="nav nav-tabs mb-3" id="resourceTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">Materials</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="links-tab" data-bs-toggle="tab" data-bs-target="#links" type="button" role="tab" aria-controls="links" aria-selected="false">Links</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="certificates-tab" data-bs-toggle="tab" data-bs-target="#certificates" type="button" role="tab" aria-controls="certificates" aria-selected="false">Certificates</button>
-                        </li>
-                    </ul>
+                        <form class="search-bar ms-2 flex-grow-1 mb-0" method="GET" style="max-width: 400px;">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" placeholder="Search by title, competency, source, or date..." value="{{ request('search') }}">
+                                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                            </div>
+                        </form>
+                    </div>
                     <div class="tab-content" id="resourceTabsContent">
                         <!-- Materials Tab -->
-                        <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th class="text-center">Title</th>
-                                <th class="text-center">Competency</th>
-                                <th class="text-center">Source</th>
-                                <th class="text-center">Date Uploaded</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($materials as $material)
-                                <tr>
-                                    <td class="text-center">{{ $material->title }}</td>
-                                    <td class="text-center">{{ $material->competency->name ?? 'N/A' }}</td>
-                                    <td class="text-center">{{ $material->source }}</td>
-                                    <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-primary btn-sm me-1"
-                                            @if (!$material->file_path) disabled @endif
-                                            onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
-                                            title="@if (!$material->file_path) No file available @endif">
-                                            <i class="fas fa-download"></i> Download File
-                                        </button>
+                        <div class="tab-pane fade{{ request()->get('tab', 'materials') == 'materials' ? ' show active' : '' }}" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Title</th>
+                                        <th class="text-center">Competency</th>
+                                        <th class="text-center">Source</th>
+                                        <th class="text-center">Date Uploaded</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($materials as $material)
+                                        <tr>
+                                            <td class="text-center">{{ $material->title }}</td>
+                                            <td class="text-center">{{ $material->competency->name ?? 'N/A' }}</td>
+                                            <td class="text-center">{{ $material->source }}</td>
+                                            <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary btn-sm me-1"
+                                                    @if (!$material->file_path) disabled @endif
+                                                    onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                                    title="@if (!$material->file_path) No file available @endif">
+                                                    <i class="fas fa-download"></i> Download File
+                                                </button>
                                             </td>
                                         </tr>
                                     @empty
@@ -253,7 +264,7 @@
                             @endif
                         </div>
                         <!-- Links Tab -->
-                        <div class="tab-pane fade" id="links" role="tabpanel" aria-labelledby="links-tab">
+                        <div class="tab-pane fade{{ request()->get('tab') == 'links' ? ' show active' : '' }}" id="links" role="tabpanel" aria-labelledby="links-tab">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
@@ -272,16 +283,16 @@
                                             <td class="text-center">{{ $link->source }}</td>
                                             <td class="text-center">{{ $link->created_at->format('Y-m-d') }}</td>
                                             <td class="text-center">
-                                        <button class="btn btn-info btn-sm"
+                                                <button class="btn btn-info btn-sm"
                                                     @if (!$link->link) disabled @endif
                                                     onclick="@if ($link->link) window.open('{{ $link->link }}', '_blank') @else alert('There\'s no link pasted.') @endif"
                                                     title="@if (!$link->link) No link available @endif">
-                                            <i class="fas fa-external-link-alt"></i> Open Link
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
+                                                    <i class="fas fa-external-link-alt"></i> Open Link
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
                                             <td colspan="5" class="text-center">No links found.</td>
                                         </tr>
                                     @endforelse
@@ -289,7 +300,7 @@
                             </table>
                         </div>
                         <!-- Certificates Tab -->
-                        <div class="tab-pane fade" id="certificates" role="tabpanel" aria-labelledby="certificates-tab">
+                        <div class="tab-pane fade{{ request()->get('tab') == 'certificates' ? ' show active' : '' }}" id="certificates" role="tabpanel" aria-labelledby="certificates-tab">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
