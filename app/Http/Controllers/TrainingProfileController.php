@@ -19,20 +19,26 @@ class TrainingProfileController extends Controller
         $competencies = Competency::orderBy('name')->get();
         $userId = Auth::id();
         $search = $request->input('search');
+        $sort = $request->input('sort');
+        $order = $request->input('order', 'asc');
 
+<<<<<<< Updated upstream
         $trainings = Training::where(function ($q) use ($search, $userId) {
             $q->where('type', 'Program')
               ->whereHas('participants', function ($participantQuery) use ($userId) {
                   $participantQuery->where('users.id', $userId);
               });
 
+=======
+        $trainingsQuery = Training::where(function ($q) use ($search) {
+            $q->where('type', 'Program');
+>>>>>>> Stashed changes
             if ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('title', 'like', "%$search%")
                         ->orWhereHas('competency', function ($subQ) use ($search) {
                             $subQ->where('name', 'like', "%$search%");
                         });
-
                     if (preg_match('/^\\d{4}$/', $search)) {
                         $year = (int)$search;
                         $q2->orWhere(function($q3) use ($year) {
@@ -58,13 +64,24 @@ class TrainingProfileController extends Controller
         })
         ->with(['participants' => function ($query) use ($userId) {
             $query->where('users.id', $userId);
-        }, 'competency'])
-        ->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
-        ->orderBy('status')
-        ->paginate(10);
+        }, 'competency']);
 
+        // Sorting logic
+        if ($sort === 'title') {
+            $trainingsQuery->orderBy('title', $order);
+        } elseif ($sort === 'created_at') {
+            $trainingsQuery->orderBy('created_at', $order);
+        } elseif ($sort === 'status') {
+            // Implemented first = asc, Not Yet Implemented first = desc
+            $trainingsQuery->orderByRaw("CASE WHEN status = 'Implemented' THEN 0 ELSE 1 END $order");
+        } else {
+            // Default: status, then title
+            $trainingsQuery->orderByRaw("CASE WHEN status = 'Pending' THEN 0 ELSE 1 END")
+                ->orderBy('status');
+        }
+
+        $trainings = $trainingsQuery->paginate(10);
         $participationTypes = ParticipationType::all()->keyBy('id');
-
         return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies', 'participationTypes'));
     }
 
@@ -72,7 +89,10 @@ class TrainingProfileController extends Controller
     {
         $userId = Auth::id();
         $search = $request->input('search');
-        $trainings = Training::where('type', 'Unprogrammed')
+        $sort = $request->input('sort');
+        $order = $request->input('order', 'asc');
+
+        $trainingsQuery = Training::where('type', 'Unprogrammed')
             ->where(function ($query) use ($userId) {
                 $query->where('user_id', $userId)
                     ->orWhereHas('participants', function ($q) use ($userId) {
@@ -89,11 +109,21 @@ class TrainingProfileController extends Controller
             })
             ->with(['participants' => function ($query) use ($userId) {
                 $query->where('users.id', $userId);
-            }])
-            ->paginate(10);
+            }]);
 
+        // Sorting logic
+        if ($sort === 'title') {
+            $trainingsQuery->orderBy('title', $order);
+        } elseif ($sort === 'created_at') {
+            $trainingsQuery->orderBy('created_at', $order);
+        } elseif ($sort === 'status') {
+            $trainingsQuery->orderByRaw("CASE WHEN status = 'Implemented' THEN 0 ELSE 1 END $order");
+        } else {
+            $trainingsQuery->orderBy('created_at', 'desc');
+        }
+
+        $trainings = $trainingsQuery->paginate(10);
         $participationTypes = ParticipationType::all()->keyBy('id');
-
         return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
 
@@ -494,7 +524,16 @@ class TrainingProfileController extends Controller
                 }
             });
         }
-        $allMaterials = $query->orderByDesc('created_at')->paginate(10);
+        $sort = $request->input('sort');
+        $order = $request->input('order', 'asc');
+        if ($sort === 'title') {
+            $query->orderBy('title', $order);
+        } elseif ($sort === 'created_at') {
+            $query->orderBy('created_at', $order);
+        } else {
+            $query->orderByDesc('created_at');
+        }
+        $allMaterials = $query->paginate(10);
         $userId = Auth::id();
         $materials = $allMaterials->where('type', 'material')->whereNotNull('file_path');
         $links = $allMaterials->where('type', 'material')->whereNotNull('link');

@@ -208,9 +208,26 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="tab-buttons">
-                    <a href="{{ route('user.training.profile.program') }}" class="tab-button active">Programmed</a>
-                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button">Unprogrammed</a>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="tab-buttons">
+                        <a href="{{ route('user.training.profile.program') }}" class="tab-button active">Programmed</a>
+                        <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button">Unprogrammed</a>
+                    </div>
+                    <!-- Filter Dropdown -->
+                    <div class="dropdown ms-2">
+                        <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-funnel-fill me-1"></i> Filter
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                            <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=title&order=asc">Title (A-Z)</a></li>
+                            <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=title&order=desc">Title (Z-A)</a></li>
+                            <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=created_at&order=desc">Date Created (Newest)</a></li>
+                            <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=created_at&order=asc">Date Created (Oldest)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {{ request('sort') == 'status' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=status&order=asc">Status (Implemented First)</a></li>
+                            <li><a class="dropdown-item {{ request('sort') == 'status' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=status&order=desc">Status (Not Yet Implemented First)</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="search-box">
                     <form method="GET" action="{{ route('user.training.profile.program') }}">
