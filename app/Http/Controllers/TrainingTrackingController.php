@@ -12,14 +12,25 @@ class TrainingTrackingController extends Controller
     public function index()
     {
         // Fetch programmed trainings that are not implemented and where the user is a participant
-        $competencies = \App\Models\Competency::all();
+        $coreCompetencies = [
+        'Foundational/Mandatory',
+        'Competency Enhancement',
+        'Leadership/Executive Development',
+        'Gender and Development(GAD)-Related',
+        'Others'
+    ];
+        $competencies = \App\Models\Competency::paginate(10); // <-- Add pagination here
         $userId = Auth::id();
         $programmedTrainings = Training::where('type', 'Program')
             ->where('status', '!=', 'Implemented')
             ->whereHas('participants', function ($query) use ($userId) {
                 $query->where('users.id', $userId);
             })
-            ->get();
+            ->with(['participants' => function ($query) use ($userId) {
+                $query->where('users.id', $userId);
+            }])
+            ->paginate(10);
+
         $participationTypes = \App\Models\ParticipationType::all();
 
         // Fetch and group materials by training_id
@@ -33,7 +44,8 @@ class TrainingTrackingController extends Controller
             'programmedTrainings',
             'competencies',
             'participationTypes',
-            'materials'
+            'materials',
+            'coreCompetencies'
         ));
     }
 
@@ -55,12 +67,14 @@ class TrainingTrackingController extends Controller
             'provider'             => 'required',
             'implementation_date_from' => 'required|date',
             'implementation_date_to'   => 'required|date|after_or_equal:implementation_date_from',
+             'core_competency'    => 'required|string|max:255',
         ]);
 
         // 2. Determine training (programmed or unprogrammed)
         if ($request->input('courseTitle') === 'other') {
             $training = Training::create([
                 'title' => $request->input('training_title'),
+                'core_competency' => $request->input('core_competency'), // Add this
                 'competency_id' => $request->input('competency_id'),
                 'provider' => $request->input('provider'),
                 'no_of_hours' => $request->input('no_of_hours'),
@@ -80,6 +94,7 @@ class TrainingTrackingController extends Controller
             if ($training) {
                 $training->status = 'Implemented';
                 $training->implementation_date_from = $request->input('implementation_date_from');
+                $training->core_competency = $request->input('core_competency'); // Add this
                 $training->implementation_date_to = $request->input('implementation_date_to');
                 $training->save();
                 // Attach participant if not already attached

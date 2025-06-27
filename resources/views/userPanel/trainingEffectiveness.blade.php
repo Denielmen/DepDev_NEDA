@@ -18,21 +18,15 @@
             background-color: rgb(187, 219, 252);
         }
 
-        .disabled-button {
-            opacity: 0.6;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .disabled-button-wrapper {
-            display: inline-block;
-            pointer-events: auto;
-        }
-
         .navbar {
             background-color: rgb(255, 255, 255);
             padding: 0.5rem 1rem;
             box-shadow: 1px 3px 3px 0px #737373;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1040;
         }
 
         .navbar-brand {
@@ -59,6 +53,12 @@
             min-height: calc(100vh - 56px);
             width: 270px;
             padding-top: 20px;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            height: calc(100vh - 56px);
+            z-index: 1030;
+            overflow-y: auto;
         }
 
         .sidebar a {
@@ -95,6 +95,9 @@
             flex-grow: 1;
             padding: 20px;
             background-color: rgb(187, 219, 252);
+            margin-left: 270px;
+            margin-top: 56px;
+            min-height: calc(100vh - 56px);
         }
 
         .form-container {
@@ -205,6 +208,28 @@
             color: white !important;
             cursor: pointer;
         }
+
+        .scrollable-charts-row {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
+        }
+
+        .scrollable-charts-row .chart-col {
+            display: inline-block;
+            vertical-align: top;
+            width: 600px;
+            /* Adjust width as needed */
+            max-width: 90vw;
+            margin-right: 16px;
+        }
+
+        @media (max-width: 700px) {
+            .scrollable-charts-row .chart-col {
+                width: 95vw;
+                min-width: 320px;
+            }
+        }
     </style>
 </head>
 
@@ -240,7 +265,7 @@
 
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar" style="top: 56px;">
+        <div class="sidebar">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
             <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking &
@@ -261,19 +286,18 @@
 
                     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-                    <div class="container my-4">
-                        <div class="row g-3 justify-content-center">
+                    <div class="container">
+                        <div class="scrollable-charts-row">
                             @foreach ($competencyCharts as $cid => $yearly)
                                 @if (collect($yearly)->filter()->count() > 0)
-                                    <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+                                    <div class="chart-col">
                                         <div class="card text-center p-2 w-100"
-                                            style="min-width:180px; max-width:260px;">
+                                            style="min-width:320px; max-width:600px;">
                                             <h6 class="mb-2" style="font-size: 1.1rem;">
                                                 {{ $competencyLabels[$cid] ?? 'Competency' }}
                                             </h6>
-                                            <canvas id="competencyBar{{ $cid }}" width="200" height="120"
-                                                style="margin:0 auto;"></canvas>
-
+                                            <canvas id="competencyBar{{ $cid }}" width="500" height="350"
+                                                style="margin:0 auto; display:block;"></canvas>
                                         </div>
                                     </div>
                                 @endif

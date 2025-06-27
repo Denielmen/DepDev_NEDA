@@ -352,22 +352,37 @@
                                     @endforeach
                                     <option value="other">Others</option>
                                 </select>
+                                <div class="mt-2">
+                                    {{ $programmedTrainings->links() }}
+                                </div>
                             </div>
 
                             <div class="col-md-6 form-group">
                                 <label class="form-label">Title of the Training:</label>
                                 <input type="text" class="form-control" name="training_title" required>
                             </div>
-
                         </div>
                         <div class="row">
                             <div class="col-md-8 form-group">
-                                <label class="form-label">Competency:</label>
-                                <select id="competency"
-                                    class="form-control @error('competency_id') is-invalid @enderror"
-                                    name="competency_id" required>
-                                    <option value="" disabled selected>Select Competency</option>
+                                <label class="form-label">Classification:</label>
+                                <select id="core_competency" name="core_competency" class="form-control" required>
+                                    <option value="" disabled selected>Select Classification</option>
+                                    @foreach ($coreCompetencies as $core)
+                                        <option value="{{ $core }}">{{ $core }}</option>
+                                    @endforeach
                                 </select>
+                            </div>
+                            <div class="col-md-8 form-group">
+                                <label class="form-label">Competency:</label>
+                                <select id="competency" name="competency_id" class="form-control" required>
+                                    <option value="" disabled selected>Select Competency</option>
+                                    @foreach ($competencies as $competency)
+                                        <option value="{{ $competency->id }}">{{ $competency->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="mt-2">
+                                    {{ $competencies->links() }}
+                                </div>
                             </div>
                             <div class="col-md-3 form-group">
                                 <label class="form-label">Role:</label>
@@ -490,7 +505,6 @@
             // Training data fetched from the database
             const trainings = @json($programmedTrainings); // Replace with actual data from the backend
             const competencies = @json($competencies); // Replace with actual data from the backend
-            // ...existing code...
 
             // Validate link input on form submit
             const form = document.querySelector('form');
@@ -508,7 +522,6 @@
                 // ...existing code...
             });
 
-            // ...existing code...
             // Populate competencies dropdown
             competencySelect.innerHTML = '<option value="" disabled selected>Select Competency</option>';
             competencies.forEach(competency => {
@@ -658,6 +671,44 @@
             });
 
 
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const alignedTrainingSelect = document.getElementById('alignedTraining');
+            const coreCompetencySelect = document.getElementById('core_competency');
+            const roleSelect = document.getElementById('role');
+            const trainings = @json($programmedTrainings);
+
+            alignedTrainingSelect.addEventListener('change', function() {
+                const selectedId = this.value;
+                const selectedTraining = trainings.find(t => t.id == selectedId);
+
+                // Auto-fill core competency
+                if (selectedTraining && selectedTraining.core_competency) {
+                    for (let i = 0; i < coreCompetencySelect.options.length; i++) {
+                        if (coreCompetencySelect.options[i].value === selectedTraining.core_competency) {
+                            coreCompetencySelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                } else {
+                    coreCompetencySelect.selectedIndex = 0;
+                }
+
+                // Auto-fill role (participation_type_id)
+                if (selectedTraining && selectedTraining.participants && selectedTraining.participants.length > 0) {
+                    const participationTypeId = selectedTraining.participants[0].pivot.participation_type_id;
+                    for (let i = 0; i < roleSelect.options.length; i++) {
+                        if (roleSelect.options[i].value == participationTypeId) {
+                            roleSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                } else {
+                    roleSelect.selectedIndex = 0;
+                }
+            });
         });
     </script>
 </body>
