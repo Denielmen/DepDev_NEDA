@@ -16,23 +16,17 @@ class TrainingProfileController extends Controller
 {
     public function program(Request $request)
     {
-        $competencies = Competency::orderBy('name')->get();
+        $competencies = Competency::orderBy('name')->paginate(10); // <-- Add pagination here
         $userId = Auth::id();
         $search = $request->input('search');
         $sort = $request->input('sort');
         $order = $request->input('order', 'asc');
 
-<<<<<<< Updated upstream
-        $trainings = Training::where(function ($q) use ($search, $userId) {
+        $trainingsQuery = Training::where(function ($q) use ($search, $userId) {
             $q->where('type', 'Program')
               ->whereHas('participants', function ($participantQuery) use ($userId) {
                   $participantQuery->where('users.id', $userId);
               });
-
-=======
-        $trainingsQuery = Training::where(function ($q) use ($search) {
-            $q->where('type', 'Program');
->>>>>>> Stashed changes
             if ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('title', 'like', "%$search%")
@@ -664,7 +658,7 @@ class TrainingProfileController extends Controller
                 'post_rating' => $training->participant_post_rating,
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to save participant post-evaluation for training {$id}: " . $e->getMessage(), ['exception' => $e]);
+            Log::error("Failed to save participant post-evaluation for training {$id}: " . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to save participant post-evaluation.'], 500);
         }
     }
