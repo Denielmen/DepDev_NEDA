@@ -242,6 +242,64 @@
             border-top-right-radius: 0.375rem;
             border-bottom-right-radius: 0.375rem;
         }
+
+        /* Analytics Section Styles */
+        .analytics-year-container {
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            background-color: white;
+            margin-bottom: 30px;
+        }
+
+        .analytics-year-header {
+            background-color: #b8d4f0;
+            border-bottom: 1px solid #4a90e2;
+            padding: 15px;
+            text-align: center;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .year-title {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .competency-chart-container {
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+        }
+
+        .competency-chart-container:last-child {
+            border-bottom: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .competency-chart-header {
+            background-color: #e9ecef;
+            padding: 10px 20px;
+            border-bottom: 1px solid #d0d0d0;
+        }
+
+        .competency-chart-header h5 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .chart-wrapper {
+            padding: 20px;
+            background-color: white;
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-wrapper canvas {
+            max-width: 100%;
+            height: 100% !important;
+        }
     </style>
 </head>
 <body>
@@ -389,11 +447,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Unprogrammed</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="analyticsTab">Analytics</a>
+                </li>
             </ul>
         </div>
 
         <!-- Scrollable Table -->
-        <div class="table-container">
+        <div class="table-container" id="trainingTable">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -488,10 +549,143 @@
                 </div>
             </div>
         </div>
+
+        <!-- Analytics Section -->
+        <div class="table-container" id="analyticsSection" style="display: none;">
+            @php
+                // Get all programmed trainings for this user for analytics
+                $allUserTrainings = \App\Models\Training::where('type', 'Program')
+                    ->whereHas('participants', function ($query) use ($user) {
+                        $query->where('training_participants.user_id', $user->id);
+                    })
+                    ->with(['competency', 'participants', 'evaluations' => function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    }])
+                    ->get();
+
+                // Group trainings by year (based on period_from/period_to), then by competency
+                $yearlyAnalytics = [];
+                foreach ($allUserTrainings as $training) {
+                    $competencyName = $training->competency->name ?? 'Unknown Competency';
+
+                    // Use period_from and period_to to determine the year
+                    $year = null;
+                    if ($training->period_from && $training->period_to) {
+                        // If period spans multiple years, use the range
+                        if ($training->period_from != $training->period_to) {
+                            $year = $training->period_from . '-' . $training->period_to;
+                        } else {
+                            $year = $training->period_from;
+                        }
+                    } elseif ($training->period_from) {
+                        $year = $training->period_from;
+                    } elseif ($training->period_to) {
+                        $year = $training->period_to;
+                    } else {
+                        $year = 'No Period Set';
+                    }
+
+                    if (!isset($yearlyAnalytics[$year])) {
+                        $yearlyAnalytics[$year] = [];
+                    }
+
+                    if (!isset($yearlyAnalytics[$year][$competencyName])) {
+                        $yearlyAnalytics[$year][$competencyName] = [
+                            'trainings' => [],
+                            'combined_rating' => 0,
+                            'count' => 0
+                        ];
+                    }
+
+                    $yearlyAnalytics[$year][$competencyName]['trainings'][] = $training;
+                    $yearlyAnalytics[$year][$competencyName]['count']++;
+                }
+
+                // Calculate combined averages for each year/competency combination
+                foreach ($yearlyAnalytics as $year => &$competencies) {
+                    foreach ($competencies as $competency => &$data) {
+                        $totalRatings = [];
+
+                        foreach ($data['trainings'] as $training) {
+                            // Collect all available ratings for this training from the evaluation data
+                            $trainingRatings = [];
+
+                            // Get the evaluation for this specific user and training
+                            $evaluation = $training->evaluations->first();
+
+                            if ($evaluation) {
+                                if ($evaluation->participant_pre_rating !== null) {
+                                    $trainingRatings[] = $evaluation->participant_pre_rating;
+                                }
+                                if ($evaluation->participant_post_rating !== null) {
+                                    $trainingRatings[] = $evaluation->participant_post_rating;
+                                }
+                                if ($evaluation->supervisor_pre_rating !== null) {
+                                    $trainingRatings[] = $evaluation->supervisor_pre_rating;
+                                }
+                                if ($evaluation->supervisor_post_rating !== null) {
+                                    $trainingRatings[] = $evaluation->supervisor_post_rating;
+                                }
+                            }
+
+                            // Add all ratings to the total pool
+                            $totalRatings = array_merge($totalRatings, $trainingRatings);
+                        }
+
+                        // Calculate the overall average rating for this competency in this year
+                        // If no ratings available, set to 0 but still show the chart
+                        $data['combined_rating'] = count($totalRatings) > 0 ? round(array_sum($totalRatings) / count($totalRatings), 2) : 0;
+                    }
+                }
+
+                // Get the most recent 3 years (sort by year, handling year ranges)
+                $sortedYears = array_keys($yearlyAnalytics);
+                usort($sortedYears, function($a, $b) {
+                    // Extract the first year from ranges like "2024-2025"
+                    $yearA = is_numeric($a) ? (int)$a : (int)explode('-', $a)[0];
+                    $yearB = is_numeric($b) ? (int)$b : (int)explode('-', $b)[0];
+                    return $yearB - $yearA; // Descending order
+                });
+                $recentYears = array_slice($sortedYears, 0, 3);
+            @endphp
+
+            <h4 class="mb-4">Analytics - Training Effectiveness (3-Year Period)</h4>
+
+            @if(count($yearlyAnalytics) > 0)
+                @foreach($recentYears as $year)
+                    @if(isset($yearlyAnalytics[$year]))
+                        <div class="mb-5">
+                            <!-- Year Header -->
+                            <div class="analytics-year-container">
+                                <div class="analytics-year-header">
+                                    <h3 class="year-title">{{ $year }}</h3>
+                                </div>
+
+                                <!-- Single Chart for all competencies in this year -->
+                                <div class="competency-chart-container">
+                                    <div class="competency-chart-header">
+                                        <h5>Training Effectiveness by Competency</h5>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <canvas id="chart_{{ \Illuminate\Support\Str::slug($year) }}" width="600" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+            @else
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No analytics data available. This user has no programmed trainings.
+                </div>
+            @endif
+        </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const editButton = document.getElementById('editButton');
@@ -547,6 +741,154 @@
         saveButton.addEventListener('click', function() {
             form.submit();
         });
+
+        // Handle tab switching
+        const programmedTab = document.querySelector('a[href="{{ route('admin.participants.info', ['id' => $user->id]) }}"]');
+        const unprogrammedTab = document.querySelector('a[href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}"]');
+        const analyticsTab = document.getElementById('analyticsTab');
+        const trainingTable = document.getElementById('trainingTable');
+        const analyticsSection = document.getElementById('analyticsSection');
+
+        // Handle analytics tab click
+        analyticsTab.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Update tab states
+            programmedTab.classList.remove('active');
+            unprogrammedTab.classList.remove('active');
+            analyticsTab.classList.add('active');
+
+            // Show analytics section and hide table
+            trainingTable.style.display = 'none';
+            analyticsSection.style.display = 'block';
+
+            // Initialize charts if not already done
+            if (!window.chartsInitialized) {
+                initializeAnalyticsCharts();
+                window.chartsInitialized = true;
+            }
+        });
+
+        // Handle programmed tab click
+        programmedTab.addEventListener('click', function(e) {
+            analyticsTab.classList.remove('active');
+            trainingTable.style.display = 'block';
+            analyticsSection.style.display = 'none';
+        });
+
+        // Handle unprogrammed tab click (redirect)
+        unprogrammedTab.addEventListener('click', function(e) {
+            // Let the default behavior happen (redirect to unprogrammed page)
+        });
+
+        // Initialize analytics charts
+        function initializeAnalyticsCharts() {
+            @php
+                $chartData = [];
+                foreach ($recentYears as $year) {
+                    if (isset($yearlyAnalytics[$year])) {
+                        $chartId = \Illuminate\Support\Str::slug($year);
+
+                        // Get competency names and their ratings for this year
+                        $competencyLabels = [];
+                        $competencyRatings = [];
+
+                        foreach ($yearlyAnalytics[$year] as $competencyName => $data) {
+                            $competencyLabels[] = $competencyName;
+                            $competencyRatings[] = $data['combined_rating'];
+                        }
+
+                        $chartData[$chartId] = [
+                            'labels' => $competencyLabels,
+                            'data' => $competencyRatings,
+                            'year' => $year
+                        ];
+                    }
+                }
+            @endphp
+
+            const chartData = @json($chartData);
+
+            Object.keys(chartData).forEach(chartId => {
+                const ctx = document.getElementById('chart_' + chartId);
+                if (ctx) {
+                    const data = chartData[chartId];
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Training Rating',
+                                data: data.data,
+                                borderColor: '#4a7c59',
+                                backgroundColor: 'rgba(74, 124, 89, 0.1)',
+                                borderWidth: 3,
+                                fill: false,
+                                tension: 0.4,
+                                pointBackgroundColor: '#4a7c59',
+                                pointBorderColor: '#4a7c59',
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const rating = context.parsed.y;
+                                            if (rating > 0) {
+                                                return 'Rating: ' + rating + '/4';
+                                            }
+                                            return 'No rating data available';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    grid: {
+                                        display: true,
+                                        color: '#e0e0e0'
+                                    },
+                                    ticks: {
+                                        color: '#666',
+                                        maxRotation: 45,
+                                        minRotation: 0
+                                    }
+                                },
+                                y: {
+                                    display: true,
+                                    beginAtZero: true,
+                                    max: 4,
+                                    grid: {
+                                        display: true,
+                                        color: '#e0e0e0'
+                                    },
+                                    ticks: {
+                                        color: '#666',
+                                        stepSize: 1
+                                    }
+                                }
+                            },
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false
+                            }
+                        }
+                    });
+                }
+            });
+        }
     });
     </script>
 </body>

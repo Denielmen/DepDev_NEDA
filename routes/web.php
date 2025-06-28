@@ -204,6 +204,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/get-participants', [TrainingProfileController::class, 'getParticipants'])->name('admin.getParticipants');
     Route::get('/training/{id}/post-evaluation', [TrainingProfileController::class, 'postEvaluation'])
         ->name('admin.training.post-evaluation');
+    Route::get('/training/{id}/post-evaluation/user/{user_id}', [TrainingProfileController::class, 'postEvaluationWithUser'])
+        ->name('admin.training.post-evaluation.user');
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
         ->name('admin.training.rate');
     Route::post('/training/{id}/post-evaluation/submit', [TrainingProfileController::class, 'submitPostEvaluation'])->name('admin.training.post-evaluation.submit');

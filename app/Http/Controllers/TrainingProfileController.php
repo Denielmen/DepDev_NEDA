@@ -138,10 +138,13 @@ class TrainingProfileController extends Controller
             $query->orderBy('last_name')->orderBy('first_name');
         }, 'competency']);
 
+        // Get or create evaluation record for this training-user combination
+        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($training->id, $userId);
+
         // Get participation types for display
         $participationTypes = ParticipationType::all()->keyBy('id');
 
-        return view('userPanel.trainingProfileShow', compact('training', 'participationTypes'));
+        return view('userPanel.trainingProfileShow', compact('training', 'participationTypes', 'evaluation'));
     }
 
     public function adminShow(Training $training)
@@ -452,10 +455,14 @@ class TrainingProfileController extends Controller
         $request->validate([
             'type' => 'required|in:participant_pre,participant_post,supervisor_pre,supervisor_post',
             'rating' => 'required|integer|min:1|max:4',
+            'user_id' => 'nullable|integer|exists:users,id',
         ]);
 
         $training = Training::findOrFail($id);
         $user = Auth::user();
+
+        // Determine which user's evaluation we're updating
+        $target_user_id = $request->user_id ?? $user->id;
 
         $isSupervisorAction = in_array($request->type, ['supervisor_pre', 'supervisor_post']);
         $isParticipantAction = in_array($request->type, ['participant_pre', 'participant_post']);
@@ -465,38 +472,41 @@ class TrainingProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'You are not authorized to perform supervisor ratings.'], 403);
         }
 
-        // Check for participant actions: user must be a participant
-        if ($isParticipantAction && !$training->participants()->where('users.id', $user->id)->exists()) {
+        // Check for participant actions: user must be a participant or admin
+        if ($isParticipantAction && $user->role !== 'Admin' && !$training->participants()->where('users.id', $user->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'You are not authorized to rate this training.'], 403);
         }
 
+        // Get or create evaluation record for this training-user combination
+        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($id, $target_user_id);
+
         if ($request->type === 'participant_pre') {
-            $training->participant_pre_rating = $request->rating;
-            Log::info("Updating participant_pre_rating for training {$id} to {$request->rating}");
+            $evaluation->participant_pre_rating = $request->rating;
+            Log::info("Updating participant_pre_rating for training {$id}, user {$target_user_id} to {$request->rating}");
         } elseif ($request->type === 'participant_post') {
-            $training->participant_post_rating = $request->rating;
-            Log::info("Updating participant_post_rating for training {$id} to {$request->rating}");
+            $evaluation->participant_post_rating = $request->rating;
+            Log::info("Updating participant_post_rating for training {$id}, user {$target_user_id} to {$request->rating}");
         } elseif ($request->type === 'supervisor_pre') {
-            $training->supervisor_pre_rating = $request->rating;
-            Log::info("Updating supervisor_pre_rating for training {$id} to {$request->rating}");
+            $evaluation->supervisor_pre_rating = $request->rating;
+            Log::info("Updating supervisor_pre_rating for training {$id}, user {$target_user_id} to {$request->rating}");
         } elseif ($request->type === 'supervisor_post') {
-            $training->supervisor_post_rating = $request->rating;
-            Log::info("Updating supervisor_post_rating for training {$id} to {$request->rating}");
+            $evaluation->supervisor_post_rating = $request->rating;
+            Log::info("Updating supervisor_post_rating for training {$id}, user {$target_user_id} to {$request->rating}");
         }
 
         try {
-            $training->save();
-            Log::info("Training {$id} saved successfully.");
+            $evaluation->save();
+            Log::info("Evaluation for training {$id}, user {$target_user_id} saved successfully.");
             return response()->json([
                 'success' => true,
                 'message' => 'Evaluation stored successfully!',
-                'pre_rating' => $training->participant_pre_rating,
-                'post_rating' => $training->participant_post_rating,
-                'supervisor_pre_rating' => $training->supervisor_pre_rating,
-                'supervisor_post_rating' => $training->supervisor_post_rating,
+                'pre_rating' => $evaluation->participant_pre_rating,
+                'post_rating' => $evaluation->participant_post_rating,
+                'supervisor_pre_rating' => $evaluation->supervisor_pre_rating,
+                'supervisor_post_rating' => $evaluation->supervisor_post_rating,
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to save training {$id}: " . $e->getMessage());
+            Log::error("Failed to save evaluation for training {$id}, user {$target_user_id}: " . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to save evaluation.'], 500);
         }
     }
@@ -545,7 +555,10 @@ class TrainingProfileController extends Controller
             abort(403, 'You are not authorized to evaluate this training.');
         }
 
-        return view('userPanel.evalParticipant', compact('training'));
+        // Get or create evaluation record for this training-user combination
+        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($training_id, $userId);
+
+        return view('userPanel.evalParticipant', compact('training', 'evaluation'));
     }
 
     public function downloadMaterial(TrainingMaterial $material)
@@ -564,10 +577,28 @@ class TrainingProfileController extends Controller
     }
 
 
-    public function postEvaluation($id)
+     public function postEvaluation(Request $request, $id)
     {
         $training = Training::with('participants')->findOrFail($id);
-        return view('adminPanel.post_eval', compact('training'));
+        $user_id = $request->query('user_id');
+
+        // Get or create evaluation record for this training-user combination
+        $evaluation = null;
+        if ($user_id) {
+            $evaluation = \App\Models\TrainingEvaluation::getOrCreate($id, $user_id);
+        }
+
+        return view('adminPanel.post_eval', compact('training', 'user_id', 'evaluation'));
+    }
+
+    public function postEvaluationWithUser(Request $request, $id, $user_id)
+    {
+        $training = Training::with('participants')->findOrFail($id);
+
+        // Get or create evaluation record for this training-user combination
+        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($id, $user_id);
+
+        return view('adminPanel.post_eval', compact('training', 'user_id', 'evaluation'));
     }
 
     public function submitParticipantEvaluation(Request $request, $id)
@@ -608,6 +639,9 @@ class TrainingProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'You are not authorized to evaluate this training.'], 403);
         }
 
+        // Get or create evaluation record for this training-user combination
+        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($id, $userId);
+
         Log::debug('Training found:', ['id' => $training->id, 'title' => $training->title]);
 
         // Collect all numeric ratings for averaging
@@ -643,22 +677,22 @@ class TrainingProfileController extends Controller
         }
         Log::debug('Calculated average rating:', ['average' => $averageRating, 'numeric_ratings' => $numericRatings]);
 
-        // Store the average rating and detailed data in participant_post_rating and participant_post_evaluation
-        $training->participant_post_rating = $averageRating;
-        $training->participant_post_evaluation = $detailedParticipantPostEvaluationData;
+        // Store the average rating and detailed data in the evaluation record
+        $evaluation->participant_post_rating = $averageRating;
+        $evaluation->participant_post_evaluation = $detailedParticipantPostEvaluationData;
 
         try {
-            $training->save();
-            Log::info("Training {$id} participant post-evaluation saved successfully. Average rating: {$averageRating}");
-            Log::debug('Training saved successfully.', ['training_id' => $training->id, 'participant_post_rating' => $training->participant_post_rating, 'participant_post_evaluation' => $training->participant_post_evaluation]);
+            $evaluation->save();
+            Log::info("Evaluation for training {$id}, user {$userId} participant post-evaluation saved successfully. Average rating: {$averageRating}");
+            Log::debug('Evaluation saved successfully.', ['training_id' => $id, 'user_id' => $userId, 'participant_post_rating' => $evaluation->participant_post_rating, 'participant_post_evaluation' => $evaluation->participant_post_evaluation]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Participant post-evaluation submitted successfully!',
-                'post_rating' => $training->participant_post_rating,
+                'post_rating' => $evaluation->participant_post_rating,
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to save participant post-evaluation for training {$id}: " . $e->getMessage());
+            Log::error("Failed to save participant post-evaluation for training {$id}, user {$userId}: " . $e->getMessage(), ['exception' => $e]);
             return response()->json(['success' => false, 'message' => 'Failed to save participant post-evaluation.'], 500);
         }
     }
@@ -676,8 +710,15 @@ class TrainingProfileController extends Controller
             }
         }
 
+        // Get evaluation for the current user
+        $userId = Auth::id();
+        $evaluation = \App\Models\TrainingEvaluation::where('training_id', $training_id)
+            ->where('user_id', $userId)
+            ->first();
+
         $data = [
             'training' => $training,
+            'evaluation' => $evaluation,
             'evaluation_type' => $type,
             'success' => false,
             'message' => 'No evaluation data found.'
@@ -685,22 +726,22 @@ class TrainingProfileController extends Controller
 
         switch ($type) {
             case 'participant_pre':
-                $data['rating'] = $training->participant_pre_rating;
+                $data['rating'] = $evaluation ? $evaluation->participant_pre_rating : null;
                 $data['success'] = ($data['rating'] !== null);
                 return response()->json($data); // Always JSON for pre-eval modal
             case 'participant_post':
-                $data['rating'] = $training->participant_post_rating;
-                $data['detailed_evaluation'] = $training->participant_post_evaluation; // Retrieve all detailed data
+                $data['rating'] = $evaluation ? $evaluation->participant_post_rating : null;
+                $data['detailed_evaluation'] = $evaluation ? $evaluation->participant_post_evaluation : null; // Retrieve all detailed data
                 $data['success'] = ($data['rating'] !== null);
                 // If data exists, or if it's a page load, render the view
                 return view('userPanel.evalParticipantPostView', compact('training', 'data'));
             case 'supervisor_pre':
-                $data['rating'] = $training->supervisor_pre_rating;
+                $data['rating'] = $evaluation ? $evaluation->supervisor_pre_rating : null;
                 $data['success'] = ($data['rating'] !== null);
                 return response()->json($data); // Always JSON for pre-eval modal
             case 'supervisor_post':
-                $data['rating'] = $training->supervisor_post_rating;
-                $data['detailed_evaluation'] = $training->supervisor_post_evaluation;
+                $data['rating'] = $evaluation ? $evaluation->supervisor_post_rating : null;
+                $data['detailed_evaluation'] = $evaluation ? $evaluation->supervisor_post_evaluation : null;
                 $data['success'] = ($data['rating'] !== null);
                 return view('userPanel.evalSupervisorPostView', compact('training', 'data'));
             default:
@@ -729,6 +770,7 @@ class TrainingProfileController extends Controller
                 'initiateParticipation' => 'required|in:Yes,No',
                 'trainingSuggestions' => 'required|string',
                 'type' => 'required|in:supervisor_post',
+                'user_id' => 'nullable|integer|exists:users,id',
             ]);
             Log::debug('Supervisor post-eval validation successful.', $validatedData);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -737,7 +779,15 @@ class TrainingProfileController extends Controller
         }
 
         $training = Training::findOrFail($id);
-        Log::debug('Training found for supervisor post-eval:', ['id' => $training->id, 'title' => $training->title]);
+        $user = Auth::user();
+
+        // Determine which user's evaluation we're updating
+        $target_user_id = $validatedData['user_id'] ?? $user->id;
+
+        Log::debug('Training found for supervisor post-eval:', ['id' => $training->id, 'title' => $training->title, 'target_user_id' => $target_user_id]);
+
+        // Get or create evaluation record for this training-user combination
+        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($id, $target_user_id);
 
         $detailedSupervisorPostEvaluationData = [
             'goals' => $validatedData['goals'],
@@ -762,18 +812,18 @@ class TrainingProfileController extends Controller
         if (count($numericRatings) > 0) {
             $averageRating = round(array_sum($numericRatings) / count($numericRatings), 2);
         }
-        $training->supervisor_post_rating = $averageRating;
-        $training->supervisor_post_evaluation = $detailedSupervisorPostEvaluationData;
+        $evaluation->supervisor_post_rating = $averageRating;
+        $evaluation->supervisor_post_evaluation = $detailedSupervisorPostEvaluationData;
 
         try {
-            $training->save();
-            Log::info("Training {$id} supervisor post-evaluation saved successfully. Average rating: {$averageRating}");
-            Log::debug('Training saved successfully (supervisor post-eval).', ['training_id' => $training->id, 'supervisor_post_rating' => $training->supervisor_post_rating, 'supervisor_post_evaluation' => $training->supervisor_post_evaluation]);
+            $evaluation->save();
+            Log::info("Evaluation for training {$id}, user {$target_user_id} supervisor post-evaluation saved successfully. Average rating: {$averageRating}");
+            Log::debug('Evaluation saved successfully (supervisor post-eval).', ['training_id' => $id, 'user_id' => $target_user_id, 'supervisor_post_rating' => $evaluation->supervisor_post_rating, 'supervisor_post_evaluation' => $evaluation->supervisor_post_evaluation]);
 
             // Redirect back with a success message instead of returning JSON
             return redirect()->back()->with('success', 'Supervisor post-evaluation submitted successfully!');
         } catch (\Exception $e) {
-            Log::error("Failed to save supervisor post-evaluation for training {$id}: " . $e->getMessage(), ['exception' => $e]);
+            Log::error("Failed to save supervisor post-evaluation for training {$id}, user {$target_user_id}: " . $e->getMessage(), ['exception' => $e]);
             return redirect()->back()->with('error', 'Failed to save supervisor post-evaluation.');
         }
     }
@@ -792,6 +842,9 @@ class TrainingProfileController extends Controller
                       $subQ->where('name', 'like', "%$search%");
                   });
             })
+            ->with(['evaluations' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
             ->paginate(5);
 
         // Get all competencies used in user's trainings for charts
@@ -799,6 +852,9 @@ class TrainingProfileController extends Controller
             ->whereHas('participants', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
             })
+            ->with(['evaluations' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
             ->get();
 
         $competencyIds = $allUserTrainings->pluck('competency_id')->unique()->filter();
@@ -818,10 +874,12 @@ class TrainingProfileController extends Controller
             ) {
                 if ($year) {
                     $preAvg = round($yearTrainings->avg(function ($t) {
-                        return $t->participant_pre_rating ?? $t->supervisor_pre_rating;
+                        $evaluation = $t->evaluations->first();
+                        return $evaluation ? ($evaluation->participant_pre_rating ?? $evaluation->supervisor_pre_rating) : null;
                     }), 2);
                     $postAvg = round($yearTrainings->avg(function ($t) {
-                        return $t->participant_post_rating ?? $t->supervisor_post_rating;
+                        $evaluation = $t->evaluations->first();
+                        return $evaluation ? ($evaluation->participant_post_rating ?? $evaluation->supervisor_post_rating) : null;
                     }), 2);
                     $yearly[$year] = [
                         'pre' => $preAvg,
