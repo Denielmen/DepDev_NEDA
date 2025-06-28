@@ -295,32 +295,38 @@
                         </tr>
                         <tr id="pre_rating_row">
                             <td class="label">Participant Pre-Rating:</td>
-                            <td id="participant_pre_rating_display">{{ $training->participant_pre_rating ?? 'N/A' }}</td>
+                            <td id="participant_pre_rating_display">{{ $evaluation->participant_pre_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr id="post_rating_row">
                             <td class="label">Participant Post-Rating:</td>
-                            <td id="participant_post_rating_display">{{ $training->participant_post_rating ?? 'N/A' }}</td>
+                            <td id="participant_post_rating_display">{{ $evaluation->participant_post_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Supervisor Pre-Evaluation Rating:</td>
-                            <td id="supervisor_pre_rating_display">{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
+                            <td id="supervisor_pre_rating_display">{{ $evaluation->supervisor_pre_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Supervisor Post-Evaluation Rating:</td>
-                            <td>{{ $training->supervisor_post_rating ?? 'N/A' }}</td>
+                            <td>{{ $evaluation->supervisor_post_rating ?? 'N/A' }}</td>
                         </tr>
                     </table>
                     <div class="eval-buttons">
-                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }})">
+                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }}, {{ $user->id }})">
                             <i class="bi bi-clipboard-check"></i>
                             Pre-Eval
                         </button>
-                        <a href="{{ route('admin.training.post-evaluation', ['id' => $training->id]) }}"
-                           class="btn btn-eval btn-post-eval"
-                           {{ $training->supervisor_post_rating ? 'disabled' : '' }}>
-                            <i class="bi bi-clipboard-data"></i>
-                            Post-Eval
-                        </a>
+                        @if($evaluation->supervisor_post_rating)
+                            <span class="btn btn-eval btn-post-eval disabled" style="pointer-events: none; opacity: 0.6;">
+                                <i class="bi bi-clipboard-data"></i>
+                                Post-Eval
+                            </span>
+                        @else
+                            <a href="{{ route('admin.training.post-evaluation.user', ['id' => $training->id, 'user_id' => $user->id]) }}"
+                               class="btn btn-eval btn-post-eval">
+                                <i class="bi bi-clipboard-data"></i>
+                                Post-Eval
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -361,6 +367,7 @@
                         </div>
                     </div>
                     <input type="hidden" id="modalTrainingId" value="">
+                    <input type="hidden" id="modalUserId" value="">
                     @csrf
                 </div>
                 <div class="modal-footer">
@@ -473,11 +480,12 @@
             const preRatingDisplay = document.getElementById('participant_pre_rating_display');
             const ratingInputs = document.querySelectorAll('input[name="proficiency_level"]');
 
-            window.showPreEvalModal = function(trainingId) {
+            window.showPreEvalModal = function(trainingId, userId) {
                 // Get the current supervisor pre-rating from the table
                 const supervisorPreRatingDisplay = document.getElementById('supervisor_pre_rating_display');
                 const currentRating = supervisorPreRatingDisplay ? supervisorPreRatingDisplay.textContent : 'N/A';
                 document.getElementById('modalTrainingId').value = trainingId;
+                document.getElementById('modalUserId').value = userId;
 
                 // If there's a previous rating, show it and disable inputs
                 if (currentRating && currentRating !== 'N/A') {
@@ -510,9 +518,10 @@
                 submitEvaluationBtn.addEventListener('click', function () {
                     const rating = document.querySelector('input[name="proficiency_level"]:checked');
                     const trainingId = document.getElementById('modalTrainingId').value;
+                    const userId = document.getElementById('modalUserId').value;
                     const csrfToken = document.querySelector('input[name="_token"]').value;
 
-                    if (!rating || !trainingId) {
+                    if (!rating || !trainingId || !userId) {
                         alert('Please select a rating.');
                         return;
                     }
@@ -531,7 +540,8 @@
                         },
                         body: JSON.stringify({
                             type: 'supervisor_pre',
-                            rating: rating.value
+                            rating: rating.value,
+                            user_id: userId
                         })
                     })
                     .then(response => response.json())

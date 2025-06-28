@@ -232,19 +232,19 @@
                     @if($training->type === 'Program')
                     <tr>
                         <td class="label">Participant Pre Rating:</td>
-                        <td>{{ $training->participant_pre_rating ?? 'N/A' }}</td>
+                        <td>{{ $evaluation->participant_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Participant Post Rating:</td>
-                        <td>{{ $training->participant_post_rating ?? 'N/A' }}</td>
+                        <td>{{ $evaluation->participant_post_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Supervisor Pre Rating:</td>
-                        <td>{{ $training->supervisor_pre_rating ?? 'N/A' }}</td>
+                        <td>{{ $evaluation->supervisor_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Supervisor Post Rating:</td>
-                        <td>{{ $training->supervisor_post_rating ?? 'N/A' }}</td>
+                        <td>{{ $evaluation->supervisor_post_rating ?? 'N/A' }}</td>
                     </tr>
                     @endif
                 </table>

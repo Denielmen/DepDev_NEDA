@@ -288,10 +288,17 @@
     <div class="main-content">
       <!-- Back Button -->
       <div class="top-actions">
-                <a href="{{ route('admin.viewUserInfo', ['id' => $training->id]) }}" class="btn btn-back">
-                    <i class="bi bi-arrow-left"></i>
-                    Back
-                </a>
+                @if($user_id)
+                    <a href="{{ route('admin.viewUserInfo', ['training_id' => $training->id, 'user_id' => $user_id]) }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i>
+                        Back
+                    </a>
+                @else
+                    <a href="{{ route('admin.training-plan') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i>
+                        Back
+                    </a>
+                @endif
             </div>
 
       <div class="evaluation-container">
@@ -305,8 +312,11 @@
         <form method="POST" action="{{ route('admin.training.post-evaluation.submit', ['id' => $training->id]) }}" class="evaluation-form">
           @csrf
           <input type="hidden" name="type" value="supervisor_post">
+          @if($user_id)
+            <input type="hidden" name="user_id" value="{{ $user_id }}">
+          @endif
 
-          @if($training->supervisor_post_evaluation)
+          @if($evaluation && $evaluation->supervisor_post_evaluation)
           <div class="alert alert-info">
             <strong>Note:</strong> You have already submitted a post-evaluation for this training. You can view your previous submission below.
           </div>
@@ -327,10 +337,10 @@
             </tr>
             <tr>
               <td>How satisfied are you in the learner's achievement of his/her learning goals/objectives as specified in his/her learner's profile.</td>
-              <td class="rating-cell"><input type="radio" name="goals" value="1" required {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['goals'] == 1 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="goals" value="2" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['goals'] == 2 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="goals" value="3" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['goals'] == 3 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="goals" value="4" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['goals'] == 4 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="goals" value="1" required {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['goals'] == 1 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="goals" value="2" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['goals'] == 2 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="goals" value="3" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['goals'] == 3 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="goals" value="4" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['goals'] == 4 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
             </tr>
           </table>
 
@@ -349,35 +359,35 @@
             </tr>
             <tr>
               <td>1. The employee applied the learning/s gained from this course.</td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="1" required {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning1'] == 1 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="2" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning1'] == 2 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="3" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning1'] == 3 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="4" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning1'] == 4 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning1" value="5" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning1'] == 5 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning1" value="1" required {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning1'] == 1 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning1" value="2" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning1'] == 2 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning1" value="3" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning1'] == 3 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning1" value="4" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning1'] == 4 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning1" value="5" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning1'] == 5 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
             </tr>
             <tr>
               <td>2. The employee's quality of work improved. </td>
-              <td class="rating-cell"><input type="radio" name="learning2" value="1" required {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning2'] == 1 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning2" value="2" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning2'] == 2 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning2" value="3" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning2'] == 3 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning2" value="4" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning2'] == 4 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning2" value="5" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning2'] == 5 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning2" value="1" required {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning2'] == 1 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning2" value="2" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning2'] == 2 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning2" value="3" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning2'] == 3 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning2" value="4" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning2'] == 4 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning2" value="5" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning2'] == 5 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
             </tr>
             <tr>
               <td>3. The proficiency level of the employee on this course increased.</td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="1" required {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning3'] == 1 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="2" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning3'] == 2 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="3" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning3'] == 3 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="4" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning3'] == 4 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning3" value="5" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning3'] == 5 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning3" value="1" required {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning3'] == 1 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning3" value="2" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning3'] == 2 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning3" value="3" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning3'] == 3 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning3" value="4" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning3'] == 4 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning3" value="5" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning3'] == 5 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
             </tr>
             <tr>
               <td>4. The employee's overall work performance increased/improved.</td>
-              <td class="rating-cell"><input type="radio" name="learning4" value="1" required {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning4'] == 1 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning4" value="2" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning4'] == 2 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning4" value="3" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning4'] == 3 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning4" value="4" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning4'] == 4 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="learning4" value="5" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['learning4'] == 5 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="1" required {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning4'] == 1 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="2" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning4'] == 2 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="3" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning4'] == 3 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="4" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning4'] == 4 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="learning4" value="5" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['learning4'] == 5 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
             </tr>
           </table>
 
@@ -385,7 +395,7 @@
             <label for="workPerformanceChanges"><strong>To support your raating, please describe changes in work performance as a result of
                 attendance to this training. If employee's work performance did not change, please cite possible
                 reasons and what support is needed in order for the employees to apply acquired knowledge and skills.</strong></label>
-            <textarea name="workPerformanceChanges" rows="4" placeholder="Write down the changes from your performance..." {{ $training->supervisor_post_evaluation ? 'readonly' : '' }}>{{ $training->supervisor_post_evaluation ? $training->supervisor_post_evaluation['workPerformanceChanges'] : '' }}</textarea>
+            <textarea name="workPerformanceChanges" rows="4" placeholder="Write down the changes from your performance..." {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'readonly' : '' }}>{{ $evaluation && $evaluation->supervisor_post_evaluation ? $evaluation->supervisor_post_evaluation['workPerformanceChanges'] : '' }}</textarea>
           </div>
 
           <table>
@@ -398,10 +408,10 @@
             </tr>
             <tr>
               <td>In a scale 4-1 (4 being the highest), please tick the circle which best describes the proficiency level of your subordinate after participation in this course.</td>
-              <td class="rating-cell"><input type="radio" name="performance1" value="1" required {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['performance1'] == 1 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="performance1" value="2" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['performance1'] == 2 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="performance1" value="3" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['performance1'] == 3 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
-              <td class="rating-cell"><input type="radio" name="performance1" value="4" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['performance1'] == 4 ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="performance1" value="1" required {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['performance1'] == 1 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="performance1" value="2" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['performance1'] == 2 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="performance1" value="3" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['performance1'] == 3 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
+              <td class="rating-cell"><input type="radio" name="performance1" value="4" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['performance1'] == 4 ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}></td>
             </tr>
           </table>
 
@@ -409,20 +419,20 @@
           <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
             <strong>I will initiate the participation of other staffs to this course.</strong>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="initiateParticipation" id="yesParticipation" value="Yes" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['initiateParticipation'] == 'Yes' ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}>
+              <input class="form-check-input" type="radio" name="initiateParticipation" id="yesParticipation" value="Yes" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['initiateParticipation'] == 'Yes' ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}>
               <label class="form-check-label" for="yesParticipation">Yes</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="initiateParticipation" id="noParticipation" value="No" {{ $training->supervisor_post_evaluation && $training->supervisor_post_evaluation['initiateParticipation'] == 'No' ? 'checked' : '' }} {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}>
+              <input class="form-check-input" type="radio" name="initiateParticipation" id="noParticipation" value="No" {{ $evaluation && $evaluation->supervisor_post_evaluation && $evaluation->supervisor_post_evaluation['initiateParticipation'] == 'No' ? 'checked' : '' }} {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}>
               <label class="form-check-label" for="noParticipation">No</label>
             </div>
           </div>
 
           <div class="section-title"><strong>E. Comments/Suggestion on the training program.<strong></div>
-          <textarea name="trainingSuggestions" rows="4" placeholder="Input here your comments......" {{ $training->supervisor_post_evaluation ? 'readonly' : '' }}>{{ $training->supervisor_post_evaluation ? $training->supervisor_post_evaluation['trainingSuggestions'] : '' }}</textarea>
+          <textarea name="trainingSuggestions" rows="4" placeholder="Input here your comments......" {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'readonly' : '' }}>{{ $evaluation && $evaluation->supervisor_post_evaluation ? $evaluation->supervisor_post_evaluation['trainingSuggestions'] : '' }}</textarea>
 
           <div class="submit-button">
-            <button type="submit" {{ $training->supervisor_post_evaluation ? 'disabled' : '' }}>Submit</button>
+            <button type="submit" {{ $evaluation && $evaluation->supervisor_post_evaluation ? 'disabled' : '' }}>Submit</button>
           </div>
 
         </form>

@@ -324,6 +324,12 @@
                     <p>(For Participant)</p>
                 </div>
 
+                @if($evaluation && $evaluation->participant_post_evaluation)
+                <div class="alert alert-info">
+                    <strong>Note:</strong> You have already submitted a post-evaluation for this training. You can view your previous submission below.
+                </div>
+                @endif
+
                 <form method="POST" action="{{ route('user.training.submit.participant.evaluation', ['id' => $training->id]) }}" class="evaluation-form">
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->id }}">
@@ -343,10 +349,10 @@
                         </tr>
                         <tr>
                             <td>How satisfied are you in the achievement of your learning goals/objectives as specified in your learner's profile.</td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="1" required></td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="2"></td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="3"></td>
-                            <td class="rating-cell"><input type="radio" name="goals" value="4"></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="1" required {{ $evaluation && $evaluation->participant_post_evaluation && $evaluation->participant_post_evaluation['goals'] == 1 ? 'checked' : '' }} {{ $evaluation && $evaluation->participant_post_evaluation ? 'disabled' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="2" {{ $evaluation && $evaluation->participant_post_evaluation && $evaluation->participant_post_evaluation['goals'] == 2 ? 'checked' : '' }} {{ $evaluation && $evaluation->participant_post_evaluation ? 'disabled' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="3" {{ $evaluation && $evaluation->participant_post_evaluation && $evaluation->participant_post_evaluation['goals'] == 3 ? 'checked' : '' }} {{ $evaluation && $evaluation->participant_post_evaluation ? 'disabled' : '' }}></td>
+                            <td class="rating-cell"><input type="radio" name="goals" value="4" {{ $evaluation && $evaluation->participant_post_evaluation && $evaluation->participant_post_evaluation['goals'] == 4 ? 'checked' : '' }} {{ $evaluation && $evaluation->participant_post_evaluation ? 'disabled' : '' }}></td>
                         </tr>
                     </table>
 
@@ -477,7 +483,9 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary">Submit Evaluation</button>
+                        <button type="submit" class="btn-primary" {{ $evaluation && $evaluation->participant_post_evaluation ? 'disabled' : '' }}>
+                            {{ $evaluation && $evaluation->participant_post_evaluation ? 'Already Submitted' : 'Submit Evaluation' }}
+                        </button>
                     </div>
                 </form>
             </div>

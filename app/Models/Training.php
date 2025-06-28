@@ -62,6 +62,22 @@ class Training extends Model
     }
 
     /**
+     * Get the evaluations for this training.
+     */
+    public function evaluations()
+    {
+        return $this->hasMany(TrainingEvaluation::class);
+    }
+
+    /**
+     * Get the evaluation for a specific user.
+     */
+    public function getEvaluationForUser($user_id)
+    {
+        return $this->evaluations()->where('user_id', $user_id)->first();
+    }
+
+    /**
      * Get the participation type for a specific participant.
      */
     public function getParticipantType($userId)

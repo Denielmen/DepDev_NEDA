@@ -344,42 +344,48 @@
                                         </td>
                                         <td>
                                             @php
+                                                $evaluation = $training->evaluations->first();
                                                 $pre_rating_display_value = 'Empty';
-                                                if (
-                                                    $training->participant_pre_rating &&
-                                                    $training->supervisor_pre_rating
-                                                ) {
-                                                    $pre_rating_display_value = round(
-                                                        ($training->participant_pre_rating +
-                                                            $training->supervisor_pre_rating) /
+                                                if ($evaluation) {
+                                                    if (
+                                                        $evaluation->participant_pre_rating &&
+                                                        $evaluation->supervisor_pre_rating
+                                                    ) {
+                                                        $pre_rating_display_value = round(
+                                                            ($evaluation->participant_pre_rating +
+                                                                $evaluation->supervisor_pre_rating) /
+                                                                2,
                                                             2,
-                                                        2,
-                                                    );
-                                                } elseif ($training->participant_pre_rating !== null) {
-                                                    $pre_rating_display_value = $training->participant_pre_rating;
-                                                } elseif ($training->supervisor_pre_rating !== null) {
-                                                    $pre_rating_display_value = $training->supervisor_pre_rating;
+                                                        );
+                                                    } elseif ($evaluation->participant_pre_rating !== null) {
+                                                        $pre_rating_display_value = $evaluation->participant_pre_rating;
+                                                    } elseif ($evaluation->supervisor_pre_rating !== null) {
+                                                        $pre_rating_display_value = $evaluation->supervisor_pre_rating;
+                                                    }
                                                 }
                                             @endphp
                                             {{ $pre_rating_display_value }}
                                         </td>
                                         <td>
                                             @php
+                                                $evaluation = $training->evaluations->first();
                                                 $post_rating_value = null;
-                                                if (
-                                                    $training->participant_post_rating &&
-                                                    $training->supervisor_post_rating
-                                                ) {
-                                                    $post_rating_value = round(
-                                                        ($training->participant_post_rating +
-                                                            $training->supervisor_post_rating) /
+                                                if ($evaluation) {
+                                                    if (
+                                                        $evaluation->participant_post_rating &&
+                                                        $evaluation->supervisor_post_rating
+                                                    ) {
+                                                        $post_rating_value = round(
+                                                            ($evaluation->participant_post_rating +
+                                                                $evaluation->supervisor_post_rating) /
+                                                                2,
                                                             2,
-                                                        2,
-                                                    );
-                                                } elseif ($training->participant_post_rating) {
-                                                    $post_rating_value = $training->participant_post_rating;
-                                                } elseif ($training->supervisor_post_rating) {
-                                                    $post_rating_value = $training->supervisor_post_rating;
+                                                        );
+                                                    } elseif ($evaluation->participant_post_rating) {
+                                                        $post_rating_value = $evaluation->participant_post_rating;
+                                                    } elseif ($evaluation->supervisor_post_rating) {
+                                                        $post_rating_value = $evaluation->supervisor_post_rating;
+                                                    }
                                                 }
                                             @endphp
                                             @if ($post_rating_value !== null)
@@ -409,9 +415,9 @@
                                         </td>
                                         <td>
                                             @php
-                                                $isParticipantPreEvaluated = $training->participant_pre_rating !== null;
-                                                $isParticipantPostEvaluated =
-                                                    $training->participant_post_rating !== null;
+                                                $evaluation = $training->evaluations->first();
+                                                $isParticipantPreEvaluated = $evaluation && $evaluation->participant_pre_rating !== null;
+                                                $isParticipantPostEvaluated = $evaluation && $evaluation->participant_post_rating !== null;
                                             @endphp
 
                                             @if ($training->status == 'Implemented')

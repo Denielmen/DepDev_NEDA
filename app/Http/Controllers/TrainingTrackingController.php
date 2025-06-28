@@ -26,11 +26,11 @@ class TrainingTrackingController extends Controller
             ->whereHas('participants', function ($query) use ($userId) {
                 $query->where('users.id', $userId);
             })
-            ->with(['participants' => function ($query) use ($userId) {
-                $query->where('users.id', $userId);
+            ->with(['evaluations' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
             }])
+            
             ->paginate(10);
-
         $participationTypes = \App\Models\ParticipationType::all();
 
         // Fetch and group materials by training_id
