@@ -567,7 +567,7 @@
                     }])
                     ->get();
 
-                // Group trainings by year (based on period_from/period_to), then by competency
+                // Group trainings by year (based on period_from/period_to), then by individual training
                 $yearlyAnalytics = [];
                 foreach ($allUserTrainings as $training) {
                     $competencyName = $training->competency->name ?? 'Unknown Competency';
@@ -593,53 +593,42 @@
                         $yearlyAnalytics[$year] = [];
                     }
 
-                    if (!isset($yearlyAnalytics[$year][$competencyName])) {
-                        $yearlyAnalytics[$year][$competencyName] = [
-                            'trainings' => [],
-                            'combined_rating' => 0,
-                            'count' => 0
-                        ];
-                    }
+                    // Create unique training identifier using training title and competency
+                    $trainingLabel = $training->title . ' (' . $competencyName . ')';
 
-                    $yearlyAnalytics[$year][$competencyName]['trainings'][] = $training;
-                    $yearlyAnalytics[$year][$competencyName]['count']++;
-                }
+                    // Get the evaluation for this specific user and training
+                    $evaluation = $training->evaluations->first();
+                    $trainingRating = 0;
 
-                // Calculate combined averages for each year/competency combination
-                foreach ($yearlyAnalytics as $year => &$competencies) {
-                    foreach ($competencies as $competency => &$data) {
-                        $totalRatings = [];
+                    if ($evaluation) {
+                        // Calculate average of available ratings for this specific training
+                        $availableRatings = [];
 
-                        foreach ($data['trainings'] as $training) {
-                            // Collect all available ratings for this training from the evaluation data
-                            $trainingRatings = [];
-
-                            // Get the evaluation for this specific user and training
-                            $evaluation = $training->evaluations->first();
-
-                            if ($evaluation) {
-                                if ($evaluation->participant_pre_rating !== null) {
-                                    $trainingRatings[] = $evaluation->participant_pre_rating;
-                                }
-                                if ($evaluation->participant_post_rating !== null) {
-                                    $trainingRatings[] = $evaluation->participant_post_rating;
-                                }
-                                if ($evaluation->supervisor_pre_rating !== null) {
-                                    $trainingRatings[] = $evaluation->supervisor_pre_rating;
-                                }
-                                if ($evaluation->supervisor_post_rating !== null) {
-                                    $trainingRatings[] = $evaluation->supervisor_post_rating;
-                                }
-                            }
-
-                            // Add all ratings to the total pool
-                            $totalRatings = array_merge($totalRatings, $trainingRatings);
+                        if ($evaluation->participant_pre_rating !== null) {
+                            $availableRatings[] = $evaluation->participant_pre_rating;
+                        }
+                        if ($evaluation->participant_post_rating !== null) {
+                            $availableRatings[] = $evaluation->participant_post_rating;
+                        }
+                        if ($evaluation->supervisor_pre_rating !== null) {
+                            $availableRatings[] = $evaluation->supervisor_pre_rating;
+                        }
+                        if ($evaluation->supervisor_post_rating !== null) {
+                            $availableRatings[] = $evaluation->supervisor_post_rating;
                         }
 
-                        // Calculate the overall average rating for this competency in this year
-                        // If no ratings available, set to 0 but still show the chart
-                        $data['combined_rating'] = count($totalRatings) > 0 ? round(array_sum($totalRatings) / count($totalRatings), 2) : 0;
+                        // Calculate average rating for this training
+                        if (count($availableRatings) > 0) {
+                            $trainingRating = round(array_sum($availableRatings) / count($availableRatings), 2);
+                        }
                     }
+
+                    // Store each training separately
+                    $yearlyAnalytics[$year][$trainingLabel] = [
+                        'training' => $training,
+                        'rating' => $trainingRating,
+                        'competency' => $competencyName
+                    ];
                 }
 
                 // Get the most recent 3 years (sort by year, handling year ranges)
@@ -665,10 +654,10 @@
                                     <h3 class="year-title">{{ $year }}</h3>
                                 </div>
 
-                                <!-- Single Chart for all competencies in this year -->
+                                <!-- Single Chart for all trainings in this year -->
                                 <div class="competency-chart-container">
                                     <div class="competency-chart-header">
-                                        <h5>Training Effectiveness by Competency</h5>
+                                        <h5>Training Effectiveness by Individual Training</h5>
                                     </div>
                                     <div class="chart-wrapper">
                                         <canvas id="chart_{{ \Illuminate\Support\Str::slug($year) }}" width="600" height="300"></canvas>
@@ -793,18 +782,18 @@
                     if (isset($yearlyAnalytics[$year])) {
                         $chartId = \Illuminate\Support\Str::slug($year);
 
-                        // Get competency names and their ratings for this year
-                        $competencyLabels = [];
-                        $competencyRatings = [];
+                        // Get training labels and their ratings for this year
+                        $trainingLabels = [];
+                        $trainingRatings = [];
 
-                        foreach ($yearlyAnalytics[$year] as $competencyName => $data) {
-                            $competencyLabels[] = $competencyName;
-                            $competencyRatings[] = $data['combined_rating'];
+                        foreach ($yearlyAnalytics[$year] as $trainingLabel => $data) {
+                            $trainingLabels[] = $trainingLabel;
+                            $trainingRatings[] = $data['rating'];
                         }
 
                         $chartData[$chartId] = [
-                            'labels' => $competencyLabels,
-                            'data' => $competencyRatings,
+                            'labels' => $trainingLabels,
+                            'data' => $trainingRatings,
                             'year' => $year
                         ];
                     }

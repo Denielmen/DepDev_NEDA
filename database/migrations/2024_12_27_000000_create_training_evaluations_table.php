@@ -35,6 +35,9 @@ return new class extends Migration
 
         // Migrate existing evaluation data from trainings table
         $this->migrateExistingEvaluations();
+
+        // Clear the old evaluation fields from trainings table after migration
+        $this->clearOldEvaluationFields();
     }
 
     /**
@@ -79,6 +82,21 @@ return new class extends Migration
                 );
             }
         }
+    }
+
+    /**
+     * Clear old evaluation fields from trainings table after migration.
+     */
+    private function clearOldEvaluationFields(): void
+    {
+        DB::table('trainings')->update([
+            'participant_pre_rating' => null,
+            'participant_post_rating' => null,
+            'supervisor_pre_rating' => null,
+            'supervisor_post_rating' => null,
+            'participant_post_evaluation' => null,
+            'supervisor_post_evaluation' => null,
+        ]);
     }
 
     /**
