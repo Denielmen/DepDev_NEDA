@@ -305,48 +305,14 @@
                                                     </button>
                                                 </form>
                                             </li>
-                                            <li>
-                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#addParticipantModal{{ $training->id }}">
-                                                    <i class="bi bi-person-plus"></i> Add Participant
-                                                </a>
-                                            </li>
+
                                         </ul>
                                     </div>
                                 </div>
                             </td>
                         </tr>
 
-                        <!-- Add Participant Modal -->
-                        <div class="modal fade" id="addParticipantModal{{ $training->id }}" tabindex="-1" aria-labelledby="addParticipantModalLabel{{ $training->id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="addParticipantModalLabel{{ $training->id }}">Add Participant to {{ $training->title }}</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('admin.training-plan.add-participant', $training->id) }}" method="POST">
-                                        @csrf
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label for="participant{{ $training->id }}" class="form-label">Select Participant</label>
-                                                <select class="form-select" id="participant{{ $training->id }}" name="user_id" required>
-                                                    <option value="">Select a participant...</option>
-                                                    @foreach(\App\Models\User::where('is_active', true)->get() as $user)
-                                                        @if(!$training->participants->contains($user->id))
-                                                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->position }})</option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Add Participant</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+
                         @endforeach
                     </tbody>
                 </table>

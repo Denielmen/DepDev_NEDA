@@ -51,8 +51,8 @@ class User extends Authenticatable
      */
     public function trainings()
     {
-        return $this->belongsToMany(Training::class, 'training_participant')
-                    ->withPivot('participation_type_id')
+        return $this->belongsToMany(Training::class, 'training_participants')
+                    ->withPivot('participation_type_id', 'year')
                     ->withTimestamps();
     }
 

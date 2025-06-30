@@ -364,8 +364,20 @@ class TrainingProfileController extends Controller
     {
         $search = $request->get('search', '');
         $page = $request->get('page', 1);
+        $all = $request->get('all', false);
+        $trainingId = $request->get('training_id', null);
 
         $query = User::where('is_active', true)->orderBy('last_name');
+
+        // Exclude users who are already participants in the specified training
+        if ($trainingId) {
+            $query->whereNotExists(function($q) use ($trainingId) {
+                $q->select(\DB::raw(1))
+                  ->from('training_participants')
+                  ->whereColumn('training_participants.user_id', 'users.id')
+                  ->where('training_participants.training_id', $trainingId);
+            });
+        }
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -374,6 +386,17 @@ class TrainingProfileController extends Controller
                   ->orWhere('position', 'like', "%{$search}%")
                   ->orWhere('division', 'like', "%{$search}%");
             });
+        }
+
+        if ($all) {
+            // Return all users without pagination for "Select All" functionality
+            $users = $query->get();
+            $participationTypes = ParticipationType::all();
+
+            return response()->json([
+                'users' => $users,
+                'participation_types' => $participationTypes
+            ]);
         }
 
         $users = $query->paginate(5, ['*'], 'page', $page);
