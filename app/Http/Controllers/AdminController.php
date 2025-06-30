@@ -17,20 +17,17 @@ class AdminController extends Controller
         $training = Training::findOrFail($training_id);
         $user = User::findOrFail($user_id);
 
-        // Get or create evaluation record for this training-user combination
-        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($training_id, $user_id);
-
         // Fix certificates that don't have training_id set
         // This will link certificates to trainings based on title and user
         $this->fixCertificateTrainingIds($training, $user);
 
-        return view('adminPanel.viewUserInfo', compact('training', 'user', 'evaluation'));
+        return view('adminPanel.viewUserInfo', compact('training', 'user'));
     }
 
-    public function viewUserInfoUnprog($training_id, $user_id)
+    public function viewUserInfoUnprog($id)
     {
-        $training = Training::findOrFail($training_id);
-        $user = User::findOrFail($user_id);
+        $training = Training::findOrFail($id);
+        $user = User::findOrFail($training->user_id); // Get the creator of the training
         return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
     }
     // public function viewUserInfoUnprog($training_id, $user_id)
