@@ -479,35 +479,12 @@
             const addSelectedParticipantsBtn = document.getElementById('addSelectedParticipantsBtn');
             const selectAllCheckbox = document.getElementById('selectAllParticipants');
             const removeAllSelectionBtn = document.getElementById('removeAllSelectionBtn');
-            const participantCheckboxes = document.querySelectorAll('.participant-checkbox');
 
-            // Handle Select All functionality
-            selectAllCheckbox.addEventListener('change', function() {
-                const isChecked = this.checked;
-                participantCheckboxes.forEach(checkbox => {
-                    checkbox.checked = isChecked;
-                });
-            });
+            // Global array to track all selected participants across pages
+            let globalSelectedParticipants = new Set();
 
-            // Handle individual checkbox changes to update Select All state
-            participantCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const checkedCount = document.querySelectorAll('.participant-checkbox:checked').length;
-                    const totalCount = participantCheckboxes.length;
-
-                    selectAllCheckbox.checked = checkedCount === totalCount;
-                    selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
-                });
-            });
-
-            // Handle Remove All Selection functionality
-            removeAllSelectionBtn.addEventListener('click', function() {
-                participantCheckboxes.forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                selectAllCheckbox.checked = false;
-                selectAllCheckbox.indeterminate = false;
-            });
+            // Initialize event listeners
+            initializeParticipantEventListeners();
 
             // Clear any pre-selected participants
             participantsSelect.innerHTML = '';
@@ -559,6 +536,12 @@
                         data.users.forEach(user => {
                             const row = createParticipantRow(user, data.participation_types);
                             tableBody.appendChild(row);
+                        });
+
+                        // Restore selection state for current page
+                        document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                            const userId = checkbox.getAttribute('data-user-id');
+                            checkbox.checked = globalSelectedParticipants.has(userId);
                         });
 
                         // Update pagination info
@@ -671,26 +654,42 @@
             // Event handler functions
             function handleSelectAll() {
                 const isChecked = this.checked;
-                document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
-                    checkbox.checked = isChecked;
-                });
-            }
 
-            function handleIndividualCheckbox() {
-                const checkedCount = document.querySelectorAll('.participant-checkbox:checked').length;
-                const totalCount = document.querySelectorAll('.participant-checkbox').length;
-                const selectAllCheckbox = document.getElementById('selectAllParticipants');
-
-                if (selectAllCheckbox) {
-                    selectAllCheckbox.checked = checkedCount === totalCount;
-                    selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+                if (isChecked) {
+                    // Select ALL participants across all pages
+                    selectAllParticipantsGlobally();
+                } else {
+                    // Deselect ALL participants
+                    globalSelectedParticipants.clear();
+                    document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    updateSelectAllState();
                 }
             }
 
+            function handleIndividualCheckbox() {
+                const userId = this.getAttribute('data-user-id');
+
+                if (this.checked) {
+                    globalSelectedParticipants.add(userId);
+                } else {
+                    globalSelectedParticipants.delete(userId);
+                }
+
+                updateSelectAllState();
+            }
+
             function handleRemoveAllSelection() {
+                // Clear global selection
+                globalSelectedParticipants.clear();
+
+                // Uncheck all visible checkboxes
                 document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
                     checkbox.checked = false;
                 });
+
+                // Update select all state
                 const selectAllCheckbox = document.getElementById('selectAllParticipants');
                 if (selectAllCheckbox) {
                     selectAllCheckbox.checked = false;
@@ -698,8 +697,67 @@
                 }
             }
 
+            function selectAllParticipantsGlobally() {
+                // Show loading
+                const loading = document.getElementById('participantLoading');
+                loading.style.display = 'block';
+
+                // Fetch all participants (without pagination)
+                const search = document.getElementById('participantSearch').value;
+                fetch(`{{ route('admin.getParticipants') }}?all=true&search=${encodeURIComponent(search)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Add all participants to global selection
+                        data.users.forEach(user => {
+                            globalSelectedParticipants.add(user.id.toString());
+                        });
+
+                        // Update current page checkboxes
+                        document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                            const userId = checkbox.getAttribute('data-user-id');
+                            checkbox.checked = globalSelectedParticipants.has(userId);
+                        });
+
+                        updateSelectAllState();
+                        loading.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error selecting all participants:', error);
+                        loading.style.display = 'none';
+                        alert('Error selecting all participants. Please try again.');
+                    });
+            }
+
+            function updateSelectAllState() {
+                const selectAllCheckbox = document.getElementById('selectAllParticipants');
+                const currentPageCheckboxes = document.querySelectorAll('.participant-checkbox');
+                const currentPageUserIds = Array.from(currentPageCheckboxes).map(cb => cb.getAttribute('data-user-id'));
+
+                const currentPageSelectedCount = currentPageUserIds.filter(id => globalSelectedParticipants.has(id)).length;
+                const totalCurrentPageCount = currentPageUserIds.length;
+
+                if (selectAllCheckbox) {
+                    if (currentPageSelectedCount === 0) {
+                        selectAllCheckbox.checked = false;
+                        selectAllCheckbox.indeterminate = false;
+                    } else if (currentPageSelectedCount === totalCurrentPageCount) {
+                        selectAllCheckbox.checked = globalSelectedParticipants.size > totalCurrentPageCount;
+                        selectAllCheckbox.indeterminate = !selectAllCheckbox.checked;
+                    } else {
+                        selectAllCheckbox.checked = false;
+                        selectAllCheckbox.indeterminate = true;
+                    }
+                }
+            }
+
             // Function to update the selected participants display and hidden inputs
             function updateSelectedParticipants() {
+                // Check if we have global selections that need validation
+                if (globalSelectedParticipants.size > 0) {
+                    updateSelectedParticipantsFromGlobal();
+                    return;
+                }
+
                 selectedParticipantsDiv.innerHTML = '';
                 // Clear the old hidden inputs before adding new ones
                 form.querySelectorAll('input[name="participants[]"], input[name^="participation_types["]').forEach(input => {
@@ -707,52 +765,64 @@
                 });
 
                 const selected = [];
+                const missingParticipationTypes = [];
+
                 // Get the period_from value to use as the year
                 let periodFromYear = parseInt(document.getElementById('period_from').value);
-                
+
                 // If period_from is less than 2025, set it to 2025
                 if (periodFromYear <=2025) {
                     periodFromYear = 2025;
                 }
-                
+
                 document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
                     const userId = checkbox.dataset.userId;
                     const participantRow = checkbox.closest('.participant-row');
                     const participationTypeSelect = participantRow.querySelector('.participation-type');
                     const participationTypeId = participationTypeSelect.value;
-                    const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
                     const userName = participantRow.querySelector('td').textContent.trim();
 
-                    // Only add if a participation type is selected and it's not the default empty option
-                    if (participationTypeId && participationTypeId !== '') {
-                        selected.push({
-                            id: userId,
-                            name: userName,
-                            participation_type_id: participationTypeId,
-                            participation_type_name: participationTypeName
-                        });
-
-                        // Add hidden inputs to the main form
-                        const participantInput = document.createElement('input');
-                        participantInput.type = 'hidden';
-                        participantInput.name = 'participants[]';
-                        participantInput.value = userId;
-                        form.appendChild(participantInput);
-
-                        const participationTypeInput = document.createElement('input');
-                        participationTypeInput.type = 'hidden';
-                        participationTypeInput.name = `participation_types[${userId}]`;
-                        participationTypeInput.value = participationTypeId;
-                        form.appendChild(participationTypeInput);
-                        
-                        // Add a hidden input for the year based on period_from (minimum 2025)
-                        const yearInput = document.createElement('input');
-                        yearInput.type = 'hidden';
-                        yearInput.name = `participant_years[${userId}]`;
-                        yearInput.value = periodFromYear;
-                        form.appendChild(yearInput);
+                    // Check if participation type is missing
+                    if (!participationTypeId || participationTypeId === '') {
+                        missingParticipationTypes.push(userName);
+                        return; // Skip this participant
                     }
+
+                    const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
+
+                    selected.push({
+                        id: userId,
+                        name: userName,
+                        participation_type_id: participationTypeId,
+                        participation_type_name: participationTypeName
+                    });
+
+                    // Add hidden inputs to the main form
+                    const participantInput = document.createElement('input');
+                    participantInput.type = 'hidden';
+                    participantInput.name = 'participants[]';
+                    participantInput.value = userId;
+                    form.appendChild(participantInput);
+
+                    const participationTypeInput = document.createElement('input');
+                    participationTypeInput.type = 'hidden';
+                    participationTypeInput.name = `participation_types[${userId}]`;
+                    participationTypeInput.value = participationTypeId;
+                    form.appendChild(participationTypeInput);
+
+                    // Add a hidden input for the year based on period_from (minimum 2025)
+                    const yearInput = document.createElement('input');
+                    yearInput.type = 'hidden';
+                    yearInput.name = `participant_years[${userId}]`;
+                    yearInput.value = periodFromYear;
+                    form.appendChild(yearInput);
                 });
+
+                // Show error message if there are missing participation types
+                if (missingParticipationTypes.length > 0) {
+                    alert('Please select participation Type');
+                    return; // Don't close modal
+                }
 
                 // Update the visual display
                 selected.forEach(participant => {
@@ -765,7 +835,6 @@
                             <span class="badge bg-info">${participant.participation_type_name}</span>
                         </div>
                         <div>
-                             ${/* We keep the remove button functionality for the displayed list outside the modal */''}
                             <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.id}">
                                 <i class="bi bi-x"></i> Remove
                             </button>
@@ -776,12 +845,136 @@
 
                 // Log the current state
                 console.log('Selected participants:', selected);
+
+                // Close modal only if we successfully added participants
+                if (selected.length > 0) {
+                    modal.hide();
+                }
+            }
+
+            // Function to handle global selection validation and processing
+            function updateSelectedParticipantsFromGlobal() {
+                const loading = document.getElementById('participantLoading');
+                loading.style.display = 'block';
+
+                // Get all participants data to validate selections
+                const search = document.getElementById('participantSearch').value;
+                fetch(`{{ route('admin.getParticipants') }}?all=true&search=${encodeURIComponent(search)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const selectedUsers = data.users.filter(user => globalSelectedParticipants.has(user.id.toString()));
+                        const missingParticipationTypes = [];
+                        const selected = [];
+
+                        // Get the period_from value to use as the year
+                        let periodFromYear = parseInt(document.getElementById('period_from').value);
+                        if (periodFromYear <= 2025) {
+                            periodFromYear = 2025;
+                        }
+
+                        selectedUsers.forEach(user => {
+                            const visibleParticipationSelect = document.querySelector(`select.participation-type[data-user-id="${user.id}"]`);
+                            let participationTypeId = '';
+
+                            if (visibleParticipationSelect) {
+                                participationTypeId = visibleParticipationSelect.value;
+                            }
+
+                            // Check if participation type is missing
+                            if (!participationTypeId) {
+                                missingParticipationTypes.push(`${user.last_name}, ${user.first_name} ${user.mid_init || ''}`);
+                                return; // Skip this user
+                            }
+
+                            const participationType = data.participation_types.find(type => type.id == participationTypeId);
+
+                            selected.push({
+                                id: user.id,
+                                name: `${user.last_name}, ${user.first_name} ${user.mid_init || ''}`,
+                                participation_type_id: participationTypeId,
+                                participation_type_name: participationType ? participationType.name : 'Unknown'
+                            });
+                        });
+
+                        // Show error message if there are missing participation types
+                        if (missingParticipationTypes.length > 0) {
+                            loading.style.display = 'none';
+                            alert('Please select Participation Type');
+                            return;
+                        }
+
+                        // Clear old inputs
+                        selectedParticipantsDiv.innerHTML = '';
+                        form.querySelectorAll('input[name="participants[]"], input[name^="participation_types["]').forEach(input => {
+                            input.remove();
+                        });
+
+                        // Add selected participants
+                        selected.forEach(participant => {
+                            // Add hidden inputs to the main form
+                            const participantInput = document.createElement('input');
+                            participantInput.type = 'hidden';
+                            participantInput.name = 'participants[]';
+                            participantInput.value = participant.id;
+                            form.appendChild(participantInput);
+
+                            const participationTypeInput = document.createElement('input');
+                            participationTypeInput.type = 'hidden';
+                            participationTypeInput.name = `participation_types[${participant.id}]`;
+                            participationTypeInput.value = participant.participation_type_id;
+                            form.appendChild(participationTypeInput);
+
+                            const yearInput = document.createElement('input');
+                            yearInput.type = 'hidden';
+                            yearInput.name = `participant_years[${participant.id}]`;
+                            yearInput.value = periodFromYear;
+                            form.appendChild(yearInput);
+
+                            // Add to visual display
+                            const participantDiv = document.createElement('div');
+                            participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
+
+                            participantDiv.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2">${participant.name}</span>
+                                    <span class="badge bg-info">${participant.participation_type_name}</span>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.id}">
+                                        <i class="bi bi-x"></i> Remove
+                                    </button>
+                                </div>
+                            `;
+                            selectedParticipantsDiv.appendChild(participantDiv);
+                        });
+
+                        // Clear global selection
+                        globalSelectedParticipants.clear();
+                        document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                            checkbox.checked = false;
+                        });
+                        updateSelectAllState();
+
+                        loading.style.display = 'none';
+                        modal.hide(); // Close the modal after successful addition
+                    })
+                    .catch(error => {
+                        console.error('Error processing participants:', error);
+                        loading.style.display = 'none';
+                        alert('Error processing participants. Please try again.');
+                    });
             }
 
              // Handle Add Selected Participants button click in modal footer
             addSelectedParticipantsBtn.addEventListener('click', function() {
+                // Check if any participants are selected
+                if (globalSelectedParticipants.size === 0 && document.querySelectorAll('.participant-checkbox:checked').length === 0) {
+                    alert('Please select at least one participant.');
+                    return;
+                }
+
                 updateSelectedParticipants();
-                modal.hide(); // Close the modal after adding
+                // Note: modal.hide() is now called inside updateSelectedParticipants functions only on success
             });
 
             // Handle Remove Participant button clicks from the displayed list outside the modal
@@ -897,10 +1090,7 @@
                 }
             });
 
-            // Event listener for modal close to update display based on selections
-            participantModal.addEventListener('hidden.bs.modal', function () {
-                 updateSelectedParticipants();
-            });
+
 
              // Initial call to setup the display based on any old data (if page was reloaded with errors)
              // This part might need adjustment depending on how old input is handled after validation errors.

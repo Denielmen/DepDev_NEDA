@@ -285,6 +285,20 @@
                 </button>
             </div>
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
          <div class="row">
             <!-- User Info Card -->
             <div class="col-md-4">
@@ -320,6 +334,22 @@
                     <form id="employeeForm" action="{{ route('admin.employee.update', $user->id) }}" method="POST">
                         @csrf
                         @method('PUT')
+                        <div id="nameEdit" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Employee ID</label>
+                            <input type="text" class="form-control" name="user_id" value="{{ $user->user_id }}" readonly>
+                        </div>
                         <div class="row mb-3">
                             <div class="col-md-8">
                                 <label class="form-label">Salary Grade</label>

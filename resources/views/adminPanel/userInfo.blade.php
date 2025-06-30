@@ -411,6 +411,10 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Employee ID</label>
+                            <input type="text" class="form-control" name="user_id" value="{{ $user->user_id }}" readonly>
+                        </div>
                         <div class="row mb-3">
                             <div class="col-md-8">
                                 <label class="form-label">Salary Grade</label>

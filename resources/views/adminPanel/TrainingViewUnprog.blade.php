@@ -170,6 +170,21 @@
                             <td>{{ $training->competency->name ?? '' }}</td>
                         </tr>
                         <tr>
+                            <td class="label">Uploaded/Added by:</td>
+                            <td>
+                                @php
+                                    $uploader = 'N/A';
+                                    if ($training->user_id) {
+                                        $uploaderUser = \App\Models\User::find($training->user_id);
+                                        if ($uploaderUser) {
+                                            $uploader = $uploaderUser->last_name . ', ' . $uploaderUser->first_name . ' ' . ($uploaderUser->mid_init ?? '');
+                                        }
+                                    }
+                                @endphp
+                                {{ $uploader }}
+                            </td>
+                        </tr>
+                        <tr>
                             <td class="label">User Role:</td>
                             <td>
                                 @php
@@ -198,6 +213,36 @@
                         <tr>
                             <td class="label">Status:</td>
                             <td>{{ $training->status ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Participants:</td>
+                            <td>
+                                @php
+                                    // Force a fresh reload of the participants relationship with pivot data
+                                    $training->load(['participants' => function($query) {
+                                        $query->withPivot('participation_type_id', 'year')
+                                              ->orderBy('last_name')->orderBy('first_name');
+                                    }]);
+                                @endphp
+
+                                @forelse ($training->participants as $participant)
+                                    <div class="mb-1">
+                                        {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}
+                                        @if($participant->pivot && $participant->pivot->participation_type_id)
+                                            <span class="badge bg-info">
+                                                {{ $participationTypes[$participant->pivot->participation_type_id]->name ?? 'N/A' }}
+                                            </span>
+                                        @endif
+                                        @if($participant->pivot && $participant->pivot->year)
+                                            <span class="badge bg-secondary">
+                                                CY-{{ $participant->pivot->year }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div class="text-muted">No participants found.</div>
+                                @endforelse
+                            </td>
                         </tr>
                     </table>
                 </div>

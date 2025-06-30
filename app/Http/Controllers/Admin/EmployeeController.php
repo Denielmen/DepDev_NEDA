@@ -18,6 +18,7 @@ class EmployeeController extends Controller
             Log::info('Update request data:', $request->all());
             
             $validated = $request->validate([
+                'user_id' => 'required|string|max:255|unique:users,user_id,' . $id,
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
                 'salary_grade' => 'required|string|max:255',
