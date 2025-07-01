@@ -455,11 +455,7 @@
                                                 <span class="disabled-button-wrapper" {!! $preButtonAttributes !!}>
                                                     <a href="#"
                                                         class="btn btn-primary btn-sm {!! $preButtonClass !!}"
-                                                        data-bs-toggle="modal" data-bs-target="#preEvaluationModal"
-                                                        data-training-id="{{ $training->id }}"
-                                                        data-evaluation-type="participant_pre"
-                                                        {{ $isParticipantPreEvaluated ? 'tabindex=-1 aria-disabled=true' : '' }}
-                                                        {!! $activePreButtonAttributes !!}>
+                                                        @if($isParticipantPreEvaluated) tabindex="-1" aria-disabled="true" style="pointer-events: none; opacity: 0.65;" @else data-bs-toggle="modal" data-bs-target="#preEvaluationModal" data-training-id="{{ $training->id }}" data-evaluation-type="participant_pre" {!! $activePreButtonAttributes !!} @endif>
                                                         Pre-Evaluation
                                                     </a>
                                                 </span>

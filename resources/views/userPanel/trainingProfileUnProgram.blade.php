@@ -190,9 +190,9 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="tab-buttons">
-                        <a href="{{ route('user.training.profile.program') }}" class="tab-button">Programmed</a>
-                        <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
+                <div class="tab-buttons">
+                    <a href="{{ route('user.training.profile.program') }}" class="tab-button">Programmed</a>
+                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                     </div>
                     <!-- Filter Dropdown -->
                     <div class="dropdown ms-2">
@@ -214,7 +214,7 @@
                     <form method="GET" action="{{ route('user.training.profile.unprogrammed') }}">
                         <input type="text" name="search" placeholder="Search by title or competency..." value="{{ request('search') }}">
                         <button type="submit" style="border:none;background:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);">
-                            <i class="bi bi-search search-icon"></i>
+                    <i class="bi bi-search search-icon"></i>
                         </button>
                     </form>
                 </div>

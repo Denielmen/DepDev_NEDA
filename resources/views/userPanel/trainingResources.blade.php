@@ -215,39 +215,39 @@
                             </ul>
                         </div>
                         <form class="search-bar ms-2 flex-grow-1 mb-0" method="GET" style="max-width: 400px;">
-                            <div class="input-group">
+                        <div class="input-group">
                                 <input type="text" class="form-control" name="search" placeholder="Search by title, competency, source, or date..." value="{{ request('search') }}">
-                                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
-                            </div>
-                        </form>
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                        </div>
+                    </form>
                     </div>
                     <div class="tab-content" id="resourceTabsContent">
                         <!-- Materials Tab -->
                         <div class="tab-pane fade{{ request()->get('tab', 'materials') == 'materials' ? ' show active' : '' }}" id="materials" role="tabpanel" aria-labelledby="materials-tab">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Title</th>
-                                        <th class="text-center">Competency</th>
-                                        <th class="text-center">Source</th>
-                                        <th class="text-center">Date Uploaded</th>
-                                        <th class="text-center">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($materials as $material)
-                                        <tr>
-                                            <td class="text-center">{{ $material->title }}</td>
-                                            <td class="text-center">{{ $material->competency->name ?? 'N/A' }}</td>
-                                            <td class="text-center">{{ $material->source }}</td>
-                                            <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
-                                            <td class="text-center">
-                                                <button class="btn btn-primary btn-sm me-1"
-                                                    @if (!$material->file_path) disabled @endif
-                                                    onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
-                                                    title="@if (!$material->file_path) No file available @endif">
-                                                    <i class="fas fa-download"></i> Download File
-                                                </button>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Title</th>
+                                <th class="text-center">Competency</th>
+                                <th class="text-center">Source</th>
+                                <th class="text-center">Date Uploaded</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($materials as $material)
+                                <tr>
+                                    <td class="text-center">{{ $material->title }}</td>
+                                    <td class="text-center">{{ $material->competency->name ?? 'N/A' }}</td>
+                                    <td class="text-center">{{ $material->source }}</td>
+                                    <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-primary btn-sm me-1"
+                                            @if (!$material->file_path) disabled @endif
+                                            onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                            title="@if (!$material->file_path) No file available @endif">
+                                            <i class="fas fa-download"></i> Download File
+                                        </button>
                                             </td>
                                         </tr>
                                     @empty
@@ -283,16 +283,16 @@
                                             <td class="text-center">{{ $link->source }}</td>
                                             <td class="text-center">{{ $link->created_at->format('Y-m-d') }}</td>
                                             <td class="text-center">
-                                                <button class="btn btn-info btn-sm"
+                                        <button class="btn btn-info btn-sm"
                                                     @if (!$link->link) disabled @endif
                                                     onclick="@if ($link->link) window.open('{{ $link->link }}', '_blank') @else alert('There\'s no link pasted.') @endif"
                                                     title="@if (!$link->link) No link available @endif">
-                                                    <i class="fas fa-external-link-alt"></i> Open Link
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
+                                            <i class="fas fa-external-link-alt"></i> Open Link
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
                                             <td colspan="5" class="text-center">No links found.</td>
                                         </tr>
                                     @endforelse
