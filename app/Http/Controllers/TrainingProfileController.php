@@ -22,11 +22,8 @@ class TrainingProfileController extends Controller
         $sort = $request->input('sort');
         $order = $request->input('order', 'asc');
 
-        $trainingsQuery = Training::where(function ($q) use ($search, $userId) {
-            $q->where('type', 'Program')
-              ->whereHas('participants', function ($participantQuery) use ($userId) {
-                  $participantQuery->where('users.id', $userId);
-              });
+        $trainingsQuery = Training::where(function ($q) use ($search) {
+            $q->where('type', 'Program');
             if ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('title', 'like', "%$search%")
