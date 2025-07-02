@@ -311,8 +311,8 @@
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <div class="tab-buttons">
-                        <a href="#" class="tab-button active" id="active-tab" onclick="filterUsersByStatus('active'); return false;">Active</a>
-                        <a href="#" class="tab-button" id="inactive-tab" onclick="filterUsersByStatus('inactive'); return false;">Disable</a>
+                        <a href="{{ route('admin.participants', ['status' => 'active']) }}" class="tab-button {{ $status === 'active' ? 'active' : '' }}" id="active-tab">Active</a>
+                        <a href="{{ route('admin.participants', ['status' => 'inactive']) }}" class="tab-button {{ $status === 'inactive' ? 'active' : '' }}" id="inactive-tab">Disable</a>
                     </div>
                     <div>
                         <label for="sort-by" class="me-2">Sort by</label>
@@ -413,24 +413,23 @@
             const filter = input.value.toUpperCase();
             const table = document.querySelector('.table-container table');
             const tr = table.getElementsByTagName('tr');
-            const activeTab = document.querySelector('.tab-button.active').id;
-            const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
             for (let i = 1; i < tr.length; i++) {
+                const idCell = tr[i].getElementsByTagName('td')[1];
                 const nameCell = tr[i].getElementsByTagName('td')[2];
-                const statusCell = tr[i].getElementsByTagName('td')[0]; // Status column
+                const positionCell = tr[i].getElementsByTagName('td')[3];
 
-                if (nameCell && statusCell) {
-                    const nameValue = nameCell.textContent || nameCell.innerText;
-                    const statusText = statusCell.textContent || statusCell.innerText;
+                if (idCell && nameCell && positionCell) {
+                    const idText = idCell.textContent || idCell.innerText;
+                    const nameText = nameCell.textContent || nameCell.innerText;
+                    const positionText = positionCell.textContent || positionCell.innerText;
 
-                    // Only search within the current tab's status (active or inactive)
-                    if (statusText.includes(statusFilter)) {
-                        if (nameValue.toUpperCase().indexOf(filter) > -1) {
-                            tr[i].style.display = '';
-                        } else {
-                            tr[i].style.display = 'none';
-                        }
+                    const matchesSearch = idText.toUpperCase().indexOf(filter) > -1 ||
+                                        nameText.toUpperCase().indexOf(filter) > -1 ||
+                                        positionText.toUpperCase().indexOf(filter) > -1;
+
+                    if (matchesSearch) {
+                        tr[i].style.display = '';
                     } else {
                         tr[i].style.display = 'none';
                     }
@@ -443,54 +442,25 @@ function sortUsers() {
     const position = select.value;
     const table = document.querySelector('.table-container table');
     const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
-    const activeTab = document.querySelector('.tab-button.active').id;
-    const statusFilter = activeTab === 'active-tab' ? 'Active' : 'Inactive';
 
+    // Filter by position only (status is handled server-side)
     tr.forEach(row => {
-        const userPosition = row.getElementsByTagName('td')[3].textContent; // Position column
-        const statusText = row.getElementsByTagName('td')[0].textContent; // Status column
+        const positionCell = row.getElementsByTagName('td')[3];
 
-        // Only sort within the current tab's status (active or inactive)
-        if (statusText.includes(statusFilter)) {
-            if (position === 'all' || userPosition.trim() === position.trim()) {
+        if (positionCell) {
+            const positionText = positionCell.textContent.trim();
+
+            // Show row if it matches the position filter
+            if (position === 'all' || positionText === position) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
             }
-        } else {
-            row.style.display = 'none';
         }
     });
 }
 
-        function filterUsersByStatus(status) {
-    // Update active tab
-    document.getElementById('active-tab').classList.remove('active');
-    document.getElementById('inactive-tab').classList.remove('active');
-    document.getElementById(status + '-tab').classList.add('active');
 
-    // Filter table rows
-    const table = document.querySelector('.table-container table');
-    const tr = table.getElementsByTagName('tr');
-
-    for (let i = 1; i < tr.length; i++) {
-        const statusCell = tr[i].getElementsByTagName('td')[0];
-        if (statusCell) {
-            const statusText = statusCell.textContent.trim();
-            if ((status === 'active' && statusText.includes('Active')) ||
-                (status === 'inactive' && statusText.includes('Inactive'))) {
-                tr[i].style.display = '';
-            } else {
-                tr[i].style.display = 'none';
-            }
-        }
-    }
-}
-
-// Initialize to show only active users when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    filterUsersByStatus('active');
-});
     </script>
 </body>
 </html>
