@@ -112,6 +112,7 @@ class AdminController extends Controller
     {
         $allTrainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
             ->orderBy('core_competency')
+            ->where('type', 'Program') 
             ->get();
 
         // Group the trainings by core_competency and sort each group by created_at descending
@@ -128,6 +129,7 @@ class AdminController extends Controller
     {
         $trainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2025', 'participants_2026', 'participants_2027'])
             ->orderBy('core_competency')
+            ->where('type', 'Program') 
             ->get();
 
         return Excel::download(new TrainingsExport($trainings), 'training_report.xlsx');

@@ -340,7 +340,22 @@
                                     <tr>
                                         <td>{{ $training->title }}</td>
                                         <td>
-                                            {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
+                                            @php
+                                                // Check if current user has completed pre-evaluation
+                                                $userEvaluation = $training->evaluations->where('user_id', Auth::id())->first();
+                                                $hasPreEvaluation = $userEvaluation && $userEvaluation->participant_pre_rating !== null;
+
+                                                // Check if current user has completed tracking (has implementation dates)
+                                                $hasTracking = $training->implementation_date_from !== null;
+
+                                                // Determine status for current user - simplified to only Implemented or Not yet Implemented
+                                                if ($hasPreEvaluation && $hasTracking) {
+                                                    $userStatus = 'Implemented';
+                                                } else {
+                                                    $userStatus = 'Not yet Implemented';
+                                                }
+                                            @endphp
+                                            {{ $userStatus }}
                                         </td>
                                         <td>
                                             @php
@@ -418,9 +433,13 @@
                                                 $evaluation = $training->evaluations->first();
                                                 $isParticipantPreEvaluated = $evaluation && $evaluation->participant_pre_rating !== null;
                                                 $isParticipantPostEvaluated = $evaluation && $evaluation->participant_post_rating !== null;
+
+                                                // Check if current user has completed both pre-evaluation and tracking
+                                                $hasTracking = $training->implementation_date_from !== null;
+                                                $isImplementedForUser = $isParticipantPreEvaluated && $hasTracking;
                                             @endphp
 
-                                            @if ($training->status == 'Implemented')
+                                            @if ($isImplementedForUser)
                                                 @php
                                                     $postButtonClass = $isParticipantPostEvaluated
                                                         ? 'disabled-button'

@@ -507,7 +507,7 @@
             const linkMaterialsInput = document.getElementById('linkMaterials');
 
             // Training data fetched from the database
-            const trainings = @json($programmedTrainings); // Replace with actual data from the backend
+            const trainings = @json($programmedTrainings->items()); // Get the actual training items from pagination
             const competencies = @json($competencies); // Replace with actual data from the backend
 
             // Validate link input on form submit
@@ -526,23 +526,22 @@
                 // ...existing code...
             });
 
-            // Populate competencies dropdown
-            competencySelect.innerHTML = '<option value="" disabled selected>Select Competency</option>';
-            competencies.forEach(competency => {
-                const option = document.createElement('option');
-                option.value = competency.id;
-                option.textContent = competency.name;
-                competencySelect.appendChild(option);
-            });
+            // Competencies are already populated by server-side rendering
+            // No need to repopulate them via JavaScript
 
             // Handle training selection
             alignedTrainingSelect.addEventListener('change', function() {
                 const selectedTrainingId = this.value;
+                const coreCompetencySelect = document.getElementById('core_competency');
+
+                console.log('Selected Training ID:', selectedTrainingId);
+                console.log('Available trainings:', trainings);
 
                 if (selectedTrainingId === 'other') {
                     // Clear fields for "Other" selection
                     trainingTitleInput.value = '';
                     competencySelect.value = '';
+                    coreCompetencySelect.value = '';
                     roleSelect.value = '';
                     noOfHoursInput.value = '';
                     expensesInput.value = '';
@@ -555,19 +554,43 @@
                 // Find the selected training
                 const selectedTraining = trainings.find(training => training.id == selectedTrainingId);
 
+                console.log('Found training:', selectedTraining);
+
                 if (selectedTraining) {
                     // Populate fields with training data
-                    trainingTitleInput.value = selectedTraining.title;
-                    competencySelect.value = selectedTraining.competency_id || '';
-                    const selectedRole = @json($participationTypes).find(type => type.id ==
-                        selectedTraining.participation_type_id);
-                    roleSelect.value = selectedRole ? selectedRole.id : '';
+                    trainingTitleInput.value = selectedTraining.title || '';
+
+                    // Set competency
+                    if (selectedTraining.competency_id) {
+                        competencySelect.value = selectedTraining.competency_id;
+                    }
+
+                    // Set core competency (classification)
+                    if (selectedTraining.core_competency) {
+                        coreCompetencySelect.value = selectedTraining.core_competency;
+                    }
+
+                    // Set role (participation type)
+                    if (selectedTraining.participants && selectedTraining.participants.length > 0) {
+                        const participationTypeId = selectedTraining.participants[0].pivot.participation_type_id;
+                        roleSelect.value = participationTypeId;
+                    }
+
                     noOfHoursInput.value = selectedTraining.no_of_hours || '';
                     expensesInput.value = selectedTraining.budget || '';
                     providerInput.value = selectedTraining.provider || '';
-                    dateFromInput.value = selectedTraining.implementation_date_from || '';
-                    dateToInput.value = selectedTraining.implementation_date_to || selectedTraining
-                        .implementation_date_from || '';
+
+                    // Handle dates
+                    if (selectedTraining.implementation_date_from) {
+                        dateFromInput.value = selectedTraining.implementation_date_from;
+                    }
+                    if (selectedTraining.implementation_date_to) {
+                        dateToInput.value = selectedTraining.implementation_date_to;
+                    }
+
+                    console.log('Fields populated successfully');
+                } else {
+                    console.log('Training not found!');
                 }
             });
 
@@ -675,44 +698,6 @@
             });
 
 
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const alignedTrainingSelect = document.getElementById('alignedTraining');
-            const coreCompetencySelect = document.getElementById('core_competency');
-            const roleSelect = document.getElementById('role');
-            const trainings = @json($programmedTrainings);
-
-            alignedTrainingSelect.addEventListener('change', function() {
-                const selectedId = this.value;
-                const selectedTraining = trainings.find(t => t.id == selectedId);
-
-                // Auto-fill core competency
-                if (selectedTraining && selectedTraining.core_competency) {
-                    for (let i = 0; i < coreCompetencySelect.options.length; i++) {
-                        if (coreCompetencySelect.options[i].value === selectedTraining.core_competency) {
-                            coreCompetencySelect.selectedIndex = i;
-                            break;
-                        }
-                    }
-                } else {
-                    coreCompetencySelect.selectedIndex = 0;
-                }
-
-                // Auto-fill role (participation_type_id)
-                if (selectedTraining && selectedTraining.participants && selectedTraining.participants.length > 0) {
-                    const participationTypeId = selectedTraining.participants[0].pivot.participation_type_id;
-                    for (let i = 0; i < roleSelect.options.length; i++) {
-                        if (roleSelect.options[i].value == participationTypeId) {
-                            roleSelect.selectedIndex = i;
-                            break;
-                        }
-                    }
-                } else {
-                    roleSelect.selectedIndex = 0;
-                }
-            });
         });
     </script>
 </body>
