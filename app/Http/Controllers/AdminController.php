@@ -133,14 +133,26 @@ class AdminController extends Controller
         return Excel::download(new TrainingsExport($trainings), 'training_report.xlsx');
     }
 
-    public function participants()
+    public function participants(Request $request)
     {
-        $users = User::orderBy('is_active', 'desc')
-            ->orderBy('last_name', 'asc')
-            ->paginate(5); // Show 15 users per page
+        $status = $request->get('status', 'active'); // Default to active
+
+        $query = User::query();
+
+        // Filter by status
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
+
+        $users = $query->orderBy('last_name', 'asc')
+            ->paginate(5)
+            ->appends(['status' => $status]); // Preserve status in pagination links
+
         $positions = User::distinct()->pluck('position')->filter()->values()->toArray();
 
-        return view('adminPanel.listOfUser', compact('users', 'positions'));
+        return view('adminPanel.listOfUser', compact('users', 'positions', 'status'));
     }
 
     public function welcomeAdmin()

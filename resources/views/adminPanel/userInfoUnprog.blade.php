@@ -346,7 +346,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3">
+                        <div id="employeeIdEdit" class="mb-3" style="display: none;">
                             <label class="form-label">Employee ID</label>
                             <input type="text" class="form-control" name="user_id" value="{{ $user->user_id }}" readonly>
                         </div>
@@ -527,6 +527,8 @@
             // Show name edit fields and hide display
             nameDisplay.style.display = 'none';
             nameEdit.style.display = 'block';
+            // Show employee ID edit field
+            document.getElementById('employeeIdEdit').style.display = 'block';
             editButton.style.display = 'none';
             saveCancelButtons.style.display = 'block';
         });
@@ -546,6 +548,8 @@
             // Show name display and hide edit fields
             nameDisplay.style.display = 'block';
             nameEdit.style.display = 'none';
+            // Hide employee ID edit field
+            document.getElementById('employeeIdEdit').style.display = 'none';
             editButton.style.display = 'block';
             saveCancelButtons.style.display = 'none';
         });
