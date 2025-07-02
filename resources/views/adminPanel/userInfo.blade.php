@@ -484,7 +484,24 @@
                                 @endif</td>
                         <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
-                        <td>{{ $training->status }}</td>
+                        <td>
+                            @php
+                                // Check if this user has completed pre-evaluation for this training
+                                $userEvaluation = $training->evaluations->where('user_id', $user->id)->first();
+                                $hasPreEvaluation = $userEvaluation && $userEvaluation->participant_pre_rating !== null;
+
+                                // Check if this user has completed tracking (has implementation dates)
+                                $hasTracking = $training->implementation_date_from !== null;
+
+                                // Determine status for this specific user
+                                if ($hasPreEvaluation && $hasTracking) {
+                                    $userStatus = 'Implemented';
+                                } else {
+                                    $userStatus = 'Not yet Implemented';
+                                }
+                            @endphp
+                            {{ $userStatus }}
+                        </td>
                         <td>
                             @php
                                 $participationTypeName = 'N/A';

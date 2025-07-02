@@ -22,14 +22,21 @@ class TrainingTrackingController extends Controller
         $competencies = \App\Models\Competency::paginate(10); // <-- Add pagination here
         $userId = Auth::id();
         $programmedTrainings = Training::where('type', 'Program')
-            ->where('status', '!=', 'Implemented')
             ->whereHas('participants', function ($query) use ($userId) {
                 $query->where('users.id', $userId);
             })
-            ->with(['evaluations' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])
-            
+            ->whereHas('evaluations', function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                      ->whereNotNull('participant_pre_rating');
+            })
+            ->whereNull('implementation_date_from') // Only show trainings not yet tracked by this user
+            ->with([
+                'evaluations' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                },
+                'competency',
+                'participants'
+            ])
             ->paginate(10);
         $participationTypes = \App\Models\ParticipationType::all();
 
@@ -92,7 +99,7 @@ class TrainingTrackingController extends Controller
         } else {
             $training = Training::find($request->input('courseTitle'));
             if ($training) {
-                $training->status = 'Implemented';
+                // Don't change global status - only update implementation dates
                 $training->implementation_date_from = $request->input('implementation_date_from');
                 $training->core_competency = $request->input('core_competency'); // Add this
                 $training->implementation_date_to = $request->input('implementation_date_to');

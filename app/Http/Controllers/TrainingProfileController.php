@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TrainingsExport;
 
 class TrainingProfileController extends Controller
 {
@@ -22,9 +25,11 @@ class TrainingProfileController extends Controller
         $sort = $request->input('sort');
         $order = $request->input('order', 'asc');
 
-        $trainingsQuery = Training::where(function ($q) use ($search) {
-            $q->where('type', 'Program');
-            if ($search) {
+        $trainingsQuery = Training::where('type', 'Program')
+            ->whereHas('participants', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            })
+            ->when($search, function ($q) use ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('title', 'like', "%$search%")
                         ->orWhereHas('competency', function ($subQ) use ($search) {
@@ -51,11 +56,16 @@ class TrainingProfileController extends Controller
                             ->orWhere('period_to', 'like', "%$search%");
                     }
                 });
-            }
-        })
-        ->with(['participants' => function ($query) use ($userId) {
-            $query->where('users.id', $userId);
-        }, 'competency']);
+            })
+            ->with([
+                'participants' => function ($query) use ($userId) {
+                    $query->where('users.id', $userId);
+                },
+                'competency',
+                'evaluations' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }
+            ]);
 
         // Sorting logic
         if ($sort === 'title') {
@@ -913,6 +923,35 @@ class TrainingProfileController extends Controller
         $competencyLabels = Competency::whereIn('id', $competencyIds)->pluck('name', 'id');
 
         return view('userPanel.trainingEffectiveness', compact('trainings', 'competencyCharts', 'competencyLabels'));
+    }
+
+    public function export($id)
+    {
+        $userId = Auth::id();
+
+        // Use the same logic as the program() method to get programmed trainings
+        $trainings = Training::where('type', 'Program')
+            ->whereHas('participants', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            })
+            ->with([
+                'participants' => function ($query) use ($userId) {
+                    $query->where('users.id', $userId);
+                },
+                'competency',
+                'evaluations' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }
+            ])
+            ->orderBy('core_competency')
+            ->orderBy('title')
+            ->get();
+
+        // Group trainings by core competency
+        $groupedTrainings = $trainings->groupBy('core_competency');
+
+        $pdf = Pdf::loadView('userPanel.training-export-pdf', compact('groupedTrainings'));
+        return $pdf->download('my-programmed-trainings.pdf');
     }
 }
 

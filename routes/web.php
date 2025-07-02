@@ -164,9 +164,15 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             ->whereHas('participants', function ($query) use ($user) {
                 $query->where('training_participants.user_id', $user->id);
             })
-            ->with(['participants' => function ($query) use ($user) {
-                $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
-            }])
+            ->with([
+                'participants' => function ($query) use ($user) {
+                    $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
+                },
+                'competency',
+                'evaluations' => function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                }
+            ])
             ->orderBy('created_at', 'desc')
             ->paginate(5); // Show 10 trainings per page
         return view('adminPanel.userInfo', compact('user', 'programmedTrainings'));

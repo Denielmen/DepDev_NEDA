@@ -273,7 +273,22 @@
                             <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
                             <td class="text-center">
-                                {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
+                                @php
+                                    // Check if current user has completed pre-evaluation
+                                    $userEvaluation = $training->evaluations->where('user_id', Auth::id())->first();
+                                    $hasPreEvaluation = $userEvaluation && $userEvaluation->participant_pre_rating !== null;
+
+                                    // Check if current user has completed tracking (has implementation dates)
+                                    $hasTracking = $training->implementation_date_from !== null;
+
+                                    // Determine status for current user - simplified to only Implemented or Not yet Implemented
+                                    if ($hasPreEvaluation && $hasTracking) {
+                                        $userStatus = 'Implemented';
+                                    } else {
+                                        $userStatus = 'Not yet Implemented';
+                                    }
+                                @endphp
+                                {{ $userStatus }}
                             </td>
                             <td class="text-center">
                                 @php

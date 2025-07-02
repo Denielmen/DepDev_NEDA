@@ -27,7 +27,7 @@ class SearchExport implements FromCollection, WithHeadings, WithMapping
             'Type',
             'Title/Name',
             'Competency/Position',
-            'Related Information'
+            'Participants/Division',
         ];
     }
 
@@ -40,7 +40,13 @@ class SearchExport implements FromCollection, WithHeadings, WithMapping
             case 'training':
                 $details = $result->competency->name ?? 'N/A';
                 $relatedInfo = $result->participants->map(function($participant) {
-                    return $participant['name'];
+                    // Handle both array format and User model format
+                    if (is_array($participant)) {
+                        return $participant['name'] ?? 'N/A';
+                    } else {
+                        // User model format
+                        return $participant->last_name . ', ' . $participant->first_name . ' ' . $participant->mid_init . '.';
+                    }
                 })->implode(', ');
                 break;
 
