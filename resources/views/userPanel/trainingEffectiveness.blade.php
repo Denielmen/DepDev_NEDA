@@ -230,6 +230,27 @@
                 min-width: 320px;
             }
         }
+
+        /* Fix pagination styling */
+        .pagination {
+            margin: 0;
+        }
+
+        .pagination .page-link {
+            padding: 0.375rem 0.75rem;
+            margin: 0 0.125rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+        }
+
+        .pagination .page-item {
+            margin: 0 2px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
     </style>
 </head>
 
@@ -494,6 +515,48 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination Links -->
+                    <div class="d-flex justify-content-end mt-3">
+                        <nav aria-label="Training pagination">
+                            <ul class="pagination pagination-sm">
+                                {{-- Previous Page Link --}}
+                                @if ($trainings->onFirstPage())
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Previous</span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $trainings->previousPageUrl() }}">Previous</a>
+                                    </li>
+                                @endif
+
+                                {{-- Pagination Elements --}}
+                                @foreach ($trainings->getUrlRange(1, $trainings->lastPage()) as $page => $url)
+                                    @if ($page == $trainings->currentPage())
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ $page }}</span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                        </li>
+                                    @endif
+                                @endforeach
+
+                                {{-- Next Page Link --}}
+                                @if ($trainings->hasMorePages())
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $trainings->nextPageUrl() }}">Next</a>
+                                    </li>
+                                @else
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Next</span>
+                                    </li>
+                                @endif
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>

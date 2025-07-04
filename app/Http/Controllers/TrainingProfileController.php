@@ -875,7 +875,7 @@ class TrainingProfileController extends Controller
             ->with(['evaluations' => function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             }])
-            ->paginate(5);
+            ->paginate(10);
 
         // Get all competencies used in user's trainings for charts
         $allUserTrainings = Training::where('type', 'Program')
