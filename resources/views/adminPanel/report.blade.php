@@ -156,8 +156,11 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="mb-0">Training Plan</h2>
                 <div class="search-box">
-                    <i class="bi bi-search search-icon"></i>
-                    <input type="text" placeholder="Search...">
+                    <form method="GET" action="{{ route('admin.reports') }}">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search by Core Competency...">
+                        <button type="submit" style="display: none;"></button>
+                    </form>
                 </div>
             </div>
             <div class="table-container">
@@ -215,5 +218,27 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-submit search form when user types (with delay)
+        let searchTimeout;
+        const searchInput = document.querySelector('input[name="search"]');
+        const searchForm = searchInput.closest('form');
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                searchForm.submit();
+            }, 500); // Wait 500ms after user stops typing
+        });
+
+        // Also submit on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimeout);
+                searchForm.submit();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -78,7 +78,7 @@
         }
         .search-box {
             position: relative;
-            width: 300px;
+            width: 320px;
         }
         .search-box input {
             width: 100%;

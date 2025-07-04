@@ -91,20 +91,27 @@ class AdminController extends Controller
         ]);
     }
 
-    public function reports()
+    public function reports(Request $request)
     {
+        $search = $request->input('search');
+
         // Fetch all trainings with their relationships
-        $allTrainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
-            ->orderBy('core_competency')
-            ->where('type', 'Program') // Filter for programmed trainings
-            ->get();
+        $query = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
+            ->where('type', 'Program'); // Filter for programmed trainings
+
+        // Add search functionality for core competency
+        if ($search) {
+            $query->where('core_competency', 'like', "%{$search}%");
+        }
+
+        $allTrainings = $query->orderBy('core_competency')->get();
 
         // Group the trainings by core_competency and sort each group by created_at descending
         $trainings = $allTrainings->groupBy('core_competency')->map(function ($group) {
             return $group->sortByDesc('created_at');
         });
 
-        return view('adminPanel.report', compact('trainings'));
+        return view('adminPanel.report', compact('trainings', 'search'));
     }
 
     // Export Reports to PDF
