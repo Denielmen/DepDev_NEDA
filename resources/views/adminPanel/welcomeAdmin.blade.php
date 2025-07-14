@@ -120,7 +120,7 @@
             margin-right: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
         }
 
         /* .menu-cards::before {
@@ -133,16 +133,16 @@
         } */
         .flex {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: stretch;
             gap: 30px;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .col-md-4 {
-            flex: 0 0 350px;
-            max-width: 350px;
+            flex: 0 0 450px;
+            max-width: 450px;
         }
 
         .card {
@@ -156,6 +156,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            width: 100%;
         }
 
         .card a {

@@ -262,7 +262,7 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>List of Training Plans</h2>
+                <h2>Training Program - Unprogrammed</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
