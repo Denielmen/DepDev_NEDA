@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>DEPDEV Learning and Development System</title>
+    <title>DEPDEV Learning and Development System - Reset Password</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -54,7 +54,7 @@
             border-radius: 5px;
         }
 
-        .left-panel .btn-login {
+        .left-panel .btn-primary {
             background-color: #004080;
             color: white;
             border: none;
@@ -63,12 +63,8 @@
             width: 100%;
         }
 
-        .left-panel .btn-login:hover {
+        .left-panel .btn-primary:hover {
             background-color: #0059b3;
-        }
-
-        .left-panel .form-check-label {
-            color: white;
         }
 
         .right-panel {
@@ -119,6 +115,10 @@
             padding: 1rem;
             filter: brightness(1.9);
         }
+
+        .alert {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 
@@ -126,38 +126,44 @@
     <div class="login-container">
         <!-- Left Panel -->
         <div class="left-panel">
-            <h1>Login to your account</h1>
-            <p>Accessing this system requires a login. Please enter your credentials below.</p>
-            <form method="POST" action="{{ route('login') }}">
+            <h1>Reset Password</h1>
+            <p>Enter your new password below.</p>
+            
+            <!-- Validation Errors -->
+            @if ($errors->any())
+                <div class="alert alert-danger" role="alert">
+                    @foreach ($errors->all() as $error)
+                        {{ $error }}
+                    @endforeach
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('password.store') }}">
                 @csrf
 
-                <!-- User ID -->
+                <!-- Password Reset Token -->
+                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+                <!-- Email Address -->
                 <div class="mb-3">
-                    <label for="user_id" class="form-label">User ID</label>
-                    <input type="text" id="user_id" name="user_id" class="form-control" required autofocus>
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $request->email) }}" required autofocus>
                 </div>
 
                 <!-- Password -->
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="position-relative">
-                        <input type="password" id="password" name="password" class="form-control" required>
-                        <button type="button" class="btn position-absolute" id="togglePassword"
-                                style="right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; color: #6c757d;">
-                            <i class="bi bi-eye" id="eyeIcon"></i>
-                        </button>
-                    </div>
+                    <label for="password" class="form-label">New Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
                 </div>
 
-                <!-- Forgot Password Link -->
-                <div class="mb-3 text-end">
-                    <a href="{{ route('password.request') }}" style="color: #87CEEB; text-decoration: none; font-size: 0.9rem;">
-                        Forgot your password?
-                    </a>
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label for="password_confirmation" class="form-label">Confirm Password</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-login">Log In</button>
+                <button type="submit" class="btn btn-primary">Reset Password</button>
             </form>
         </div>
 
@@ -174,23 +180,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordField = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                eyeIcon.classList.remove('bi-eye');
-                eyeIcon.classList.add('bi-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                eyeIcon.classList.remove('bi-eye-slash');
-                eyeIcon.classList.add('bi-eye');
-            }
-        });
-    </script>
 </body>
 
 </html>

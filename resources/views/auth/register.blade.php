@@ -192,13 +192,22 @@
                         </div>
                     </div>
 
-                    <!-- Position -->
+                    <!-- User ID and Email -->
                     <div class="row mb-3">
                         <div class="col">
                             <label for="user_id" class="form-label">User ID <span class="dot">*</span></label>
                             <input type="text" id="user_id" name="user_id" class="form-control"
                                 value="{{ old('user_id') }}" required>
                         </div>
+                        <div class="col">
+                            <label for="email" class="form-label">Email Address <span class="dot">*</span></label>
+                            <input type="email" id="email" name="email" class="form-control"
+                                value="{{ old('email') }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Position -->
+                    <div class="row mb-3">
                         <div class="col">
                             <label for="position" class="form-label">Position <span class="dot">*</span></label>
                             <input type="text" id="position" name="position" class="form-control"
