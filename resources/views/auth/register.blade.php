@@ -223,9 +223,11 @@
                                 value="{{ old('years_in_position') }}" required>
                         </div>
                         <div class="col">
-                            <label for="years_in_csc" class="form-label">Years in Goverment <span class="dot">*</span></label>
-                            <input type="number" id="years_in_csc" name="years_in_csc" class="form-control"
-                                value="{{ old('years_in_csc') }}" required>
+                            <label for="government_start_date" class="form-label">Government Start Date <span class="dot">*</span></label>
+                            <input type="date" id="government_start_date" name="government_start_date" class="form-control"
+                                value="{{ old('government_start_date') }}" required>
+                            <input type="hidden" id="years_in_csc" name="years_in_csc" value="{{ old('years_in_csc') }}">
+                            <small class="text-muted">Years in Government: <span id="years_display">0</span> years</small>
                         </div>
                     </div>
 
@@ -282,14 +284,24 @@
                     <!-- Password -->
                     <div class="mb-3">
                         <label for="password" class="form-label">Password <span class="dot">*</span></label>
-                        <input type="password" id="password" name="password" class="form-control" required>
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" class="form-control" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="passwordIcon"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="mb-3">
                         <label for="password_confirmation" class="form-label">Confirm Password <span class="dot">*</span></label>
-                        <input type="password" id="password_confirmation" name="password_confirmation"
-                            class="form-control" required>
+                        <div class="input-group">
+                            <input type="password" id="password_confirmation" name="password_confirmation"
+                                class="form-control" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirmation">
+                                <i class="bi bi-eye" id="passwordConfirmationIcon"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Submit Button -->
@@ -301,6 +313,86 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function calculateYearsInGovernment() {
+                const startDate = document.getElementById('government_start_date').value;
+                const yearsDisplay = document.getElementById('years_display');
+                const yearsInput = document.getElementById('years_in_csc');
+
+                if (startDate) {
+                    const start = new Date(startDate);
+                    const today = new Date();
+
+                    // Calculate the difference in years
+                    let years = today.getFullYear() - start.getFullYear();
+                    const monthDiff = today.getMonth() - start.getMonth();
+
+                    // Adjust if the current date hasn't reached the anniversary yet
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < start.getDate())) {
+                        years--;
+                    }
+
+                    // Ensure years is not negative
+                    years = Math.max(0, years);
+
+                    yearsDisplay.textContent = years;
+                    yearsInput.value = years;
+                } else {
+                    yearsDisplay.textContent = '0';
+                    yearsInput.value = '';
+                }
+            }
+
+            // Add event listener when the page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                const governmentStartDate = document.getElementById('government_start_date');
+
+                // Calculate on page load if there's already a value
+                calculateYearsInGovernment();
+
+                // Calculate when date changes
+                governmentStartDate.addEventListener('change', calculateYearsInGovernment);
+                governmentStartDate.addEventListener('input', calculateYearsInGovernment);
+
+                // Password toggle functionality
+                const togglePassword = document.getElementById('togglePassword');
+                const password = document.getElementById('password');
+                const passwordIcon = document.getElementById('passwordIcon');
+
+                togglePassword.addEventListener('click', function() {
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+
+                    // Toggle icon
+                    if (type === 'password') {
+                        passwordIcon.classList.remove('bi-eye-slash');
+                        passwordIcon.classList.add('bi-eye');
+                    } else {
+                        passwordIcon.classList.remove('bi-eye');
+                        passwordIcon.classList.add('bi-eye-slash');
+                    }
+                });
+
+                // Password confirmation toggle functionality
+                const togglePasswordConfirmation = document.getElementById('togglePasswordConfirmation');
+                const passwordConfirmation = document.getElementById('password_confirmation');
+                const passwordConfirmationIcon = document.getElementById('passwordConfirmationIcon');
+
+                togglePasswordConfirmation.addEventListener('click', function() {
+                    const type = passwordConfirmation.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordConfirmation.setAttribute('type', type);
+
+                    // Toggle icon
+                    if (type === 'password') {
+                        passwordConfirmationIcon.classList.remove('bi-eye-slash');
+                        passwordConfirmationIcon.classList.add('bi-eye');
+                    } else {
+                        passwordConfirmationIcon.classList.remove('bi-eye');
+                        passwordConfirmationIcon.classList.add('bi-eye-slash');
+                    }
+                });
+            });
+        </script>
 </body>
 
 </html>

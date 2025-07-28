@@ -226,7 +226,7 @@
 
 
                     <div class="form-group row mb-3">
-                        <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period From ') }}<span class="dot">*</span></label>
+                        <label for="period_from" class="col-md-4 col-form-label text-md-right">{{ __('Period From ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="period_from" type="number" min="2000" max="2100" class="form-control @error('period_from') is-invalid @enderror" name="period_from" value="{{ old('period_from') }}" required onchange="setPeriodTo()" placeholder="YYYY">
                             @error('period_from')
@@ -238,7 +238,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="period_to" class="col-md-4 col-form-label text-md-right">{{ __('Three-Year Period To ') }}<span class="dot">*</span></label>
+                        <label for="period_to" class="col-md-4 col-form-label text-md-right">{{ __('Period To ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="period_to" type="number" min="2000" max="2100" class="form-control @error('period_to') is-invalid @enderror" name="period_to" value="{{ old('period_to') }}" required placeholder="YYYY">
                             @error('period_to')

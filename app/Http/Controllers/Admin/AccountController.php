@@ -30,4 +30,17 @@ class AccountController extends Controller
 
         return redirect()->back()->with('success', 'User status updated successfully');
     }
+
+    /**
+     * Delete a user from the database.
+     */
+    public function deleteUser(User $user)
+    {
+        $userName = $user->first_name . ' ' . $user->last_name;
+
+        // Delete the user from database
+        $user->delete();
+
+        return redirect()->back()->with('success', 'The user ' . $userName . ' is successfully deleted.');
+    }
 }

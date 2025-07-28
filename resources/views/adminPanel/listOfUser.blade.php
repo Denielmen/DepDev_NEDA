@@ -186,6 +186,14 @@
             background-color: #c82333;
             color: white;
         }
+        .action-btn.delete {
+            background-color: #6c757d;
+            color: white;
+        }
+        .action-btn.delete:hover {
+            background-color: #5a6268;
+            color: white;
+        }
         .tab-buttons {
             display: inline-flex;
             gap: 5px;
@@ -296,6 +304,12 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <div class="list-title">
                 <h2>List of Employees</h2>
             </div>
@@ -332,7 +346,7 @@
                                 <th style="width: 15%;">User ID</th>
                                 <th style="width: 25%;">Name</th>
                                 <th style="width: 25%;">Position</th>
-                                <th style="width: 20%;">Action</th>
+                                <th style="width: 30%;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -354,6 +368,13 @@
                                         @method('PATCH')
                                         <button type="submit" class="action-btn {{ $user->is_active ? 'disable' : 'enable' }}">
                                             <i class="bi bi-toggle-{{ $user->is_active ? 'on' : 'off' }}"></i> {{ $user->is_active ? 'Disable' : 'Enable' }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.deleteUser', $user->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="action-btn delete" onclick="return confirm('Are you sure you want to delete {{ $user->first_name }} {{ $user->last_name }}? This action cannot be undone.')">
+                                            <i class="bi bi-trash"></i> Delete
                                         </button>
                                     </form>
                                 </td>

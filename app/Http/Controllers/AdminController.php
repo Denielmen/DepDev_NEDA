@@ -156,7 +156,7 @@ class AdminController extends Controller
         }
 
         $users = $query->orderBy('last_name', 'asc')
-            ->paginate(5)
+            ->paginate(10)
             ->appends(['status' => $status]); // Preserve status in pagination links
 
         $positions = User::distinct()->pluck('position')->filter()->values()->toArray();
