@@ -153,13 +153,23 @@
                 <!-- Password -->
                 <div class="mb-3">
                     <label for="password" class="form-label">New Password</label>
-                    <input type="password" id="password" name="password" class="form-control" required>
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" class="form-control" required>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="bi bi-eye" id="passwordIcon"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Confirm Password -->
                 <div class="mb-3">
                     <label for="password_confirmation" class="form-label">Confirm Password</label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
+                    <div class="input-group">
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirmation">
+                            <i class="bi bi-eye" id="passwordConfirmationIcon"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Submit Button -->
@@ -180,6 +190,48 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password toggle functionality
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+
+            togglePassword.addEventListener('click', function() {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+
+                // Toggle icon
+                if (type === 'password') {
+                    passwordIcon.classList.remove('bi-eye-slash');
+                    passwordIcon.classList.add('bi-eye');
+                } else {
+                    passwordIcon.classList.remove('bi-eye');
+                    passwordIcon.classList.add('bi-eye-slash');
+                }
+            });
+
+            // Password confirmation toggle functionality
+            const togglePasswordConfirmation = document.getElementById('togglePasswordConfirmation');
+            const passwordConfirmation = document.getElementById('password_confirmation');
+            const passwordConfirmationIcon = document.getElementById('passwordConfirmationIcon');
+
+            togglePasswordConfirmation.addEventListener('click', function() {
+                const type = passwordConfirmation.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordConfirmation.setAttribute('type', type);
+
+                // Toggle icon
+                if (type === 'password') {
+                    passwordConfirmationIcon.classList.remove('bi-eye-slash');
+                    passwordConfirmationIcon.classList.add('bi-eye');
+                } else {
+                    passwordConfirmationIcon.classList.remove('bi-eye');
+                    passwordConfirmationIcon.classList.add('bi-eye-slash');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

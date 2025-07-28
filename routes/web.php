@@ -204,6 +204,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('admin.profile.destroy');
     Route::patch('/users/{user}/toggle-status', [App\Http\Controllers\Admin\AccountController::class, 'toggleStatus'])
         ->name('admin.toggleUserStatus');
+    Route::delete('/users/{user}/delete', [App\Http\Controllers\Admin\AccountController::class, 'deleteUser'])
+        ->name('admin.deleteUser');
     Route::get('/training-details/{training_id}/user/{user_id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('admin.viewUserInfo');
     Route::get('/training-details/unprogrammed/{training_id}/user/{user_id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('admin.viewUserInfoUnprog');
     Route::post('/fix-certificates', [App\Http\Controllers\AdminController::class, 'fixAllCertificates'])->name('admin.fixCertificates');

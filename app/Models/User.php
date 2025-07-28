@@ -20,6 +20,7 @@ class User extends Authenticatable
         'position',
         'years_in_position',
         'years_in_csc',
+        'government_start_date',
         'division',
         'salary_grade',
         'role',
