@@ -115,12 +115,13 @@
         .menu-cards {
             padding: 4rem;
             position: relative;
-            margin-left: 270px;
+            margin-left: 70px;
             /* Adjusted to account for the sidebar width */
             margin-right: 0;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            gap: 30px;
         }
 
         /* .menu-cards::before {
@@ -136,23 +137,23 @@
             justify-content: flex-start;
             align-items: stretch;
             gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
+            flex-wrap: nowrap;
+            width: 100%;
         }
 
         .col-md-4 {
-            flex: 0 0 450px;
-            max-width: 450px;
+            flex: 0 0 400px;
+            max-width: 400px;
         }
 
         .card {
             background-color: white;
             border-radius: 15px;
-            padding: 1.5rem;
+            padding: 2rem 2.5rem;
             margin-bottom: 1rem;
             box-shadow: 0px -7px 1px 0px #003366;
             transition: transform 0.2s;
-            height: 150px;
+            height: 120px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -173,13 +174,15 @@
         .card h5 {
             color: #003366;
             font-weight: bold;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
 
         .card p {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin: 0;
+            line-height: 1.3;
         }
 
         .user-menu {
