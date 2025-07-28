@@ -168,14 +168,24 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="competency" class="form-label">Competency</label>
-                            <select class="form-control" id="competency" name="competency_id" required>
+                            <select class="form-control @error('competency_id') is-invalid @enderror" id="competency" name="competency_id" required onchange="toggleCompetencyInputEdit()">
                                 <option value="">Select Competency</option>
                                 @foreach($competencies as $competency)
                                     <option value="{{ $competency->id }}" {{ $training->competency_id == $competency->id ? 'selected' : '' }}>
                                         {{ $competency->name }}
                                     </option>
                                 @endforeach
+                                <option value="others" {{ old('competency_id') == 'others' ? 'selected' : '' }}>Others</option>
                             </select>
+                            <input type="text" class="form-control mt-2 @error('competency_input') is-invalid @enderror"
+                                id="competency_input_edit" name="competency_input"
+                                placeholder="Enter custom competency" value="{{ old('competency_input') }}" style="display: none;">
+                            @error('competency_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @error('competency_input')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         {{-- <div class="col-md-6">
                             <label for="implementation_date_from" class="form-label">Year of Implementation:</label>
@@ -932,6 +942,33 @@
                     button.closest('.d-flex').remove();
                 }
             });
+
+        });
+
+        // Function to toggle competency input field - moved outside DOMContentLoaded
+        function toggleCompetencyInputEdit() {
+            const competencySelect = document.getElementById('competency');
+            const competencyInput = document.getElementById('competency_input_edit');
+
+            if (competencySelect && competencyInput) {
+                if (competencySelect.value === 'others') {
+                    competencySelect.style.display = 'none';
+                    competencyInput.style.display = 'block';
+                    competencyInput.required = true;
+                    competencyInput.focus();
+                } else {
+                    competencySelect.style.display = 'block';
+                    competencyInput.style.display = 'none';
+                    competencyInput.required = false;
+                }
+            }
+        }
+
+        // Call on page load to set initial state
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                toggleCompetencyInputEdit();
+            }, 100);
         });
     </script>
 </body>

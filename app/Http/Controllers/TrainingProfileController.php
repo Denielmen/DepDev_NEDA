@@ -201,7 +201,8 @@ class TrainingProfileController extends Controller
 
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'competency_id' => 'required|exists:competencies,id',
+                'competency_id' => 'required',
+                'competency_input' => 'required_if:competency_id,others|nullable|string|max:255',
                 'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
                 'period_from' => 'required|integer|digits:4',
                 'period_to' => 'required|integer|digits:4|gte:period_from',
@@ -221,6 +222,24 @@ class TrainingProfileController extends Controller
                 'participant_years' => 'nullable|array',
                 'participant_years.*' => 'integer|in:2025,2026,2027'
             ]);
+
+            // Handle custom competency
+            if ($validated['competency_id'] === 'others') {
+                // Check if competency already exists
+                $existingCompetency = Competency::where('name', $validated['competency_input'])->first();
+
+                if ($existingCompetency) {
+                    $competencyId = $existingCompetency->id;
+                } else {
+                    // Create new competency
+                    $newCompetency = Competency::create([
+                        'name' => $validated['competency_input'],
+                        'description' => 'Custom competency created by user'
+                    ]);
+                    $competencyId = $newCompetency->id;
+                }
+                $validated['competency_id'] = $competencyId;
+            }
 
             // Additional validation for participants and participation types
             if ($request->has('participants') && !empty($request->participants)) {
@@ -303,7 +322,8 @@ class TrainingProfileController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'competency_id' => 'required|exists:competencies,id',
+            'competency_id' => 'required',
+            'competency_input' => 'required_if:competency_id,others|nullable|string|max:255',
             'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
             'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
             'period_from' => 'required|integer|digits:4',
@@ -323,6 +343,25 @@ class TrainingProfileController extends Controller
             'participant_years' => 'required|array',
         ]);
 
+        // Handle custom competency
+        if ($validated['competency_id'] === 'others') {
+            // Check if competency already exists
+            $existingCompetency = Competency::where('name', $validated['competency_input'])->first();
+
+            if ($existingCompetency) {
+                $competencyId = $existingCompetency->id;
+            } else {
+                // Create new competency
+                $newCompetency = Competency::create([
+                    'name' => $validated['competency_input'],
+                    'description' => 'Custom competency created by user'
+                ]);
+                $competencyId = $newCompetency->id;
+            }
+        } else {
+            $competencyId = $validated['competency_id'];
+        }
+
         foreach ($validated['participants'] as $participantId) {
             if (
                 !isset($validated['participation_types'][$participantId]) ||
@@ -336,7 +375,7 @@ class TrainingProfileController extends Controller
         try {
             $training = Training::create([
                 'title' => $validated['title'],
-                'competency_id' => $validated['competency_id'],
+                'competency_id' => $competencyId,
                 'core_competency' => $validated['core_competency'] === 'Others' ? $validated['core_competency_input'] : $validated['core_competency'],
                 'period_from' => $validated['period_from'],
                 'period_to' => $validated['period_to'],

@@ -207,15 +207,24 @@
                     <div class="form-group row mb-3">
                         <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
-                            <select id="competency" class="form-control @error('competency_id') is-invalid @enderror" name="competency_id" required>
+                            <select id="competency" class="form-control @error('competency_id') is-invalid @enderror" name="competency_id" required onchange="toggleCompetencyInput()">
                                 <option value="">Select Competency</option>
                                 @foreach($competencies as $competency)
                                     <option value="{{ $competency->id }}" {{ old('competency_id') == $competency->id ? 'selected' : '' }}>
                                         {{ $competency->name }}
                                     </option>
                                 @endforeach
+                                <option value="others" {{ old('competency_id') == 'others' ? 'selected' : '' }}>Others</option>
                             </select>
+                            <input type="text" class="form-control mt-2 @error('competency_input') is-invalid @enderror"
+                                id="competency_input" name="competency_input"
+                                placeholder="Enter custom competency" value="{{ old('competency_input') }}" style="display: none;">
                             @error('competency_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                            @error('competency_input')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -250,7 +259,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget ') }}<span class="dot">*</span></label>
+                        <label for="budget" class="col-md-4 col-form-label text-md-right">{{ __('Budget ') }}</label>
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-text">₱</span>
@@ -265,7 +274,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Total Number of Hours ') }}<span class="dot">*</span></label>
+                        <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Total Number of Hours ') }}</label>
                         <div class="col-md-6">
                             <input id="no_of_hours" type="number" class="form-control @error('no_of_hours') is-invalid @enderror" name="no_of_hours" value="{{ old('no_of_hours') }}">
                             @error('no_of_hours')
@@ -278,7 +287,7 @@
 
 
                     <div class="form-group row mb-3">
-                        <label for="provider" class="col-md-4 col-form-label text-md-right">{{ __('Learning Service Provider ') }}<span class="dot">*</span></label>
+                        <label for="provider" class="col-md-4 col-form-label text-md-right">{{ __('Learning Service Provider ') }}</label>
                         <div class="col-md-6">
                             <input id="provider" type="text" class="form-control @error('provider') is-invalid @enderror" name="provider" value="{{ old('provider') }}">
                             @error('provider')
@@ -1056,7 +1065,8 @@
                 const formData = new FormData(form);
                 console.log('Form data:', {
                     title: formData.get('title'),
-                    competency_id: formData.get('competency_id'),
+                    competency_id: formData.get('competency_id') === 'others' ? 'others' : formData.get('competency_id'),
+                    competency_input: formData.get('competency_input'),
                     core_competency: formData.get('core_competency') === 'Others' ? formData.get('core_competency_input') : formData.get('core_competency'), // Get the correct core competency value
                     period_from: formData.get('period_from'),
                     period_to: formData.get('period_to'),
@@ -1130,9 +1140,26 @@
              // The form submission logic already handles this by checking the select value.
         }
 
+        function toggleCompetencyInput() {
+            const competencySelect = document.getElementById('competency');
+            const competencyInput = document.getElementById('competency_input');
+
+            if (competencySelect.value === 'others') {
+                competencySelect.style.display = 'none';
+                competencyInput.style.display = 'block';
+                competencyInput.required = true;
+                competencyInput.focus();
+            } else {
+                competencySelect.style.display = 'block';
+                competencyInput.style.display = 'none';
+                competencyInput.required = false;
+            }
+        }
+
         // Call on page load to set initial state
         document.addEventListener('DOMContentLoaded', function() {
             toggleCoreCompetencyInput();
+            toggleCompetencyInput();
         });
 
         function searchParticipants() {

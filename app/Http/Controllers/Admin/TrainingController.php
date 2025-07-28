@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Training;
+use App\Models\Competency;
 use Illuminate\Http\Request;
 
 class TrainingController extends Controller
 {
     public function index()
     {
-        $competencies = \App\Models\Competency::all();
+        $competencies = Competency::all();
         $trainings = Training::where('type', 'Program')->get();
         return view('adminPanel.trainingPlan', compact('trainings', 'competencies'));
     }
@@ -23,14 +24,16 @@ class TrainingController extends Controller
 
     public function create()
     {
-        return view('adminPanel.trainingPlanCreate');
+        $competencies = Competency::all();
+        return view('adminPanel.trainingPlanCreate', compact('competencies'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'competency_id' => 'required|exists:competencies,id',
+            'competency_id' => 'required',
+            'competency_input' => 'required_if:competency_id,others|nullable|string|max:255',
             'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
             'period_from' => 'required|integer|digits:4',
             'period_to' => 'required|integer|digits:4|gte:period_from',
@@ -50,7 +53,30 @@ class TrainingController extends Controller
             'participation_types.*' => 'exists:participation_types,id'
         ]);
 
-        $training = Training::create($request->all());
+        // Handle custom competency
+        if ($request->competency_id === 'others') {
+            // Check if competency already exists
+            $existingCompetency = Competency::where('name', $request->competency_input)->first();
+
+            if ($existingCompetency) {
+                $competencyId = $existingCompetency->id;
+            } else {
+                // Create new competency
+                $newCompetency = Competency::create([
+                    'name' => $request->competency_input,
+                    'description' => 'Custom competency created by user'
+                ]);
+                $competencyId = $newCompetency->id;
+            }
+        } else {
+            $competencyId = $request->competency_id;
+        }
+
+        // Prepare training data with the correct competency_id
+        $trainingData = $request->all();
+        $trainingData['competency_id'] = $competencyId;
+
+        $training = Training::create($trainingData);
 
         // Attach participants with their participation types
         foreach ($request->participants as $participantId) {
