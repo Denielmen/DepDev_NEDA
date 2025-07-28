@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>DEPDEV Learning and Development System</title>
+    <title>DEPDEV Learning and Development System - Forgot Password</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -54,7 +54,7 @@
             border-radius: 5px;
         }
 
-        .left-panel .btn-login {
+        .left-panel .btn-primary {
             background-color: #004080;
             color: white;
             border: none;
@@ -63,12 +63,22 @@
             width: 100%;
         }
 
-        .left-panel .btn-login:hover {
+        .left-panel .btn-primary:hover {
             background-color: #0059b3;
         }
 
-        .left-panel .form-check-label {
+        .left-panel .btn-secondary {
+            background-color: #6c757d;
             color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .left-panel .btn-secondary:hover {
+            background-color: #5a6268;
         }
 
         .right-panel {
@@ -119,6 +129,10 @@
             padding: 1rem;
             filter: brightness(1.9);
         }
+
+        .alert {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 
@@ -126,38 +140,39 @@
     <div class="login-container">
         <!-- Left Panel -->
         <div class="left-panel">
-            <h1>Login to your account</h1>
-            <p>Accessing this system requires a login. Please enter your credentials below.</p>
-            <form method="POST" action="{{ route('login') }}">
+            <h1>Forgot Password</h1>
+            <p>Enter your email address and we'll send you a link to reset your password.</p>
+            
+            <!-- Session Status -->
+            @if (session('status'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            <!-- Validation Errors -->
+            @if ($errors->any())
+                <div class="alert alert-danger" role="alert">
+                    @foreach ($errors->all() as $error)
+                        {{ $error }}
+                    @endforeach
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('password.email') }}">
                 @csrf
 
-                <!-- User ID -->
+                <!-- Email Address -->
                 <div class="mb-3">
-                    <label for="user_id" class="form-label">User ID</label>
-                    <input type="text" id="user_id" name="user_id" class="form-control" required autofocus>
-                </div>
-
-                <!-- Password -->
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="position-relative">
-                        <input type="password" id="password" name="password" class="form-control" required>
-                        <button type="button" class="btn position-absolute" id="togglePassword"
-                                style="right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none; color: #6c757d;">
-                            <i class="bi bi-eye" id="eyeIcon"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Forgot Password Link -->
-                <div class="mb-3 text-end">
-                    <a href="{{ route('password.request') }}" style="color: #87CEEB; text-decoration: none; font-size: 0.9rem;">
-                        Forgot your password?
-                    </a>
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-login">Log In</button>
+                <button type="submit" class="btn btn-primary">Send Password Reset Link</button>
+                
+                <!-- Back to Login -->
+                <a href="{{ route('login') }}" class="btn btn-secondary">Back to Login</a>
             </form>
         </div>
 
@@ -174,23 +189,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordField = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                eyeIcon.classList.remove('bi-eye');
-                eyeIcon.classList.add('bi-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                eyeIcon.classList.remove('bi-eye-slash');
-                eyeIcon.classList.add('bi-eye');
-            }
-        });
-    </script>
 </body>
 
 </html>

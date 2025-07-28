@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -12,6 +13,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'user_id',
+        'email',
         'last_name',
         'first_name',
         'mid_init',
@@ -89,5 +91,13 @@ class User extends Authenticatable
     public function getFullNameAttribute()
     {
         return $this->last_name . ', ' . $this->first_name . ($this->mid_init ? ' ' . $this->mid_init : '');
+    }
+
+    /**
+     * Send the password reset notification.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

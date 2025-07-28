@@ -30,6 +30,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'user_id' => 'required|string|unique:users,user_id', // add by deniel
+            'email' => 'required|string|email|max:255|unique:users,email',
             'last_name' => 'required|string|max:50',
             'first_name' => 'required|string|max:50',
             'mid_init' => 'nullable|string|max:10',
@@ -47,6 +48,7 @@ class RegisteredUserController extends Controller
         // Create the user in the database
         $user = User::create([
             'user_id' => $request->user_id, // Use the user-provided ID add by Deniel
+            'email' => $request->email,
             'last_name' => $request->last_name,
             'first_name' => $request->first_name,
             'mid_init' => $request->mid_init,
