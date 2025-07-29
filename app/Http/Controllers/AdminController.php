@@ -145,6 +145,7 @@ class AdminController extends Controller
     public function participants(Request $request)
     {
         $status = $request->get('status', 'active'); // Default to active
+        $search = $request->get('search', ''); // Get search parameter
 
         $query = User::query();
 
@@ -155,13 +156,22 @@ class AdminController extends Controller
             $query->where('is_active', false);
         }
 
+        // Add search functionality
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
         $users = $query->orderBy('last_name', 'asc')
             ->paginate(10)
-            ->appends(['status' => $status]); // Preserve status in pagination links
+            ->appends(['status' => $status, 'search' => $search]); // Preserve both status and search in pagination links
 
         $positions = User::distinct()->pluck('position')->filter()->values()->toArray();
 
-        return view('adminPanel.listOfUser', compact('users', 'positions', 'status'));
+        return view('adminPanel.listOfUser', compact('users', 'positions', 'status', 'search'));
     }
 
     public function welcomeAdmin()

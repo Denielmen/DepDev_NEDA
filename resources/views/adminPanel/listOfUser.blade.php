@@ -93,21 +93,38 @@
         }
         .search-box {
             position: relative;
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 25px;
+            padding: 8px 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             width: 300px;
         }
+
         .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
             width: 100%;
-            padding: 8px 15px;
-            padding-right: 35px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
+            padding-right: 30px;
         }
-        .search-box .search-icon {
+
+        .search-icon {
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .clear-search {
             position: absolute;
             right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
+            color: #666;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .clear-search:hover {
+            color: #333;
         }
         .table-container {
             background-color: white;
@@ -140,7 +157,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin-right: 5px;
+            margin-right: 8px;
         }
         .status-indicator.active {
             background-color: #28a745;
@@ -318,15 +335,21 @@
                     <a href="{{ route('register') }}" class="new-user-btn">
                         <i class="bi bi-person-plus-fill"></i> NEW USER
                     </a>
-                    <div class="search-box">
+                    <form method="GET" action="{{ route('admin.participants') }}" class="search-box">
                         <i class="bi bi-search search-icon"></i>
-                        <input type="text" placeholder="Search current page..." id="searchInput" onkeyup="searchUsers()">
-                    </div>
+                        <input type="text" placeholder="Search by name or ID..." name="search" value="{{ $search ?? '' }}" id="searchInput">
+                        <input type="hidden" name="status" value="{{ $status }}">
+                        @if($search)
+                            <a href="{{ route('admin.participants', ['status' => $status]) }}" class="clear-search" title="Clear search">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        @endif
+                    </form>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <div class="tab-buttons">
-                        <a href="{{ route('admin.participants', ['status' => 'active']) }}" class="tab-button {{ $status === 'active' ? 'active' : '' }}" id="active-tab">Active</a>
-                        <a href="{{ route('admin.participants', ['status' => 'inactive']) }}" class="tab-button {{ $status === 'inactive' ? 'active' : '' }}" id="inactive-tab">Disable</a>
+                        <a href="{{ route('admin.participants', ['status' => 'active', 'search' => $search ?? '']) }}" class="tab-button {{ $status === 'active' ? 'active' : '' }}" id="active-tab">Active</a>
+                        <a href="{{ route('admin.participants', ['status' => 'inactive', 'search' => $search ?? '']) }}" class="tab-button {{ $status === 'inactive' ? 'active' : '' }}" id="inactive-tab">Disable</a>
                     </div>
                     <div>
                         <label for="sort-by" class="me-2">Sort by</label>
@@ -429,59 +452,49 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function searchUsers() {
-            const input = document.getElementById('searchInput');
-            const filter = input.value.toUpperCase();
+        // Search functionality with delay
+        let searchTimeout;
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = searchInput.closest('form');
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                searchForm.submit();
+            }, 500); // Wait 500ms after user stops typing
+        });
+
+        // Also submit on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimeout);
+                searchForm.submit();
+            }
+        });
+
+        function sortUsers() {
+            const select = document.getElementById('sort-by');
+            const position = select.value;
             const table = document.querySelector('.table-container table');
-            const tr = table.getElementsByTagName('tr');
+            const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
 
-            for (let i = 1; i < tr.length; i++) {
-                const idCell = tr[i].getElementsByTagName('td')[1];
-                const nameCell = tr[i].getElementsByTagName('td')[2];
-                const positionCell = tr[i].getElementsByTagName('td')[3];
+            // Filter by position only (status is handled server-side)
+            tr.forEach(row => {
+                const positionCell = row.getElementsByTagName('td')[3];
 
-                if (idCell && nameCell && positionCell) {
-                    const idText = idCell.textContent || idCell.innerText;
-                    const nameText = nameCell.textContent || nameCell.innerText;
-                    const positionText = positionCell.textContent || positionCell.innerText;
+                if (positionCell) {
+                    const positionText = positionCell.textContent.trim();
 
-                    const matchesSearch = idText.toUpperCase().indexOf(filter) > -1 ||
-                                        nameText.toUpperCase().indexOf(filter) > -1 ||
-                                        positionText.toUpperCase().indexOf(filter) > -1;
-
-                    if (matchesSearch) {
-                        tr[i].style.display = '';
+                    // Show row if it matches the position filter
+                    if (position === 'all' || positionText === position) {
+                        row.style.display = '';
                     } else {
-                        tr[i].style.display = 'none';
+                        row.style.display = 'none';
                     }
                 }
-            }
+            });
         }
-
-function sortUsers() {
-    const select = document.getElementById('sort-by');
-    const position = select.value;
-    const table = document.querySelector('.table-container table');
-    const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
-
-    // Filter by position only (status is handled server-side)
-    tr.forEach(row => {
-        const positionCell = row.getElementsByTagName('td')[3];
-
-        if (positionCell) {
-            const positionText = positionCell.textContent.trim();
-
-            // Show row if it matches the position filter
-            if (position === 'all' || positionText === position) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        }
-    });
-}
-
-
     </script>
 </body>
 </html>
