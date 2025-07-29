@@ -218,16 +218,17 @@
                     <!-- Years in Position and CSC -->
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="years_in_position" class="form-label">Years in Position <span class="dot">*</span></label>
-                            <input type="number" id="years_in_position" name="years_in_position" class="form-control"
-                                value="{{ old('years_in_position') }}" required>
+                            <label for="position_start_date" class="form-label">Position Start Date <span class="dot">*</span></label>
+                            <input type="date" id="position_start_date" name="position_start_date" class="form-control"
+                                value="{{ old('position_start_date') }}" required>
+                            <small class="text-muted">Years in Position: <span id="position_years_display">0 months</span></small>
                         </div>
                         <div class="col">
                             <label for="government_start_date" class="form-label">Government Start Date <span class="dot">*</span></label>
                             <input type="date" id="government_start_date" name="government_start_date" class="form-control"
                                 value="{{ old('government_start_date') }}" required>
                             <input type="hidden" id="years_in_csc" name="years_in_csc" value="{{ old('years_in_csc') }}">
-                            <small class="text-muted">Years in Government: <span id="years_display">0</span> years</small>
+                            <small class="text-muted">Years in Government: <span id="years_display">0 months</span></small>
                         </div>
                     </div>
 
@@ -235,8 +236,15 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label for="division" class="form-label">Division/Unit <span class="dot">*</span></label>
-                            <input type="text" id="division" name="division" class="form-control"
-                                value="{{ old('division') }}" required>
+                            <select id="division" name="division" class="form-control" required>
+                                <option value="">Select Division/Unit</option>
+                                <option value="ORD - Office of the Regional Director" {{ old('division') == 'ORD - Office of the Regional Director' ? 'selected' : '' }}>ORD - Office of the Regional Director</option>
+                                <option value="FAD - Finance and Administrative Division" {{ old('division') == 'FAD - Finance and Administrative Division' ? 'selected' : '' }}>FAD - Finance and Administrative Division</option>
+                                <option value="DRD - Development Research Division" {{ old('division') == 'DRD - Development Research Division' ? 'selected' : '' }}>DRD - Development Research Division</option>
+                                <option value="PDIPBD - Project Development, Investment Programming and Budget Division" {{ old('division') == 'PDIPBD - Project Development, Investment Programming and Budget Division' ? 'selected' : '' }}>PDIPBD - Project Development, Investment Programming and Budget Division</option>
+                                <option value="PMED - Project Monitoring and Educational Division" {{ old('division') == 'PMED - Project Monitoring and Educational Division' ? 'selected' : '' }}>PMED - Project Monitoring and Educational Division</option>
+                                <option value="ORD-RDC - Office of the Regional Director - Regional Development Council" {{ old('division') == 'ORD-RDC - Office of the Regional Director - Regional Development Council' ? 'selected' : '' }}>ORD-RDC - Office of the Regional Director - Regional Development Council</option>
+                            </select>
                         </div>
                         <div class="col">
                             <label for="salary_grade" class="form-label">Salary Grade <span class="dot">*</span></label>
@@ -323,36 +331,101 @@
                     const start = new Date(startDate);
                     const today = new Date();
 
-                    // Calculate the difference in years
-                    let years = today.getFullYear() - start.getFullYear();
-                    const monthDiff = today.getMonth() - start.getMonth();
+                    // Calculate total months difference
+                    let totalMonths = (today.getFullYear() - start.getFullYear()) * 12;
+                    totalMonths += today.getMonth() - start.getMonth();
 
-                    // Adjust if the current date hasn't reached the anniversary yet
-                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < start.getDate())) {
-                        years--;
+                    // Adjust for day difference
+                    if (today.getDate() < start.getDate()) {
+                        totalMonths--;
                     }
 
-                    // Ensure years is not negative
-                    years = Math.max(0, years);
+                    // Ensure totalMonths is not negative
+                    totalMonths = Math.max(0, totalMonths);
 
-                    yearsDisplay.textContent = years;
-                    yearsInput.value = years;
+                    // Calculate years and remaining months
+                    const years = Math.floor(totalMonths / 12);
+                    const months = totalMonths % 12;
+
+                    // Format the display text
+                    let displayText = '';
+                    if (years > 0 && months > 0) {
+                        displayText = `${years} year${years > 1 ? 's' : ''} & ${months} month${months > 1 ? 's' : ''}`;
+                    } else if (years > 0) {
+                        displayText = `${years} year${years > 1 ? 's' : ''}`;
+                    } else if (months > 0) {
+                        displayText = `${months} month${months > 1 ? 's' : ''}`;
+                    } else {
+                        displayText = '0 months';
+                    }
+
+                    // Update displays
+                    yearsDisplay.textContent = displayText;
+                    yearsInput.value = years; // Keep the hidden field as just years for backend
                 } else {
-                    yearsDisplay.textContent = '0';
+                    yearsDisplay.textContent = '0 months';
                     yearsInput.value = '';
+                }
+            }
+
+            function calculateYearsInPosition() {
+                const startDate = document.getElementById('position_start_date').value;
+                const positionYearsDisplay = document.getElementById('position_years_display');
+
+                if (startDate) {
+                    const start = new Date(startDate);
+                    const today = new Date();
+
+                    // Calculate total months difference
+                    let totalMonths = (today.getFullYear() - start.getFullYear()) * 12;
+                    totalMonths += today.getMonth() - start.getMonth();
+
+                    // Adjust for day difference
+                    if (today.getDate() < start.getDate()) {
+                        totalMonths--;
+                    }
+
+                    // Ensure totalMonths is not negative
+                    totalMonths = Math.max(0, totalMonths);
+
+                    // Calculate years and remaining months
+                    const years = Math.floor(totalMonths / 12);
+                    const months = totalMonths % 12;
+
+                    // Format the display text
+                    let displayText = '';
+                    if (years > 0 && months > 0) {
+                        displayText = `${years} year${years > 1 ? 's' : ''} & ${months} month${months > 1 ? 's' : ''}`;
+                    } else if (years > 0) {
+                        displayText = `${years} year${years > 1 ? 's' : ''}`;
+                    } else if (months > 0) {
+                        displayText = `${months} month${months > 1 ? 's' : ''}`;
+                    } else {
+                        displayText = '0 months';
+                    }
+
+                    // Update display
+                    positionYearsDisplay.textContent = displayText;
+                } else {
+                    positionYearsDisplay.textContent = '0 months';
                 }
             }
 
             // Add event listener when the page loads
             document.addEventListener('DOMContentLoaded', function() {
                 const governmentStartDate = document.getElementById('government_start_date');
+                const positionStartDate = document.getElementById('position_start_date');
 
                 // Calculate on page load if there's already a value
                 calculateYearsInGovernment();
+                calculateYearsInPosition();
 
                 // Calculate when date changes
                 governmentStartDate.addEventListener('change', calculateYearsInGovernment);
                 governmentStartDate.addEventListener('input', calculateYearsInGovernment);
+
+                positionStartDate.addEventListener('change', calculateYearsInPosition);
+                positionStartDate.addEventListener('input', calculateYearsInPosition);
 
                 // Password toggle functionality
                 const togglePassword = document.getElementById('togglePassword');

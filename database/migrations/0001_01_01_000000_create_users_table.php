@@ -18,8 +18,9 @@ return new class extends Migration
             $table->string('first_name', 50);
             $table->string('mid_init', 10)->nullable();
             $table->string('position', 100);
-            $table->integer('years_in_position');
+            $table->date('position_start_date')->nullable();
             $table->integer('years_in_csc');
+            $table->date('government_start_date')->nullable();
             $table->string('division', 100);
             $table->integer('salary_grade');
             $table->string('role', 50);

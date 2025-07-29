@@ -18,7 +18,7 @@ class User extends Authenticatable
         'first_name',
         'mid_init',
         'position',
-        'years_in_position',
+        'position_start_date',
         'years_in_csc',
         'government_start_date',
         'division',
@@ -85,6 +85,59 @@ class User extends Authenticatable
             ->orderBy('first_name')
             ->get();
     }
+
+    /**
+     * Get formatted years in position (e.g., "5 years & 2 months")
+     */
+    public function getFormattedYearsInPosition()
+    {
+        if (!$this->position_start_date) {
+            return '0 months';
+        }
+
+        $startDate = new \DateTime($this->position_start_date);
+        $today = new \DateTime();
+        $diff = $today->diff($startDate);
+
+        $years = $diff->y;
+        $months = $diff->m;
+
+        if ($years > 0 && $months > 0) {
+            return $years . ' year' . ($years > 1 ? 's' : '') . ' & ' . $months . ' month' . ($months > 1 ? 's' : '');
+        } elseif ($years > 0) {
+            return $years . ' year' . ($years > 1 ? 's' : '');
+        } else {
+            // If years is 0, show only months (even if months is 0)
+            return $months . ' month' . ($months > 1 ? 's' : '');
+        }
+    }
+
+    /**
+     * Get formatted years in government (e.g., "5 years & 2 months")
+     */
+    public function getFormattedYearsInGovernment()
+    {
+        if (!$this->government_start_date) {
+            return '0 months';
+        }
+
+        $startDate = new \DateTime($this->government_start_date);
+        $today = new \DateTime();
+        $diff = $today->diff($startDate);
+
+        $years = $diff->y;
+        $months = $diff->m;
+
+        if ($years > 0 && $months > 0) {
+            return $years . ' year' . ($years > 1 ? 's' : '') . ' & ' . $months . ' month' . ($months > 1 ? 's' : '');
+        } elseif ($years > 0) {
+            return $years . ' year' . ($years > 1 ? 's' : '');
+        } else {
+            // If years is 0, show only months (even if months is 0)
+            return $months . ' month' . ($months > 1 ? 's' : '');
+        }
+    }
+
 
     /**
      * Get the user's full name
