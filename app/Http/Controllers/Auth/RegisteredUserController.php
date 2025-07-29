@@ -35,7 +35,7 @@ class RegisteredUserController extends Controller
             'first_name' => 'required|string|max:50',
             'mid_init' => 'nullable|string|max:10',
             'position' => 'required|string|max:100',
-            'years_in_position' => 'required|integer',
+            'position_start_date' => 'required|date|before_or_equal:today',
             'years_in_csc' => 'required|integer',
             'government_start_date' => 'required|date|before_or_equal:today',
             'division' => 'required|string|max:100',
@@ -46,6 +46,11 @@ class RegisteredUserController extends Controller
             'is_superior_eligible' => 'boolean',
         ]);
 
+        // Calculate years in government from government_start_date
+        $governmentStartDate = new \DateTime($request->government_start_date);
+        $today = new \DateTime();
+        $yearsInGovernment = $today->diff($governmentStartDate)->y;
+
         // Create the user in the database
         $user = User::create([
             'user_id' => $request->user_id, // Use the user-provided ID add by Deniel
@@ -54,8 +59,8 @@ class RegisteredUserController extends Controller
             'first_name' => $request->first_name,
             'mid_init' => $request->mid_init,
             'position' => $request->position,
-            'years_in_position' => $request->years_in_position,
-            'years_in_csc' => $request->years_in_csc,
+            'position_start_date' => $request->position_start_date,
+            'years_in_csc' => $yearsInGovernment, // Store calculated years from government_start_date
             'government_start_date' => $request->government_start_date,
             'division' => $request->division,
             'salary_grade' => $request->salary_grade,
