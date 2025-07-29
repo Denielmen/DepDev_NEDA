@@ -416,27 +416,55 @@
                             <input type="text" class="form-control" name="user_id" value="{{ $user->user_id }}" readonly>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-8">
+                            <div class="col-md-4">
                                 <label class="form-label">Salary Grade</label>
                                 <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Government Start Date</label>
-                                <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date && is_object($user->government_start_date) ? $user->government_start_date->format('Y-m-d') : ($user->government_start_date ? $user->government_start_date : '') }}" readonly>
-                                <input type="hidden" name="years_in_csc" value="{{ $user->years_in_csc }}">
-                                <small class="text-muted">Years in Government: <span id="years_display">{{ $user->years_in_csc ?? 0 }}</span> years</small>
+                            <div class="col-md-8">
+                                <!-- Display mode -->
+                                <div class="division-display">
+                                    <label class="form-label">Division/Unit</label>
+                                    <input type="text" class="form-control" value="{{ $user->division }}" readonly>
+                                </div>
+                                <!-- Edit mode -->
+                                <div class="division-edit" style="display: none;">
+                                    <label class="form-label">Division/Unit</label>
+                                    <select class="form-control" name="division" readonly disabled>
+                                        <option value="">Select Division/Unit</option>
+                                        <option value="ORD - Office of the Regional Director" {{ $user->division == 'ORD - Office of the Regional Director' ? 'selected' : '' }}>ORD - Office of the Regional Director</option>
+                                        <option value="FAD - Finance and Administrative Division" {{ $user->division == 'FAD - Finance and Administrative Division' ? 'selected' : '' }}>FAD - Finance and Administrative Division</option>
+                                        <option value="DRD - Development Research Division" {{ $user->division == 'DRD - Development Research Division' ? 'selected' : '' }}>DRD - Development Research Division</option>
+                                        <option value="PDIPBD - Project Development, Investment Programming and Budget Division" {{ $user->division == 'PDIPBD - Project Development, Investment Programming and Budget Division' ? 'selected' : '' }}>PDIPBD - Project Development, Investment Programming and Budget Division</option>
+                                        <option value="PMED - Project Monitoring and Educational Division" {{ $user->division == 'PMED - Project Monitoring and Educational Division' ? 'selected' : '' }}>PMED - Project Monitoring and Educational Division</option>
+                                        <option value="ORD-RDC - Office of the Regional Director - Regional Development Council" {{ $user->division == 'ORD-RDC - Office of the Regional Director - Regional Development Council' ? 'selected' : '' }}>ORD-RDC - Office of the Regional Director - Regional Development Council</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-8">
-                                <label class="form-label">Division/Unit</label>
-                                <input type="text" class="form-control" name="division" value="{{ $user->division }}" readonly>
+                            <div class="col-md-6">
+                                <!-- Display mode -->
+                                <div class="years-display">
+                                    <label class="form-label">Years in Position</label>
+                                    <input type="text" class="form-control" value="{{ $user->getFormattedYearsInPosition() }}" readonly>
+                                </div>
+                                <!-- Edit mode -->
+                                <div class="years-edit" style="display: none;">
+                                    <label class="form-label">Position Start Date</label>
+                                    <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date }}" readonly>
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Position Start Date</label>
-                                <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date && is_object($user->position_start_date) ? $user->position_start_date->format('Y-m-d') : ($user->position_start_date ? $user->position_start_date : '') }}" readonly>
-                                <input type="hidden" name="years_in_position" value="{{ $user->years_in_position ?? 0 }}">
-                                <small class="text-muted">Years in Position: <span id="position_years_display">{{ $user->years_in_position ?? 0 }}</span> years</small>
+                            <div class="col-md-6">
+                                <!-- Display mode -->
+                                <div class="years-display">
+                                    <label class="form-label">Years in Government</label>
+                                    <input type="text" class="form-control" value="{{ $user->getFormattedYearsInGovernment() }}" readonly>
+                                </div>
+                                <!-- Edit mode -->
+                                <div class="years-edit" style="display: none;">
+                                    <label class="form-label">Government Start Date</label>
+                                    <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date }}" readonly>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -736,6 +764,22 @@
             nameEdit.style.display = 'block';
             // Show employee ID edit field
             document.getElementById('employeeIdEdit').style.display = 'block';
+
+            // Switch years fields to edit mode (show dates)
+            const yearsDisplays = document.querySelectorAll('.years-display');
+            const yearsEdits = document.querySelectorAll('.years-edit');
+            yearsDisplays.forEach(display => display.style.display = 'none');
+            yearsEdits.forEach(edit => edit.style.display = 'block');
+
+            // Switch division field to edit mode (show dropdown)
+            const divisionDisplay = document.querySelector('.division-display');
+            const divisionEdit = document.querySelector('.division-edit');
+            const divisionSelect = divisionEdit.querySelector('select');
+            divisionDisplay.style.display = 'none';
+            divisionEdit.style.display = 'block';
+            divisionSelect.removeAttribute('readonly');
+            divisionSelect.removeAttribute('disabled');
+
             editButton.style.display = 'none';
             saveCancelButtons.style.display = 'block';
 
@@ -772,6 +816,22 @@
             nameEdit.style.display = 'none';
             // Hide employee ID edit field
             document.getElementById('employeeIdEdit').style.display = 'none';
+
+            // Switch years fields back to display mode (show formatted years)
+            const yearsDisplays = document.querySelectorAll('.years-display');
+            const yearsEdits = document.querySelectorAll('.years-edit');
+            yearsDisplays.forEach(display => display.style.display = 'block');
+            yearsEdits.forEach(edit => edit.style.display = 'none');
+
+            // Switch division field back to display mode (show text)
+            const divisionDisplay = document.querySelector('.division-display');
+            const divisionEdit = document.querySelector('.division-edit');
+            const divisionSelect = divisionEdit.querySelector('select');
+            divisionDisplay.style.display = 'block';
+            divisionEdit.style.display = 'none';
+            divisionSelect.setAttribute('readonly', true);
+            divisionSelect.setAttribute('disabled', true);
+
             editButton.style.display = 'block';
             saveCancelButtons.style.display = 'none';
 
