@@ -18,6 +18,7 @@ class User extends Authenticatable
         'first_name',
         'mid_init',
         'position',
+        'position_start_date',
         'years_in_position',
         'years_in_csc',
         'government_start_date',
@@ -71,6 +72,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'is_superior_eligible' => 'boolean',
+            'position_start_date' => 'date',
+            'government_start_date' => 'date',
         ];
     }
 

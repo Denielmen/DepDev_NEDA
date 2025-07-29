@@ -23,8 +23,11 @@ class EmployeeController extends Controller
                 'last_name' => 'required|string|max:255',
                 'salary_grade' => 'required|string|max:255',
                 'years_in_csc' => 'required|numeric',
+                'years_in_position' => 'required|numeric',
                 'division' => 'required|string|max:255',
                 'position' => 'required|string|max:255',
+                'position_start_date' => 'nullable|date|before_or_equal:today',
+                'government_start_date' => 'nullable|date|before_or_equal:today',
                 'superior' => 'nullable|string|max:255',
             ]);
 

@@ -218,9 +218,11 @@
                     <!-- Years in Position and CSC -->
                     <div class="row mb-3">
                         <div class="col">
-                            <label for="years_in_position" class="form-label">Years in Position <span class="dot">*</span></label>
-                            <input type="number" id="years_in_position" name="years_in_position" class="form-control"
-                                value="{{ old('years_in_position') }}" required>
+                            <label for="position_start_date" class="form-label">Position Start Date <span class="dot">*</span></label>
+                            <input type="date" id="position_start_date" name="position_start_date" class="form-control"
+                                value="{{ old('position_start_date') }}" required>
+                            <input type="hidden" id="years_in_position" name="years_in_position" value="{{ old('years_in_position') }}">
+                            <small class="text-muted">Years in Position: <span id="position_years_display">0</span> years</small>
                         </div>
                         <div class="col">
                             <label for="government_start_date" class="form-label">Government Start Date <span class="dot">*</span></label>
@@ -343,16 +345,49 @@
                 }
             }
 
+            function calculateYearsInPosition() {
+                const startDate = document.getElementById('position_start_date').value;
+                const positionYearsDisplay = document.getElementById('position_years_display');
+                const positionYearsInput = document.getElementById('years_in_position');
+
+                if (startDate) {
+                    const start = new Date(startDate);
+                    const today = new Date();
+
+                    // Calculate the difference in years
+                    let years = today.getFullYear() - start.getFullYear();
+                    const monthDiff = today.getMonth() - start.getMonth();
+
+                    // Adjust if the current date hasn't reached the anniversary yet
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < start.getDate())) {
+                        years--;
+                    }
+
+                    // Ensure years is not negative
+                    years = Math.max(0, years);
+
+                    positionYearsDisplay.textContent = years;
+                    positionYearsInput.value = years;
+                } else {
+                    positionYearsDisplay.textContent = '0';
+                    positionYearsInput.value = '';
+                }
+            }
+
             // Add event listener when the page loads
             document.addEventListener('DOMContentLoaded', function() {
                 const governmentStartDate = document.getElementById('government_start_date');
+                const positionStartDate = document.getElementById('position_start_date');
 
                 // Calculate on page load if there's already a value
                 calculateYearsInGovernment();
+                calculateYearsInPosition();
 
                 // Calculate when date changes
                 governmentStartDate.addEventListener('change', calculateYearsInGovernment);
                 governmentStartDate.addEventListener('input', calculateYearsInGovernment);
+                positionStartDate.addEventListener('change', calculateYearsInPosition);
+                positionStartDate.addEventListener('input', calculateYearsInPosition);
 
                 // Password toggle functionality
                 const togglePassword = document.getElementById('togglePassword');
