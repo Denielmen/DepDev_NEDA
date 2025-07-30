@@ -381,7 +381,8 @@
                                 <!-- Display mode -->
                                 <div class="years-display">
                                     <label class="form-label">Years in Position</label>
-                                    <input type="text" class="form-control" value="{{ $user->getFormattedYearsInPosition() }}" readonly>
+                                    <input type="text" class="form-control" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('m/d/Y') : '' }}" readonly>
+                                    <small class="text-muted">{{ $user->getFormattedYearsInPosition() }}</small>
                                 </div>
                                 <!-- Edit mode -->
                                 <div class="years-edit" style="display: none;">
@@ -393,7 +394,8 @@
                                 <!-- Display mode -->
                                 <div class="years-display">
                                     <label class="form-label">Years in Government</label>
-                                    <input type="text" class="form-control" value="{{ $user->getFormattedYearsInGovernment() }}" readonly>
+                                    <input type="text" class="form-control" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('m/d/Y') : '' }}" readonly>
+                                    <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
                                 </div>
                                 <!-- Edit mode -->
                                 <div class="years-edit" style="display: none;">
