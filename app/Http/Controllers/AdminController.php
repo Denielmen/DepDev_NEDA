@@ -145,6 +145,8 @@ class AdminController extends Controller
     public function participants(Request $request)
     {
         $status = $request->get('status', 'active'); // Default to active
+        $positionFilter = $request->get('position'); // Get position filter
+        $searchQuery = $request->get('search'); // Get search query
 
         $query = User::query();
 
@@ -155,13 +157,58 @@ class AdminController extends Controller
             $query->where('is_active', false);
         }
 
-        $users = $query->orderBy('last_name', 'asc')
-            ->paginate(10)
-            ->appends(['status' => $status]); // Preserve status in pagination links
+        // Filter by position if specified
+        if ($positionFilter && $positionFilter !== 'all') {
+            $query->where('position', $positionFilter);
+        }
 
-        $positions = User::distinct()->pluck('position')->filter()->values()->toArray();
+        // Filter by search query if specified
+        if ($searchQuery && trim($searchQuery) !== '') {
+            $query->where(function ($q) use ($searchQuery) {
+                $q->where('user_id', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('first_name', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('last_name', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('position', 'like', '%' . $searchQuery . '%')
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $searchQuery . '%'])
+                  ->orWhereRaw("CONCAT(last_name, ', ', first_name) LIKE ?", ['%' . $searchQuery . '%']);
+            });
+        }
 
-        return view('adminPanel.listOfUser', compact('users', 'positions', 'status'));
+        // If filtering by position or search, don't paginate to show all results
+        if (($positionFilter && $positionFilter !== 'all') || ($searchQuery && trim($searchQuery) !== '')) {
+            $users = $query->orderBy('last_name', 'asc')->get();
+            // Convert to a paginator-like object for compatibility with the view
+            $users = new \Illuminate\Pagination\LengthAwarePaginator(
+                $users,
+                $users->count(),
+                $users->count(), // Show all items per page
+                1, // Current page
+                [
+                    'path' => $request->url(),
+                    'pageName' => 'page',
+                ]
+            );
+            $users->appends($request->only(['status', 'position', 'search']));
+        } else {
+            // Normal pagination when not filtering
+            $users = $query->orderBy('last_name', 'asc')
+                ->paginate(10)
+                ->appends(['status' => $status]); // Preserve status in pagination links
+        }
+
+        $positions = User::distinct()
+            ->pluck('position')
+            ->filter(function ($position) {
+                return !empty(trim($position));
+            })
+            ->map(function ($position) {
+                return trim($position);
+            })
+            ->sort()
+            ->values()
+            ->toArray();
+
+        return view('adminPanel.listOfUser', compact('users', 'positions', 'status', 'positionFilter', 'searchQuery'));
     }
 
     public function welcomeAdmin()
