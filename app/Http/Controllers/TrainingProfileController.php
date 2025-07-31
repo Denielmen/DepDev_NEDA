@@ -183,7 +183,7 @@ class TrainingProfileController extends Controller
         $training = Training::findOrFail($training->id);
         $competencies = Competency::orderBy('name')->get();
         $participationTypes = ParticipationType::all()->keyBy('id');
-        $users = User::where('is_active', true)->orderBy('last_name')->paginate(5);
+        $users = User::where('is_active', true)->orderBy('last_name')->paginate(10);
 
         $training->load(['participants' => function ($query) {
             $query->withPivot('participation_type_id', 'year');
@@ -243,18 +243,32 @@ class TrainingProfileController extends Controller
 
             // Additional validation for participants and participation types
             if ($request->has('participants') && !empty($request->participants)) {
+                $participationTypes = $request->input('participation_types', []);
+                $participantYears = $request->input('participant_years', []);
+
                 foreach ($request->participants as $participantId) {
-                    if (
-                        !isset($request->participation_types[$participantId]) ||
-                        !ParticipationType::find($request->participation_types[$participantId])
-                    ) {
+                    // Find matching user_year keys for this participant
+                    $hasValidType = false;
+                    $hasValidYear = false;
+
+                    foreach ($participationTypes as $key => $typeId) {
+                        if (strpos($key, $participantId . '_') === 0) {
+                            if (ParticipationType::find($typeId)) {
+                                $hasValidType = true;
+                            }
+
+                            $year = $participantYears[$key] ?? null;
+                            if (in_array($year, [2025, 2026, 2027])) {
+                                $hasValidYear = true;
+                            }
+                        }
+                    }
+
+                    if (!$hasValidType) {
                         return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
                     }
 
-                    if (
-                        !isset($request->participant_years[$participantId]) ||
-                        !in_array($request->participant_years[$participantId], [2025, 2026, 2027])
-                    ) {
+                    if (!$hasValidYear) {
                         return back()->withInput()->withErrors(['participants' => 'All participants must have a valid year (2025, 2026, or 2027).']);
                     }
                 }
@@ -265,21 +279,30 @@ class TrainingProfileController extends Controller
 
             // Handle participants
             if ($request->has('participants')) {
-                // Prepare the participants data with pivot attributes
-                $participants = [];
-                foreach ($request->participants as $userId) {
-                    $participants[$userId] = [
-                        'participation_type_id' => $request->input("participation_types.$userId"),
-                        'year' => $request->input("participant_years.$userId", 2025) // Default to 2025 if not specified
-                    ];
+                // First, detach all existing participants
+                $training->participants()->detach();
+
+                // Handle participants with user_year keys to support multiple entries for same user
+                $participationTypes = $request->input('participation_types', []);
+                $participantYears = $request->input('participant_years', []);
+
+                // Process each unique user_year combination
+                foreach ($participationTypes as $userYearKey => $participationTypeId) {
+                    if ($participationTypeId && isset($participantYears[$userYearKey])) {
+                        // Extract user ID and year from the key (format: userId_year)
+                        $parts = explode('_', $userYearKey);
+                        if (count($parts) === 2) {
+                            $userId = $parts[0];
+                            $year = $participantYears[$userYearKey];
+
+                            // Attach the participant
+                            $training->participants()->attach($userId, [
+                                'participation_type_id' => $participationTypeId,
+                                'year' => $year
+                            ]);
+                        }
+                    }
                 }
-
-
-
-                // Sync participants (this will remove any participants not in the array)
-                $training->participants()->sync($participants);
-
-
             } else {
                 // If no participants were selected, detach all
                 $training->participants()->detach();
@@ -313,7 +336,7 @@ class TrainingProfileController extends Controller
     public function create()
     {
         $competencies = Competency::orderBy('name')->get();
-        $users = User::where('is_active', true)->orderBy('last_name')->paginate(5);
+        $users = User::where('is_active', true)->orderBy('last_name')->paginate(10);
         $participationTypes = ParticipationType::all()->keyBy('id');
         return view('adminPanel.createTraining', compact('competencies', 'users', 'participationTypes'));
     }
@@ -415,15 +438,8 @@ class TrainingProfileController extends Controller
 
         $query = User::where('is_active', true)->orderBy('last_name');
 
-        // Exclude users who are already participants in the specified training
-        if ($trainingId) {
-            $query->whereNotExists(function($q) use ($trainingId) {
-                $q->select(\DB::raw(1))
-                  ->from('training_participants')
-                  ->whereColumn('training_participants.user_id', 'users.id')
-                  ->where('training_participants.training_id', $trainingId);
-            });
-        }
+        // Don't exclude users - allow same user to be added with different years
+        // The duplicate prevention will be handled in the frontend
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -445,7 +461,7 @@ class TrainingProfileController extends Controller
             ]);
         }
 
-        $users = $query->paginate(5, ['*'], 'page', $page);
+        $users = $query->paginate(10, ['*'], 'page', $page);
         $participationTypes = ParticipationType::all();
 
         return response()->json([

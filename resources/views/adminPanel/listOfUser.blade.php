@@ -98,16 +98,31 @@
         .search-box input {
             width: 100%;
             padding: 8px 15px;
-            padding-right: 35px;
+            padding-right: 70px;
             border: 1px solid #ced4da;
             border-radius: 5px;
         }
         .search-box .search-icon {
             position: absolute;
-            right: 10px;
+            right: 40px;
             top: 50%;
             transform: translateY(-50%);
             color: #6c757d;
+        }
+        .search-box .clear-search {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
+            font-size: 16px;
+        }
+        .search-box .clear-search:hover {
+            color: #dc3545;
         }
         .table-container {
             background-color: white;
@@ -274,7 +289,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name ?? 'Admin' }}
+                        {{ auth()->user()->last_name && auth()->user()->first_name ? auth()->user()->last_name . ', ' . auth()->user()->first_name : (auth()->user()->last_name ?? auth()->user()->first_name ?? 'Admin') }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -312,6 +327,21 @@
             @endif
             <div class="list-title">
                 <h2>List of Employees</h2>
+                @if((isset($positionFilter) && $positionFilter !== 'all') || (isset($searchQuery) && trim($searchQuery) !== ''))
+                    <div class="alert alert-info mt-2 mb-0">
+                        <i class="bi bi-filter"></i>
+                        @if(isset($positionFilter) && $positionFilter !== 'all')
+                            Showing employees with position: <strong>{{ $positionFilter }}</strong>
+                        @endif
+                        @if(isset($searchQuery) && trim($searchQuery) !== '')
+                            @if(isset($positionFilter) && $positionFilter !== 'all') and @endif
+                            Searching for: <strong>"{{ $searchQuery }}"</strong>
+                        @endif
+                        <a href="{{ route('admin.participants', ['status' => $status]) }}" class="btn btn-sm btn-outline-primary ms-2">
+                            <i class="bi bi-x"></i> Clear All Filters
+                        </a>
+                    </div>
+                @endif
             </div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -320,7 +350,12 @@
                     </a>
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
-                        <input type="text" placeholder="Search current page..." id="searchInput" onkeyup="searchUsers()">
+                        <input type="text" placeholder="Search all employees..." id="searchInput" value="{{ $searchQuery ?? '' }}" onkeyup="handleSearch(event)">
+                        @if(isset($searchQuery) && trim($searchQuery) !== '')
+                            <button type="button" class="clear-search" onclick="clearSearch()" title="Clear search">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        @endif
                     </div>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
@@ -330,10 +365,10 @@
                     </div>
                     <div>
                         <label for="sort-by" class="me-2">Sort by</label>
-                        <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers()">
-                            <option value="all">All Positions</option>
+                        <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers();">
+                            <option value="all" {{ (!isset($positionFilter) || $positionFilter === 'all') ? 'selected' : '' }}>All Positions</option>
                             @foreach($positions as $position)
-                                <option value="{{ $position }}">{{ $position }}</option>
+                                <option value="{{ $position }}" {{ (isset($positionFilter) && $positionFilter === $position) ? 'selected' : '' }}>{{ $position }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -429,56 +464,88 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function searchUsers() {
-            const input = document.getElementById('searchInput');
-            const filter = input.value.toUpperCase();
-            const table = document.querySelector('.table-container table');
-            const tr = table.getElementsByTagName('tr');
+        // Initialize page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Page initialization complete
+        });
 
-            for (let i = 1; i < tr.length; i++) {
-                const idCell = tr[i].getElementsByTagName('td')[1];
-                const nameCell = tr[i].getElementsByTagName('td')[2];
-                const positionCell = tr[i].getElementsByTagName('td')[3];
 
-                if (idCell && nameCell && positionCell) {
-                    const idText = idCell.textContent || idCell.innerText;
-                    const nameText = nameCell.textContent || nameCell.innerText;
-                    const positionText = positionCell.textContent || positionCell.innerText;
+    </script>
+    <script>
+        // Handle search with debouncing to avoid too many requests
+        let searchTimeout;
+        function handleSearch(event) {
+            clearTimeout(searchTimeout);
 
-                    const matchesSearch = idText.toUpperCase().indexOf(filter) > -1 ||
-                                        nameText.toUpperCase().indexOf(filter) > -1 ||
-                                        positionText.toUpperCase().indexOf(filter) > -1;
-
-                    if (matchesSearch) {
-                        tr[i].style.display = '';
-                    } else {
-                        tr[i].style.display = 'none';
-                    }
-                }
+            // If Enter key is pressed, search immediately
+            if (event.key === 'Enter') {
+                performSearch();
+                return;
             }
+
+            // Otherwise, wait 500ms after user stops typing
+            searchTimeout = setTimeout(performSearch, 500);
+        }
+
+        function performSearch() {
+            const input = document.getElementById('searchInput');
+            const searchQuery = input.value.trim();
+
+            // Get current URL parameters
+            const url = new URL(window.location);
+
+            // Update or remove search parameter
+            if (searchQuery === '') {
+                url.searchParams.delete('search');
+            } else {
+                url.searchParams.set('search', searchQuery);
+            }
+
+            // Preserve position filter if it exists
+            const positionSelect = document.getElementById('sort-by');
+            if (positionSelect && positionSelect.value !== 'all') {
+                url.searchParams.set('position', positionSelect.value);
+            }
+
+            // Redirect to the new URL to reload with server-side search
+            window.location.href = url.toString();
+        }
+
+        function clearSearch() {
+            const url = new URL(window.location);
+            url.searchParams.delete('search');
+            window.location.href = url.toString();
         }
 
 function sortUsers() {
-    const select = document.getElementById('sort-by');
-    const position = select.value;
-    const table = document.querySelector('.table-container table');
-    const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
+    try {
+        const select = document.getElementById('sort-by');
+        if (!select) return;
 
-    // Filter by position only (status is handled server-side)
-    tr.forEach(row => {
-        const positionCell = row.getElementsByTagName('td')[3];
+        const position = select.value;
 
-        if (positionCell) {
-            const positionText = positionCell.textContent.trim();
+        // Get current URL parameters
+        const url = new URL(window.location);
 
-            // Show row if it matches the position filter
-            if (position === 'all' || positionText === position) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+        // Update or remove position parameter
+        if (position === 'all') {
+            url.searchParams.delete('position');
+        } else {
+            url.searchParams.set('position', position);
         }
-    });
+
+        // Preserve search query if it exists
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput && searchInput.value.trim() !== '') {
+            url.searchParams.set('search', searchInput.value.trim());
+        }
+
+        // Redirect to the new URL to reload with server-side filtering
+        window.location.href = url.toString();
+
+    } catch (error) {
+        console.error('Error in sortUsers:', error);
+    }
 }
 
 
