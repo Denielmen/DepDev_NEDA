@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>DEPDEV Learning and Development System</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -119,6 +120,17 @@
             padding: 1rem;
             filter: brightness(1.9);
         }
+
+        .alert {
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
     </style>
 </head>
 
@@ -131,10 +143,19 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 
+                <!-- Display Errors -->
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
                 <!-- User ID -->
                 <div class="mb-3">
                     <label for="user_id" class="form-label">User ID</label>
-                    <input type="text" id="user_id" name="user_id" class="form-control" required autofocus>
+                    <input type="text" id="user_id" name="user_id" class="form-control" value="{{ old('user_id') }}" required autofocus>
                 </div>
 
                 <!-- Password -->
@@ -149,8 +170,11 @@
                     </div>
                 </div>
 
-                <!-- Forgot Password Link -->
-                <div class="mb-3 text-end">
+                <!-- Links -->
+                <div class="mb-3 d-flex justify-content-between">
+                    <a href="{{ route('register') }}" style="color: #87CEEB; text-decoration: none; font-size: 0.9rem;">
+                        Need an account? Register
+                    </a>
                     <a href="{{ route('password.request') }}" style="color: #87CEEB; text-decoration: none; font-size: 0.9rem;">
                         Forgot your password?
                     </a>
