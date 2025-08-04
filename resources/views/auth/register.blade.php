@@ -128,6 +128,7 @@
                 DEPDEV Learning and Development Database System Region VII
             </a>
             <div class="d-flex align-items-center">
+                @auth
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
@@ -145,11 +146,17 @@
                         </li>
                     </ul>
                 </div>
+                @else
+                <div class="d-flex align-items-center">
+                    <a href="{{ route('login') }}" class="btn btn-outline-primary me-2">Login</a>
+                </div>
+                @endauth
             </div>
         </div>
     </nav>
 
     <div class="d-flex">
+        @auth
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
@@ -158,9 +165,10 @@
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
+        @endauth
 
         <!-- Main Content -->
-        <div class="main-content">
+        <div class="main-content" @guest style="margin-left: 0;" @endguest>
             <!-- Registration Form admin.Container -->
             <div class="register-container">
                 <!-- Header -->
