@@ -178,10 +178,11 @@ class AdminController extends Controller
         if (($positionFilter && $positionFilter !== 'all') || ($searchQuery && trim($searchQuery) !== '')) {
             $users = $query->orderBy('last_name', 'asc')->get();
             // Convert to a paginator-like object for compatibility with the view
+            $perPage = max($users->count(), 1); // Ensure per page is never 0 to avoid division by zero
             $users = new \Illuminate\Pagination\LengthAwarePaginator(
                 $users,
                 $users->count(),
-                $users->count(), // Show all items per page
+                $perPage, // Use safe per page value
                 1, // Current page
                 [
                     'path' => $request->url(),
