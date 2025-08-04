@@ -32,15 +32,23 @@ class AccountController extends Controller
     }
 
     /**
-     * Delete a user from the database.
+     * Destroy user session and deactivate account.
      */
     public function deleteUser(User $user)
     {
         $userName = $user->first_name . ' ' . $user->last_name;
 
-        // Delete the user from database
-        $user->delete();
+        // Deactivate the user instead of deleting
+        $user->is_active = false;
+        $user->save();
 
-        return redirect()->back()->with('success', 'The user ' . $userName . ' is successfully deleted.');
+        // If this is the currently logged in user, logout
+        if (auth()->check() && auth()->id() === $user->id) {
+            auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
+
+        return redirect()->back()->with('success', 'The user ' . $userName . ' session has been destroyed and account deactivated.');
     }
 }
