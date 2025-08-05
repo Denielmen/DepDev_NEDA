@@ -32,23 +32,25 @@ class AccountController extends Controller
     }
 
     /**
-     * Destroy user session and deactivate account.
+     * Delete a user from the database.
      */
     public function deleteUser(User $user)
     {
         $userName = $user->first_name . ' ' . $user->last_name;
 
-        // Deactivate the user instead of deleting
-        $user->is_active = false;
-        $user->save();
-
-        // If this is the currently logged in user, logout
+        // If this is the currently logged in user, logout first
         if (auth()->check() && auth()->id() === $user->id) {
             auth()->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
         }
 
-        return redirect()->back()->with('success', 'The user ' . $userName . ' session has been destroyed and account deactivated.');
+        // Handle foreign key constraints by setting user_id to null in trainings
+        \App\Models\Training::where('user_id', $user->id)->update(['user_id' => null]);
+
+        // Delete the user from database (other tables have cascade delete)
+        $user->delete();
+
+        return redirect()->back()->with('success', 'The user ' . $userName . ' is successfully deleted.');
     }
 }
