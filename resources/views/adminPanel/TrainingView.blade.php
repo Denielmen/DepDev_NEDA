@@ -185,7 +185,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name ?? 'Admin' }}
+                        {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">

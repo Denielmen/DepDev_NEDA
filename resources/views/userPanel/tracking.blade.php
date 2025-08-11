@@ -298,7 +298,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name ?? 'User' }}
+                        {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -356,9 +356,7 @@
                                     @endforeach
                                     <option value="other">Others</option>
                                 </select>
-                                <div class="mt-2">
-                                    {{ $programmedTrainings->links() }}
-                                </div>
+
                             </div>
 
                             <div class="col-md-6 form-group">
@@ -369,24 +367,26 @@
                         <div class="row">
                             <div class="col-md-8 form-group">
                                 <label class="form-label">Classification:</label>
-                                <select id="core_competency" name="core_competency" class="form-control" required>
+                                <select id="core_competency" name="core_competency" class="form-control" required onchange="toggleClassificationInput()">
                                     <option value="" disabled selected>Select Classification</option>
                                     @foreach ($coreCompetencies as $core)
                                         <option value="{{ $core }}">{{ $core }}</option>
                                     @endforeach
                                 </select>
+                                <input type="text" class="form-control mt-2" id="core_competency_input" name="core_competency_input"
+                                    placeholder="Enter custom classification" style="display: none;">
                             </div>
                             <div class="col-md-8 form-group">
                                 <label class="form-label">Competency:</label>
-                                <select id="competency" name="competency_id" class="form-control" required>
+                                <select id="competency" name="competency_id" class="form-control" required onchange="toggleCompetencyInput()">
                                     <option value="" disabled selected>Select Competency</option>
                                     @foreach ($competencies as $competency)
                                         <option value="{{ $competency->id }}">{{ $competency->name }}</option>
                                     @endforeach
+                                    <option value="others">Others</option>
                                 </select>
-                                <div class="mt-2">
-                                    {{ $competencies->links() }}
-                                </div>
+                                <input type="text" class="form-control mt-2" id="competency_input" name="competency_input"
+                                    placeholder="Enter custom competency" style="display: none;">
                             </div>
                             <div class="col-md-3 form-group">
                                 <label class="form-label">Role:</label>
@@ -548,6 +548,21 @@
                     providerInput.value = '';
                     dateFromInput.value = '';
                     dateToInput.value = '';
+
+                    // Reset competency input visibility
+                    const competencyInput = document.getElementById('competency_input');
+                    competencySelect.style.display = 'block';
+                    competencyInput.style.display = 'none';
+                    competencyInput.required = false;
+                    competencyInput.value = '';
+
+                    // Reset classification input visibility
+                    const classificationInput = document.getElementById('core_competency_input');
+                    coreCompetencySelect.style.display = 'block';
+                    classificationInput.style.display = 'none';
+                    classificationInput.required = false;
+                    classificationInput.value = '';
+
                     return;
                 }
 
@@ -560,14 +575,50 @@
                     // Populate fields with training data
                     trainingTitleInput.value = selectedTraining.title || '';
 
-                    // Set competency
+                    // Set competency and reset input visibility
+                    const competencyInput = document.getElementById('competency_input');
+
                     if (selectedTraining.competency_id) {
-                        competencySelect.value = selectedTraining.competency_id;
+                        // Check if the competency exists in the dropdown
+                        const competencyOption = competencySelect.querySelector(`option[value="${selectedTraining.competency_id}"]`);
+
+                        if (competencyOption) {
+                            // Standard competency - show dropdown and select it
+                            competencySelect.style.display = 'block';
+                            competencyInput.style.display = 'none';
+                            competencyInput.required = false;
+                            competencySelect.value = selectedTraining.competency_id;
+                        } else if (selectedTraining.competency && selectedTraining.competency.name) {
+                            // Custom competency - show input field with the competency name
+                            competencySelect.style.display = 'none';
+                            competencyInput.style.display = 'block';
+                            competencyInput.required = true;
+                            competencyInput.value = selectedTraining.competency.name;
+                            competencySelect.value = 'others';
+                        }
                     }
 
                     // Set core competency (classification)
+                    const classificationInput = document.getElementById('core_competency_input');
+
                     if (selectedTraining.core_competency) {
-                        coreCompetencySelect.value = selectedTraining.core_competency;
+                        // Check if the classification exists in the dropdown
+                        const classificationOption = coreCompetencySelect.querySelector(`option[value="${selectedTraining.core_competency}"]`);
+
+                        if (classificationOption) {
+                            // Standard classification - show dropdown and select it
+                            coreCompetencySelect.style.display = 'block';
+                            classificationInput.style.display = 'none';
+                            classificationInput.required = false;
+                            coreCompetencySelect.value = selectedTraining.core_competency;
+                        } else {
+                            // Custom classification - show input field with the custom value
+                            coreCompetencySelect.style.display = 'none';
+                            classificationInput.style.display = 'block';
+                            classificationInput.required = true;
+                            classificationInput.value = selectedTraining.core_competency;
+                            coreCompetencySelect.value = 'Others';
+                        }
                     }
 
                     // Set role (participation type)
@@ -600,6 +651,40 @@
                     dateToInput.value = this.value;
                 }
             });
+
+            // Function to toggle competency input field
+            window.toggleCompetencyInput = function() {
+                const competencySelect = document.getElementById('competency');
+                const competencyInput = document.getElementById('competency_input');
+
+                if (competencySelect.value === 'others') {
+                    competencySelect.style.display = 'none';
+                    competencyInput.style.display = 'block';
+                    competencyInput.required = true;
+                    competencyInput.focus();
+                } else {
+                    competencySelect.style.display = 'block';
+                    competencyInput.style.display = 'none';
+                    competencyInput.required = false;
+                }
+            };
+
+            // Function to toggle classification input field
+            window.toggleClassificationInput = function() {
+                const classificationSelect = document.getElementById('core_competency');
+                const classificationInput = document.getElementById('core_competency_input');
+
+                if (classificationSelect.value === 'Others') {
+                    classificationSelect.style.display = 'none';
+                    classificationInput.style.display = 'block';
+                    classificationInput.required = true;
+                    classificationInput.focus();
+                } else {
+                    classificationSelect.style.display = 'block';
+                    classificationInput.style.display = 'none';
+                    classificationInput.required = false;
+                }
+            };
             // Function to handle file previews
             function handleFilePreview(input, previewContainer) {
                 previewContainer.innerHTML = ''; // Clear previous previews

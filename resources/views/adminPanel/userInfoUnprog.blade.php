@@ -249,7 +249,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name ?? 'Admin' }}
+                        {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -368,6 +368,7 @@
                                         <option value="">Select Division/Unit</option>
                                         <option value="ORD - Office of the Regional Director" {{ $user->division == 'ORD - Office of the Regional Director' ? 'selected' : '' }}>ORD - Office of the Regional Director</option>
                                         <option value="FAD - Finance and Administrative Division" {{ $user->division == 'FAD - Finance and Administrative Division' ? 'selected' : '' }}>FAD - Finance and Administrative Division</option>
+                                        <option value="PFPD - Policy Formulation and Planning Division" {{ $user->division == 'PFPD - Policy Formulation and Planning Division' ? 'selected' : '' }}>PFPD - Policy Formulation and Planning Division</option>
                                         <option value="DRD - Development Research Division" {{ $user->division == 'DRD - Development Research Division' ? 'selected' : '' }}>DRD - Development Research Division</option>
                                         <option value="PDIPBD - Project Development, Investment Programming and Budget Division" {{ $user->division == 'PDIPBD - Project Development, Investment Programming and Budget Division' ? 'selected' : '' }}>PDIPBD - Project Development, Investment Programming and Budget Division</option>
                                         <option value="PMED - Project Monitoring and Educational Division" {{ $user->division == 'PMED - Project Monitoring and Educational Division' ? 'selected' : '' }}>PMED - Project Monitoring and Educational Division</option>
