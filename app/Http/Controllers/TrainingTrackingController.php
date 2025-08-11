@@ -67,22 +67,48 @@ class TrainingTrackingController extends Controller
             'linkMaterials'        => 'nullable',
             'courseTitle'          => 'required',
             'training_title'       => 'required_if:courseTitle,other',
-            'competency_id'        => 'required|exists:competencies,id',
+            'competency_id'        => 'required',
+            'competency_input'     => 'required_if:competency_id,others|nullable|string|max:255',
+            'core_competency'      => 'required|string|max:255',
+            'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
             'participation_type_id' => 'required|exists:participation_types,id',
             'no_of_hours'          => 'required|numeric',
             'expenses'             => 'required|numeric',
             'provider'             => 'required',
             'implementation_date_from' => 'required|date',
             'implementation_date_to'   => 'required|date|after_or_equal:implementation_date_from',
-             'core_competency'    => 'required|string|max:255',
         ]);
+
+        // Handle custom competency
+        $competencyId = $request->input('competency_id');
+        if ($competencyId === 'others') {
+            // Check if competency already exists
+            $existingCompetency = \App\Models\Competency::where('name', $request->input('competency_input'))->first();
+
+            if ($existingCompetency) {
+                $competencyId = $existingCompetency->id;
+            } else {
+                // Create new competency
+                $newCompetency = \App\Models\Competency::create([
+                    'name' => $request->input('competency_input'),
+                    'description' => 'Custom competency created by user'
+                ]);
+                $competencyId = $newCompetency->id;
+            }
+        }
+
+        // Handle custom classification
+        $coreCompetency = $request->input('core_competency');
+        if ($coreCompetency === 'Others') {
+            $coreCompetency = $request->input('core_competency_input');
+        }
 
         // 2. Determine training (programmed or unprogrammed)
         if ($request->input('courseTitle') === 'other') {
             $training = Training::create([
                 'title' => $request->input('training_title'),
-                'core_competency' => $request->input('core_competency'), // Add this
-                'competency_id' => $request->input('competency_id'),
+                'core_competency' => $coreCompetency, // Use processed classification
+                'competency_id' => $competencyId, // Use processed competency ID
                 'provider' => $request->input('provider'),
                 'no_of_hours' => $request->input('no_of_hours'),
                 'budget' => $request->input('expenses'),
@@ -101,7 +127,7 @@ class TrainingTrackingController extends Controller
             if ($training) {
                 // Don't change global status - only update implementation dates
                 $training->implementation_date_from = $request->input('implementation_date_from');
-                $training->core_competency = $request->input('core_competency'); // Add this
+                $training->core_competency = $coreCompetency; // Use processed classification
                 $training->implementation_date_to = $request->input('implementation_date_to');
                 $training->save();
                 // Attach participant if not already attached
