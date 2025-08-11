@@ -132,7 +132,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name && auth()->user()->first_name ? auth()->user()->last_name . ', ' . auth()->user()->first_name : (auth()->user()->last_name ?? auth()->user()->first_name ?? 'Admin') }}
+                        {{ auth()->user()->first_name && auth()->user()->last_name ? auth()->user()->first_name . ', ' . auth()->user()->last_name : (auth()->user()->first_name ?? auth()->user()->last_name ?? 'Admin') }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -248,6 +248,7 @@
                                 <option value="">Select Division/Unit</option>
                                 <option value="ORD - Office of the Regional Director" {{ old('division') == 'ORD - Office of the Regional Director' ? 'selected' : '' }}>ORD - Office of the Regional Director</option>
                                 <option value="FAD - Finance and Administrative Division" {{ old('division') == 'FAD - Finance and Administrative Division' ? 'selected' : '' }}>FAD - Finance and Administrative Division</option>
+                                <option value="PFPD - Policy Formulation and Planning Division" {{ old('division') == 'PFPD - Policy Formulation and Planning Division' ? 'selected' : '' }}>PFPD - Policy Formulation and Planning Division</option>
                                 <option value="DRD - Development Research Division" {{ old('division') == 'DRD - Development Research Division' ? 'selected' : '' }}>DRD - Development Research Division</option>
                                 <option value="PDIPBD - Project Development, Investment Programming and Budget Division" {{ old('division') == 'PDIPBD - Project Development, Investment Programming and Budget Division' ? 'selected' : '' }}>PDIPBD - Project Development, Investment Programming and Budget Division</option>
                                 <option value="PMED - Project Monitoring and Educational Division" {{ old('division') == 'PMED - Project Monitoring and Educational Division' ? 'selected' : '' }}>PMED - Project Monitoring and Educational Division</option>
