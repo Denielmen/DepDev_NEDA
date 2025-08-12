@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AccountController extends Controller
 {
@@ -52,5 +53,43 @@ class AccountController extends Controller
         $user->delete();
 
         return redirect()->back()->with('success', 'The user ' . $userName . ' is successfully deleted.');
+    }
+
+    /**
+     * Upload profile picture for a user.
+     */
+    public function uploadProfilePicture(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $request->validate([
+                'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            ]);
+
+            // Delete old profile picture if exists
+            if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+
+            // Store the new profile picture
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+
+            // Update user record
+            $user->profile_picture = $path;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile picture updated successfully',
+                'image_url' => asset('storage/' . $path)
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error uploading profile picture: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
