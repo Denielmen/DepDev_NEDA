@@ -22,10 +22,22 @@
             background-color: #d3d3d3;
             font-weight: bold;
         }
+        .export-date {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <h2>Training Report</h2>
+
+    <div class="export-date">
+        <strong>Date:</strong> {{ \Carbon\Carbon::now()->format('F j, Y \a\t g:i A') }}
+    </div>
 
     <table>
         <thead>

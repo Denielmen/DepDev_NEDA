@@ -80,10 +80,44 @@
             justify-content: center;
             margin: 0 auto 15px;
             border: 2px solid #004080;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
         }
         .user-avatar i {
             font-size: 3rem;
             color: #6c757d;
+        }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .user-avatar:hover .avatar-overlay {
+            opacity: 1;
+        }
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 50%;
+        }
+        .avatar-overlay i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        .avatar-upload-input {
+            display: none;
         }
         .form-control {
             border: 1px solid #ced4da;
@@ -303,9 +337,18 @@
             <!-- User Info Card -->
             <div class="col-md-4">
                 <div class="user-info-card text-center">
-                    <div class="user-avatar">
-                        <i class="fas fa-user fa-3x text-secondary"></i>
+                    <div class="user-avatar" onclick="document.getElementById('profilePictureInput').click()" title="Click to upload profile picture">
+                        @if($user->profile_picture && file_exists(public_path('storage/' . $user->profile_picture)))
+                            <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" id="profileImage">
+                        @else
+                            <i class="fas fa-user fa-3x text-secondary" id="defaultIcon"></i>
+                        @endif
+                        <div class="avatar-overlay">
+                            <i class="fas fa-camera"></i>
+                            <small style="color: white; font-size: 0.7rem; margin-top: 5px;">Upload</small>
+                        </div>
                     </div>
+                    <input type="file" id="profilePictureInput" class="avatar-upload-input" accept="image/*" onchange="uploadProfilePicture(this)">
                     <div id="nameDisplay">
                         <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
                     </div>
@@ -632,6 +675,82 @@
             form.submit();
         });
     });
+
+    // Profile picture upload function
+    function uploadProfilePicture(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                input.value = ''; // Clear the input
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB.');
+                input.value = ''; // Clear the input
+                return;
+            }
+
+            // Show preview and confirm upload
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const userAvatar = document.querySelector('.user-avatar');
+                const originalContent = userAvatar.innerHTML;
+
+                // Show preview
+                userAvatar.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <div class="avatar-overlay" style="opacity: 1;">
+                        <i class="fas fa-spinner fa-spin fa-2x text-white"></i>
+                        <small style="color: white; font-size: 0.7rem; margin-top: 5px;">Uploading...</small>
+                    </div>
+                `;
+
+                // Create FormData for upload
+                const formData = new FormData();
+                formData.append('profile_picture', file);
+                formData.append('_token', '{{ csrf_token() }}');
+
+                // Upload the file
+                fetch('{{ route("admin.employee.upload-picture", $user->id) }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the avatar with the new image
+                        const newImageHtml = `
+                            <img src="${data.image_url}?t=${Date.now()}" alt="Profile Picture" id="profileImage">
+                            <div class="avatar-overlay">
+                                <i class="fas fa-camera"></i>
+                                <small style="color: white; font-size: 0.7rem; margin-top: 5px;">Upload</small>
+                            </div>
+                        `;
+                        userAvatar.innerHTML = newImageHtml;
+
+                        // Show success message
+                        alert('Profile picture updated successfully!');
+                    } else {
+                        // Restore original content on error
+                        userAvatar.innerHTML = originalContent;
+                        alert('Error uploading image: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Restore original content on error
+                    userAvatar.innerHTML = originalContent;
+                    alert('Error uploading image. Please try again.');
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
     </script>
 </body>
 </html>

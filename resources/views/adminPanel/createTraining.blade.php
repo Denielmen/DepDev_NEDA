@@ -499,6 +499,14 @@
             participantsSelect.innerHTML = '';
             selectedParticipantsDiv.innerHTML = '';
 
+            // Clear any stored participation types from previous sessions
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('participationType_')) {
+                    localStorage.removeItem(key);
+                }
+            }
+
             // Initialize pagination and search functionality
             initializeParticipantEventListeners();
 
@@ -540,6 +548,8 @@
                 fetch(`{{ route('admin.getParticipants') }}?page=${page}&search=${encodeURIComponent(search)}`)
                     .then(response => response.json())
                     .then(data => {
+                        console.log(`Loading page ${page} with ${data.users.length} users. Global selection has ${globalSelectedParticipants.size} participants.`);
+
                         // Update table body
                         tableBody.innerHTML = '';
                         data.users.forEach(user => {
@@ -550,7 +560,25 @@
                         // Restore selection state for current page
                         document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
                             const userId = checkbox.getAttribute('data-user-id');
-                            checkbox.checked = globalSelectedParticipants.has(userId);
+                            // Ensure consistent string comparison
+                            const isSelected = globalSelectedParticipants.has(userId.toString());
+                            checkbox.checked = isSelected;
+
+                            // Debug logging
+                            if (isSelected) {
+                                console.log(`Restoring selection for user ${userId}`);
+                            }
+
+                            // Also restore participation type if this user was previously selected
+                            if (checkbox.checked) {
+                                const participantRow = checkbox.closest('.participant-row');
+                                const participationTypeSelect = participantRow.querySelector('.participation-type');
+                                const storedParticipationType = localStorage.getItem(`participationType_${userId}`);
+                                if (storedParticipationType && participationTypeSelect) {
+                                    participationTypeSelect.value = storedParticipationType;
+                                    console.log(`Restored participation type ${storedParticipationType} for user ${userId}`);
+                                }
+                            }
                         });
 
                         // Update pagination info
@@ -598,6 +626,19 @@
                         <input type="checkbox" class="form-check-input participant-checkbox" data-user-id="${user.id}">
                     </td>
                 `;
+
+                // Add event listener for participation type changes
+                const participationTypeSelect = row.querySelector('.participation-type');
+                participationTypeSelect.addEventListener('change', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    const checkbox = row.querySelector('.participant-checkbox');
+
+                    // If user is selected and changes participation type, update localStorage
+                    if (checkbox.checked && this.value) {
+                        localStorage.setItem(`participationType_${userId}`, this.value);
+                        console.log(`Updated participation type to ${this.value} for user ${userId}`);
+                    }
+                });
 
                 return row;
             }
@@ -679,11 +720,25 @@
 
             function handleIndividualCheckbox() {
                 const userId = this.getAttribute('data-user-id');
+                const participantRow = this.closest('.participant-row');
+                const participationTypeSelect = participantRow.querySelector('.participation-type');
 
                 if (this.checked) {
-                    globalSelectedParticipants.add(userId);
+                    // Ensure consistent string storage
+                    globalSelectedParticipants.add(userId.toString());
+                    console.log(`Added user ${userId} to global selection. Total selected: ${globalSelectedParticipants.size}`);
+
+                    // Store participation type in localStorage for persistence
+                    if (participationTypeSelect && participationTypeSelect.value) {
+                        localStorage.setItem(`participationType_${userId}`, participationTypeSelect.value);
+                        console.log(`Stored participation type ${participationTypeSelect.value} for user ${userId}`);
+                    }
                 } else {
-                    globalSelectedParticipants.delete(userId);
+                    globalSelectedParticipants.delete(userId.toString());
+                    console.log(`Removed user ${userId} from global selection. Total selected: ${globalSelectedParticipants.size}`);
+
+                    // Remove stored participation type
+                    localStorage.removeItem(`participationType_${userId}`);
                 }
 
                 updateSelectAllState();
@@ -692,6 +747,14 @@
             function handleRemoveAllSelection() {
                 // Clear global selection
                 globalSelectedParticipants.clear();
+
+                // Clear all stored participation types from localStorage
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('participationType_')) {
+                        localStorage.removeItem(key);
+                    }
+                }
 
                 // Uncheck all visible checkboxes
                 document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
@@ -724,7 +787,7 @@
                         // Update current page checkboxes
                         document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
                             const userId = checkbox.getAttribute('data-user-id');
-                            checkbox.checked = globalSelectedParticipants.has(userId);
+                            checkbox.checked = globalSelectedParticipants.has(userId.toString());
                         });
 
                         updateSelectAllState();
@@ -742,7 +805,7 @@
                 const currentPageCheckboxes = document.querySelectorAll('.participant-checkbox');
                 const currentPageUserIds = Array.from(currentPageCheckboxes).map(cb => cb.getAttribute('data-user-id'));
 
-                const currentPageSelectedCount = currentPageUserIds.filter(id => globalSelectedParticipants.has(id)).length;
+                const currentPageSelectedCount = currentPageUserIds.filter(id => globalSelectedParticipants.has(id.toString())).length;
                 const totalCurrentPageCount = currentPageUserIds.length;
 
                 if (selectAllCheckbox) {
@@ -788,16 +851,33 @@
                     const userId = checkbox.dataset.userId;
                     const participantRow = checkbox.closest('.participant-row');
                     const participationTypeSelect = participantRow.querySelector('.participation-type');
-                    const participationTypeId = participationTypeSelect.value;
+                    let participationTypeId = participationTypeSelect.value;
                     const userName = participantRow.querySelector('td').textContent.trim();
 
-                    // Check if participation type is missing
+                    // If no participation type selected on current page, check localStorage
                     if (!participationTypeId || participationTypeId === '') {
+                        participationTypeId = localStorage.getItem(`participationType_${userId}`);
+                        console.log(`Retrieved participation type ${participationTypeId} from localStorage for user ${userId}`);
+                    }
+
+                    // Check if participation type is still missing
+                    if (!participationTypeId || participationTypeId === '') {
+                        console.log(`Missing participation type for user ${userId} (${userName})`);
                         missingParticipationTypes.push(userName);
                         return; // Skip this participant
                     }
 
-                    const participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
+                    let participationTypeName = '';
+                    if (participationTypeSelect.value === participationTypeId) {
+                        // Participation type is from current page
+                        participationTypeName = participationTypeSelect.options[participationTypeSelect.selectedIndex].text;
+                    } else {
+                        // Participation type is from localStorage, need to find the name
+                        // We'll get this from the participation types data
+                        const participationTypes = @json($participationTypes);
+                        const participationType = participationTypes.find(type => type.id == participationTypeId);
+                        participationTypeName = participationType ? participationType.name : 'Unknown';
+                    }
 
                     selected.push({
                         id: userId,
@@ -886,7 +966,11 @@
                             let participationTypeId = '';
 
                             if (visibleParticipationSelect) {
+                                // User is on current page, get from visible select
                                 participationTypeId = visibleParticipationSelect.value;
+                            } else {
+                                // User is on different page, get from localStorage
+                                participationTypeId = localStorage.getItem(`participationType_${user.id}`);
                             }
 
                             // Check if participation type is missing
