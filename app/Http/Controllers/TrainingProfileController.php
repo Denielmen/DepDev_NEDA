@@ -177,6 +177,120 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingProfileUnprogramShow', compact('training'));
     }
 
+    public function editUnprogrammed($id)
+    {
+        $training = Training::where('type', 'Unprogrammed')->findOrFail($id);
+        // Ensure only owner can edit
+        if (Auth::id() !== $training->user_id) {
+            abort(403, 'You are not authorized to edit this training.');
+        }
+        $competencies = Competency::orderBy('name')->get();
+        $participationTypes = ParticipationType::all();
+        return view('userPanel.trainingProfileUnprogramEdit', compact('training', 'competencies', 'participationTypes'));
+    }
+
+    public function updateUnprogrammed(Request $request, $id)
+    {
+        $training = Training::where('type', 'Unprogrammed')->findOrFail($id);
+        if (Auth::id() !== $training->user_id) {
+            abort(403, 'You are not authorized to update this training.');
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'competency_id' => 'required',
+            'competency_input' => 'required_if:competency_id,others|nullable|string|max:255',
+            'no_of_hours' => 'nullable|numeric',
+            'provider' => 'nullable|string|max:255',
+            'implementation_date_from' => 'nullable|date',
+            'implementation_date_to' => 'nullable|date|after_or_equal:implementation_date_from',
+            'participation_type_id' => 'nullable|exists:participation_types,id',
+        ]);
+
+        // Handle custom competency
+        $competencyId = $validated['competency_id'];
+        if ($competencyId === 'others') {
+            $existingCompetency = Competency::where('name', $validated['competency_input'])->first();
+            $competencyId = $existingCompetency?->id ?? Competency::create([
+                'name' => $validated['competency_input'],
+                'description' => 'Custom competency created by user'
+            ])->id;
+        }
+
+        $training->update([
+            'title' => $validated['title'],
+            'competency_id' => $competencyId,
+            'no_of_hours' => $validated['no_of_hours'] ?? $training->no_of_hours,
+            'provider' => $validated['provider'] ?? $training->provider,
+            'implementation_date_from' => $validated['implementation_date_from'] ?? $training->implementation_date_from,
+            'implementation_date_to' => $validated['implementation_date_to'] ?? $training->implementation_date_to,
+            'status' => 'Implemented',
+        ]);
+
+        // Update current user's participation type if provided
+        if (!empty($validated['participation_type_id'])) {
+            $training->participants()->updateExistingPivot(Auth::id(), [
+                'participation_type_id' => $validated['participation_type_id'],
+            ]);
+        }
+
+        // Save uploaded materials
+        if ($request->hasFile('uploadMaterials')) {
+            foreach ($request->file('uploadMaterials') as $file) {
+                $filePath = $file->store('uploads', [
+                    'disk' => 'public',
+                    'visibility' => 'public',
+                ]);
+                \App\Models\TrainingMaterial::create([
+                    'title'         => $training->title,
+                    'competency_id' => $training->competency_id,
+                    'user_id'       => Auth::id(),
+                    'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                    'file_path'     => $filePath,
+                    'link'          => null,
+                    'type'          => 'material',
+                    'training_id'   => $training->id,
+                ]);
+            }
+        }
+
+        // Save link material
+        if ($request->filled('linkMaterials')) {
+            \App\Models\TrainingMaterial::create([
+                'title'         => $training->title,
+                'competency_id' => $training->competency_id,
+                'user_id'       => Auth::id(),
+                'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                'file_path'     => null,
+                'link'          => $request->linkMaterials,
+                'type'          => 'material',
+                'training_id'   => $training->id,
+            ]);
+        }
+
+        // Save uploaded certificates
+        if ($request->hasFile('uploadCertificates')) {
+            foreach ($request->file('uploadCertificates') as $file) {
+                $certificatePath = $file->store('certificates', [
+                    'disk' => 'public',
+                    'visibility' => 'public',
+                ]);
+                \App\Models\TrainingMaterial::create([
+                    'title'         => $training->title . ' Certificate',
+                    'competency_id' => $training->competency_id,
+                    'user_id'       => Auth::id(),
+                    'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                    'file_path'     => $certificatePath,
+                    'link'          => null,
+                    'type'          => 'certificate',
+                    'training_id'   => $training->id,
+                ]);
+            }
+        }
+
+        return redirect()->route('user.training.profile.unprogram.show', $training->id)
+            ->with('success', 'Training updated successfully.');
+    }
 
     public function edit(Training $training)
     {

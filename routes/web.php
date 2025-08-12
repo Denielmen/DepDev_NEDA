@@ -64,6 +64,12 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training-profile/unprogrammed/{id}', [TrainingProfileController::class, 'showUnprogrammed'])
         ->name('user.training.profile.unprogram.show');
 
+    Route::get('/training-profile/unprogrammed/{id}/edit', [TrainingProfileController::class, 'editUnprogrammed'])
+        ->name('user.training.profile.unprogram.edit');
+
+    Route::put('/training-profile/unprogrammed/{id}', [TrainingProfileController::class, 'updateUnprogrammed'])
+        ->name('user.training.profile.unprogram.update');
+
     Route::get('/training/{id}/effectiveness/participant/{type}', [TrainingProfileController::class, 'effectivenessParticipant'])
         ->name('user.training.effectiveness.participant');
 

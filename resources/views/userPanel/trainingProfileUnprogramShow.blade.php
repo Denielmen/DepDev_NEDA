@@ -207,6 +207,14 @@
                         <td>{{ $training->status ?? '' }}</td>
                     </tr>
                 </table>
+                @if(Auth::id() === ($training->user_id ?? null))
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="{{ route('user.training.profile.unprogram.edit', $training->id) }}" class="btn btn-primary" style="background-color:#0d6efd;border:none;">
+                        <i class="bi bi-pencil-square"></i>
+                        Edit
+                    </a>
+                </div>
+                @endif
             </div>
         </div>
     </div>
