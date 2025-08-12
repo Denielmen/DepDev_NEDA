@@ -13,7 +13,7 @@ use App\Http\Controllers\TrainingMaterialController;
 use Illuminate\Support\Facades\Auth;
 //remove lines 48-50 before deployment
 
-//GET /register: shows the registration form.]
+//GET /register: shows the registration form.
 //POST /register: processes the registration.
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
@@ -212,6 +212,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         ->name('admin.toggleUserStatus');
     Route::delete('/users/{user}/delete', [App\Http\Controllers\Admin\AccountController::class, 'deleteUser'])
         ->name('admin.deleteUser');
+    Route::post('/employee/{id}/upload-picture', [App\Http\Controllers\Admin\AccountController::class, 'uploadProfilePicture'])
+        ->name('admin.employee.upload-picture');
     Route::get('/training-details/{training_id}/user/{user_id}', [App\Http\Controllers\AdminController::class, 'viewUserInfo'])->name('admin.viewUserInfo');
     Route::get('/training-details/unprogrammed/{training_id}/user/{user_id}', [App\Http\Controllers\AdminController::class, 'viewUserInfoUnprog'])->name('admin.viewUserInfoUnprog');
     Route::post('/fix-certificates', [App\Http\Controllers\AdminController::class, 'fixAllCertificates'])->name('admin.fixCertificates');

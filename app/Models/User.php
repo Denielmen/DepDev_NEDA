@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'superior',
         'password',
+        'profile_picture',
         'is_active',
         'is_superior_eligible',
     ];
