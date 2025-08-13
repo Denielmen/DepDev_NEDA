@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Training Effectiveness Evaluation - Participant</title>
+    <title>lnd.dro7.depdev</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -273,7 +273,7 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
-                DEPDEV Learning and Development Database System Region VII
+               DEPDEV Region VII Learning and Development Database System
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
