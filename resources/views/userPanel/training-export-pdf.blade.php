@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>My Training Programs</title>
+    <title>lnd.dro7.depdev</title>
     <style>
         body {
             font-family: Arial, sans-serif;
