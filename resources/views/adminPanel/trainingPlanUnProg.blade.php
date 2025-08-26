@@ -309,6 +309,7 @@
                                         <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown">
                                             <i class="bi bi-three-dots"></i>
                                         </button>
+                                        @if(!$isReadOnlyAdmin)
                                         <!-- <ul class="dropdown-menu">
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('admin.training-plan.edit', $training->id) }}">
@@ -325,6 +326,7 @@
                                                 </form>
                                             </li>
                                         </ul> -->
+                                        @endif
                                     </div> --}}
                                 </div>
                             </td>

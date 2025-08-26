@@ -93,16 +93,39 @@
         }
         .search-box {
             position: relative;
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 25px;
+            padding: 8px 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             width: 300px;
         }
+
         .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
             width: 100%;
             padding: 8px 15px;
             padding-right: 70px;
             border: 1px solid #ced4da;
             border-radius: 5px;
         }
-        .search-box .search-icon {
+
+        .search-icon {
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .search-box .clear-search {
             position: absolute;
             right: 40px;
             top: 50%;
@@ -155,7 +178,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin-right: 5px;
+            margin-right: 8px;
         }
         .status-indicator.active {
             background-color: #28a745;
@@ -345,9 +368,11 @@
             </div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
+                    @if(!$isReadOnlyAdmin)
                     <a href="{{ route('register') }}" class="new-user-btn">
                         <i class="bi bi-person-plus-fill"></i> NEW USER
                     </a>
+                    @endif
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" placeholder="Search all employees..." id="searchInput" value="{{ $searchQuery ?? '' }}" onkeyup="handleSearch(event)">
@@ -360,8 +385,8 @@
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <div class="tab-buttons">
-                        <a href="{{ route('admin.participants', ['status' => 'active']) }}" class="tab-button {{ $status === 'active' ? 'active' : '' }}" id="active-tab">Active</a>
-                        <a href="{{ route('admin.participants', ['status' => 'inactive']) }}" class="tab-button {{ $status === 'inactive' ? 'active' : '' }}" id="inactive-tab">Disable</a>
+                        <a href="{{ route('admin.participants', ['status' => 'active', 'search' => $searchQuery ?? '']) }}" class="tab-button {{ $status === 'active' ? 'active' : '' }}" id="active-tab">Active</a>
+                        <a href="{{ route('admin.participants', ['status' => 'inactive', 'search' => $searchQuery ?? '']) }}" class="tab-button {{ $status === 'inactive' ? 'active' : '' }}" id="inactive-tab">Disable</a>
                     </div>
                     <div>
                         <label for="sort-by" class="me-2">Sort by</label>
@@ -398,6 +423,7 @@
                                     <a href="{{ route('admin.participants.info', ['id' => $user->id]) }}" class="action-btn view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
+                                    @if(!$isReadOnlyAdmin)
                                     <form action="{{ route('admin.toggleUserStatus', $user->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PATCH')
@@ -405,6 +431,8 @@
                                             <i class="bi bi-toggle-{{ $user->is_active ? 'on' : 'off' }}"></i> {{ $user->is_active ? 'Disable' : 'Enable' }}
                                         </button>
                                     </form>
+                                    @endif
+                                    @if(!$isReadOnlyAdmin)
                                     <form action="{{ route('admin.deleteUser', $user->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
@@ -412,6 +440,7 @@
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
                                     </form>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -469,9 +498,6 @@
             // Page initialization complete
         });
 
-
-    </script>
-    <script>
         // Handle search with debouncing to avoid too many requests
         let searchTimeout;
         function handleSearch(event) {
@@ -517,38 +543,36 @@
             window.location.href = url.toString();
         }
 
-function sortUsers() {
-    try {
-        const select = document.getElementById('sort-by');
-        if (!select) return;
+        function sortUsers() {
+            try {
+                const select = document.getElementById('sort-by');
+                if (!select) return;
 
-        const position = select.value;
+                const position = select.value;
 
-        // Get current URL parameters
-        const url = new URL(window.location);
+                // Get current URL parameters
+                const url = new URL(window.location);
 
-        // Update or remove position parameter
-        if (position === 'all') {
-            url.searchParams.delete('position');
-        } else {
-            url.searchParams.set('position', position);
+                // Update or remove position parameter
+                if (position === 'all') {
+                    url.searchParams.delete('position');
+                } else {
+                    url.searchParams.set('position', position);
+                }
+
+                // Preserve search query if it exists
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.value.trim() !== '') {
+                    url.searchParams.set('search', searchInput.value.trim());
+                }
+
+                // Redirect to the new URL to reload with server-side filtering
+                window.location.href = url.toString();
+
+            } catch (error) {
+                console.error('Error in sortUsers:', error);
+            }
         }
-
-        // Preserve search query if it exists
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput && searchInput.value.trim() !== '') {
-            url.searchParams.set('search', searchInput.value.trim());
-        }
-
-        // Redirect to the new URL to reload with server-side filtering
-        window.location.href = url.toString();
-
-    } catch (error) {
-        console.error('Error in sortUsers:', error);
-    }
-}
-
-
     </script>
 </body>
 </html>

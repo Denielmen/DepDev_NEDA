@@ -631,6 +631,21 @@
 
             editButton.style.display = 'none';
             saveCancelButtons.style.display = 'block';
+
+            // Make Position Start Date editable but keep Government Start Date read-only
+            const positionStartDate = document.querySelector('input[name="position_start_date"]');
+            const governmentStartDate = document.querySelector('input[name="government_start_date"]');
+            
+            if (positionStartDate) {
+                positionStartDate.removeAttribute('readonly');
+                positionStartDate.addEventListener('change', calculateYearsInPosition);
+                positionStartDate.addEventListener('input', calculateYearsInPosition);
+            }
+            
+            // Keep Government Start Date read-only
+            if (governmentStartDate) {
+                governmentStartDate.setAttribute('readonly', true);
+            }
         });
 
         // Restore original values and readonly state when cancel is clicked
@@ -668,11 +683,105 @@
 
             editButton.style.display = 'block';
             saveCancelButtons.style.display = 'none';
+
+            // Restore read-only state for both date fields
+            const positionStartDate = document.querySelector('input[name="position_start_date"]');
+            const governmentStartDate = document.querySelector('input[name="government_start_date"]');
+            
+            if (positionStartDate) {
+                positionStartDate.setAttribute('readonly', true);
+            }
+            
+            if (governmentStartDate) {
+                governmentStartDate.setAttribute('readonly', true);
+            }
         });
 
         // Handle form submission
         saveButton.addEventListener('click', function() {
             form.submit();
+        });
+
+        // Add functions to calculate years when dates change
+        function calculateYearsInGovernment() {
+            const startDate = document.querySelector('input[name="government_start_date"]').value;
+            const yearsDisplay = document.getElementById('years_display');
+            const hiddenInput = document.querySelector('input[name="years_in_csc"]');
+
+            if (startDate) {
+                const start = new Date(startDate);
+                const today = new Date();
+
+                // Calculate the difference in years
+                let years = today.getFullYear() - start.getFullYear();
+                const monthDiff = today.getMonth() - start.getMonth();
+
+                // Adjust if the current date hasn't reached the anniversary yet
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < start.getDate())) {
+                    years--;
+                }
+
+                // Ensure years is not negative
+                years = Math.max(0, years);
+
+                yearsDisplay.textContent = years;
+                hiddenInput.value = years; // Update hidden input
+            } else {
+                yearsDisplay.textContent = '0';
+                hiddenInput.value = '0';
+            }
+        }
+
+        function calculateYearsInPosition() {
+            const startDate = document.querySelector('input[name="position_start_date"]').value;
+            const positionYearsDisplay = document.getElementById('position_years_display');
+            const hiddenInput = document.querySelector('input[name="years_in_position"]');
+
+            if (startDate) {
+                const start = new Date(startDate);
+                const today = new Date();
+
+                // Calculate the difference in years
+                let years = today.getFullYear() - start.getFullYear();
+                const monthDiff = today.getMonth() - start.getMonth();
+
+                // Adjust if the current date hasn't reached the anniversary yet
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < start.getDate())) {
+                    years--;
+                }
+
+                // Ensure years is not negative
+                years = Math.max(0, years);
+
+                positionYearsDisplay.textContent = years;
+                hiddenInput.value = years; // Update hidden input
+            } else {
+                positionYearsDisplay.textContent = '0';
+                hiddenInput.value = '0';
+            }
+        }
+
+        // Add event listeners for date changes when in edit mode
+        editButton.addEventListener('click', function() {
+            // Add event listeners for date fields
+            const governmentStartDate = document.querySelector('input[name="government_start_date"]');
+            const positionStartDate = document.querySelector('input[name="position_start_date"]');
+
+            if (governmentStartDate) {
+                governmentStartDate.addEventListener('change', calculateYearsInGovernment);
+                governmentStartDate.addEventListener('input', calculateYearsInGovernment);
+            }
+
+            if (positionStartDate) {
+                positionStartDate.addEventListener('change', calculateYearsInPosition);
+                positionStartDate.addEventListener('input', calculateYearsInPosition);
+            }
+        });
+
+        // Calculate years on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateYearsInGovernment();
+            calculateYearsInPosition();
         });
     });
 

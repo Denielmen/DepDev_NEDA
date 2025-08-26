@@ -26,6 +26,8 @@ class EmployeeController extends Controller
                 'government_start_date' => 'required|date|before_or_equal:today',
                 'division' => 'required|string|max:255',
                 'position' => 'required|string|max:255',
+                'position_start_date' => 'nullable|date|before_or_equal:today',
+                'government_start_date' => 'nullable|date|before_or_equal:today',
                 'superior' => 'nullable|string|max:255',
             ]);
 

@@ -253,10 +253,12 @@
                     <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button">Unprogrammed</a>
                 </div>
                 <div class="d-flex align-items-center gap-3">
+                    @if(!$isReadOnlyAdmin)
                     <a href="{{ route('admin.training-plan.create') }}" class="btn btn-create">
                         <i class="bi bi-plus-circle"></i>
                         Create New
                     </a>
+                    @endif
                     <a href="{{ route('admin.search.index') }}" class="btn btn-primary">
                         <i class="bi bi-search"></i>
                         Advanced Search
@@ -291,6 +293,7 @@
                                             <i class="bi bi-three-dots"></i>
                                         </button>
                                         <ul class="dropdown-menu">
+                                            @if(!$isReadOnlyAdmin)
                                             <li>
                                                <a class="dropdown-item" href="{{ route('admin.training-plan.edit', ['training' => $training->id]) }}">
                                                     <i class="bi bi-pencil-square"></i> Edit
@@ -305,6 +308,7 @@
                                                     </button>
                                                 </form>
                                             </li>
+                                            @endif
 
                                         </ul>
                                     </div>

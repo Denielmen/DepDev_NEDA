@@ -429,6 +429,7 @@
                 calculateYearsInGovernment();
                 calculateYearsInPosition();
 
+
                 // Calculate when date changes
                 governmentStartDate.addEventListener('change', calculateYearsInGovernment);
                 governmentStartDate.addEventListener('input', calculateYearsInGovernment);

@@ -72,6 +72,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'is_superior_eligible' => 'boolean',
+            'position_start_date' => 'date',
+            'government_start_date' => 'date',
         ];
     }
 

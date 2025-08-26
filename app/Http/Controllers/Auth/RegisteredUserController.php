@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
@@ -15,7 +16,7 @@ class RegisteredUserController extends Controller
     public function create()
     {
         // If user is authenticated and not an admin, redirect to home
-        if (auth()->check() && auth()->user()->role !== 'Admin') {
+        if (Auth::check() && Auth::user()->role !== 'Admin') {
             return redirect()->route('user.home');
         }
         
@@ -76,7 +77,7 @@ class RegisteredUserController extends Controller
         // ]);
 
         // If the user is authenticated (admin), redirect back to participants list
-        if (auth()->check()) {
+        if (Auth::check()) {
             return redirect()->route('admin.participants')->with('status', 'User registered successfully.');
         }
 
