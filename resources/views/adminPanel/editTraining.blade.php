@@ -108,7 +108,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name ?? 'Admin' }}
+                        {{ auth()->user()->last_name && auth()->user()->first_name ? auth()->user()->last_name . ', ' . auth()->user()->first_name : (auth()->user()->last_name ?? auth()->user()->first_name ?? 'Admin') }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -228,26 +228,30 @@
                         <textarea class="form-control" id="objective" name="objective" rows="2">{{ $training->objective }}</textarea>
                     </div>
 
-                    <h5 class="mt-4">Participants</h5>
+                    <h5 class="mt-4">Participants ({{ $training->participants->count() }})</h5>
                     <div id="selectedParticipantsContainer" class="mb-3">
                         <div id="selectedParticipants">
-                            @foreach ($training->participants as $participant)
-                                <div class="d-flex justify-content-between align-items-center mb-1 p-2 border rounded">
-                                    <div class="d-flex align-items-center">
-                                        <span class="me-2">{{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}</span>
-                                        <span class="badge bg-info me-1">{{ $participationTypes->get($participant->pivot->participation_type_id)->name ?? 'N/A' }}</span>
-                                        <span class="badge bg-success">CY-{{ $participant->pivot->year ?? '2025' }}</span>
+                            @if($training->participants->count() > 0)
+                                @foreach ($training->participants as $participant)
+                                    <div class="d-flex justify-content-between align-items-center mb-1 p-2 border rounded" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? '2025' }}">
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-2">{{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}</span>
+                                            <span class="badge bg-info me-1">{{ $participationTypes->get($participant->pivot->participation_type_id)->name ?? 'N/A' }}</span>
+                                            <span class="badge bg-success">CY-{{ $participant->pivot->year ?? '2025' }}</span>
+                                        </div>
+                                        <div>
+                                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? '2025' }}">
+                                                <i class="bi bi-x"></i> Remove
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="{{ $participant->id }}">
-                                            <i class="bi bi-x"></i> Remove
-                                        </button>
-                                    </div>
-                                </div>
-                                <input type="hidden" name="participants[]" value="{{ $participant->id }}">
-                                <input type="hidden" name="participation_types[{{ $participant->id }}]" value="{{ $participant->pivot->participation_type_id }}">
-                                <input type="hidden" name="participant_years[{{ $participant->id }}]" value="{{ $participant->pivot->year ?? '2025' }}">
-                            @endforeach
+                                    <input type="hidden" name="participants[]" value="{{ $participant->id }}">
+                                    <input type="hidden" name="participation_types[{{ $participant->id }}_{{ $participant->pivot->year ?? '2025' }}]" value="{{ $participant->pivot->participation_type_id }}">
+                                    <input type="hidden" name="participant_years[{{ $participant->id }}_{{ $participant->pivot->year ?? '2025' }}]" value="{{ $participant->pivot->year ?? '2025' }}">
+                                @endforeach
+                            @else
+                                <p class="text-muted">No participants added yet.</p>
+                            @endif
                         </div>
                     </div>
 
@@ -291,7 +295,7 @@
 
     <!-- Participant List Modal -->
     <div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="participantModalLabel">Add Participants</h5>
@@ -412,6 +416,36 @@
                 const toYear = fromYear + 2; // 3-year period: from year + 2 = to year
                 toYearInput.value = toYear;
             }
+        }
+
+        // Function to check for duplicate participant-year combinations
+        function checkDuplicateParticipantYear(userId, year) {
+            const form = document.querySelector('form[action*="training-plan"]');
+
+            // Check existing participants in the form (hidden inputs)
+            // Look for user_year key format
+            const userYearKey = `${userId}_${year}`;
+            const existingYearInput = form.querySelector(`input[name="participant_years[${userYearKey}]"]`);
+
+            if (existingYearInput) {
+                return true; // Duplicate found
+            }
+
+            // Also check the displayed participants (in case they're already shown but not yet in hidden inputs)
+            const selectedParticipantsDiv = document.getElementById('selectedParticipants');
+            const participantDivs = selectedParticipantsDiv.querySelectorAll('.d-flex');
+
+            for (let div of participantDivs) {
+                const removeButton = div.querySelector('.remove-participant');
+                if (removeButton && removeButton.dataset.userId === userId) {
+                    const yearBadge = div.querySelector('.badge.bg-success');
+                    if (yearBadge && yearBadge.textContent.includes(`CY-${year}`)) {
+                        return true; // Duplicate found in displayed participants
+                    }
+                }
+            }
+
+            return false; // No duplicate found
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -737,19 +771,35 @@
                     return;
                 }
 
-                // Add selected participants to the form
+                // Check for duplicates first and collect them
+                const duplicates = [];
+                const validParticipants = [];
+
                 selected.forEach(participant => {
-                    // Check if participant already exists
-                    const existingParticipant = form.querySelector(`input[name="participants[]"][value="${participant.userId}"]`);
-                    if (existingParticipant) {
-                        // Update participation type if participant already exists
-                        form.querySelector(`input[name="participation_types[${participant.userId}]"]`).value = participant.participationTypeId;
+                    // Check if participant already exists with the same year
+                    const existingParticipantWithSameYear = checkDuplicateParticipantYear(participant.userId, participant.participantYear);
+                    if (existingParticipantWithSameYear) {
+                        duplicates.push(`${participant.participantName} (CY-${participant.participantYear})`);
                         return;
                     }
+
+                    // Allow adding the same user with different years
+                    validParticipants.push(participant);
+                });
+
+                // Show duplicates alert if any
+                if (duplicates.length > 0) {
+                    alert(`The following participants are already added for the specified year(s):\n\n${duplicates.join('\n')}\n\nPlease select different years for these participants.`);
+                }
+
+                // Add valid participants to the form
+                validParticipants.forEach(participant => {
 
                     // Create participant display
                     const participantDiv = document.createElement('div');
                     participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
+                    participantDiv.setAttribute('data-user-id', participant.userId);
+                    participantDiv.setAttribute('data-year', participant.participantYear);
                     participantDiv.innerHTML = `
                         <div class="d-flex align-items-center">
                             <span class="me-2">${participant.participantName}</span>
@@ -757,13 +807,15 @@
                             <span class="badge bg-success">CY-${participant.participantYear}</span>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.userId}">
+                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.userId}" data-year="${participant.participantYear}">
                                 <i class="bi bi-x"></i> Remove
                             </button>
                         </div>
                     `;
 
-                    // Create hidden inputs
+                    // Create hidden inputs using user_year keys to allow multiple entries for same user
+                    const userYearKey = `${participant.userId}_${participant.participantYear}`;
+
                     const participantInput = document.createElement('input');
                     participantInput.type = 'hidden';
                     participantInput.name = 'participants[]';
@@ -771,12 +823,12 @@
 
                     const participationTypeInput = document.createElement('input');
                     participationTypeInput.type = 'hidden';
-                    participationTypeInput.name = `participation_types[${participant.userId}]`;
+                    participationTypeInput.name = `participation_types[${userYearKey}]`;
                     participationTypeInput.value = participant.participationTypeId;
 
                     const participantYearInput = document.createElement('input');
                     participantYearInput.type = 'hidden';
-                    participantYearInput.name = `participant_years[${participant.userId}]`;
+                    participantYearInput.name = `participant_years[${userYearKey}]`;
                     participantYearInput.value = participant.participantYear;
 
                     // Add to form
@@ -863,17 +915,35 @@
                             return;
                         }
 
-                        // Add selected participants to the form
+                        // Check for duplicates first and collect them
+                        const duplicates = [];
+                        const validParticipants = [];
+
                         selected.forEach(participant => {
-                            // Check if participant already exists
-                            const existingParticipant = form.querySelector(`input[name="participants[]"][value="${participant.userId}"]`);
-                            if (existingParticipant) {
-                                return; // Skip if already added
+                            // Check if participant already exists with the same year
+                            const existingParticipantWithSameYear = checkDuplicateParticipantYear(participant.userId, participant.participantYear);
+                            if (existingParticipantWithSameYear) {
+                                duplicates.push(`${participant.participantName} (CY-${participant.participantYear})`);
+                                return;
                             }
+
+                            // Allow adding the same user with different years
+                            validParticipants.push(participant);
+                        });
+
+                        // Show duplicates alert if any
+                        if (duplicates.length > 0) {
+                            alert(`The following participants are already added for the specified year(s):\n\n${duplicates.join('\n')}\n\nPlease select different years for these participants.`);
+                        }
+
+                        // Add valid participants to the form
+                        validParticipants.forEach(participant => {
 
                             // Create participant display
                             const participantDiv = document.createElement('div');
                             participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
+                            participantDiv.setAttribute('data-user-id', participant.userId);
+                            participantDiv.setAttribute('data-year', participant.participantYear);
                             participantDiv.innerHTML = `
                                 <div class="d-flex align-items-center">
                                     <span class="me-2">${participant.participantName}</span>
@@ -881,13 +951,15 @@
                                     <span class="badge bg-success">CY-${participant.participantYear}</span>
                                 </div>
                                 <div>
-                                    <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.userId}">
+                                    <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="${participant.userId}" data-year="${participant.participantYear}">
                                         <i class="bi bi-x"></i> Remove
                                     </button>
                                 </div>
                             `;
 
-                            // Create hidden inputs
+                            // Create hidden inputs using user_year keys to allow multiple entries for same user
+                            const userYearKey = `${participant.userId}_${participant.participantYear}`;
+
                             const participantInput = document.createElement('input');
                             participantInput.type = 'hidden';
                             participantInput.name = 'participants[]';
@@ -895,12 +967,12 @@
 
                             const participationTypeInput = document.createElement('input');
                             participationTypeInput.type = 'hidden';
-                            participationTypeInput.name = `participation_types[${participant.userId}]`;
+                            participationTypeInput.name = `participation_types[${userYearKey}]`;
                             participationTypeInput.value = participant.participationTypeId;
 
                             const participantYearInput = document.createElement('input');
                             participantYearInput.type = 'hidden';
-                            participantYearInput.name = `participant_years[${participant.userId}]`;
+                            participantYearInput.name = `participant_years[${userYearKey}]`;
                             participantYearInput.value = participant.participantYear;
 
                             // Add to form
@@ -932,11 +1004,19 @@
                 if (e.target.closest('.remove-participant')) {
                     const button = e.target.closest('.remove-participant');
                     const userId = button.dataset.userId;
+                    const year = button.dataset.year;
+                    const participantDiv = button.closest('.d-flex');
+                    const userYearKey = `${userId}_${year}`;
 
-                    // Remove the hidden inputs for this user
-                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
-                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
-                    form.querySelectorAll(`input[name="participant_years[${userId}]"]`).forEach(input => input.remove());
+                    // Find and remove the corresponding hidden inputs using user_year key
+                    const participantInput = form.querySelector(`input[name="participants[]"][value="${userId}"]`);
+                    const participationTypeInput = form.querySelector(`input[name="participation_types[${userYearKey}]"]`);
+                    const participantYearInput = form.querySelector(`input[name="participant_years[${userYearKey}]"]`);
+
+                    // Remove the inputs if they exist
+                    if (participantInput) participantInput.remove();
+                    if (participationTypeInput) participationTypeInput.remove();
+                    if (participantYearInput) participantYearInput.remove();
 
                     // Remove the participant's div from the display
                     button.closest('.d-flex').remove();

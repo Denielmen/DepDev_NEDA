@@ -107,7 +107,10 @@
             outline: none;
             background: transparent;
             width: 100%;
-            padding-right: 30px;
+            padding: 8px 15px;
+            padding-right: 70px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
         }
 
         .search-icon {
@@ -117,14 +120,25 @@
 
         .clear-search {
             position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .search-box .clear-search {
+            position: absolute;
             right: 10px;
-            color: #666;
-            text-decoration: none;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
             font-size: 16px;
         }
-
-        .clear-search:hover {
-            color: #333;
+        .search-box .clear-search:hover {
+            color: #dc3545;
         }
         .table-container {
             background-color: white;
@@ -291,7 +305,7 @@
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
                         <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name ?? 'Admin' }}
+                        {{ auth()->user()->last_name && auth()->user()->first_name ? auth()->user()->last_name . ', ' . auth()->user()->first_name : (auth()->user()->last_name ?? auth()->user()->first_name ?? 'Admin') }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -329,34 +343,48 @@
             @endif
             <div class="list-title">
                 <h2>List of Employees</h2>
+                @if((isset($positionFilter) && $positionFilter !== 'all') || (isset($searchQuery) && trim($searchQuery) !== ''))
+                    <div class="alert alert-info mt-2 mb-0">
+                        <i class="bi bi-filter"></i>
+                        @if(isset($positionFilter) && $positionFilter !== 'all')
+                            Showing employees with position: <strong>{{ $positionFilter }}</strong>
+                        @endif
+                        @if(isset($searchQuery) && trim($searchQuery) !== '')
+                            @if(isset($positionFilter) && $positionFilter !== 'all') and @endif
+                            Searching for: <strong>"{{ $searchQuery }}"</strong>
+                        @endif
+                        <a href="{{ route('admin.participants', ['status' => $status]) }}" class="btn btn-sm btn-outline-primary ms-2">
+                            <i class="bi bi-x"></i> Clear All Filters
+                        </a>
+                    </div>
+                @endif
             </div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <a href="{{ route('register') }}" class="new-user-btn">
                         <i class="bi bi-person-plus-fill"></i> NEW USER
                     </a>
-                    <form method="GET" action="{{ route('admin.participants') }}" class="search-box">
+                    <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
-                        <input type="text" placeholder="Search by name or ID..." name="search" value="{{ $search ?? '' }}" id="searchInput">
-                        <input type="hidden" name="status" value="{{ $status }}">
-                        @if($search)
-                            <a href="{{ route('admin.participants', ['status' => $status]) }}" class="clear-search" title="Clear search">
-                                <i class="bi bi-x-circle"></i>
-                            </a>
+                        <input type="text" placeholder="Search all employees..." id="searchInput" value="{{ $searchQuery ?? '' }}" onkeyup="handleSearch(event)">
+                        @if(isset($searchQuery) && trim($searchQuery) !== '')
+                            <button type="button" class="clear-search" onclick="clearSearch()" title="Clear search">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
                         @endif
-                    </form>
+                    </div>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <div class="tab-buttons">
-                        <a href="{{ route('admin.participants', ['status' => 'active', 'search' => $search ?? '']) }}" class="tab-button {{ $status === 'active' ? 'active' : '' }}" id="active-tab">Active</a>
-                        <a href="{{ route('admin.participants', ['status' => 'inactive', 'search' => $search ?? '']) }}" class="tab-button {{ $status === 'inactive' ? 'active' : '' }}" id="inactive-tab">Disable</a>
+                        <a href="{{ route('admin.participants', ['status' => 'active', 'search' => $searchQuery ?? '']) }}" class="tab-button {{ $status === 'active' ? 'active' : '' }}" id="active-tab">Active</a>
+                        <a href="{{ route('admin.participants', ['status' => 'inactive', 'search' => $searchQuery ?? '']) }}" class="tab-button {{ $status === 'inactive' ? 'active' : '' }}" id="inactive-tab">Disable</a>
                     </div>
                     <div>
                         <label for="sort-by" class="me-2">Sort by</label>
-                        <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers()">
-                            <option value="all">All Positions</option>
+                        <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers();">
+                            <option value="all" {{ (!isset($positionFilter) || $positionFilter === 'all') ? 'selected' : '' }}>All Positions</option>
                             @foreach($positions as $position)
-                                <option value="{{ $position }}">{{ $position }}</option>
+                                <option value="{{ $position }}" {{ (isset($positionFilter) && $positionFilter === $position) ? 'selected' : '' }}>{{ $position }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -452,48 +480,85 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Search functionality with delay
+        // Initialize page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Page initialization complete
+        });
+
+        // Handle search with debouncing to avoid too many requests
         let searchTimeout;
-        const searchInput = document.getElementById('searchInput');
-        const searchForm = searchInput.closest('form');
-
-        searchInput.addEventListener('input', function() {
+        function handleSearch(event) {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
-                searchForm.submit();
-            }, 500); // Wait 500ms after user stops typing
-        });
 
-        // Also submit on Enter key
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                clearTimeout(searchTimeout);
-                searchForm.submit();
+            // If Enter key is pressed, search immediately
+            if (event.key === 'Enter') {
+                performSearch();
+                return;
             }
-        });
+
+            // Otherwise, wait 500ms after user stops typing
+            searchTimeout = setTimeout(performSearch, 500);
+        }
+
+        function performSearch() {
+            const input = document.getElementById('searchInput');
+            const searchQuery = input.value.trim();
+
+            // Get current URL parameters
+            const url = new URL(window.location);
+
+            // Update or remove search parameter
+            if (searchQuery === '') {
+                url.searchParams.delete('search');
+            } else {
+                url.searchParams.set('search', searchQuery);
+            }
+
+            // Preserve position filter if it exists
+            const positionSelect = document.getElementById('sort-by');
+            if (positionSelect && positionSelect.value !== 'all') {
+                url.searchParams.set('position', positionSelect.value);
+            }
+
+            // Redirect to the new URL to reload with server-side search
+            window.location.href = url.toString();
+        }
+
+        function clearSearch() {
+            const url = new URL(window.location);
+            url.searchParams.delete('search');
+            window.location.href = url.toString();
+        }
 
         function sortUsers() {
-            const select = document.getElementById('sort-by');
-            const position = select.value;
-            const table = document.querySelector('.table-container table');
-            const tr = Array.from(table.getElementsByTagName('tr')).slice(1); // Skip header row
+            try {
+                const select = document.getElementById('sort-by');
+                if (!select) return;
 
-            // Filter by position only (status is handled server-side)
-            tr.forEach(row => {
-                const positionCell = row.getElementsByTagName('td')[3];
+                const position = select.value;
 
-                if (positionCell) {
-                    const positionText = positionCell.textContent.trim();
+                // Get current URL parameters
+                const url = new URL(window.location);
 
-                    // Show row if it matches the position filter
-                    if (position === 'all' || positionText === position) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                // Update or remove position parameter
+                if (position === 'all') {
+                    url.searchParams.delete('position');
+                } else {
+                    url.searchParams.set('position', position);
                 }
-            });
+
+                // Preserve search query if it exists
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.value.trim() !== '') {
+                    url.searchParams.set('search', searchInput.value.trim());
+                }
+
+                // Redirect to the new URL to reload with server-side filtering
+                window.location.href = url.toString();
+
+            } catch (error) {
+                console.error('Error in sortUsers:', error);
+            }
         }
     </script>
 </body>
