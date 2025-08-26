@@ -424,12 +424,11 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const governmentStartDate = document.getElementById('government_start_date');
                 const positionStartDate = document.getElementById('position_start_date');
-                const positionStartDate = document.getElementById('position_start_date');
 
                 // Calculate on page load if there's already a value
                 calculateYearsInGovernment();
                 calculateYearsInPosition();
-                calculateYearsInPosition();
+
 
                 // Calculate when date changes
                 governmentStartDate.addEventListener('change', calculateYearsInGovernment);
