@@ -361,9 +361,11 @@
             </div>
             <div class="user-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
+                    @if(!$isReadOnlyAdmin)
                     <a href="{{ route('register') }}" class="new-user-btn">
                         <i class="bi bi-person-plus-fill"></i> NEW USER
                     </a>
+                    @endif
                     <div class="search-box">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" placeholder="Search all employees..." id="searchInput" value="{{ $searchQuery ?? '' }}" onkeyup="handleSearch(event)">
@@ -414,6 +416,7 @@
                                     <a href="{{ route('admin.participants.info', ['id' => $user->id]) }}" class="action-btn view">
                                         <i class="bi bi-eye"></i> View
                                     </a>
+                                    @if(!$isReadOnlyAdmin)
                                     <form action="{{ route('admin.toggleUserStatus', $user->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PATCH')
@@ -421,6 +424,8 @@
                                             <i class="bi bi-toggle-{{ $user->is_active ? 'on' : 'off' }}"></i> {{ $user->is_active ? 'Disable' : 'Enable' }}
                                         </button>
                                     </form>
+                                    @endif
+                                    @if(!$isReadOnlyAdmin)
                                     <form action="{{ route('admin.deleteUser', $user->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
@@ -428,6 +433,7 @@
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
                                     </form>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach

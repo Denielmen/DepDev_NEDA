@@ -134,7 +134,7 @@ class AdminController extends Controller
     // Export Reports to Excel
     public function exportExcel()
     {
-        $trainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2025', 'participants_2026', 'participants_2027'])
+        $trainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
             ->orderBy('core_competency')
             ->where('type', 'Program') 
             ->get();

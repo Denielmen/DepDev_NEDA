@@ -427,9 +427,11 @@
                 <div class="user-info-card">
                        <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Employee Information</h5>
+                        @if(!$isReadOnlyAdmin)
                         <button id="editButton" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit
                         </button>
+                        @endif
                         <div id="saveCancelButtons" style="display: none;">
                             <button id="saveButton" class="btn btn-success me-2">
                                 <i class="fas fa-save"></i> Save

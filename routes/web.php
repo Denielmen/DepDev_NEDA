@@ -109,8 +109,8 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
         ->name('user.evaluation.view');
 });
 
-// ADMIN PANEL ROUTES (unchanged, but make sure admin checks are in place)
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+// ADMIN PANEL ROUTES (with read-only middleware for Admin_ accounts)
+Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function () {
     Route::get('/', [App\Http\Controllers\AdminController::class, 'welcomeAdmin'])->name('admin.home');
 
     // });
