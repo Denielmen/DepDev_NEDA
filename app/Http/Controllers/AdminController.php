@@ -193,7 +193,7 @@ class AdminController extends Controller
         } else {
             // Normal pagination when not filtering
             $users = $query->orderBy('last_name', 'asc')
-                ->paginate(10)
+                ->paginate(30)
                 ->appends(['status' => $status]); // Preserve status in pagination links
         }
 

@@ -22,22 +22,14 @@ class EmployeeController extends Controller
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
                 'salary_grade' => 'required|string|max:255',
-                'position_start_date' => 'required|date|before_or_equal:today',
-                'government_start_date' => 'required|date|before_or_equal:today',
-                'division' => 'required|string|max:255',
-                'position' => 'required|string|max:255',
                 'position_start_date' => 'nullable|date|before_or_equal:today',
                 'government_start_date' => 'nullable|date|before_or_equal:today',
+                'division' => 'required|string|max:255',
+                'position' => 'required|string|max:255',
                 'superior' => 'nullable|string|max:255',
             ]);
 
-            // Calculate years in CSC from government_start_date
-            $governmentStartDate = new \DateTime($validated['government_start_date']);
-            $today = new \DateTime();
-            $yearsInGovernment = $today->diff($governmentStartDate)->y;
-
-            // Add calculated years to validated data
-            $validated['years_in_csc'] = $yearsInGovernment;
+            // Use the years_in_csc value provided by admin (no automatic calculation)
 
             // Log the validated data
             Log::info('Validated data:', $validated);

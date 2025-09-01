@@ -173,7 +173,7 @@ class SearchController extends Controller
                 ->when($materialType === 'link', function($q) {
                     $q->whereNotNull('link');
                 })
-                ->paginate(10);
+                ->paginate(30);
             $materials->getCollection()->transform(function($material) {
                 $material->search_type = 'training_material';
                 return $material;

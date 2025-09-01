@@ -19,7 +19,7 @@ class TrainingTrackingController extends Controller
         'Gender and Development(GAD)-Related',
         'Others'
     ];
-        $competencies = \App\Models\Competency::paginate(10); // <-- Add pagination here
+        $competencies = \App\Models\Competency::paginate(30); // <-- Add pagination here
         $userId = Auth::id();
         $programmedTrainings = Training::where('type', 'Program')
             ->whereHas('participants', function ($query) use ($userId) {
@@ -37,7 +37,7 @@ class TrainingTrackingController extends Controller
                 'competency',
                 'participants'
             ])
-            ->paginate(10);
+            ->paginate(30);
         $participationTypes = \App\Models\ParticipationType::all();
 
         // Fetch and group materials by training_id

@@ -270,10 +270,10 @@
                     <a href="{{ route('admin.training-plan') }}" class="tab-button">Programmed</a>
                     <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
-                <form action="{{ route('admin.training-plan.unprogrammed') }}" method="GET" class="search-box">
-                    <input type="text" name="search" placeholder="Search by title or participant..." value="{{ request('search') }}">
-                    <i class="bi bi-search search-icon"></i>
-                </form>
+                <a href="{{ route('admin.search.index') }}" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                    Advanced Search
+                </a>
             </div>
 
             <div class="training-table mt-3">

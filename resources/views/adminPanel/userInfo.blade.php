@@ -789,13 +789,13 @@
         const saveButton = document.getElementById('saveButton');
         const cancelButton = document.getElementById('cancelButton');
         const form = document.getElementById('employeeForm');
-        const inputs = form.querySelectorAll('input[readonly]');
+        const inputs = form.querySelectorAll('input[readonly], select[readonly]');
         const nameDisplay = document.getElementById('nameDisplay');
-        const nameEdit = document.getElementById('nameEdit');
-        const nameInputs = nameEdit.querySelectorAll('input[readonly]');
-        let originalValues = {};
+        const nameInputs = document.querySelectorAll('#nameEdit input');
 
-        // Store original values when edit is clicked
+        // Store original values before making fields editable
+        const originalValues = {};
+
         editButton.addEventListener('click', function() {
             // Handle main form inputs
             inputs.forEach(input => {
@@ -831,7 +831,7 @@
             editButton.style.display = 'none';
             saveCancelButtons.style.display = 'block';
 
-            // Make Position Start Date editable but keep Government Start Date read-only
+            // Make Position Start Date and Government Start Date editable
             const positionStartDate = document.querySelector('input[name="position_start_date"]');
             const governmentStartDate = document.querySelector('input[name="government_start_date"]');
             
@@ -841,9 +841,11 @@
                 positionStartDate.addEventListener('input', calculateYearsInPosition);
             }
             
-            // Keep Government Start Date read-only
+            // Make Government Start Date editable
             if (governmentStartDate) {
-                governmentStartDate.setAttribute('readonly', true);
+                governmentStartDate.removeAttribute('readonly');
+                governmentStartDate.addEventListener('change', calculateYearsInGovernment);
+                governmentStartDate.addEventListener('input', calculateYearsInGovernment);
             }
         });
 
@@ -883,7 +885,7 @@
             editButton.style.display = 'block';
             saveCancelButtons.style.display = 'none';
 
-            // Restore read-only state for both date fields
+            // Restore read-only state for date fields
             const positionStartDate = document.querySelector('input[name="position_start_date"]');
             const governmentStartDate = document.querySelector('input[name="government_start_date"]');
             
