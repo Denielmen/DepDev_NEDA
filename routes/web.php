@@ -181,7 +181,11 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
             ])
             ->orderBy('created_at', 'desc')
             ->paginate(5); // Show 10 trainings per page
-        return view('adminPanel.userInfo', compact('user', 'programmedTrainings'));
+        
+        // Check if current user is read-only admin
+        $isReadOnlyAdmin = \App\Helpers\AdminHelper::isReadOnlyAdmin();
+        
+        return view('adminPanel.userInfo', compact('user', 'programmedTrainings', 'isReadOnlyAdmin'));
     })->name('admin.participants.info');
 
     Route::get('/participants/{id}/unprogrammed', function ($id) {

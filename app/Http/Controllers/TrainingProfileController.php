@@ -19,7 +19,7 @@ class TrainingProfileController extends Controller
 {
     public function program(Request $request)
     {
-        $competencies = Competency::orderBy('name')->paginate(10); // <-- Add pagination here
+        $competencies = Competency::orderBy('name')->paginate(30); // <-- Add pagination here
         $userId = Auth::id();
         $search = $request->input('search');
         $sort = $request->input('sort');
@@ -81,7 +81,7 @@ class TrainingProfileController extends Controller
                 ->orderBy('status');
         }
 
-        $trainings = $trainingsQuery->paginate(10);
+        $trainings = $trainingsQuery->paginate(30);
         $participationTypes = ParticipationType::all()->keyBy('id');
         return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies', 'participationTypes'));
     }
@@ -123,7 +123,7 @@ class TrainingProfileController extends Controller
             $trainingsQuery->orderBy('created_at', 'desc');
         }
 
-        $trainings = $trainingsQuery->paginate(10);
+        $trainings = $trainingsQuery->paginate(30);
         $participationTypes = ParticipationType::all()->keyBy('id');
         return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
@@ -297,7 +297,7 @@ class TrainingProfileController extends Controller
         $training = Training::findOrFail($training->id);
         $competencies = Competency::orderBy('name')->get();
         $participationTypes = ParticipationType::all()->keyBy('id');
-        $users = User::where('is_active', true)->orderBy('last_name')->paginate(10);
+        $users = User::where('is_active', true)->orderBy('last_name')->paginate(30);
 
         $training->load(['participants' => function ($query) {
             $query->withPivot('participation_type_id', 'year');
@@ -434,7 +434,7 @@ class TrainingProfileController extends Controller
         $trainings = Training::with('participants')
             ->where('type', 'Program')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);// Show 10 trainings per page
+            ->paginate(30);// Show 30 trainings per page
         return view('adminPanel.trainingPlan', compact('trainings'));
     }
 
@@ -443,14 +443,14 @@ class TrainingProfileController extends Controller
         $trainings = Training::with('participants')
             ->where('type', 'Unprogrammed')
             ->orderBy('created_at', 'desc')
-            ->paginate(10); // Show 10 trainings per page
+            ->paginate(30); // Show 30 trainings per page
         return view('adminPanel.trainingPlanUnProg', compact('trainings'));
     }
 
     public function create()
     {
         $competencies = Competency::orderBy('name')->get();
-        $users = User::where('is_active', true)->orderBy('last_name')->paginate(10);
+        $users = User::where('is_active', true)->orderBy('last_name')->paginate(30);
         $participationTypes = ParticipationType::all()->keyBy('id');
         return view('adminPanel.createTraining', compact('competencies', 'users', 'participationTypes'));
     }
@@ -575,7 +575,7 @@ class TrainingProfileController extends Controller
             ]);
         }
 
-        $users = $query->paginate(10, ['*'], 'page', $page);
+        $users = $query->paginate(30, ['*'], 'page', $page);
         $participationTypes = ParticipationType::all();
 
         return response()->json([
@@ -736,7 +736,7 @@ class TrainingProfileController extends Controller
         } else {
             $query->orderByDesc('created_at');
         }
-        $allMaterials = $query->paginate(10);
+        $allMaterials = $query->paginate(30);
         $userId = Auth::id();
         $materials = $allMaterials->where('type', 'material')->whereNotNull('file_path');
         $links = $allMaterials->where('type', 'material')->whereNotNull('link');
