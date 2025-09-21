@@ -108,6 +108,9 @@ class AdminController extends Controller
 
         $allTrainings = $query->orderBy('core_competency')->get();
 
+        // Define the years array for the three-year range
+        $years = [$year, $year + 1, $year + 2];
+
         // Attach participants for a three-year range to each training
         foreach ($allTrainings as $training) {
             $participantsForYears = [];
