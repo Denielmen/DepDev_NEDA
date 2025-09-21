@@ -175,7 +175,8 @@ class AdminController extends Controller
             $training->setAttribute('participants_for_years', $participantsForYears);
         }
 
-                return Excel::download(new TrainingsExport($trainings, $year), 'training_report.xlsx');
+
+        return Excel::download(new TrainingsExport($allTrainings, $year), 'training_report.xlsx');
     }
 
     public function participants(Request $request)
