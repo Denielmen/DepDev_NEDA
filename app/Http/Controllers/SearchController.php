@@ -134,12 +134,33 @@ class SearchController extends Controller
                 ->get()
                 ->map(function ($training) {
                     $training->search_type = 'training';
-                    $training->participants = $training->participants->map(function ($participant) {
-                        return [
+                    
+                    // Get the period of implementation dates
+                    $periodStart = null;
+                    $periodEnd = null;
+                    
+                    if ($training->type === 'Program') {
+                        $periodStart = $training->period_from;
+                        $periodEnd = $training->period_to;
+                    } elseif ($training->type === 'Unprogrammed') {
+                        $periodStart = $training->implementation_date_from ? $training->implementation_date_from->format('Y-m-d') : null;
+                        $periodEnd = $training->implementation_date_to ? $training->implementation_date_to->format('Y-m-d') : null;
+                    }
+                    
+                    $training->participants = $training->participants->map(function ($participant) use ($periodStart, $periodEnd) {
+                        $participantData = [
                             'id' => $participant->id,
                             'name' => $participant->first_name . ' ' . $participant->last_name,
                         ];
+                        
+                        // Add period of implementation if dates are available
+                        if ($periodStart && $periodEnd) {
+                            $participantData['period'] = $periodStart . ' - ' . $periodEnd;
+                        }
+                        
+                        return $participantData;
                     });
+                    
                     $training->relatedMaterials = TrainingMaterial::query()
                         ->where('title', 'like', "%{$training->title}%")
                         ->where('source', 'like', "%{$training->source}%")
@@ -225,7 +246,33 @@ class SearchController extends Controller
             $trainings = $trainingQuery->with(['competency', 'participants'])->get();
             foreach ($trainings as $training) {
                 $training->search_type = 'training';
-                // Removed explicit formatting of participants for PDF export
+                
+                // Get the period of implementation dates
+                $periodStart = null;
+                $periodEnd = null;
+                
+                if ($training->type === 'Program') {
+                    $periodStart = $training->period_from;
+                    $periodEnd = $training->period_to;
+                } elseif ($training->type === 'Unprogrammed') {
+                    $periodStart = $training->implementation_date_from ? $training->implementation_date_from->format('Y-m-d') : null;
+                    $periodEnd = $training->implementation_date_to ? $training->implementation_date_to->format('Y-m-d') : null;
+                }
+                
+                $training->participants = $training->participants->map(function ($participant) use ($periodStart, $periodEnd) {
+                    $participantData = [
+                        'id' => $participant->id,
+                        'name' => $participant->first_name . ' ' . $participant->last_name,
+                    ];
+                    
+                    // Add period of implementation if dates are available
+                    if ($periodStart && $periodEnd) {
+                        $participantData['period'] = $periodStart . ' - ' . $periodEnd;
+                    }
+                    
+                    return $participantData;
+                });
+                
                 $results->push($training);
             }
         }
