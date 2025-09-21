@@ -1122,6 +1122,82 @@ class TrainingProfileController extends Controller
         $pdf = Pdf::loadView('userPanel.training-export-pdf', compact('groupedTrainings'));
         return $pdf->download('my-programmed-trainings.pdf');
     }
+
+    public function userProfileInfo()
+    {
+        $user = Auth::user();
+        $programmedTrainings = Training::where('type', 'Program')
+            ->whereHas('participants', function ($query) use ($user) {
+                $query->where('training_participants.user_id', $user->id);
+            })
+            ->with([
+                'participants' => function ($query) use ($user) {
+                    $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
+                },
+                'competency',
+                'evaluations' => function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                }
+            ])
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
+        
+        return view('userPanel.userInfo', compact('user', 'programmedTrainings'));
+    }
+
+    public function userProfileInfoUnprogrammed()
+    {
+        $user = Auth::user();
+        $unprogrammedTrainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('participants', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
+            })
+            ->with(['competency', 'participants'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
+        
+        return view('userPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
+    }
+
+    public function uploadUserProfilePicture(Request $request)
+    {
+        try {
+            $request->validate([
+                'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            ]);
+
+            $user = Auth::user();
+            
+            // Delete old profile picture if exists
+            if ($user->profile_picture && file_exists(public_path('storage/' . $user->profile_picture))) {
+                unlink(public_path('storage/' . $user->profile_picture));
+            }
+
+            // Store new profile picture
+            $file = $request->file('profile_picture');
+            $filename = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('profile_pictures', $filename, 'public');
+
+            // Update user record
+            $user->profile_picture = $path;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile picture updated successfully!',
+                'image_url' => asset('storage/' . $path)
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error uploading profile picture: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
 
