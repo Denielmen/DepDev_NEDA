@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('first_name', 50);
             $table->string('mid_init', 10)->nullable();
             $table->string('position', 100);
-            $table->date('position_start_date')->nullable();
             $table->date('government_start_date')->nullable();
             $table->string('division', 100);
             $table->integer('salary_grade');
