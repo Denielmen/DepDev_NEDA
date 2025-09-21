@@ -131,19 +131,28 @@ class AdminController extends Controller
     // Export Reports to PDF
     public function exportPdf()
     {
-        $allTrainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
-            ->orderBy('core_competency')
+        $year = request('year') ?? date('Y');
+        $allTrainings = Training::with(['competency'])
             ->where('type', 'Program')
+            ->orderBy('core_competency')
             ->get();
 
-        // Group the trainings by core_competency and sort each group by created_at descending
+        $years = [$year, $year + 1, $year + 2];
+        foreach ($allTrainings as $training) {
+            $participantsForYears = [];
+            foreach ($years as $yr) {
+                $participantsForYears[$yr] = $training->participants_year($yr)->get();
+            }
+            $training->setAttribute('participants_for_years', $participantsForYears);
+        }
+
         $trainings = $allTrainings->groupBy('core_competency')->map(function ($group) {
             return $group->sortByDesc('created_at');
         });
 
-        $pdf = Pdf::loadView('adminPanel.reports.pdf', compact('trainings'));
+        $pdf = Pdf::loadView('adminPanel.reports.pdf', compact('trainings', 'year'));
 
-        return $pdf->download('training_report.pdf');
+        return $pdf->download("training_report_{$year}.pdf");
     }
 
     // Export Reports to Excel
@@ -152,22 +161,25 @@ class AdminController extends Controller
         if (! $year) {
             $year = date('Y');
         }
-        // Fetch trainings with participants for the given year
-        $trainings = Training::with(['competency'])
+        $allTrainings = Training::with(['competency'])
             ->where('type', 'Program')
             ->orderBy('core_competency')
             ->get();
 
-        // Attach participants for the specified year to each training
-        foreach ($trainings as $training) {
-            $years = [$year, $year + 1, $year + 2];
-            $training->participants_for_years = [];
+        $years = [$year, $year + 1, $year + 2];
+        foreach ($allTrainings as $training) {
+            $participantsForYears = [];
             foreach ($years as $yr) {
-                $training->participants_for_years[$yr] = $training->participants_year($yr)->get();
+                $participantsForYears[$yr] = $training->participants_year($yr)->get();
             }
+            $training->setAttribute('participants_for_years', $participantsForYears);
         }
 
-        return Excel::download(new TrainingsExport($trainings, $year), 'training_report.xlsx');
+        $trainings = $allTrainings->groupBy('core_competency')->map(function ($group) {
+            return $group->sortByDesc('created_at');
+        });
+
+        return Excel::download(new TrainingsExport($trainings, $year), "training_report_{$year}.xlsx");
     }
 
     public function participants(Request $request)
