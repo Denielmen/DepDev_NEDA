@@ -109,12 +109,12 @@ class AdminController extends Controller
         $allTrainings = $query->orderBy('core_competency')->get();
 
         // Attach participants for a three-year range to each training
-        $years = [$year, $year + 1, $year + 2];
         foreach ($allTrainings as $training) {
-            $training->participants_for_years = [];
+            $participantsForYears = [];
             foreach ($years as $yr) {
-                $training->participants_for_years[$yr] = $training->participants_year($yr)->get();
+                $participantsForYears[$yr] = $training->participants_year($yr)->get();
             }
+            $training->setAttribute('participants_for_years', $participantsForYears);
         }
 
         // Group the trainings by core_competency and sort each group by created_at descending
