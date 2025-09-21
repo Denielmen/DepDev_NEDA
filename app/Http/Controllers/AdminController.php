@@ -152,7 +152,7 @@ class AdminController extends Controller
 
         $pdf = Pdf::loadView('adminPanel.reports.pdf', compact('trainings', 'year'));
 
-        return $pdf->download("training_report_{$year}.pdf");
+        return $pdf->download('training_report.pdf');
     }
 
     // Export Reports to Excel
@@ -179,7 +179,7 @@ class AdminController extends Controller
             return $group->sortByDesc('created_at');
         });
 
-        return Excel::download(new TrainingsExport($trainings, $year), "training_report_{$year}.xlsx");
+        return Excel::download(new TrainingsExport($trainings, $year), "training_report.xlsx");
     }
 
     public function participants(Request $request)
