@@ -175,11 +175,7 @@ class AdminController extends Controller
             $training->setAttribute('participants_for_years', $participantsForYears);
         }
 
-        $trainings = $allTrainings->groupBy('core_competency')->map(function ($group) {
-            return $group->sortByDesc('created_at');
-        });
-
-        return Excel::download(new TrainingsExport($trainings, $year), 'training_report.xlsx');
+                return Excel::download(new TrainingsExport($trainings, $year), 'training_report.xlsx');
     }
 
     public function participants(Request $request)
