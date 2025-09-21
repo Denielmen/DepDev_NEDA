@@ -129,7 +129,7 @@ class AdminController extends Controller
     }
 
     // Export Reports to PDF
-    public function exportPdf()
+    public function exportPdf($year = null)
     {
         $year = request('year') ?? date('Y');
         $allTrainings = Training::with(['competency'])
@@ -179,7 +179,7 @@ class AdminController extends Controller
             return $group->sortByDesc('created_at');
         });
 
-        return Excel::download(new TrainingsExport($trainings, $year), "training_report.xlsx");
+        return Excel::download(new TrainingsExport($trainings, $year), 'training_report.xlsx');
     }
 
     public function participants(Request $request)
