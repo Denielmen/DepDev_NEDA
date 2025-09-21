@@ -131,7 +131,9 @@ class AdminController extends Controller
     // Export Reports to PDF
     public function exportPdf($year = null)
     {
-        $year = request('year') ?? date('Y');
+        if (!$year) {
+            $year = request('year') ?? date('Y');
+        }
         $allTrainings = Training::with(['competency'])
             ->where('type', 'Program')
             ->orderBy('core_competency')
@@ -158,8 +160,8 @@ class AdminController extends Controller
     // Export Reports to Excel
     public function exportExcel($year = null)
     {
-        if (! $year) {
-            $year = date('Y');
+        if (!$year) {
+            $year = request('year') ?? date('Y');
         }
         $allTrainings = Training::with(['competency'])
             ->where('type', 'Program')
