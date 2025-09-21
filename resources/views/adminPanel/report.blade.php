@@ -155,11 +155,14 @@
         <div class="content-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="mb-0">Training Plan</h2>
-                <div class="search-box">
-                    <form method="GET" action="{{ route('admin.reports') }}">
-                        <i class="bi bi-search search-icon"></i>
-                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search by Core Competency...">
-                        <button type="submit" style="display: none;"></button>
+                <div class="d-flex align-items-center">
+                    <form method="GET" action="{{ route('admin.reports') }}" class="d-flex align-items-center">
+                        <div class="search-box me-2">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search by Core Competency...">
+                        </div>
+                        <input type="number" name="year" value="{{ $year ?? date('Y') }}" min="2020" max="2100" class="form-control me-2" style="width:100px;" placeholder="Year">
+                        <button type="submit" class="btn btn-primary">Go</button>
                     </form>
                 </div>
             </div>
@@ -169,10 +172,10 @@
                         <tr class="text-center align-middle">
                             <th class="table-header">Training Program</th>
                             <th class="table-header">Competency</th>
-                            <th class="table-header">CY 2025</th>
-                            <th class="table-header">CY 2026</th>
-                            <th class="table-header">CY 2027</th>
                             <th class="table-header">Provider</th>
+                            <th class="table-header">CY {{ $year }}</th>
+                            <th class="table-header">CY {{ $year + 1 }}</th>
+                            <th class="table-header">CY {{ $year + 2 }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -184,22 +187,22 @@
                                 <tr>
                                     <td>{{ $training->title }}</td>
                                     <td>{{ $training->competency->name }}</td>
-                                    <td>
-                                        @foreach($training->participants_2025 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
-                                        @endforeach
-                                    </td>
-                                    <td>
-                                        @foreach($training->participants_2026 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
-                                        @endforeach
-                                    </td>
-                                    <td>
-                                        @foreach($training->participants_2027 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
-                                        @endforeach
-                                    </td>
                                     <td>{{ $training->provider }}</td>
+                                    <td>
+                                        @foreach($training->participants_for_years[$year] ?? [] as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach($training->participants_for_years[$year + 1] ?? [] as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach($training->participants_for_years[$year + 2] ?? [] as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
+                                        @endforeach
+                                    </td>
                                 </tr>
                             @endforeach
                         @endforeach

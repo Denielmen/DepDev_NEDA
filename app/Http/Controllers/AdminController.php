@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Training;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TrainingsExport;
 use App\Models\Competency;
+use App\Models\Training;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
 {
@@ -31,6 +31,7 @@ class AdminController extends Controller
     {
         $training = Training::findOrFail($training_id);
         $user = User::findOrFail($user_id);
+
         return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
     }
     // public function viewUserInfoUnprog($training_id, $user_id)
@@ -51,9 +52,9 @@ class AdminController extends Controller
         $orphanedCertificates = \App\Models\TrainingMaterial::where('type', 'certificate')
             ->where('user_id', $user->id)
             ->whereNull('training_id')
-            ->where(function($query) use ($training) {
-                $query->where('title', 'like', '%' . $training->title . '%')
-                      ->orWhere('title', $training->title . ' Certificate');
+            ->where(function ($query) use ($training) {
+                $query->where('title', 'like', '%'.$training->title.'%')
+                    ->orWhere('title', $training->title.' Certificate');
             })
             ->get();
 
@@ -73,10 +74,10 @@ class AdminController extends Controller
         foreach ($orphanedCertificates as $certificate) {
             // Try to find a matching training based on title and user
             $possibleTrainings = Training::where('user_id', $certificate->user_id)
-                ->where(function($query) use ($certificate) {
+                ->where(function ($query) use ($certificate) {
                     $certTitle = str_replace(' Certificate', '', $certificate->title);
-                    $query->where('title', 'like', '%' . $certTitle . '%')
-                          ->orWhere('title', $certTitle);
+                    $query->where('title', 'like', '%'.$certTitle.'%')
+                        ->orWhere('title', $certTitle);
                 })
                 ->get();
 
@@ -87,17 +88,18 @@ class AdminController extends Controller
         }
 
         return response()->json([
-            'message' => "Fixed {$fixed} certificates out of {$orphanedCertificates->count()} orphaned certificates."
+            'message' => "Fixed {$fixed} certificates out of {$orphanedCertificates->count()} orphaned certificates.",
         ]);
     }
 
     public function reports(Request $request)
     {
         $search = $request->input('search');
+        $year = $request->input('year') ?? date('Y');
 
-        // Fetch all trainings with their relationships
-        $query = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
-            ->where('type', 'Program'); // Filter for programmed trainings
+        // Fetch all trainings with competency relationship
+        $query = Training::with(['competency'])
+            ->where('type', 'Program');
 
         // Add search functionality for core competency
         if ($search) {
@@ -106,12 +108,21 @@ class AdminController extends Controller
 
         $allTrainings = $query->orderBy('core_competency')->get();
 
+        // Attach participants for a three-year range to each training
+        $years = [$year, $year + 1, $year + 2];
+        foreach ($allTrainings as $training) {
+            $training->participants_for_years = [];
+            foreach ($years as $yr) {
+                $training->participants_for_years[$yr] = $training->participants_year($yr)->get();
+            }
+        }
+
         // Group the trainings by core_competency and sort each group by created_at descending
         $trainings = $allTrainings->groupBy('core_competency')->map(function ($group) {
             return $group->sortByDesc('created_at');
         });
 
-        return view('adminPanel.report', compact('trainings', 'search'));
+        return view('adminPanel.report', compact('trainings', 'search', 'year'));
     }
 
     // Export Reports to PDF
@@ -119,7 +130,7 @@ class AdminController extends Controller
     {
         $allTrainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
             ->orderBy('core_competency')
-            ->where('type', 'Program') 
+            ->where('type', 'Program')
             ->get();
 
         // Group the trainings by core_competency and sort each group by created_at descending
@@ -128,18 +139,32 @@ class AdminController extends Controller
         });
 
         $pdf = Pdf::loadView('adminPanel.reports.pdf', compact('trainings'));
+
         return $pdf->download('training_report.pdf');
     }
 
     // Export Reports to Excel
-    public function exportExcel()
+    public function exportExcel($year = null)
     {
-        $trainings = Training::with(['competency', 'participants', 'participants_2025', 'participants_2026', 'participants_2027'])
+        if (! $year) {
+            $year = date('Y');
+        }
+        // Fetch trainings with participants for the given year
+        $trainings = Training::with(['competency'])
+            ->where('type', 'Program')
             ->orderBy('core_competency')
-            ->where('type', 'Program') 
             ->get();
 
-        return Excel::download(new TrainingsExport($trainings), 'training_report.xlsx');
+        // Attach participants for the specified year to each training
+        foreach ($trainings as $training) {
+            $years = [$year, $year + 1, $year + 2];
+            $training->participants_for_years = [];
+            foreach ($years as $yr) {
+                $training->participants_for_years[$yr] = $training->participants_year($yr)->get();
+            }
+        }
+
+        return Excel::download(new TrainingsExport($trainings, $year), 'training_report.xlsx');
     }
 
     public function participants(Request $request)
@@ -165,12 +190,12 @@ class AdminController extends Controller
         // Filter by search query if specified
         if ($searchQuery && trim($searchQuery) !== '') {
             $query->where(function ($q) use ($searchQuery) {
-                $q->where('user_id', 'like', '%' . $searchQuery . '%')
-                  ->orWhere('first_name', 'like', '%' . $searchQuery . '%')
-                  ->orWhere('last_name', 'like', '%' . $searchQuery . '%')
-                  ->orWhere('position', 'like', '%' . $searchQuery . '%')
-                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $searchQuery . '%'])
-                  ->orWhereRaw("CONCAT(last_name, ', ', first_name) LIKE ?", ['%' . $searchQuery . '%']);
+                $q->where('user_id', 'like', '%'.$searchQuery.'%')
+                    ->orWhere('first_name', 'like', '%'.$searchQuery.'%')
+                    ->orWhere('last_name', 'like', '%'.$searchQuery.'%')
+                    ->orWhere('position', 'like', '%'.$searchQuery.'%')
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%'.$searchQuery.'%'])
+                    ->orWhereRaw("CONCAT(last_name, ', ', first_name) LIKE ?", ['%'.$searchQuery.'%']);
             });
         }
 
@@ -200,7 +225,7 @@ class AdminController extends Controller
         $positions = User::distinct()
             ->pluck('position')
             ->filter(function ($position) {
-                return !empty(trim($position));
+                return ! empty(trim($position));
             })
             ->map(function ($position) {
                 return trim($position);
