@@ -119,6 +119,27 @@
         .alert {
             margin-bottom: 1rem;
         }
+
+        /* Eye icon styling */
+        .password-toggle-icon {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 10;
+            color: #6c757d;
+            font-size: 1rem;
+            user-select: none;
+        }
+
+        .password-toggle-icon:hover {
+            color: #495057;
+        }
+
+        .password-input {
+            padding-right: 40px !important;
+        }
     </style>
 </head>
 
@@ -153,22 +174,18 @@
                 <!-- Password -->
                 <div class="mb-3">
                     <label for="password" class="form-label">New Password</label>
-                    <div class="input-group">
-                        <input type="password" id="password" name="password" class="form-control" required>
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                            <i class="bi bi-eye" id="passwordIcon"></i>
-                        </button>
+                    <div class="position-relative">
+                        <input type="password" id="password" name="password" class="form-control password-input" required>
+                        <span class="password-toggle-icon" id="passwordIcon">👁</span>
                     </div>
                 </div>
 
                 <!-- Confirm Password -->
                 <div class="mb-3">
                     <label for="password_confirmation" class="form-label">Confirm Password</label>
-                    <div class="input-group">
-                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
-                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirmation">
-                            <i class="bi bi-eye" id="passwordConfirmationIcon"></i>
-                        </button>
+                    <div class="position-relative">
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control password-input" required>
+                        <span class="password-toggle-icon" id="passwordConfirmationIcon">👁</span>
                     </div>
                 </div>
 
@@ -194,40 +211,34 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Password toggle functionality
-            const togglePassword = document.getElementById('togglePassword');
             const password = document.getElementById('password');
             const passwordIcon = document.getElementById('passwordIcon');
 
-            togglePassword.addEventListener('click', function() {
+            passwordIcon.addEventListener('click', function() {
                 const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
                 password.setAttribute('type', type);
 
-                // Toggle icon
+                // Toggle icon - using simple symbols
                 if (type === 'password') {
-                    passwordIcon.classList.remove('bi-eye-slash');
-                    passwordIcon.classList.add('bi-eye');
+                    passwordIcon.textContent = '👁';
                 } else {
-                    passwordIcon.classList.remove('bi-eye');
-                    passwordIcon.classList.add('bi-eye-slash');
+                    passwordIcon.textContent = '✕';
                 }
             });
 
             // Password confirmation toggle functionality
-            const togglePasswordConfirmation = document.getElementById('togglePasswordConfirmation');
             const passwordConfirmation = document.getElementById('password_confirmation');
             const passwordConfirmationIcon = document.getElementById('passwordConfirmationIcon');
 
-            togglePasswordConfirmation.addEventListener('click', function() {
+            passwordConfirmationIcon.addEventListener('click', function() {
                 const type = passwordConfirmation.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordConfirmation.setAttribute('type', type);
 
-                // Toggle icon
+                // Toggle icon - using simple symbols
                 if (type === 'password') {
-                    passwordConfirmationIcon.classList.remove('bi-eye-slash');
-                    passwordConfirmationIcon.classList.add('bi-eye');
+                    passwordConfirmationIcon.textContent = '👁';
                 } else {
-                    passwordConfirmationIcon.classList.remove('bi-eye');
-                    passwordConfirmationIcon.classList.add('bi-eye-slash');
+                    passwordConfirmationIcon.textContent = '✕';
                 }
             });
         });

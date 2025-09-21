@@ -113,7 +113,24 @@
             color: #fff;
             transform: translateY(-1px);
         }
-      
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }   
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -127,7 +144,11 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
