@@ -395,51 +395,75 @@
                 <div class="user-info-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Employee Information</h5>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">First Name</label>
-                            <input type="text" class="form-control" value="{{ $user->first_name }}" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Last Name</label>
-                            <input type="text" class="form-control" value="{{ $user->last_name }}" readonly>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Employee ID</label>
-                        <input type="text" class="form-control" value="{{ $user->user_id }}" readonly>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Salary Grade</label>
-                            <input type="text" class="form-control" value="{{ $user->salary_grade }}" readonly>
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label">Division/Unit</label>
-                            <input type="text" class="form-control" value="{{ $user->division }}" readonly>
+                        <button id="editButton" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <div id="saveCancelButtons" style="display: none;">
+                            <button id="saveButton" class="btn btn-success me-2">
+                                <i class="bi bi-check"></i> Save
+                            </button>
+                            <button id="cancelButton" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Cancel
+                            </button>
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Years in Position</label>
-                            <input type="text" class="form-control" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('m/d/Y') : '' }}" readonly>
-                            <small class="text-muted">{{ $user->getFormattedYearsInPosition() }}</small>
+                    <form id="employeeForm" action="{{ route('user.profile.update') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Years in Government</label>
-                            <input type="text" class="form-control" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('m/d/Y') : '' }}" readonly>
-                            <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
+                        <div class="mb-3">
+                            <label class="form-label">Employee ID</label>
+                            <input type="text" class="form-control" name="user_id" value="{{ $user->user_id }}" readonly>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Position</label>
-                        <input type="text" class="form-control" value="{{ $user->position }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Name of Supervisor (Last, First, MI)</label>
-                        <input type="text" class="form-control" value="{{ $user->superior }}" readonly>
-                    </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Salary Grade</label>
+                                <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Division/Unit</label>
+                                <select class="form-control" name="division" disabled>
+                                    <option value="">Select Division/Unit</option>
+                                    <option value="ORD - Office of the Regional Director" {{ $user->division == 'ORD - Office of the Regional Director' ? 'selected' : '' }}>ORD - Office of the Regional Director</option>
+                                    <option value="FAD - Finance and Administrative Division" {{ $user->division == 'FAD - Finance and Administrative Division' ? 'selected' : '' }}>FAD - Finance and Administrative Division</option>
+                                    <option value="PFPD - Policy Formulation and Planning Division" {{ $user->division == 'PFPD - Policy Formulation and Planning Division' ? 'selected' : '' }}>PFPD - Policy Formulation and Planning Division</option>
+                                    <option value="DRD - Development Research Division" {{ $user->division == 'DRD - Development Research Division' ? 'selected' : '' }}>DRD - Development Research Division</option>
+                                    <option value="PDIPBD - Project Development, Investment Programming and Budget Division" {{ $user->division == 'PDIPBD - Project Development, Investment Programming and Budget Division' ? 'selected' : '' }}>PDIPBD - Project Development, Investment Programming and Budget Division</option>
+                                    <option value="PMED - Project Monitoring and Educational Division" {{ $user->division == 'PMED - Project Monitoring and Educational Division' ? 'selected' : '' }}>PMED - Project Monitoring and Educational Division</option>
+                                    <option value="ORD-RDC - Office of the Regional Director - Regional Development Council" {{ $user->division == 'ORD-RDC - Office of the Regional Director - Regional Development Council' ? 'selected' : '' }}>ORD-RDC - Office of the Regional Director - Regional Development Council</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Position Start Date</label>
+                                <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('Y-m-d') : '' }}" readonly>
+                                <small class="text-muted">{{ $user->getFormattedYearsInPosition() }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Government Start Date</label>
+                                <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('Y-m-d') : '' }}" readonly>
+                                <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Position</label>
+                            <input type="text" class="form-control" name="position" value="{{ $user->position }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name of Supervisor (Last, First, MI)</label>
+                            <input type="text" class="form-control" name="superior" value="{{ $user->superior }}" readonly>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -516,6 +540,104 @@
                 });
             }
         }
+
+        // Edit functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButton = document.getElementById('editButton');
+            const saveButton = document.getElementById('saveButton');
+            const cancelButton = document.getElementById('cancelButton');
+            const saveCancelButtons = document.getElementById('saveCancelButtons');
+            const form = document.getElementById('employeeForm');
+            
+            // Store original values
+            let originalValues = {};
+            
+            function storeOriginalValues() {
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    originalValues[input.name] = input.value;
+                });
+            }
+            
+            function restoreOriginalValues() {
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (originalValues[input.name] !== undefined) {
+                        input.value = originalValues[input.name];
+                    }
+                });
+            }
+            
+            function toggleEditMode(isEditing) {
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.name === 'first_name' || input.name === 'last_name' || input.name === 'user_id') {
+                        // Keep these fields readonly
+                        input.readOnly = true;
+                        if (input.tagName === 'SELECT') {
+                            input.disabled = true;
+                        }
+                    } else {
+                        input.readOnly = !isEditing;
+                        if (input.tagName === 'SELECT') {
+                            input.disabled = !isEditing;
+                        }
+                    }
+                });
+                
+                editButton.style.display = isEditing ? 'none' : 'block';
+                saveCancelButtons.style.display = isEditing ? 'block' : 'none';
+            }
+            
+            editButton.addEventListener('click', function() {
+                storeOriginalValues();
+                toggleEditMode(true);
+            });
+            
+            cancelButton.addEventListener('click', function() {
+                restoreOriginalValues();
+                toggleEditMode(false);
+            });
+            
+            saveButton.addEventListener('click', function() {
+                // Show loading state
+                saveButton.disabled = true;
+                saveButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+                
+                // Submit the form
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Profile updated successfully!');
+                        toggleEditMode(false);
+                        // Update the display name if it changed
+                        const nameDisplay = document.querySelector('#nameDisplay h4');
+                        if (nameDisplay) {
+                            nameDisplay.textContent = data.user.first_name + ' ' + data.user.last_name;
+                        }
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to update profile'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the profile.');
+                })
+                .finally(() => {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = '<i class="bi bi-check"></i> Save';
+                });
+            });
+        });
     </script>
 </body>
 </html>

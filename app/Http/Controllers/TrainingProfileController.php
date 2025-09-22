@@ -1198,6 +1198,47 @@ class TrainingProfileController extends Controller
             ], 500);
         }
     }
+
+    public function updateUserProfile(Request $request)
+    {
+        try {
+            $request->validate([
+                'salary_grade' => 'nullable|string|max:10',
+                'division' => 'nullable|string|max:255',
+                'position_start_date' => 'nullable|date',
+                'government_start_date' => 'nullable|date',
+                'position' => 'nullable|string|max:255',
+                'superior' => 'nullable|string|max:255',
+            ]);
+
+            $user = Auth::user();
+            
+            // Update only the fields that users are allowed to edit
+            $user->salary_grade = $request->salary_grade;
+            $user->division = $request->division;
+            $user->position_start_date = $request->position_start_date;
+            $user->government_start_date = $request->government_start_date;
+            $user->position = $request->position;
+            $user->superior = $request->superior;
+            
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully!',
+                'user' => [
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating profile: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
 
