@@ -107,6 +107,16 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     // Route for viewing evaluations
     Route::get('/evaluation/view/{training_id}/{type}', [TrainingProfileController::class, 'viewEvaluationData'])
         ->name('user.evaluation.view');
+
+    // User profile info routes
+    Route::get('/profile/info', [TrainingProfileController::class, 'userProfileInfo'])
+        ->name('user.profile.info');
+    Route::get('/profile/info/unprogrammed', [TrainingProfileController::class, 'userProfileInfoUnprogrammed'])
+        ->name('user.profile.info.unprogrammed');
+    Route::post('/profile/upload-picture', [TrainingProfileController::class, 'uploadUserProfilePicture'])
+        ->name('user.profile.upload-picture');
+    Route::put('/profile/update', [TrainingProfileController::class, 'updateUserProfile'])
+        ->name('user.profile.update');
 });
 
 // ADMIN PANEL ROUTES (with read-only middleware for Admin_ accounts)
