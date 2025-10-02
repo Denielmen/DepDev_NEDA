@@ -263,21 +263,21 @@
                         <div id="selectedParticipants">
                             @if($training->participants->count() > 0)
                                 @foreach ($training->participants as $participant)
-                                    <div class="d-flex justify-content-between align-items-center mb-1 p-2 border rounded" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? '2025' }}">
+                                    <div class="d-flex justify-content-between align-items-center mb-1 p-2 border rounded" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? date('Y') }}">
                                         <div class="d-flex align-items-center">
                                             <span class="me-2">{{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}</span>
                                             <span class="badge bg-info me-1">{{ $participationTypes->get($participant->pivot->participation_type_id)->name ?? 'N/A' }}</span>
-                                            <span class="badge bg-success">CY-{{ $participant->pivot->year ?? '2025' }}</span>
+                                            <span class="badge bg-success">CY-{{ $participant->pivot->year ?? date('Y') }}</span>
                                         </div>
                                         <div>
-                                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? '2025' }}">
+                                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? date('Y') }}">
                                                 <i class="bi bi-x"></i> Remove
                                             </button>
                                         </div>
                                     </div>
                                     <input type="hidden" name="participants[]" value="{{ $participant->id }}">
-                                    <input type="hidden" name="participation_types[{{ $participant->id }}_{{ $participant->pivot->year ?? '2025' }}]" value="{{ $participant->pivot->participation_type_id }}">
-                                    <input type="hidden" name="participant_years[{{ $participant->id }}_{{ $participant->pivot->year ?? '2025' }}]" value="{{ $participant->pivot->year ?? '2025' }}">
+                                    <input type="hidden" name="participation_types[{{ $participant->id }}_{{ $participant->pivot->year ?? date('Y') }}]" value="{{ $participant->pivot->participation_type_id }}">
+                                    <input type="hidden" name="participant_years[{{ $participant->id }}_{{ $participant->pivot->year ?? date('Y') }}]" value="{{ $participant->pivot->year ?? date('Y') }}">
                                 @endforeach
                             @else
                                 <p class="text-muted">No participants added yet.</p>

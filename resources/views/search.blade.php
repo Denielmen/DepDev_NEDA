@@ -390,8 +390,8 @@
                                     @if ($result->participants)
                                     @foreach ($result->participants as $participant)
                                     {{ $loop->iteration }}. {{ $participant['name'] }}
-                                    @if(isset($participant['period']))
-                                        <small class="text-muted d-block">({{ $participant['period'] }})</small>
+                                    @if(isset($participant['year']))
+                                        <small class="text-muted d-block">{{ $participant['year'] }}</small>
                                     @endif
                                     <br>
                                     @endforeach
