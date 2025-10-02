@@ -341,9 +341,9 @@
                                     <td>
                                         <select class="form-select participant-year" data-user-id="{{ $user->id }}">
                                             <option value="">Select Year</option>
-                                            <option value="2025">CY-2025</option>
-                                            <option value="2026">CY-2026</option>
-                                            <option value="2027">CY-2027</option>
+                                            <option value="{{ $training->period_from }}">CY-{{ $training->period_from }}</option>
+                                            <option value="{{ $training->period_from+1 }}">CY-{{ $training->period_from+1 }}</option>
+                                            <option value="{{ $training->period_from+2 }}">CY-{{ $training->period_from+2 }}</option>
                                         </select>
                                     </td>
                                     <td>
@@ -570,14 +570,14 @@
                     <td>
                         <select class="form-select participant-year" data-user-id="${user.id}">
                             <option value="">Select Year</option>
-                            <option value="2025">CY-2025</option>
-                            <option value="2026">CY-2026</option>
-                            <option value="2027">CY-2027</option>
+                            <option value="{{ $training->period_from }}">CY-{{ $training->period_from }}</option>
+                            <option value="{{ $training->period_from+1 }}">CY-{{ $training->period_from+1 }}</option>
+                            <option value="{{ $training->period_from+2 }}">CY-{{ $training->period_from+2 }}</option>
                         </select>
                     </td>
                     <td>
                         <input type="checkbox" class="form-check-input participant-checkbox" data-user-id="${user.id}">
-                    </td>
+                    </td>+
                 `;
 
                 return row;
