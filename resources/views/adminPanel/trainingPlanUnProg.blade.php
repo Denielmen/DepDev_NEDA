@@ -237,6 +237,53 @@
             font-size: 32px;
             margin-right: 8px;
         }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 40px 8px 35px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #003366;
+            box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: #666;
+            z-index: 1;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 20%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-search:hover {
+            color: #003366;
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -300,10 +347,21 @@
                     <a href="{{ route('admin.training-plan') }}" class="tab-button">Programmed</a>
                     <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
                 </div>
-                <a href="{{ route('admin.search.index') }}" class="btn btn-primary">
-                    <i class="bi bi-search"></i>
-                    Advanced Search
-                </a>
+                
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" placeholder="Search trainings..." id="searchInput" value="{{ request('search') ?? '' }}">
+                            @if(request('search'))
+                                <button type="button" class="clear-search" onclick="clearSearch()" title="Clear search">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                            @endif
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="performSearch()" title="Search">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
             </div>
 
             <div class="training-table mt-3">
@@ -410,13 +468,30 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Add search functionality
-        document.querySelector('.search-box input').addEventListener('input', function(e) {
-            // Add a small delay to prevent too many requests
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(() => {
-                this.form.submit();
-            }, 500);
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const currentUrl = new URL(window.location);
+            
+            if (searchTerm.trim()) {
+                currentUrl.searchParams.set('search', searchTerm);
+            } else {
+                currentUrl.searchParams.delete('search');
+            }
+            
+            window.location.href = currentUrl.toString();
+        }
+        
+        function clearSearch() {
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.delete('search');
+            window.location.href = currentUrl.toString();
+        }
+        
+        // Handle Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
         });
     </script>
 </body>

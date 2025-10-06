@@ -432,8 +432,29 @@ class TrainingProfileController extends Controller
         }
     }
 
-    public function trainingPlan()
+    public function trainingPlan(Request $request)
     {
+        $query = Training::with(['participants', 'competency'])
+            ->where('type', 'Program');
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'LIKE', "%{$searchTerm}%")
+                  ->orWhereHas('competency', function($comp) use ($searchTerm) {
+                      $comp->where('name', 'LIKE', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        $trainings = $query->orderBy('created_at', 'desc')
+            ->paginate(30);// Show 30 trainings per page
+
+        // Check if current user is read-only admin
+        $isReadOnlyAdmin = \App\Helpers\AdminHelper::isReadOnlyAdmin();
+        
+        return view('adminPanel.trainingPlan', compact('trainings', 'isReadOnlyAdmin'));
         $trainings = Training::with('participants')
             ->where('type', 'Program')
             ->orderBy('created_at', 'desc')
@@ -442,12 +463,29 @@ class TrainingProfileController extends Controller
         return view('adminPanel.trainingPlan', compact('trainings'));
     }
 
-    public function trainingPlanUnprogrammed()
+    public function trainingPlanUnprogrammed(Request $request)
     {
-        $trainings = Training::with('participants')
-            ->where('type', 'Unprogrammed')
-            ->orderBy('created_at', 'desc')
+        $query = Training::with(['participants', 'competency'])
+            ->where('type', 'Unprogrammed');
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'LIKE', "%{$searchTerm}%")
+                  ->orWhereHas('competency', function($comp) use ($searchTerm) {
+                      $comp->where('name', 'LIKE', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        $trainings = $query->orderBy('created_at', 'desc')
             ->paginate(30); // Show 30 trainings per page
+
+        // Check if current user is read-only admin
+        $isReadOnlyAdmin = \App\Helpers\AdminHelper::isReadOnlyAdmin();
+        
+        return view('adminPanel.trainingPlanUnProg', compact('trainings', 'isReadOnlyAdmin'));
 
         return view('adminPanel.trainingPlanUnProg', compact('trainings'));
     }

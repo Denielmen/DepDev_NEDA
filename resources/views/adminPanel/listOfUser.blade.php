@@ -96,7 +96,7 @@
             display: flex;
             align-items: center;
             background: white;
-            border-radius: 25px;
+            border-radius: 10px;
             padding: 8px 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             width: 300px;
@@ -108,9 +108,9 @@
             background: transparent;
             width: 100%;
             padding: 8px 15px;
-            padding-right: 70px;
+            padding-right: 40px;
             border: 1px solid #ced4da;
-            border-radius: 5px;
+            border-radius: 10px;
         }
 
         .search-icon {
