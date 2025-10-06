@@ -384,6 +384,23 @@
                         </div>
                     </div>
 
+                    <div class="form-group row mb-3">
+                        <label for="resource_persons" class="col-md-4 col-form-label text-md-right">{{ __('Resource Speaker') }}</label>
+                        <div class="col-md-6">
+                            <div id="selectedResourcePersons" class="mb-2">
+                                <!-- Selected resource persons will be displayed here -->
+                            </div>
+                            <select id="resource_persons" class="form-control @error('resource_persons') is-invalid @enderror" name="resource_persons[]" multiple style="display: none;">
+                                {{-- Options are added via JavaScript --}}
+                            </select>
+                             @error('resource_persons')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="text-end">
                         <a href="{{ route('admin.training-plan') }}" class="btn btn-secondary me-2">Cancel</a>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#participantModal">Add Participant</button>
@@ -443,9 +460,8 @@
                                     <td>{{ $user->division }}</td>
                                     <td>
                                         <select class="form-select participation-type" data-user-id="{{ $user->id }}">
-                                            <option value="">Select Type</option>
                                             @foreach($participationTypes as $type)
-                                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                                <option value="{{ $type->id }}" {{ strtolower($type->name) == 'participant' ? 'selected' : '' }}>{{ $type->name }}</option>
                                             @endforeach
                                         </select>
                                     </td>
@@ -518,6 +534,9 @@
             const addSelectedParticipantsBtn = document.getElementById('addSelectedParticipantsBtn');
             const selectAllCheckbox = document.getElementById('selectAllParticipants');
             const removeAllSelectionBtn = document.getElementById('removeAllSelectionBtn');
+            
+            // Track already added participants
+            let addedParticipants = new Set();
 
             // Global array to track all selected participants across pages
             let globalSelectedParticipants = new Set();
@@ -528,6 +547,26 @@
             // Clear any pre-selected participants
             participantsSelect.innerHTML = '';
             selectedParticipantsDiv.innerHTML = '';
+            
+            // Function to hide already added participants from modal
+            function hideAddedParticipantsFromModal() {
+                document.querySelectorAll('.participant-row').forEach(row => {
+                    const checkbox = row.querySelector('.participant-checkbox');
+                    if (checkbox) {
+                        const userId = checkbox.getAttribute('data-user-id');
+                        if (addedParticipants.has(userId.toString())) {
+                            row.style.display = 'none';
+                        } else {
+                            row.style.display = '';
+                        }
+                    }
+                });
+            }
+            
+            // Hide already added participants on modal show
+            participantModal.addEventListener('show.bs.modal', function() {
+                hideAddedParticipantsFromModal();
+            });
 
             // Clear any stored participation types from previous sessions
             for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -584,7 +623,9 @@
                         tableBody.innerHTML = '';
                         data.users.forEach(user => {
                             const row = createParticipantRow(user, data.participation_types);
-                            tableBody.appendChild(row);
+                            if (row) { // Only append if row was created (not already added)
+                                tableBody.appendChild(row);
+                            }
                         });
 
                         // Restore selection state for current page
@@ -635,6 +676,11 @@
 
             // Function to create participant row
             function createParticipantRow(user, participationTypes) {
+                // Hide already added participants
+                if (addedParticipants.has(user.id.toString())) {
+                    return null; // Don't create row for already added participants
+                }
+                
                 const row = document.createElement('tr');
                 row.className = 'participant-row';
 
@@ -860,10 +906,14 @@
                     return;
                 }
 
-                selectedParticipantsDiv.innerHTML = '';
-                // Clear the old hidden inputs before adding new ones
-                form.querySelectorAll('input[name="participants[]"], input[name^="participation_types["]').forEach(input => {
-                    input.remove();
+                const selectedResourcePersonsDiv = document.getElementById('selectedResourcePersons');
+                // Don't clear the display divs - we want to keep existing participants
+                // Only remove hidden inputs for participants we're about to re-add
+                document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
+                    const userId = checkbox.dataset.userId;
+                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participant_years[${userId}]"]`).forEach(input => input.remove());
                 });
 
                 const selected = [];
@@ -916,6 +966,9 @@
                         participation_type_name: participationTypeName
                     });
 
+                    // Add to tracking set
+                    addedParticipants.add(userId.toString());
+
                     // Add hidden inputs to the main form
                     const participantInput = document.createElement('input');
                     participantInput.type = 'hidden';
@@ -943,7 +996,8 @@
                     return; // Don't close modal
                 }
 
-                // Update the visual display
+                // Update the visual display - separate participants and resource persons
+                
                 selected.forEach(participant => {
                     const participantDiv = document.createElement('div');
                     participantDiv.className = 'd-flex justify-content-between align-items-center mb-1 p-2 border rounded';
@@ -959,7 +1013,20 @@
                             </button>
                         </div>
                     `;
-                    selectedParticipantsDiv.appendChild(participantDiv);
+                    
+                    // Check if participant is already displayed to avoid duplicates
+                    const existingParticipant = selectedParticipantsDiv.querySelector(`[data-user-id="${participant.id}"]`) || 
+                                               selectedResourcePersonsDiv.querySelector(`[data-user-id="${participant.id}"]`);
+                    if (!existingParticipant) {
+                        // Check if participation type is "Participant" - add to participants section
+                        // Otherwise add to resource persons section
+                        console.log('Participant type:', participant.participation_type_name); // Debug log
+                        if (participant.participation_type_name.toLowerCase() === 'participant') {
+                            selectedParticipantsDiv.appendChild(participantDiv);
+                        } else {
+                            selectedResourcePersonsDiv.appendChild(participantDiv);
+                        }
+                    }
                 });
 
                 // Log the current state
@@ -1026,14 +1093,20 @@
                             return;
                         }
 
-                        // Clear old inputs
-                        selectedParticipantsDiv.innerHTML = '';
-                        form.querySelectorAll('input[name="participants[]"], input[name^="participation_types["]').forEach(input => {
-                            input.remove();
+                        // Don't clear display - keep existing participants
+                        const selectedResourcePersonsDiv = document.getElementById('selectedResourcePersons');
+                        // Only remove hidden inputs for participants we're about to re-add
+                        selectedUsers.forEach(user => {
+                            form.querySelectorAll(`input[name="participants[]"][value="${user.id}"]`).forEach(input => input.remove());
+                            form.querySelectorAll(`input[name="participation_types[${user.id}]"]`).forEach(input => input.remove());
+                            form.querySelectorAll(`input[name="participant_years[${user.id}]"]`).forEach(input => input.remove());
                         });
 
                         // Add selected participants
                         selected.forEach(participant => {
+                            // Add to tracking set
+                            addedParticipants.add(participant.id.toString());
+                            
                             // Add hidden inputs to the main form
                             const participantInput = document.createElement('input');
                             participantInput.type = 'hidden';
@@ -1068,7 +1141,20 @@
                                     </button>
                                 </div>
                             `;
-                            selectedParticipantsDiv.appendChild(participantDiv);
+                            
+                            // Check if participant is already displayed to avoid duplicates
+                            const existingParticipant = selectedParticipantsDiv.querySelector(`[data-user-id="${participant.id}"]`) || 
+                                                       selectedResourcePersonsDiv.querySelector(`[data-user-id="${participant.id}"]`);
+                            if (!existingParticipant) {
+                                // Check if participation type is "Participant" - add to participants section
+                                // Otherwise add to resource persons section
+                                console.log('Global participant type:', participant.participation_type_name); // Debug log
+                                if (participant.participation_type_name.toLowerCase() === 'participant') {
+                                    selectedParticipantsDiv.appendChild(participantDiv);
+                                } else {
+                                    selectedResourcePersonsDiv.appendChild(participantDiv);
+                                }
+                            }
                         });
 
                         // Clear global selection
@@ -1101,11 +1187,15 @@
             });
 
             // Handle Remove Participant button clicks from the displayed list outside the modal
+            // Add event listener for participants section
             selectedParticipantsDiv.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-participant')) {
                     const button = e.target.closest('.remove-participant');
                     const userId = button.dataset.userId;
 
+                    // Remove from tracking set
+                    addedParticipants.delete(userId.toString());
+                    
                     // Remove the hidden inputs for this user
                     form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
                     form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
@@ -1141,6 +1231,54 @@
                      // Update the console log (optional, for debugging)
                      console.log('Removed participant:', userId);
                      console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
+                }
+            });
+
+            // Add event listener for resource persons section
+            const selectedResourcePersonsDiv = document.getElementById('selectedResourcePersons');
+            selectedResourcePersonsDiv.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-participant')) {
+                    const button = e.target.closest('.remove-participant');
+                    const userId = button.dataset.userId;
+
+                    // Remove from tracking set
+                    addedParticipants.delete(userId.toString());
+                    
+                    // Remove the hidden inputs for this user
+                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+
+                    // Uncheck the corresponding checkbox in the modal (if modal is open)
+                    const checkboxInModal = document.querySelector(`.participant-checkbox[data-user-id="${userId}"]`);
+                    if (checkboxInModal) {
+                        checkboxInModal.checked = false;
+                    }
+
+                    // Remove the participant's div from the display
+                    button.closest('.d-flex').remove();
+
+                    // Update the console log (optional, for debugging)
+                    console.log('Removed resource person:', userId);
+                    console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
+                } else if (e.target.classList.contains('remove-participant')) { // Handle click directly on the icon inside the button
+                    const button = e.target;
+                    const userId = button.dataset.userId;
+                    // Remove the hidden inputs for this user
+                    form.querySelectorAll(`input[name="participants[]"][value="${userId}"]`).forEach(input => input.remove());
+                    form.querySelectorAll(`input[name="participation_types[${userId}]"]`).forEach(input => input.remove());
+
+                    // Uncheck the corresponding checkbox in the modal (if modal is open)
+                    const checkboxInModal = document.querySelector(`.participant-checkbox[data-user-id="${userId}"]`);
+                    if (checkboxInModal) {
+                        checkboxInModal.checked = false;
+                    }
+
+                    // Remove the participant's div from the display
+                    button.closest('.d-flex').remove();
+
+                    // Update the console log (optional, for debugging)
+                    console.log('Removed resource person:', userId);
+                    console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
                 }
             });
 
