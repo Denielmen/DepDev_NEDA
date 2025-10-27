@@ -30,9 +30,7 @@ class TrainingProfileController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('title', 'like', "%$search%")
-                        ->orWhereHas('competency', function ($subQ) use ($search) {
-                            $subQ->where('name', 'like', "%$search%");
-                        });
+                        ->orWhere('core_competency', 'like', "%$search%");
                     if (preg_match('/^\\d{4}$/', $search)) {
                         $year = (int) $search;
                         $q2->orWhere(function ($q3) use ($year) {
@@ -1151,6 +1149,81 @@ class TrainingProfileController extends Controller
         $competencyLabels = Competency::whereIn('id', $competencyIds)->pluck('name', 'id');
 
         return view('userPanel.trainingEffectiveness', compact('trainings', 'competencyCharts', 'competencyLabels'));
+    }
+
+    public function effectivenessUnprogrammed(Request $request)
+    {
+        $userId = Auth::id();
+        $search = $request->input('search');
+        $trainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('participants', function ($q) use ($userId) {
+                        $q->where('users.id', $userId);
+                    });
+            })
+            ->when($search, function ($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                    ->orWhereHas('competency', function ($subQ) use ($search) {
+                        $subQ->where('name', 'like', "%$search%");
+                    });
+            })
+            ->with(['evaluations' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
+            ->paginate(10);
+
+        // Get all competencies used in user's trainings for charts
+        $allUserTrainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('participants', function ($q) use ($userId) {
+                        $q->where('users.id', $userId);
+                    });
+            })
+            ->with(['evaluations' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
+            ->get();
+
+        $competencyIds = $allUserTrainings->pluck('competency_id')->unique()->filter();
+
+        $competencyCharts = [];
+        foreach ($competencyIds as $cid) {
+            $compTrainings = $allUserTrainings->where('competency_id', $cid);
+
+            // Group by year
+            $yearly = [];
+            foreach (
+                $compTrainings->groupBy(function ($t) {
+                    return $t->implementation_date_from
+                        ? date('Y', strtotime($t->implementation_date_from))
+                        : null;
+                }) as $year => $yearTrainings
+            ) {
+                if ($year) {
+                    $preAvg = round($yearTrainings->avg(function ($t) {
+                        $evaluation = $t->evaluations->first();
+
+                        return $evaluation ? ($evaluation->participant_pre_rating ?? $evaluation->supervisor_pre_rating) : null;
+                    }), 2);
+                    $postAvg = round($yearTrainings->avg(function ($t) {
+                        $evaluation = $t->evaluations->first();
+
+                        return $evaluation ? ($evaluation->participant_post_rating ?? $evaluation->supervisor_post_rating) : null;
+                    }), 2);
+                    $yearly[$year] = [
+                        'pre' => $preAvg,
+                        'post' => $postAvg,
+                    ];
+                }
+            }
+            $competencyCharts[$cid] = $yearly;
+        }
+
+        $competencyLabels = Competency::whereIn('id', $competencyIds)->pluck('name', 'id');
+
+        return view('userPanel.trainingEffectivenessUnprogrammed', compact('trainings', 'competencyCharts', 'competencyLabels'));
     }
 
     public function export($id)

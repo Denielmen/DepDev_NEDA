@@ -216,7 +216,7 @@
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
             <a href="{{ route('user.home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
             <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('user.training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
             <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
@@ -240,8 +240,8 @@
                         <div class="col-12 col-md-6 mb-4">
                             <div class="card text-center h-100">
                                 <a href="{{ route('user.training.profile.program') }}" class="text-decoration-none">
-                                    <h5>Training Profile</h5>
-                                    <p>View and plan learning activities aligned with your role.</p>
+                                    <h5>Individual Training Profile</h5>
+                                    <p>List of programmed and completed training activities of the staff.</p>
                                 </a>
                             </div>
                         </div>
@@ -249,7 +249,7 @@
                             <div class="card text-center h-100">
                                 <a href="{{ route('user.tracking') }}" class="text-decoration-none">
                                     <h5>Training Tracking & History</h5>
-                                    <p>Track your learning and development progress.</p>
+                                    <p>Information on training attended by the staff.</p>
                                 </a>
                             </div>
                         </div>
@@ -257,7 +257,7 @@
                             <div class="card text-center h-100">
                                 <a href="{{ route('user.training.effectiveness') }}" class="text-decoration-none">
                                     <h5>Training Effectiveness</h5>
-                                    <p>Evaluate the effectiveness of completed trainings.</p>
+                                    <p>Results of proficiency level assessment of the staff.</p>
                                 </a>
                             </div>
                         </div>

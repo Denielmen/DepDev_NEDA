@@ -81,6 +81,7 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
 
 
     Route::get('user/training-effectiveness', [TrainingProfileController::class, 'effectiveness'])->name('user.training.effectiveness');
+    Route::get('user/training-effectiveness-unprogrammed', [TrainingProfileController::class, 'effectivenessUnprogrammed'])->name('user.training.effectiveness.unprogrammed');
     Route::get('/training-resources', [TrainingProfileController::class, 'resources'])
         ->name('user.training.resources');
 
