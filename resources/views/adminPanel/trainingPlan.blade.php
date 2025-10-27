@@ -312,8 +312,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
@@ -321,13 +321,13 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>Training Program</h2>
+                <h2>Training Profile</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="tab-buttons">
-                    <a href="{{ route('admin.training-plan') }}" class="tab-button active">Programmed</a>
-                    <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button">Unprogrammed</a>
+                    <a href="{{ route('admin.training-plan') }}" class="tab-button active">Programmed Trainings</a>
+                    <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button">Completed Training</a>
                 </div>
                 <div class="d-flex align-items-center gap-3">
                     @if(!$isReadOnlyAdmin)
@@ -358,6 +358,7 @@
                     <thead>
                         <tr>
                             <th>Training Title</th>
+                            <th>Type</th>
                             <th>Competency</th>
                             <th>Period of Implementation</th>
                             <th>Training Details</th>
@@ -367,6 +368,7 @@
                         @foreach($trainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
+                            <td>{{ $training->core_competency ?? 'N/A' }}</td>
                             <td>{{ $training->competency->name }}</td>
                             <td>{{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}</td>
                             <td>
