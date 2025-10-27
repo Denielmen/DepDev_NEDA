@@ -73,7 +73,6 @@ class TrainingTrackingController extends Controller
             'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
             'participation_type_id' => 'required|exists:participation_types,id',
             'no_of_hours'          => 'required|numeric',
-            'expenses'             => 'required|numeric',
             'provider'             => 'required',
             'implementation_date_from' => 'required|date',
             'implementation_date_to'   => 'required|date|after_or_equal:implementation_date_from',
@@ -111,7 +110,7 @@ class TrainingTrackingController extends Controller
                 'competency_id' => $competencyId, // Use processed competency ID
                 'provider' => $request->input('provider'),
                 'no_of_hours' => $request->input('no_of_hours'),
-                'budget' => $request->input('expenses'),
+                'budget' => $request->input('expenses', null),
                 'type' => 'Unprogrammed',
                 'status' => 'Implemented',
                 'implementation_date_from' => $request->input('implementation_date_from'),

@@ -338,8 +338,7 @@
         <div class="sidebar">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
             <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
-            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking &
-                History</a>
+            <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('user.training.effectiveness') }}" class="active"><i
                     class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
             <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
@@ -353,8 +352,8 @@
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="tab-buttons">
-                        <a href="{{ route('user.training.effectiveness') }}" class="tab-button active">Programmed Trainings</a>
-                        <a href="{{ route('user.training.effectiveness.unprogrammed') }}" class="tab-button">Completed Trainings</a>
+                        <a href="{{ route('user.training.effectiveness') }}" class="tab-button">Programmed Trainings</a>
+                        <a href="{{ route('user.training.effectiveness.unprogrammed') }}" class="tab-button active">Completed Trainings</a>
                     </div>
                 </div>
 
@@ -364,7 +363,7 @@
                         <table class="table table-bordered table-hover">
                             <thead class="table-primary">
                                 <tr>
-                                    <th>Training Programmed/Title/Subject Area</th>
+                                    <th>Training Title</th>
                                     <th>Pre-Evaluation Average</th>
                                     <th>Post-Evaluation Average</th>
                                     <th>Average</th>

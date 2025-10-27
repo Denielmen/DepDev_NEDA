@@ -225,7 +225,7 @@
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
             <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('user.training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
             <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
@@ -234,14 +234,14 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>Training Profile</h2>
+                <h2>Individual Training Profile</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex align-items-center gap-2">
                 <div class="tab-buttons">
-                    <a href="{{ route('user.training.profile.program') }}" class="tab-button active">Programmed</a>
-                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button">Unprogrammed</a>
+                    <a href="{{ route('user.training.profile.program') }}" class="tab-button active">Programmed Trainings</a>
+                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button">Completed Trainings</a>
                     </div>
                     <!-- Filter Dropdown -->
                     <div class="dropdown ms-2">
@@ -261,7 +261,7 @@
                 </div>
                 <div class="search-box">
                     <form method="GET" action="{{ route('user.training.profile.program') }}">
-                        <input type="text" name="search" placeholder="Search by title, competency, or year..." value="{{ request('search') }}">
+                        <input type="text" name="search" placeholder="Search by title, type, or year..." value="{{ request('search') }}">
                         <button type="submit" style="border:none;background:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);">
                     <i class="bi bi-search search-icon"></i>
                         </button>
@@ -273,11 +273,10 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Programmed/Title/Subject Area</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Type</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">No. of Hours</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider/Organizer</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Status</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">User Role</th>
                             <th class="text-center" style="background-color: #003366; color: white;">Details</th>
@@ -292,7 +291,7 @@
                             data-pre-rating="{{ $training->participant_pre_rating ?? '' }}"
                             data-post-rating="{{ $training->participant_post_rating ?? '' }}">
                             <td class="text-center">{{ $training->title }}</td>
-                            <td class="text-center">{{ $training->competency->name }}</td>
+                            <td class="text-center">{{ $training->core_competency }}</td>
                             <td class="text-center">
                                 @if($training->status === 'Implemented' )
                                     {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
@@ -300,7 +299,6 @@
                                     {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
                                 @endif
                             </td>
-                            <td class="text-center">{{ $training->no_of_hours }}</td>
                             <td class="text-center">{{ $training->provider }}</td>
                             <td class="text-center">
                                 @php
