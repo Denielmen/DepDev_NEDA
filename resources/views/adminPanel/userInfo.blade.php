@@ -399,8 +399,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employees Information</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
         <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
@@ -550,7 +550,7 @@
                             <input type="text" class="form-control" name="position" value="{{ $user->position }}" readonly>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Name of Supervisor (Last, First, MI)</label>
+                            <label class="form-label">Name of Immediate Supervisor (Last, First, MI)</label>
                             <input type="text" class="form-control" name="superior" value="{{ $user->superior }}" readonly>
                         </div>
                     </form>
@@ -562,10 +562,10 @@
         <div class="program-tabs">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed</a>
+                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed Trainings</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Unprogrammed</a>
+                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Trainings Attended</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#" id="analyticsTab">Analytics</a>

@@ -32,7 +32,10 @@ class AdminController extends Controller
         $training = Training::findOrFail($training_id);
         $user = User::findOrFail($user_id);
 
-        return view('adminPanel.viewUserInfoUnprog', compact('training', 'user'));
+        // Get or create evaluation record for this training-user combination
+        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($training_id, $user_id);
+
+        return view('adminPanel.viewUserInfoUnprog', compact('training', 'user', 'evaluation'));
     }
     // public function viewUserInfoUnprog($training_id, $user_id)
     // {

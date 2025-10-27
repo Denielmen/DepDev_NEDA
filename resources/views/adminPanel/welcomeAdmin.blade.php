@@ -278,8 +278,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}" class="active"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
@@ -302,16 +302,16 @@
                     <div class="col-md-4">
                         <div class="card text-center">
                             <a href="{{ route('admin.training-plan') }}" class="text-decoration-none">
-                                <h5>Training Plan</h5>
-                                <p>Outline Training Programs for Staff Development and Growth</p>
+                                <h5>Training Profi le</h5>
+                                <p>List of Programmed and Completed Training Activities</p>
                             </a>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card text-center">
                             <a href="{{ route('admin.participants')}}" class="text-decoration-none">
-                                <h5>Employee's Profile</h5>
-                                <p>List of all the Staff.</p>
+                                <h5>Employee's Information</h5>
+                                <p>List and Profile of Employee</p>
                             </a>
                         </div>
                     </div>
@@ -321,8 +321,8 @@
                     <div class="col-md-4">
                         <div class="card text-center">
                             <a href="{{ route('admin.reports')}}" class="text-decoration-none">
-                                <h5>Reports</h5>
-                                <p>View and Export Report.</p>
+                                <h5>Training Plan</h5>
+                                <p>Consolidated 3-years List of Programmed training activity.</p>
                             </a>
                         </div>
                     </div>
