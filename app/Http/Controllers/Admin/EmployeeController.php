@@ -20,6 +20,7 @@ class EmployeeController extends Controller
             $validated = $request->validate([
                 'user_id' => 'required|string|max:255|unique:users,user_id,' . $id,
                 'first_name' => 'required|string|max:255',
+                'mid_init' => 'nullable|string|max:2',
                 'last_name' => 'required|string|max:255',
                 'salary_grade' => 'required|string|max:255',
                 'position_start_date' => 'nullable|date|before_or_equal:today',
