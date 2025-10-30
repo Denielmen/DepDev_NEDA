@@ -1449,6 +1449,7 @@ class TrainingProfileController extends Controller
                 'government_start_date' => 'nullable|date',
                 'position' => 'nullable|string|max:255',
                 'superior' => 'nullable|string|max:255',
+                'mid_init' => 'nullable|string|max:1',
             ]);
 
             $user = Auth::user();
@@ -1460,6 +1461,7 @@ class TrainingProfileController extends Controller
             $user->government_start_date = $request->government_start_date;
             $user->position = $request->position;
             $user->superior = $request->superior;
+            $user->mid_init = strtoupper(substr($request->mid_init, 0, 1)); // Ensure only first character is taken and uppercase
 
             $user->save();
 
@@ -1469,6 +1471,7 @@ class TrainingProfileController extends Controller
                 'user' => [
                     'first_name' => $user->first_name,
                     'last_name' => $user->last_name,
+                    'mid_init' => $user->mid_init,
                 ],
             ]);
 

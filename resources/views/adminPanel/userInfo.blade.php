@@ -485,10 +485,6 @@
                                     <input type="text" class="form-control" name="mid_init" value="{{ $user->mid_init ?? '' }}" maxlength="2" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Middle Name</label>
-                                    <input type="text" class="form-control" name="middle_name" value="{{ $user->middle_name }}" readonly>
-                                </div>
-                                <div class="col-md-6">
                                     <label class="form-label">Last Name</label>
                                     <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
                                 </div>

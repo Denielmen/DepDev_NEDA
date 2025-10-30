@@ -383,7 +383,7 @@
                     </div>
                     <input type="file" id="profilePictureInput" class="avatar-upload-input" accept="image/*" onchange="uploadProfilePicture(this)">
                     <div id="nameDisplay">
-                        <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
+                        <h4>{{ $user->first_name }}{{ $user->mid_init ? ' ' . $user->mid_init . '.' : '' }} {{ $user->last_name }}</h4>
                     </div>
                     <p class="text-muted mb-0">ID: {{ $user->user_id }}</p>
                     <p class="text-muted mb-0">{{ $user->position }}</p>
@@ -411,15 +411,17 @@
                         @csrf
                         @method('PUT')
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <label class="form-label">First Name</label>
                                 <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Middle Name</label>
-                                <input type="text" class="form-control" name="middle_name" value="{{ $user->middle_name }}" readonly>
+                            <div class="col-md-2 position-relative" style="padding-top: 1.5rem;">
+                                <label class="form-label position-absolute" style="top: 0; left: 50%; transform: translateX(-50%);">MI</label>
+                                <div class="d-flex justify-content-center align-items-end h-100">
+                                    <input type="text" class="form-control text-center p-0" name="mid_init" value="{{ $user->mid_init ? substr($user->mid_init, 0, 1) : '' }}" readonly maxlength="1" style="text-transform: uppercase; width: 80px; font-size: 1rem; height: 37px; line-height: 37px; text-align: center;">
+                                </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <label class="form-label">Last Name</label>
                                 <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
                             </div>
@@ -457,7 +459,7 @@
                                 <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('Y-m-d') : '' }}" readonly>
                                 <small class="text-muted">
                                     @if($user->position_start_date)
-                                        {{ $user->getFormattedYearsInPosition() }} in current position
+                                        {{ $user->getFormattedYearsInPosition() }} in current position (since {{ \Carbon\Carbon::parse($user->position_start_date)->format('F j, Y') }})
                                     @else
                                         Position start date not set
                                     @endif
@@ -468,7 +470,7 @@
                                 <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('Y-m-d') : '' }}" readonly>
                                 <small class="text-muted">
                                     @if($user->government_start_date)
-                                        {{ $user->getFormattedYearsInGovernment() }} in government service
+                                        {{ $user->getFormattedYearsInGovernment() }} in government service (since {{ \Carbon\Carbon::parse($user->government_start_date)->format('F j, Y') }})
                                     @else
                                         Government start date not set
                                     @endif
@@ -642,7 +644,8 @@
                         // Update the display name if it changed
                         const nameDisplay = document.querySelector('#nameDisplay h4');
                         if (nameDisplay) {
-                            nameDisplay.textContent = data.user.first_name + ' ' + data.user.last_name;
+                            const middleInitial = data.user.mid_init ? ' ' + data.user.mid_init + '.' : '';
+                            nameDisplay.textContent = data.user.first_name + middleInitial + ' ' + data.user.last_name;
                         }
                     } else {
                         alert('Error: ' + (data.message || 'Failed to update profile'));
