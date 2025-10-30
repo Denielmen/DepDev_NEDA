@@ -399,7 +399,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
         <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employees Information</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
         <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
@@ -481,6 +481,10 @@
                                     <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label">Middle Name</label>
+                                    <input type="text" class="form-control" name="middle_name" value="{{ $user->middle_name }}" readonly>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label">Last Name</label>
                                     <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
                                 </div>
@@ -493,7 +497,11 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Salary Grade</label>
-                                <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
+                                <select class="form-control" name="salary_grade">
+                                    @for($i = 3; $i <= 28; $i++)
+                                        <option value="{{ $i }}" {{ $user->salary_grade == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
                             </div>
                             <div class="col-md-8">
                                 <!-- Display mode -->
@@ -542,6 +550,8 @@
                                 <div class="years-edit" style="display: none;">
                                     <label class="form-label">Government Start Date</label>
                                     <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date }}" readonly>
+                                    <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
+                                    
                                 </div>
                             </div>
                         </div>

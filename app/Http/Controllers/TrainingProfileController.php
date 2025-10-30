@@ -256,39 +256,71 @@ class TrainingProfileController extends Controller
 
         // Save link material
         if ($request->filled('linkMaterials')) {
-            \App\Models\TrainingMaterial::create([
-                'title' => $training->title,
-                'competency_id' => $training->competency_id,
-                'user_id' => Auth::id(),
-                'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
-                'file_path' => null,
-                'link' => $request->linkMaterials,
-                'type' => 'material',
-                'training_id' => $training->id,
-            ]);
-        }
-
-        // Save uploaded certificates
-        if ($request->hasFile('uploadCertificates')) {
-            foreach ($request->file('uploadCertificates') as $file) {
-                $certificatePath = $file->store('certificates', [
-                    'disk' => 'public',
-                    'visibility' => 'public',
-                ]);
+            // First, check if a link with the same URL already exists for this training
+            $existingLink = \App\Models\TrainingMaterial::where('training_id', $training->id)
+                ->where('type', 'link')
+                ->where('link', $request->linkMaterials)
+                ->first();
+                
+            if (!$existingLink) {
                 \App\Models\TrainingMaterial::create([
-                    'title' => $training->title.' Certificate',
+                    'title' => $training->title . ' - Link',
                     'competency_id' => $training->competency_id,
                     'user_id' => Auth::id(),
                     'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
-                    'file_path' => $certificatePath,
-                    'link' => null,
-                    'type' => 'certificate',
+                    'file_path' => null,
+                    'link' => $request->linkMaterials,
+                    'type' => 'link',
                     'training_id' => $training->id,
                 ]);
             }
         }
 
-        return redirect()->route('user.training.profile.unprogram.show', $training->id)
+        // Save uploaded certificates
+        if ($request->hasFile('uploadCertificates')) {
+            // First, ensure the certificates directory exists and is writable
+            $certificatePath = storage_path('app/public/certificates');
+            if (!file_exists($certificatePath)) {
+                mkdir($certificatePath, 0755, true);
+            }
+
+            foreach ($request->file('uploadCertificates') as $file) {
+                if ($file->isValid()) {
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = 'certificate_' . time() . '_' . uniqid() . '.' . $extension;
+                    
+                    // Store the file in the public disk under certificates directory
+                    $storedPath = $file->storeAs('certificates', $filename, 'public');
+                    
+                    if ($storedPath) {
+                        // Create a more descriptive title with original filename
+                        $title = $training->title . ' Certificate - ' . $originalName;
+                        
+                        // Create the certificate record
+                        \App\Models\TrainingMaterial::create([
+                            'title' => $title,
+                            'competency_id' => $training->competency_id,
+                            'user_id' => Auth::id(),
+                            'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
+                            'file_path' => $storedPath,
+                            'link' => null,
+                            'type' => 'certificate',
+                            'training_id' => $training->id,
+                        ]);
+                    }
+                } else {
+                    // Log error if file upload fails
+                    \Log::error('File upload failed', [
+                        'file' => $file->getClientOriginalName(),
+                        'error' => $file->getError(),
+                        'message' => $file->getErrorMessage()
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('user.training.resources')
             ->with('success', 'Training updated successfully.');
     }
 
@@ -759,37 +791,112 @@ class TrainingProfileController extends Controller
 
     public function resources(Request $request)
     {
-        $query = TrainingMaterial::query();
+        $userId = Auth::id();
+        $tab = $request->input('tab', 'materials');
+        
+        // Base query for trainings with materials/links/certificates
+        $query = Training::query();
+        
+        // Filter based on the active tab
+        $query->whereHas('materials', function($q) use ($userId, $tab) {
+            if ($tab === 'materials') {
+                $q->where('type', 'material')->whereNotNull('file_path');
+            } elseif ($tab === 'links') {
+                $q->where('type', 'material')->whereNotNull('link');
+            } else { // certificates
+                $q->where('type', 'certificate')->where('user_id', $userId);
+            }
+        });
+
+        // Apply search filter if present
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                if (preg_match('/^\\d{4}$/', $search)) {
-                    $q->whereYear('created_at', $search);
-                } else {
-                    $q->where('title', 'like', "%$search%")
-                        ->orWhereHas('competency', function ($subQ) use ($search) {
-                            $subQ->where('name', 'like', "%$search%");
-                        })
-                        ->orWhere('source', 'like', "%$search%")
-                        ->orWhereDate('created_at', $search);
-                }
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhereHas('materials', function($q) use ($search) {
+                      $q->where('title', 'like', "%$search%")
+                        ->orWhere('source', 'like', "%$search%");
+                  });
             });
         }
-        $sort = $request->input('sort');
-        $order = $request->input('order', 'asc');
-        if ($sort === 'title') {
-            $query->orderBy('title', $order);
-        } elseif ($sort === 'created_at') {
-            $query->orderBy('created_at', $order);
-        } else {
-            $query->orderByDesc('created_at');
-        }
-        $allMaterials = $query->paginate(30);
-        $userId = Auth::id();
-        $materials = $allMaterials->where('type', 'material')->whereNotNull('file_path');
-        $links = $allMaterials->where('type', 'material')->whereNotNull('link');
-        $certificates = $allMaterials->where('type', 'certificate')->where('user_id', $userId);
 
-        return view('userPanel.trainingResources', compact('materials', 'links', 'certificates', 'allMaterials'));
+        // Apply sorting
+        $sort = $request->input('sort', 'created_at');
+        $order = $request->input('order', 'desc');
+        $query->orderBy($sort, $order);
+
+        // Get paginated trainings
+        $trainings = $query->paginate(10);
+
+        // Load only the needed relationships based on the active tab
+        $trainings->load(['materials' => function($q) use ($userId, $tab) {
+            if ($tab === 'materials') {
+                $q->where('type', 'material')->whereNotNull('file_path');
+            } elseif ($tab === 'links') {
+                $q->where('type', 'material')->whereNotNull('link');
+            } else { // certificates
+                $q->where('type', 'certificate')->where('user_id', $userId);
+            }
+        }]);
+
+        // Prepare the data for the view with proper filtering
+        $groupedTrainings = [];
+        foreach ($trainings as $training) {
+            $materials = $training->materials->filter(function($item) use ($tab) {
+                return $tab === 'materials' && $item->type === 'material' && $item->file_path;
+            });
+            
+            $links = $training->materials->filter(function($item) use ($tab) {
+                return $tab === 'links' && $item->type === 'link' && $item->link;
+            });
+            
+            $certificates = $training->materials->filter(function($item) use ($tab, $userId) {
+                return $tab === 'certificates' && $item->type === 'certificate' && $item->user_id == $userId;
+            });
+            
+            // Only add to results if there are items for the current tab
+            if (($tab === 'materials' && $materials->isNotEmpty()) ||
+                ($tab === 'links' && $links->isNotEmpty()) ||
+                ($tab === 'certificates' && $certificates->isNotEmpty())) {
+                $groupedTrainings[] = [
+                    'training' => $training,
+                    'materials' => $materials,
+                    'links' => $links,
+                    'certificates' => $certificates
+                ];
+            }
+        }
+
+        // Apply sorting
+        $sort = $request->input('sort', 'created_at');
+        $order = $request->input('order', 'desc');
+        
+        usort($groupedTrainings, function($a, $b) use ($sort, $order) {
+            $valueA = $sort === 'title' ? $a['training']->title : $a['training']->created_at;
+            $valueB = $sort === 'title' ? $b['training']->title : $b['training']->created_at;
+            
+            if ($order === 'asc') {
+                return $valueA <=> $valueB;
+            } else {
+                return $valueB <=> $valueA;
+            }
+        });
+
+        // Paginate the results
+        $page = $request->input('page', 1);
+        $perPage = 10;
+        $currentPageItems = array_slice($groupedTrainings, ($page - 1) * $perPage, $perPage);
+        $paginatedTrainings = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            count($groupedTrainings),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('userPanel.trainingResources', [
+            'trainings' => $paginatedTrainings,
+            'tab' => $request->input('tab', 'materials')
+        ]);
     }
 
     public function evalParticipantForm($training_id)
