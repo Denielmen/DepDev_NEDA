@@ -251,6 +251,45 @@
             background-color: #007bff;
             border-color: #007bff;
         }
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }   
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
+        .tab-buttons {
+            display: inline-flex;
+            gap: 5px;
+        }
+        .tab-button {
+            background-color: transparent;
+            border: none;
+            padding: 8px 20px;
+            font-weight: 500;
+            color: #666;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .tab-button:hover {
+            text-decoration: none;
+            color: #003366;
+        }
+        .tab-button.active {
+            background-color: #003366;
+            color: white;
+        }
     </style>
 </head>
 
@@ -265,11 +304,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                        <a href="{{ route('user.profile.info') }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -288,7 +337,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
             <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking &
                 History</a>
             <a href="{{ route('user.training.effectiveness') }}" class="active"><i
@@ -300,216 +349,121 @@
 
             <div class="form-container">
 
+                <h2 class="resources-title">Training Effectiveness</h2>
+                
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="resources-title">Training Effectiveness</h2>
-                    <div class="dropdown ms-2">
-                        <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-funnel-fill me-1"></i> Filter
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                            <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=title&order=asc">Title (A-Z)</a></li>
-                            <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=title&order=desc">Title (Z-A)</a></li>
-                            <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=created_at&order=desc">Date Created (Newest)</a></li>
-                            <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=created_at&order=asc">Date Created (Oldest)</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item {{ request('sort') == 'status' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=status&order=asc">Status (Implemented First)</a></li>
-                            <li><a class="dropdown-item {{ request('sort') == 'status' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=status&order=desc">Status (Not Yet Implemented First)</a></li>
-                        </ul>
+                    <div class="tab-buttons">
+                        <a href="{{ route('user.training.effectiveness') }}" class="tab-button active">Programmed Trainings</a>
+                        <a href="{{ route('user.training.effectiveness.unprogrammed') }}" class="tab-button">Completed Trainings</a>
                     </div>
                 </div>
 
                 <div class="form-container">
-
-                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-                    <div class="container">
-                        <div class="scrollable-charts-row">
-                            @foreach ($competencyCharts as $cid => $yearly)
-                                @if (collect($yearly)->filter()->count() > 0)
-                                    <div class="chart-col">
-                                        <div class="card text-center p-2 w-100"
-                                            style="min-width:320px; max-width:600px;">
-                                            <h6 class="mb-2" style="font-size: 1.1rem;">
-                                                {{ $competencyLabels[$cid] ?? 'Competency' }}
-                                            </h6>
-                                            <canvas id="competencyBar{{ $cid }}" width="500" height="350"
-                                                style="margin:0 auto; display:block;"></canvas>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-
-
                     <!-- Trainings Table -->
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
                             <thead class="table-primary">
                                 <tr>
-                                    <th>Training Title</th>
-                                    <th>Status</th>
-                                    <th>Pre-Evaluation Average</th>
-                                    <th>Post-Evaluation Average</th>
-                                    <th>Average</th>
-                                    <th>Evaluation</th>
-                                    <th>View Evaluations</th>
+                                    <th class="text-center align-middle">Training Programmed/Title/Subject Area</th>
+                                    <th class="text-center">
+                                        <div>Learner's Pre-Training Proficiency Level</div>
+                                        <div class="d-flex">
+                                            <div class="text-center flex-grow-1 border-end">User</div>
+                                            <div class="text-center flex-grow-1">Supervisor</div>
+                                        </div>
+                                    </th>
+                                    <th class="text-center">
+                                        <div>Learner's Post-Training Proficiency Level</div>
+                                        <div class="d-flex">
+                                            <div class="text-center flex-grow-1 border-end">User</div>
+                                            <div class="text-center flex-grow-1">Supervisor</div>
+                                        </div>
+                                    </th>
+                                    <th class="text-center">Average Rating</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($trainings->sortByDesc('status') as $training)
+                                    @php
+                                        $evaluation = $training->evaluations->where('user_id', Auth::id())->first();
+                                        $isParticipantPreEvaluated = $evaluation && $evaluation->participant_pre_rating !== null;
+                                        $isParticipantPostEvaluated = $evaluation && $evaluation->participant_post_rating !== null;
+                                        $hasTracking = $training->implementation_date_from !== null;
+                                        $isImplementedForUser = $isParticipantPreEvaluated && $hasTracking;
+                                        
+                                        $preButtonClass = $isParticipantPreEvaluated ? 'disabled-button' : '';
+                                        $postButtonClass = $isParticipantPostEvaluated ? 'disabled-button' : '';
+                                        $preButtonAttributes = $isParticipantPreEvaluated ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your pre-evaluation."' : '';
+                                        $activePreButtonAttributes = $isParticipantPreEvaluated ? '' : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once."';
+                                        $postButtonAttributes = $isParticipantPostEvaluated ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your post-evaluation."' : '';
+                                        $activePostButtonAttributes = $isParticipantPostEvaluated ? '' : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once."';
+                                    @endphp
                                     <tr>
-                                        <td>{{ $training->title }}</td>
-                                        <td>
-                                            @php
-                                                // Check if current user has completed pre-evaluation
-                                                $userEvaluation = $training->evaluations->where('user_id', Auth::id())->first();
-                                                $hasPreEvaluation = $userEvaluation && $userEvaluation->participant_pre_rating !== null;
-
-                                                // Check if current user has completed tracking (has implementation dates)
-                                                $hasTracking = $training->implementation_date_from !== null;
-
-                                                // Determine status for current user - simplified to only Implemented or Not yet Implemented
-                                                if ($hasPreEvaluation && $hasTracking) {
-                                                    $userStatus = 'Implemented';
-                                                } else {
-                                                    $userStatus = 'Not yet Implemented';
-                                                }
-                                            @endphp
-                                            {{ $userStatus }}
+                                        <td class="align-middle text-center">{{ $training->title }}</td>
+                                        <td class="p-0">
+                                            <div class="d-flex w-100">
+                                                <div class="text-center flex-grow-1 p-1 border-end d-flex align-items-center justify-content-center" style="min-height: 40px; width: 50%;">
+                                                    @if($isParticipantPreEvaluated)
+                                                        {{ $evaluation->participant_pre_rating }}
+                                                    @else
+                                                        <a href="#" class="btn btn-success btn-sm {!! $preButtonClass !!}"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#preEvaluationModal" 
+                                                            data-training-id="{{ $training->id }}" 
+                                                            data-evaluation-type="participant_pre"
+                                                            {!! $activePreButtonAttributes !!}>
+                                                            Evaluate
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                                <div class="text-center flex-grow-1 p-1 d-flex align-items-center justify-content-center" style="min-height: 40px; width: 50%;">
+                                                    @php
+                                                        $isSupervisorPreEvaluated = $evaluation && $evaluation->supervisor_pre_rating !== null;
+                                                    @endphp
+                                                    @if($isSupervisorPreEvaluated)
+                                                        {{ $evaluation->supervisor_pre_rating }}
+                                                    @else
+                                                        <span class="text-info">Pending</span>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td>
-                                            @php
-                                                $evaluation = $training->evaluations->first();
-                                                $pre_rating_display_value = 'Empty';
-                                                if ($evaluation) {
-                                                    if (
-                                                        $evaluation->participant_pre_rating &&
-                                                        $evaluation->supervisor_pre_rating
-                                                    ) {
-                                                        $pre_rating_display_value = round(
-                                                            ($evaluation->participant_pre_rating +
-                                                                $evaluation->supervisor_pre_rating) /
-                                                                2,
-                                                            2,
-                                                        );
-                                                    } elseif ($evaluation->participant_pre_rating !== null) {
-                                                        $pre_rating_display_value = $evaluation->participant_pre_rating;
-                                                    } elseif ($evaluation->supervisor_pre_rating !== null) {
-                                                        $pre_rating_display_value = $evaluation->supervisor_pre_rating;
-                                                    }
-                                                }
-                                            @endphp
-                                            {{ $pre_rating_display_value }}
+                                        <td class="p-0">
+                                            <div class="d-flex w-100">
+                                                <div class="text-center flex-grow-1 p-1 border-end d-flex align-items-center justify-content-center" style="min-height: 40px; width: 50%;">
+                                                    @if($isParticipantPostEvaluated)
+                                                        {{ $evaluation->participant_post_rating }}
+                                                    @elseif($isParticipantPreEvaluated)
+                                                        <a href="{{ route('user.evalParticipant', ['training_id' => $training->id, 'type' => 'participant_post']) }}" 
+                                                           class="btn btn-danger btn-sm {!! $postButtonClass !!}"
+                                                           {!! $activePostButtonAttributes !!}>
+                                                            Evaluate
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                                <div class="text-center flex-grow-1 p-1 d-flex align-items-center justify-content-center" style="min-height: 40px; width: 50%;">
+                                                    @php
+                                                        $isSupervisorPostEvaluated = $evaluation && $evaluation->supervisor_post_rating !== null;
+                                                    @endphp
+                                                    @if($isSupervisorPostEvaluated)
+                                                        {{ $evaluation->supervisor_post_rating }}
+                                                    @else
+                                                        <span class="text-info">Pending</span>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td>
-                                            @php
-                                                $evaluation = $training->evaluations->first();
-                                                $post_rating_value = null;
-                                                if ($evaluation) {
-                                                    if (
-                                                        $evaluation->participant_post_rating &&
-                                                        $evaluation->supervisor_post_rating
-                                                    ) {
-                                                        $post_rating_value = round(
-                                                            ($evaluation->participant_post_rating +
-                                                                $evaluation->supervisor_post_rating) /
-                                                                2,
-                                                            2,
-                                                        );
-                                                    } elseif ($evaluation->participant_post_rating) {
-                                                        $post_rating_value = $evaluation->participant_post_rating;
-                                                    } elseif ($evaluation->supervisor_post_rating) {
-                                                        $post_rating_value = $evaluation->supervisor_post_rating;
-                                                    }
-                                                }
-                                            @endphp
-                                            @if ($post_rating_value !== null)
-                                                {{ $post_rating_value }}
-                                            @else
-                                                Empty
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @php
-                                                $average_rating = 'Empty';
-                                                if (
-                                                    $pre_rating_display_value !== 'Empty' &&
-                                                    $post_rating_value !== null
-                                                ) {
-                                                    $average_rating = round(
-                                                        ($pre_rating_display_value + $post_rating_value) / 2,
-                                                        2,
-                                                    );
-                                                } elseif ($pre_rating_display_value !== 'Empty') {
-                                                    $average_rating = $pre_rating_display_value;
-                                                } elseif ($post_rating_value !== null) {
-                                                    $average_rating = $post_rating_value;
-                                                }
-                                            @endphp
-                                            {{ $average_rating }}
-                                        </td>
-                                        <td>
-                                            @php
-                                                $evaluation = $training->evaluations->first();
-                                                $isParticipantPreEvaluated = $evaluation && $evaluation->participant_pre_rating !== null;
-                                                $isParticipantPostEvaluated = $evaluation && $evaluation->participant_post_rating !== null;
-
-                                                // Check if current user has completed both pre-evaluation and tracking
-                                                $hasTracking = $training->implementation_date_from !== null;
-                                                $isImplementedForUser = $isParticipantPreEvaluated && $hasTracking;
-                                            @endphp
-
-                                            @if ($isImplementedForUser)
-                                                @php
-                                                    $postButtonClass = $isParticipantPostEvaluated
-                                                        ? 'disabled-button'
-                                                        : '';
-                                                    $postButtonAttributes = $isParticipantPostEvaluated
-                                                        ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your post-evaluation."'
-                                                        : '';
-                                                    $activePostButtonAttributes = $isParticipantPostEvaluated
-                                                        ? ''
-                                                        : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once." ';
-                                                @endphp
-                                                <span class="disabled-button-wrapper" {!! $postButtonAttributes !!}>
-                                                    <a href="{{ route('user.evalParticipant', ['training_id' => $training->id, 'type' => 'participant_post']) }}"
-                                                        class="btn btn-primary btn-sm {!! $postButtonClass !!}"
-                                                        {{ $isParticipantPostEvaluated ? 'tabindex=-1 aria-disabled=true' : '' }}
-                                                        {!! $activePostButtonAttributes !!}>
-                                                        Post-Evaluation
-                                                    </a>
-                                                </span>
-                                            @else
-                                                @php
-                                                    $preButtonClass = $isParticipantPreEvaluated
-                                                        ? 'disabled-button'
-                                                        : '';
-                                                    $preButtonAttributes = $isParticipantPreEvaluated
-                                                        ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your pre-evaluation."'
-                                                        : '';
-                                                    $activePreButtonAttributes = $isParticipantPreEvaluated
-                                                        ? ''
-                                                        : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once." ';
-                                                @endphp
-                                                <span class="disabled-button-wrapper" {!! $preButtonAttributes !!}>
-                                                    <a href="#"
-                                                        class="btn btn-primary btn-sm {!! $preButtonClass !!}"
-                                                        @if($isParticipantPreEvaluated) tabindex="-1" aria-disabled="true" style="pointer-events: none; opacity: 0.65;" @else data-bs-toggle="modal" data-bs-target="#preEvaluationModal" data-training-id="{{ $training->id }}" data-evaluation-type="participant_pre" {!! $activePreButtonAttributes !!} @endif>
-                                                        Pre-Evaluation
-                                                    </a>
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <select class="form-select form-select-sm view-evaluation-select"
-                                                data-training-id="{{ $training->id }}">
-                                                <option value="">Select Evaluation</option>
-                                                <option value="participant_pre">Own Pre-Evaluation</option>
-                                                <option value="participant_post">Own Post-Evaluation</option>
-                                                <option value="supervisor_pre">Supervisor Pre-Evaluation</option>
-                                                <option value="supervisor_post">Supervisor Post-Evaluation</option>
-                                            </select>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center">
+                                                @if($isParticipantPreEvaluated && $isParticipantPostEvaluated)
+                                                    @php
+                                                        $averageRating = ($evaluation->participant_pre_rating + $evaluation->participant_post_rating) / 2;
+                                                    @endphp
+                                                    {{ number_format($averageRating, 1) }}
+                                                @else
+                                                    <span class="text-info">Pending</span>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -809,46 +763,6 @@
                         });
                 });
             });
-        </script>
-
-
-        <script>
-            @foreach ($competencyCharts as $cid => $yearly)
-                new Chart(document.getElementById('competencyBar{{ $cid }}'), {
-                    type: 'bar',
-                    data: {
-                        labels: {!! json_encode(array_keys($yearly)) !!},
-                        datasets: [{
-                                label: 'Pre',
-                                data: {!! json_encode(array_column($yearly, 'pre')) !!},
-                                backgroundColor: '#36b9cc'
-                            },
-                            {
-                                label: 'Post',
-                                data: {!! json_encode(array_column($yearly, 'post')) !!},
-                                backgroundColor: '#4e73df'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            },
-                            title: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 4
-                            }
-                        }
-                    }
-                });
-            @endforeach
         </script>
 </body>
 

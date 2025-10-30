@@ -116,6 +116,26 @@
         .btn-register:hover {
             background-color: #004080;
         }
+                   
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 
@@ -131,11 +151,21 @@
                 @auth
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                    @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ auth()->user()->first_name && auth()->user()->last_name ? auth()->user()->first_name . ', ' . auth()->user()->last_name : (auth()->user()->first_name ?? auth()->user()->last_name ?? 'Admin') }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -160,8 +190,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>

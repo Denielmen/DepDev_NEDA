@@ -44,9 +44,9 @@
             <tr>
                 <th>Training Program</th>
                 <th>Competency</th>
-                <th>CY 2025 Participants</th>
-                <th>CY 2026 Participants</th>
-                <th>CY 2027 Participants</th>
+                <th>CY {{ $year }} Participants</th>
+                <th>CY {{ $year + 1 }} Participants</th>
+                <th>CY {{ $year + 2 }} Participants</th>
                 <th>Provider</th>
             </tr>
         </thead>
@@ -60,18 +60,18 @@
                         <td>{{ $training->title }}</td>
                         <td>{{ $training->competency->name }}</td>
                         <td>
-                            @foreach($training->participants_2025 ?? [] as $participant)
-                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
+                            @foreach($training->participants_for_years[$year] ?? [] as $participant)
+                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
                             @endforeach
                         </td>
                         <td>
-                            @foreach($training->participants_2026 ?? [] as $participant)
-                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
+                            @foreach($training->participants_for_years[$year + 1] ?? [] as $participant)
+                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
                             @endforeach
                         </td>
                         <td>
-                            @foreach($training->participants_2027 ?? [] as $participant)
-                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
+                            @foreach($training->participants_for_years[$year + 2] ?? [] as $participant)
+                                {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
                             @endforeach
                         </td>
                         <td>{{ $training->provider }}</td>

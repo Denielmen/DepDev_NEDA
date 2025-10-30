@@ -283,6 +283,24 @@
                 margin-top: 20px;
             }
         }
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }   
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 
@@ -297,11 +315,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a href="{{ route('user.profile.info') }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -320,7 +348,7 @@
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
             <a href="{{ route('user.tracking') }}" class="active"><i class="bi bi-clock-history me-2"></i>Training
                 Tracking & History</a>
             <a href="{{ route('user.training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training
@@ -340,9 +368,9 @@
                         @csrf
                         <div class="row">
                             <div class="col-md-6 form-group">
-                                <label class="form-label">Aligned Training:</label>
+                                <label class="form-label">Programmed Training Title/Subject Area:</label>
                                 <select id="alignedTraining" name="courseTitle" class="form-control" required>
-                                    <option value="" disabled selected>Select aligned training</option>
+                                    <option value="" disabled selected>Select programmed training title / Subject Area</option>
                                     @foreach ($programmedTrainings as $training)
                                         @php
                                             $evaluation = $training->evaluations->first();
@@ -366,7 +394,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-8 form-group">
-                                <label class="form-label">Classification:</label>
+                                <label class="form-label">Type:</label>
                                 <select id="core_competency" name="core_competency" class="form-control" required onchange="toggleClassificationInput()">
                                     <option value="" disabled selected>Select Classification</option>
                                     @foreach ($coreCompetencies as $core)
@@ -405,14 +433,7 @@
                                     required>
                             </div>
                             <div class="col-md-4 form-group">
-                                <label class="form-label">Actual Expenses:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" name="expenses" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4 form-group">
-                                <label class="form-label">Date of Attendance:</label>
+                                <label class="form-label">Inclusive Date's of Attendance:</label>
                                 <div class="date-range">
                                     <input type="date" class="form-control" name="implementation_date_from"
                                         id="implementation_date_from" required>
@@ -424,7 +445,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Conducted/Sponsored by/Learning Services Provider:</label>
+                            <label class="form-label">Conducted/Sponsored by/Learning Services Provider/Organizer:</label>
                             <input type="text" class="form-control" name="provider" required>
                         </div>
 
@@ -438,7 +459,7 @@
                                         Upload Training Materials
                                     </label>
                                     <input type="file" id="uploadMaterials" name="uploadMaterials[]"
-                                        accept="image/jpeg,image/png,application/pdf" style="display: none;">
+                                        accept="image/jpeg,image/png,application/pdf" style="display: none;" multiple>
                                     <p class="submission-desc">Accepted file types: pdf, png, jpg, jpeg</p>
                                     <p class="submission-desc">Max file size: 50 MB</p>
                                 </div>
@@ -505,6 +526,10 @@
             const linkMaterialsLabel = document.getElementById('linkMaterialsLabel');
             const uploadMaterialsLabel = document.getElementById('uploadMaterialsLabel');
             const linkMaterialsInput = document.getElementById('linkMaterials');
+
+            // Store accumulated files
+            let accumulatedMaterials = [];
+            let accumulatedCertificates = [];
 
             // Training data fetched from the database
             const trainings = @json($programmedTrainings->items()); // Get the actual training items from pagination
@@ -685,44 +710,80 @@
                     classificationInput.required = false;
                 }
             };
-            // Function to handle file previews
-            function handleFilePreview(input, previewContainer) {
+            
+            // Helper function to update preview display
+            function updatePreviewDisplay(input, previewContainer, accumulatedFiles) {
+                // Update the input with accumulated files
+                const dataTransfer = new DataTransfer();
+                accumulatedFiles.forEach(file => {
+                    dataTransfer.items.add(file);
+                });
+                input.files = dataTransfer.files;
+
+                // Update preview
                 previewContainer.innerHTML = ''; // Clear previous previews
+                accumulatedFiles.forEach((file, index) => {
+                    const fileType = file.type;
+                    const fileName = file.name;
+
+                    // Create a preview element
+                    const previewElement = document.createElement('div');
+                    previewElement.style.marginBottom = '10px';
+                    previewElement.style.display = 'flex';
+                    previewElement.style.alignItems = 'center';
+
+                    if (fileType.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = URL.createObjectURL(file);
+                        img.style.maxWidth = '100px';
+                        img.style.marginRight = '10px';
+                        previewElement.appendChild(img);
+                    }
+
+                    const fileLabel = document.createElement('span');
+                    fileLabel.textContent = fileName;
+                    fileLabel.style.marginRight = '10px';
+                    previewElement.appendChild(fileLabel);
+
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-sm btn-danger';
+                    removeBtn.onclick = function() {
+                        // Remove file from array
+                        accumulatedFiles.splice(index, 1);
+                        // Update display
+                        updatePreviewDisplay(input, previewContainer, accumulatedFiles);
+                    };
+                    previewElement.appendChild(removeBtn);
+
+                    previewContainer.appendChild(previewElement);
+                });
+            }
+            
+            // Function to handle file previews
+            function handleFilePreview(input, previewContainer, accumulatedFiles) {
                 const files = input.files;
 
                 if (files.length > 0) {
+                    // Add new files to accumulated array
                     Array.from(files).forEach(file => {
-                        const fileType = file.type;
-                        const fileName = file.name;
-
-                        // Create a preview element
-                        const previewElement = document.createElement('div');
-                        previewElement.style.marginBottom = '10px';
-
-                        if (fileType.startsWith('image/')) {
-                            const img = document.createElement('img');
-                            img.src = URL.createObjectURL(file);
-                            img.style.maxWidth = '100px';
-                            img.style.marginRight = '10px';
-                            previewElement.appendChild(img);
-                        }
-
-                        const fileLabel = document.createElement('span');
-                        fileLabel.textContent = fileName;
-                        previewElement.appendChild(fileLabel);
-
-                        previewContainer.appendChild(previewElement);
+                        accumulatedFiles.push(file);
                     });
+                    
+                    // Update display
+                    updatePreviewDisplay(input, previewContainer, accumulatedFiles);
                 }
             }
 
             // Event listeners for file inputs
             uploadMaterialsInput.addEventListener('change', function() {
-                handleFilePreview(uploadMaterialsInput, filePreview);
+                handleFilePreview(uploadMaterialsInput, filePreview, accumulatedMaterials);
             });
 
             uploadCertificatesInput.addEventListener('change', function() {
-                handleFilePreview(uploadCertificatesInput, certPreview);
+                handleFilePreview(uploadCertificatesInput, certPreview, accumulatedCertificates);
             });
 
             // Optional: Add validation for file size and type

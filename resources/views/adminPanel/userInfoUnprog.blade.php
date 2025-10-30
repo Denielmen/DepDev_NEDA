@@ -269,6 +269,26 @@
             border-top-right-radius: 0.375rem;
             border-bottom-right-radius: 0.375rem;
         }
+              
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -282,11 +302,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -304,8 +334,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
+        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employees Information</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
         <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
@@ -464,10 +494,10 @@
         <div class="program-tabs">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed</a>
+                    <a class="nav-link" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed Trainings</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Unprogrammed</a>
+                    <a class="nav-link active" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Completed Trainings</a>
                 </li>
             </ul>
         </div>
@@ -483,21 +513,23 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Training Title</th>
+                            <th>Training Program/ Title/ Subject Area</th>
+                            <th>Type</th>
                             <th>Competency</th>
-                            <th>Period of Implementation</th>
-                            <th>No. of Hours</th>
-                            <th>Provider</th>
-                            <th>Status</th>
+                            <th>Inclusive Dates of Attendance</th>
+                            <th>Provider/Organizer</th>
                             <th>User Role</th>
-                            <th>Details</th>
+                            <th>No. of Hours</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($unprogrammedTrainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
-                            <td>{{ $training->competency->name }}</td>
+                            <td>
+                                {{ $training->core_competency ?? 'N/A' }}
+                            </td>
+                            <td>{{ $training->competency->name ?? 'N/A' }}</td>
                             <td>
                                 @if($training->implementation_date_from && $training->implementation_date_to)
                                     {{ $training->implementation_date_from->format('m/d/y') }} - {{ $training->implementation_date_to->format('m/d/y') }}
@@ -505,32 +537,28 @@
                                     N/A
                                 @endif
                             </td>
-                            <td>{{ $training->no_of_hours }}</td>
                             <td>{{ $training->provider }}</td>
-                            <td>{{ $training->status }}</td>
-                             <td>
-                            @php
-                                $participationTypeName = 'N/A';
-                                // Find the participant pivot data for the current user in this training
-                                $participantPivot = $training->participants->first(function ($participant) use ($user) {
-                                    return $participant->id === $user->id;
-                                });
-
-                                if ($participantPivot && $participantPivot->pivot) {
-                                    // Now that we have the pivot, get the participation type ID
-                                    $participationTypeId = $participantPivot->pivot->participation_type_id;
-                                    // Find the participation type name using the ID
-                                    $participationType = \App\Models\ParticipationType::find($participationTypeId);
-                                    if ($participationType) {
-                                        $participationTypeName = $participationType->name;
-                                    }
-                                }
-                            @endphp
-                            {{ $participationTypeName }}
-                        </td>
                             <td>
-                                <a href="{{ route('admin.viewUserInfoUnprog', ['training_id' => $training->id, 'user_id' => $user->id]) }}" class="btn btn-primary">View</a>
+                                @php
+                                    $participationTypeName = 'N/A';
+                                    // Find the participant pivot data for the current user in this training
+                                    $participantPivot = $training->participants->first(function ($participant) use ($user) {
+                                        return $participant->id === $user->id;
+                                    });
+
+                                    if ($participantPivot && $participantPivot->pivot) {
+                                        // Now that we have the pivot, get the participation type ID
+                                        $participationTypeId = $participantPivot->pivot->participation_type_id;
+                                        // Find the participation type name using the ID
+                                        $participationType = \App\Models\ParticipationType::find($participationTypeId);
+                                        if ($participationType) {
+                                            $participationTypeName = $participationType->name;
+                                        }
+                                    }
+                                @endphp
+                                {{ $participationTypeName }}
                             </td>
+                            <td>{{ $training->no_of_hours ?? 'N/A' }}</td>
                         </tr>
                         @endforeach
                     </tbody>

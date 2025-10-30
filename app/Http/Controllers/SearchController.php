@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Exports\SearchExport;
+use App\Models\Competency; // Example model
 use App\Models\Training; // Example model
-use App\Models\User; // Example model
 use App\Models\TrainingMaterial; // Import TrainingMaterial model
-use App\Models\Competency; // Import Competency modelse PDF;
+use App\Models\User; // Import Competency modelse PDF;
 use Barryvdh\DomPDF\Facade\PDF;
+use Carbon\Carbon;
+use Illuminate\Http\Request; // Assuming SearchExport is in App\\Exports
+use Illuminate\Support\Collection; // Import Carbon for date formatting
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\SearchExport; // Assuming SearchExport is in App\\Exports
-use Carbon\Carbon; // Import Carbon for date formatting
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 
 class SearchController extends Controller
 {
@@ -24,7 +23,7 @@ class SearchController extends Controller
         $competencies = Competency::all();
 
         // Initialize empty results collection
-        $results = new Collection();
+        $results = new Collection;
 
         return view('search', compact('divisions', 'positions', 'competencies', 'results'));
     }
@@ -66,6 +65,7 @@ class SearchController extends Controller
                 ->get()
                 ->map(function ($user) {
                     $user->search_type = 'user';
+
                     return $user;
                 });
             $results = $results->concat($users);
@@ -134,16 +134,25 @@ class SearchController extends Controller
                 ->get()
                 ->map(function ($training) {
                     $training->search_type = 'training';
+
+                    // For each participant, set year as their pivot year
                     $training->participants = $training->participants->map(function ($participant) {
-                        return [
+                        $participantData = [
                             'id' => $participant->id,
-                            'name' => $participant->first_name . ' ' . $participant->last_name,
+                            'name' => $participant->first_name.' '.$participant->last_name,
                         ];
+                        if (isset($participant->pivot) && isset($participant->pivot->year)) {
+                            $participantData['year'] = $participant->pivot->year;
+                        }
+
+                        return $participantData;
                     });
+
                     $training->relatedMaterials = TrainingMaterial::query()
                         ->where('title', 'like', "%{$training->title}%")
                         ->where('source', 'like', "%{$training->source}%")
                         ->get();
+
                     return $training;
                 });
             $results = $results->concat($trainings);
@@ -167,15 +176,16 @@ class SearchController extends Controller
                     $q->whereIn('competency_id', $competencies);
                 })
                 ->where('type', 'material')
-                ->when($materialType === 'material', function($q) {
+                ->when($materialType === 'material', function ($q) {
                     $q->whereNotNull('file_path');
                 })
-                ->when($materialType === 'link', function($q) {
+                ->when($materialType === 'link', function ($q) {
                     $q->whereNotNull('link');
                 })
                 ->paginate(30);
-            $materials->getCollection()->transform(function($material) {
+            $materials->getCollection()->transform(function ($material) {
                 $material->search_type = 'training_material';
+
                 return $material;
             });
             $results = $materials;
@@ -219,13 +229,39 @@ class SearchController extends Controller
             if ($year) {
                 $trainingQuery->whereYear('implementation_date_from', '=', $year);
             }
-            if (!empty($competencies)) {
+            if (! empty($competencies)) {
                 $trainingQuery->whereIn('competency_id', $competencies);
             }
             $trainings = $trainingQuery->with(['competency', 'participants'])->get();
             foreach ($trainings as $training) {
                 $training->search_type = 'training';
-                // Removed explicit formatting of participants for PDF export
+
+                // Get the period of implementation dates
+                $periodStart = null;
+                $periodEnd = null;
+
+                if ($training->type === 'Program') {
+                    $periodStart = $training->period_from;
+                    $periodEnd = $training->period_to;
+                } elseif ($training->type === 'Unprogrammed') {
+                    $periodStart = $training->implementation_date_from ? $training->implementation_date_from->format('Y-m-d') : null;
+                    $periodEnd = $training->implementation_date_to ? $training->implementation_date_to->format('Y-m-d') : null;
+                }
+
+                $training->participants = $training->participants->map(function ($participant) use ($periodStart, $periodEnd) {
+                    $participantData = [
+                        'id' => $participant->id,
+                        'name' => $participant->first_name.' '.$participant->last_name,
+                    ];
+
+                    // Add period of implementation if dates are available
+                    if ($periodStart && $periodEnd) {
+                        $participantData['period'] = $periodStart.' - '.$periodEnd;
+                    }
+
+                    return $participantData;
+                });
+
                 $results->push($training);
             }
         }
@@ -259,7 +295,7 @@ class SearchController extends Controller
             if ($keyword) {
                 $materialQuery->where('title', 'like', "%{$keyword}%");
             }
-            if (!empty($competencies)) {
+            if (! empty($competencies)) {
                 $materialQuery->whereIn('competency_id', $competencies);
             }
             $materials = $materialQuery->with(['competency', 'user'])->get();
@@ -271,11 +307,13 @@ class SearchController extends Controller
 
         if ($format === 'pdf') {
             $pdf = PDF::loadView('search.pdf', compact('results'));
+
             return $pdf->download('search-results.pdf');
-        } else if ($format === 'excel') {
+        } elseif ($format === 'excel') {
             return Excel::download(new SearchExport($results), 'search-results.xlsx');
         }
 
         return back()->with('error', 'Invalid export format');
+
     }
 }

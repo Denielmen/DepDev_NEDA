@@ -94,6 +94,26 @@
             max-height: 60vh;
             overflow-y: auto;
         }
+                   
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -107,11 +127,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                    @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -130,8 +160,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
@@ -233,21 +263,21 @@
                         <div id="selectedParticipants">
                             @if($training->participants->count() > 0)
                                 @foreach ($training->participants as $participant)
-                                    <div class="d-flex justify-content-between align-items-center mb-1 p-2 border rounded" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? '2025' }}">
+                                    <div class="d-flex justify-content-between align-items-center mb-1 p-2 border rounded" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? date('Y') }}">
                                         <div class="d-flex align-items-center">
                                             <span class="me-2">{{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}</span>
                                             <span class="badge bg-info me-1">{{ $participationTypes->get($participant->pivot->participation_type_id)->name ?? 'N/A' }}</span>
-                                            <span class="badge bg-success">CY-{{ $participant->pivot->year ?? '2025' }}</span>
+                                            <span class="badge bg-success">CY-{{ $participant->pivot->year ?? date('Y') }}</span>
                                         </div>
                                         <div>
-                                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? '2025' }}">
+                                            <button type="button" class="btn btn-sm btn-danger remove-participant" data-user-id="{{ $participant->id }}" data-year="{{ $participant->pivot->year ?? date('Y') }}">
                                                 <i class="bi bi-x"></i> Remove
                                             </button>
                                         </div>
                                     </div>
                                     <input type="hidden" name="participants[]" value="{{ $participant->id }}">
-                                    <input type="hidden" name="participation_types[{{ $participant->id }}_{{ $participant->pivot->year ?? '2025' }}]" value="{{ $participant->pivot->participation_type_id }}">
-                                    <input type="hidden" name="participant_years[{{ $participant->id }}_{{ $participant->pivot->year ?? '2025' }}]" value="{{ $participant->pivot->year ?? '2025' }}">
+                                    <input type="hidden" name="participation_types[{{ $participant->id }}_{{ $participant->pivot->year ?? date('Y') }}]" value="{{ $participant->pivot->participation_type_id }}">
+                                    <input type="hidden" name="participant_years[{{ $participant->id }}_{{ $participant->pivot->year ?? date('Y') }}]" value="{{ $participant->pivot->year ?? date('Y') }}">
                                 @endforeach
                             @else
                                 <p class="text-muted">No participants added yet.</p>
@@ -341,9 +371,9 @@
                                     <td>
                                         <select class="form-select participant-year" data-user-id="{{ $user->id }}">
                                             <option value="">Select Year</option>
-                                            <option value="2025">CY-2025</option>
-                                            <option value="2026">CY-2026</option>
-                                            <option value="2027">CY-2027</option>
+                                            <option value="{{ $training->period_from }}">CY-{{ $training->period_from }}</option>
+                                            <option value="{{ $training->period_from+1 }}">CY-{{ $training->period_from+1 }}</option>
+                                            <option value="{{ $training->period_from+2 }}">CY-{{ $training->period_from+2 }}</option>
                                         </select>
                                     </td>
                                     <td>
@@ -570,14 +600,14 @@
                     <td>
                         <select class="form-select participant-year" data-user-id="${user.id}">
                             <option value="">Select Year</option>
-                            <option value="2025">CY-2025</option>
-                            <option value="2026">CY-2026</option>
-                            <option value="2027">CY-2027</option>
+                            <option value="{{ $training->period_from }}">CY-{{ $training->period_from }}</option>
+                            <option value="{{ $training->period_from+1 }}">CY-{{ $training->period_from+1 }}</option>
+                            <option value="{{ $training->period_from+2 }}">CY-{{ $training->period_from+2 }}</option>
                         </select>
                     </td>
                     <td>
                         <input type="checkbox" class="form-check-input participant-checkbox" data-user-id="${user.id}">
-                    </td>
+                    </td>+
                 `;
 
                 return row;

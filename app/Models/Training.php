@@ -46,6 +46,17 @@ class Training extends Model
         'participant_post_evaluation' => 'array'
     ];
 
+    /**
+     * Get all materials for the training.
+     */
+    public function materials()
+    {
+        return $this->hasMany(TrainingMaterial::class);
+    }
+
+    /**
+     * Get the competency that owns the training.
+     */
     public function competency()
     {
         return $this->belongsTo(Competency::class)->withDefault();
@@ -104,24 +115,10 @@ class Training extends Model
     }
 
 
-    public function participants_2025()
+    public function participants_year($year)
     {
         return $this->belongsToMany(User::class, 'training_participants')
-            ->wherePivot('year', '2025')
-            ->withTimestamps();
-    }
-
-    public function participants_2026()
-    {
-        return $this->belongsToMany(User::class, 'training_participants')
-            ->wherePivot('year', '2026')
-            ->withTimestamps();
-    }
-
-    public function participants_2027()
-    {
-        return $this->belongsToMany(User::class, 'training_participants')
-            ->wherePivot('year', '2027')
+            ->wherePivot('year', (string) $year)
             ->withTimestamps();
     }
 

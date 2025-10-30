@@ -140,6 +140,25 @@
             background-color: #dc3545;
             color: white !important;
         }
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -153,11 +172,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                    @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                        <a href="{{ route('user.profile.info') }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -176,7 +205,7 @@
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
             <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('user.training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
             <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
@@ -185,14 +214,14 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>Training Profile</h2>
+                <h2>Individual Training Profile</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex align-items-center gap-2">
                 <div class="tab-buttons">
-                    <a href="{{ route('user.training.profile.program') }}" class="tab-button">Programmed</a>
-                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button active">Unprogrammed</a>
+                    <a href="{{ route('user.training.profile.program') }}" class="tab-button">Programmed Trainings</a>
+                    <a href="{{ route('user.training.profile.unprogrammed') }}" class="tab-button active">Completed Trainings</a>
                     </div>
                     <!-- Filter Dropdown -->
                     <div class="dropdown ms-2">
@@ -224,11 +253,12 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Competency</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Date of Attendance</th>
-                            <th class="text-center" style="background-color: #003366; color: white; ">Status</th>
-                            <th class="text-center" style="background-color: #003366; color: white;">Details</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Programmed/Title/Subject Area</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Type</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Inclusive Date's of Attendance</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Number of Hours</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider/Organizer</th>
+                            <th class="text-center" style="background-color: #003366; color: white;">User Role</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -247,11 +277,21 @@
                                     N/A
                                 @endif
                             </td>
+                            <td class="text-center">{{ $training->no_of_hours ?? 'N/A' }}</td>
+                            <td class="text-center">{{ $training->provider ?? 'N/A' }}</td>
                             <td class="text-center">
-                                {{ $training->status === 'Pending' ? 'Not yet Implemented' : $training->status }}
-                            </td>
-                            <td class="text-center">
-                                <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-sm" style="background-color: #003366; color: #fff; border-color: #003366;">View</a>  
+                                @php
+                                    $currentUser = Auth::user();
+                                    $userRole = 'Resource Speaker';
+                                    if ($currentUser) {
+                                        $participant = $training->participants->where('id', $currentUser->id)->first();
+                                        if ($participant && isset($participant->pivot->participation_type_id)) {
+                                            $participationType = \App\Models\ParticipationType::find($participant->pivot->participation_type_id);
+                                            $userRole = $participationType ? $participationType->name : 'Resource Speaker';
+                                        }
+                                    }
+                                @endphp
+                                {{ $userRole }}
                             </td>
                         </tr>
                         @endforeach

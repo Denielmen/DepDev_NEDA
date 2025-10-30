@@ -68,7 +68,11 @@
                                 <td>
                                     @if($result->participants)
                                         @foreach($result->participants as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
+                                            {{ $loop->iteration }}. {{ $participant['name'] }}
+                                            @if(isset($participant['period']))
+                                                ({{ $participant['period'] }})
+                                            @endif
+                                            <br>
                                         @endforeach
                                     @endif
                                 </td>

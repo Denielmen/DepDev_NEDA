@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Training;
-use App\Models\User;
-use App\Models\TrainingMaterial;
 use App\Models\Competency;
 use App\Models\ParticipationType;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use App\Models\Training;
+use App\Models\TrainingMaterial;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\TrainingsExport;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TrainingProfileController extends Controller
 {
@@ -32,23 +30,21 @@ class TrainingProfileController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('title', 'like', "%$search%")
-                        ->orWhereHas('competency', function ($subQ) use ($search) {
-                            $subQ->where('name', 'like', "%$search%");
-                        });
+                        ->orWhere('core_competency', 'like', "%$search%");
                     if (preg_match('/^\\d{4}$/', $search)) {
-                        $year = (int)$search;
-                        $q2->orWhere(function($q3) use ($year) {
+                        $year = (int) $search;
+                        $q2->orWhere(function ($q3) use ($year) {
                             $q3->whereNotNull('implementation_date_from')
                                 ->whereNotNull('implementation_date_to')
                                 ->whereYear('implementation_date_from', '<=', $year)
                                 ->whereYear('implementation_date_to', '>=', $year);
                         })
-                        ->orWhere(function($q3) use ($year) {
-                            $q3->whereNotNull('period_from')
-                                ->whereNotNull('period_to')
-                                ->where('period_from', '<=', $year)
-                                ->where('period_to', '>=', $year);
-                        });
+                            ->orWhere(function ($q3) use ($year) {
+                                $q3->whereNotNull('period_from')
+                                    ->whereNotNull('period_to')
+                                    ->where('period_from', '<=', $year)
+                                    ->where('period_to', '>=', $year);
+                            });
                     } else {
                         $q2->orWhere('implementation_date_from', 'like', "%$search%")
                             ->orWhere('implementation_date_to', 'like', "%$search%")
@@ -64,7 +60,7 @@ class TrainingProfileController extends Controller
                 'competency',
                 'evaluations' => function ($query) use ($userId) {
                     $query->where('user_id', $userId);
-                }
+                },
             ]);
 
         // Sorting logic
@@ -83,6 +79,7 @@ class TrainingProfileController extends Controller
 
         $trainings = $trainingsQuery->paginate(30);
         $participationTypes = ParticipationType::all()->keyBy('id');
+
         return view('userPanel.trainingProfileProgram', compact('trainings', 'competencies', 'participationTypes'));
     }
 
@@ -103,9 +100,9 @@ class TrainingProfileController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%$search%")
-                      ->orWhereHas('competency', function ($subQ) use ($search) {
-                          $subQ->where('name', 'like', "%$search%");
-                      });
+                        ->orWhereHas('competency', function ($subQ) use ($search) {
+                            $subQ->where('name', 'like', "%$search%");
+                        });
                 });
             })
             ->with(['participants' => function ($query) use ($userId) {
@@ -125,6 +122,7 @@ class TrainingProfileController extends Controller
 
         $trainings = $trainingsQuery->paginate(30);
         $participationTypes = ParticipationType::all()->keyBy('id');
+
         return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
 
@@ -133,7 +131,7 @@ class TrainingProfileController extends Controller
         $userId = Auth::id();
 
         // Check if the user is a participant in this training
-        if (!$training->participants()->where('users.id', $userId)->exists()) {
+        if (! $training->participants()->where('users.id', $userId)->exists()) {
             abort(403, 'You are not authorized to view this training.');
         }
 
@@ -162,7 +160,7 @@ class TrainingProfileController extends Controller
         // Eager load the participants relationship with their pivot data
         $training->load(['participants' => function ($query) {
             $query->withPivot('participation_type_id', 'year')
-                  ->orderBy('last_name')->orderBy('first_name');
+                ->orderBy('last_name')->orderBy('first_name');
         }, 'competency']);
 
         // Get participation types for display
@@ -174,6 +172,7 @@ class TrainingProfileController extends Controller
     public function showUnprogrammed($id)
     {
         $training = Training::where('type', 'Unprogrammed')->findOrFail($id);
+
         return view('userPanel.trainingProfileUnprogramShow', compact('training'));
     }
 
@@ -186,6 +185,7 @@ class TrainingProfileController extends Controller
         }
         $competencies = Competency::orderBy('name')->get();
         $participationTypes = ParticipationType::all();
+
         return view('userPanel.trainingProfileUnprogramEdit', compact('training', 'competencies', 'participationTypes'));
     }
 
@@ -213,7 +213,7 @@ class TrainingProfileController extends Controller
             $existingCompetency = Competency::where('name', $validated['competency_input'])->first();
             $competencyId = $existingCompetency?->id ?? Competency::create([
                 'name' => $validated['competency_input'],
-                'description' => 'Custom competency created by user'
+                'description' => 'Custom competency created by user',
             ])->id;
         }
 
@@ -228,7 +228,7 @@ class TrainingProfileController extends Controller
         ]);
 
         // Update current user's participation type if provided
-        if (!empty($validated['participation_type_id'])) {
+        if (! empty($validated['participation_type_id'])) {
             $training->participants()->updateExistingPivot(Auth::id(), [
                 'participation_type_id' => $validated['participation_type_id'],
             ]);
@@ -242,53 +242,85 @@ class TrainingProfileController extends Controller
                     'visibility' => 'public',
                 ]);
                 \App\Models\TrainingMaterial::create([
-                    'title'         => $training->title,
+                    'title' => $training->title,
                     'competency_id' => $training->competency_id,
-                    'user_id'       => Auth::id(),
-                    'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                    'file_path'     => $filePath,
-                    'link'          => null,
-                    'type'          => 'material',
-                    'training_id'   => $training->id,
+                    'user_id' => Auth::id(),
+                    'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
+                    'file_path' => $filePath,
+                    'link' => null,
+                    'type' => 'material',
+                    'training_id' => $training->id,
                 ]);
             }
         }
 
         // Save link material
         if ($request->filled('linkMaterials')) {
-            \App\Models\TrainingMaterial::create([
-                'title'         => $training->title,
-                'competency_id' => $training->competency_id,
-                'user_id'       => Auth::id(),
-                'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                'file_path'     => null,
-                'link'          => $request->linkMaterials,
-                'type'          => 'material',
-                'training_id'   => $training->id,
-            ]);
-        }
-
-        // Save uploaded certificates
-        if ($request->hasFile('uploadCertificates')) {
-            foreach ($request->file('uploadCertificates') as $file) {
-                $certificatePath = $file->store('certificates', [
-                    'disk' => 'public',
-                    'visibility' => 'public',
-                ]);
+            // First, check if a link with the same URL already exists for this training
+            $existingLink = \App\Models\TrainingMaterial::where('training_id', $training->id)
+                ->where('type', 'link')
+                ->where('link', $request->linkMaterials)
+                ->first();
+                
+            if (!$existingLink) {
                 \App\Models\TrainingMaterial::create([
-                    'title'         => $training->title . ' Certificate',
+                    'title' => $training->title . ' - Link',
                     'competency_id' => $training->competency_id,
-                    'user_id'       => Auth::id(),
-                    'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                    'file_path'     => $certificatePath,
-                    'link'          => null,
-                    'type'          => 'certificate',
-                    'training_id'   => $training->id,
+                    'user_id' => Auth::id(),
+                    'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
+                    'file_path' => null,
+                    'link' => $request->linkMaterials,
+                    'type' => 'link',
+                    'training_id' => $training->id,
                 ]);
             }
         }
 
-        return redirect()->route('user.training.profile.unprogram.show', $training->id)
+        // Save uploaded certificates
+        if ($request->hasFile('uploadCertificates')) {
+            // First, ensure the certificates directory exists and is writable
+            $certificatePath = storage_path('app/public/certificates');
+            if (!file_exists($certificatePath)) {
+                mkdir($certificatePath, 0755, true);
+            }
+
+            foreach ($request->file('uploadCertificates') as $file) {
+                if ($file->isValid()) {
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = 'certificate_' . time() . '_' . uniqid() . '.' . $extension;
+                    
+                    // Store the file in the public disk under certificates directory
+                    $storedPath = $file->storeAs('certificates', $filename, 'public');
+                    
+                    if ($storedPath) {
+                        // Create a more descriptive title with original filename
+                        $title = $training->title . ' Certificate - ' . $originalName;
+                        
+                        // Create the certificate record
+                        \App\Models\TrainingMaterial::create([
+                            'title' => $title,
+                            'competency_id' => $training->competency_id,
+                            'user_id' => Auth::id(),
+                            'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
+                            'file_path' => $storedPath,
+                            'link' => null,
+                            'type' => 'certificate',
+                            'training_id' => $training->id,
+                        ]);
+                    }
+                } else {
+                    // Log error if file upload fails
+                    \Log::error('File upload failed', [
+                        'file' => $file->getClientOriginalName(),
+                        'error' => $file->getError(),
+                        'message' => $file->getErrorMessage()
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('user.training.resources')
             ->with('success', 'Training updated successfully.');
     }
 
@@ -308,7 +340,6 @@ class TrainingProfileController extends Controller
 
     public function update(Request $request, Training $training)
     {
-
 
         try {
             // $training = Training::findOrFail($id);
@@ -334,7 +365,8 @@ class TrainingProfileController extends Controller
                 'participation_types' => 'nullable|array',
                 'participation_types.*' => 'exists:participation_types,id',
                 'participant_years' => 'nullable|array',
-                'participant_years.*' => 'integer|in:2025,2026,2027'
+                'participant_years.*' => 'integer|min:2000|max:2100',
+                // adjust as needed
             ]);
 
             // Handle custom competency
@@ -348,7 +380,7 @@ class TrainingProfileController extends Controller
                     // Create new competency
                     $newCompetency = Competency::create([
                         'name' => $validated['competency_input'],
-                        'description' => 'Custom competency created by user'
+                        'description' => 'Custom competency created by user',
                     ]);
                     $competencyId = $newCompetency->id;
                 }
@@ -356,7 +388,7 @@ class TrainingProfileController extends Controller
             }
 
             // Additional validation for participants and participation types
-            if ($request->has('participants') && !empty($request->participants)) {
+            if ($request->has('participants') && ! empty($request->participants)) {
                 $participationTypes = $request->input('participation_types', []);
                 $participantYears = $request->input('participant_years', []);
 
@@ -366,24 +398,24 @@ class TrainingProfileController extends Controller
                     $hasValidYear = false;
 
                     foreach ($participationTypes as $key => $typeId) {
-                        if (strpos($key, $participantId . '_') === 0) {
+                        if (strpos($key, $participantId.'_') === 0) {
                             if (ParticipationType::find($typeId)) {
                                 $hasValidType = true;
                             }
 
                             $year = $participantYears[$key] ?? null;
-                            if (in_array($year, [2025, 2026, 2027])) {
+                            if ($year !== null && $year >= 2000 && $year <= 2100) {
                                 $hasValidYear = true;
                             }
                         }
                     }
 
-                    if (!$hasValidType) {
+                    if (! $hasValidType) {
                         return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
                     }
 
-                    if (!$hasValidYear) {
-                        return back()->withInput()->withErrors(['participants' => 'All participants must have a valid year (2025, 2026, or 2027).']);
+                    if (! $hasValidYear) {
+                        return back()->withInput()->withErrors(['participants' => 'All participants must have a valid year (between 2000 and 2100).']);
                     }
                 }
             }
@@ -412,7 +444,7 @@ class TrainingProfileController extends Controller
                             // Attach the participant
                             $training->participants()->attach($userId, [
                                 'participation_type_id' => $participationTypeId,
-                                'year' => $year
+                                'year' => $year,
                             ]);
                         }
                     }
@@ -424,26 +456,67 @@ class TrainingProfileController extends Controller
 
             return redirect()->route('admin.training.view', $training->id)->with('success', 'Training updated successfully.');
         } catch (\Exception $e) {
-            Log::error('Training update error: ' . $e->getMessage());
-            return back()->withInput()->withErrors(['error' => 'Failed to update training: ' . $e->getMessage()]);
+            Log::error('Training update error: '.$e->getMessage());
+
+            return back()->withInput()->withErrors(['error' => 'Failed to update training: '.$e->getMessage()]);
         }
     }
 
-    public function trainingPlan()
+    public function trainingPlan(Request $request)
     {
+        $query = Training::with(['participants', 'competency'])
+            ->where('type', 'Program');
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'LIKE', "%{$searchTerm}%")
+                  ->orWhereHas('competency', function($comp) use ($searchTerm) {
+                      $comp->where('name', 'LIKE', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        $trainings = $query->orderBy('created_at', 'desc')
+            ->paginate(30);// Show 30 trainings per page
+
+        // Check if current user is read-only admin
+        $isReadOnlyAdmin = \App\Helpers\AdminHelper::isReadOnlyAdmin();
+        
+        return view('adminPanel.trainingPlan', compact('trainings', 'isReadOnlyAdmin'));
         $trainings = Training::with('participants')
             ->where('type', 'Program')
             ->orderBy('created_at', 'desc')
-            ->paginate(30);// Show 30 trainings per page
+            ->paginate(30); // Show 30 trainings per page
+
         return view('adminPanel.trainingPlan', compact('trainings'));
     }
 
-    public function trainingPlanUnprogrammed()
+    public function trainingPlanUnprogrammed(Request $request)
     {
-        $trainings = Training::with('participants')
-            ->where('type', 'Unprogrammed')
-            ->orderBy('created_at', 'desc')
+        $query = Training::with(['participants', 'competency'])
+            ->where('type', 'Unprogrammed');
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'LIKE', "%{$searchTerm}%")
+                  ->orWhereHas('competency', function($comp) use ($searchTerm) {
+                      $comp->where('name', 'LIKE', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        $trainings = $query->orderBy('created_at', 'desc')
             ->paginate(30); // Show 30 trainings per page
+
+        // Check if current user is read-only admin
+        $isReadOnlyAdmin = \App\Helpers\AdminHelper::isReadOnlyAdmin();
+        
+        return view('adminPanel.trainingPlanUnProg', compact('trainings', 'isReadOnlyAdmin'));
+
         return view('adminPanel.trainingPlanUnProg', compact('trainings'));
     }
 
@@ -452,6 +525,7 @@ class TrainingProfileController extends Controller
         $competencies = Competency::orderBy('name')->get();
         $users = User::where('is_active', true)->orderBy('last_name')->paginate(30);
         $participationTypes = ParticipationType::all()->keyBy('id');
+
         return view('adminPanel.createTraining', compact('competencies', 'users', 'participationTypes'));
     }
 
@@ -491,7 +565,7 @@ class TrainingProfileController extends Controller
                 // Create new competency
                 $newCompetency = Competency::create([
                     'name' => $validated['competency_input'],
-                    'description' => 'Custom competency created by user'
+                    'description' => 'Custom competency created by user',
                 ]);
                 $competencyId = $newCompetency->id;
             }
@@ -501,8 +575,8 @@ class TrainingProfileController extends Controller
 
         foreach ($validated['participants'] as $participantId) {
             if (
-                !isset($validated['participation_types'][$participantId]) ||
-                !ParticipationType::find($validated['participation_types'][$participantId])
+                ! isset($validated['participation_types'][$participantId]) ||
+                ! ParticipationType::find($validated['participation_types'][$participantId])
             ) {
                 return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
             }
@@ -525,21 +599,23 @@ class TrainingProfileController extends Controller
                 'performance_goal' => $validated['performance_goal'] ?? null,
                 'objective' => $validated['objective'] ?? null,
                 'type' => $validated['type'],
-                'status' => 'Not Yet Implemented'
+                'status' => 'Not Yet Implemented',
             ]);
 
             foreach ($validated['participants'] as $participantId) {
                 $training->participants()->attach($participantId, [
                     'year' => $validated['participant_years'][$participantId] ?? $validated['period_from'],
-                    'participation_type_id' => $validated['participation_types'][$participantId]
+                    'participation_type_id' => $validated['participation_types'][$participantId],
                 ]);
             }
 
             DB::commit();
+
             return redirect()->route('admin.training-plan')->with('success', 'Training created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->withErrors(['error' => 'Failed to create training: ' . $e->getMessage()]);
+
+            return back()->withInput()->withErrors(['error' => 'Failed to create training: '.$e->getMessage()]);
         }
     }
 
@@ -556,11 +632,11 @@ class TrainingProfileController extends Controller
         // The duplicate prevention will be handled in the frontend
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('last_name', 'like', "%{$search}%")
-                  ->orWhere('first_name', 'like', "%{$search}%")
-                  ->orWhere('position', 'like', "%{$search}%")
-                  ->orWhere('division', 'like', "%{$search}%");
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('position', 'like', "%{$search}%")
+                    ->orWhere('division', 'like', "%{$search}%");
             });
         }
 
@@ -571,7 +647,7 @@ class TrainingProfileController extends Controller
 
             return response()->json([
                 'users' => $users,
-                'participation_types' => $participationTypes
+                'participation_types' => $participationTypes,
             ]);
         }
 
@@ -588,7 +664,7 @@ class TrainingProfileController extends Controller
                 'from' => $users->firstItem(),
                 'to' => $users->lastItem(),
             ],
-            'participation_types' => $participationTypes
+            'participation_types' => $participationTypes,
         ]);
     }
 
@@ -618,7 +694,7 @@ class TrainingProfileController extends Controller
     {
         try {
             $request->validate([
-                'user_id' => 'required|exists:users,id'
+                'user_id' => 'required|exists:users,id',
             ]);
 
             DB::beginTransaction();
@@ -630,8 +706,9 @@ class TrainingProfileController extends Controller
             return back()->with('success', 'Participant removed successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Remove participant error: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Failed to remove participant: ' . $e->getMessage()]);
+            Log::error('Remove participant error: '.$e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to remove participant: '.$e->getMessage()]);
         }
     }
 
@@ -672,7 +749,7 @@ class TrainingProfileController extends Controller
         }
 
         // Check for participant actions: user must be a participant or admin
-        if ($isParticipantAction && $user->role !== 'Admin' && !$training->participants()->where('users.id', $user->id)->exists()) {
+        if ($isParticipantAction && $user->role !== 'Admin' && ! $training->participants()->where('users.id', $user->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'You are not authorized to rate this training.'], 403);
         }
 
@@ -696,6 +773,7 @@ class TrainingProfileController extends Controller
         try {
             $evaluation->save();
             Log::info("Evaluation for training {$id}, user {$target_user_id} saved successfully.");
+
             return response()->json([
                 'success' => true,
                 'message' => 'Evaluation stored successfully!',
@@ -705,43 +783,120 @@ class TrainingProfileController extends Controller
                 'supervisor_post_rating' => $evaluation->supervisor_post_rating,
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to save evaluation for training {$id}, user {$target_user_id}: " . $e->getMessage());
+            Log::error("Failed to save evaluation for training {$id}, user {$target_user_id}: ".$e->getMessage());
+
             return response()->json(['success' => false, 'message' => 'Failed to save evaluation.'], 500);
         }
     }
 
     public function resources(Request $request)
     {
-        $query = TrainingMaterial::query();
+        $userId = Auth::id();
+        $tab = $request->input('tab', 'materials');
+        
+        // Base query for trainings with materials/links/certificates
+        $query = Training::query();
+        
+        // Filter based on the active tab
+        $query->whereHas('materials', function($q) use ($userId, $tab) {
+            if ($tab === 'materials') {
+                $q->where('type', 'material')->whereNotNull('file_path');
+            } elseif ($tab === 'links') {
+                $q->where('type', 'material')->whereNotNull('link');
+            } else { // certificates
+                $q->where('type', 'certificate')->where('user_id', $userId);
+            }
+        });
+
+        // Apply search filter if present
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                if (preg_match('/^\\d{4}$/', $search)) {
-                    $q->whereYear('created_at', $search);
-                } else {
-                    $q->where('title', 'like', "%$search%")
-                        ->orWhereHas('competency', function ($subQ) use ($search) {
-                            $subQ->where('name', 'like', "%$search%");
-                        })
-                        ->orWhere('source', 'like', "%$search%")
-                        ->orWhereDate('created_at', $search);
-                }
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhereHas('materials', function($q) use ($search) {
+                      $q->where('title', 'like', "%$search%")
+                        ->orWhere('source', 'like', "%$search%");
+                  });
             });
         }
-        $sort = $request->input('sort');
-        $order = $request->input('order', 'asc');
-        if ($sort === 'title') {
-            $query->orderBy('title', $order);
-        } elseif ($sort === 'created_at') {
-            $query->orderBy('created_at', $order);
-        } else {
-            $query->orderByDesc('created_at');
+
+        // Apply sorting
+        $sort = $request->input('sort', 'created_at');
+        $order = $request->input('order', 'desc');
+        $query->orderBy($sort, $order);
+
+        // Get paginated trainings
+        $trainings = $query->paginate(10);
+
+        // Load only the needed relationships based on the active tab
+        $trainings->load(['materials' => function($q) use ($userId, $tab) {
+            if ($tab === 'materials') {
+                $q->where('type', 'material')->whereNotNull('file_path');
+            } elseif ($tab === 'links') {
+                $q->where('type', 'material')->whereNotNull('link');
+            } else { // certificates
+                $q->where('type', 'certificate')->where('user_id', $userId);
+            }
+        }]);
+
+        // Prepare the data for the view with proper filtering
+        $groupedTrainings = [];
+        foreach ($trainings as $training) {
+            $materials = $training->materials->filter(function($item) use ($tab) {
+                return $tab === 'materials' && $item->type === 'material' && $item->file_path;
+            });
+            
+            $links = $training->materials->filter(function($item) use ($tab) {
+                return $tab === 'links' && $item->type === 'link' && $item->link;
+            });
+            
+            $certificates = $training->materials->filter(function($item) use ($tab, $userId) {
+                return $tab === 'certificates' && $item->type === 'certificate' && $item->user_id == $userId;
+            });
+            
+            // Only add to results if there are items for the current tab
+            if (($tab === 'materials' && $materials->isNotEmpty()) ||
+                ($tab === 'links' && $links->isNotEmpty()) ||
+                ($tab === 'certificates' && $certificates->isNotEmpty())) {
+                $groupedTrainings[] = [
+                    'training' => $training,
+                    'materials' => $materials,
+                    'links' => $links,
+                    'certificates' => $certificates
+                ];
+            }
         }
-        $allMaterials = $query->paginate(30);
-        $userId = Auth::id();
-        $materials = $allMaterials->where('type', 'material')->whereNotNull('file_path');
-        $links = $allMaterials->where('type', 'material')->whereNotNull('link');
-        $certificates = $allMaterials->where('type', 'certificate')->where('user_id', $userId);
-        return view('userPanel.trainingResources', compact('materials', 'links', 'certificates', 'allMaterials'));
+
+        // Apply sorting
+        $sort = $request->input('sort', 'created_at');
+        $order = $request->input('order', 'desc');
+        
+        usort($groupedTrainings, function($a, $b) use ($sort, $order) {
+            $valueA = $sort === 'title' ? $a['training']->title : $a['training']->created_at;
+            $valueB = $sort === 'title' ? $b['training']->title : $b['training']->created_at;
+            
+            if ($order === 'asc') {
+                return $valueA <=> $valueB;
+            } else {
+                return $valueB <=> $valueA;
+            }
+        });
+
+        // Paginate the results
+        $page = $request->input('page', 1);
+        $perPage = 10;
+        $currentPageItems = array_slice($groupedTrainings, ($page - 1) * $perPage, $perPage);
+        $paginatedTrainings = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            count($groupedTrainings),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('userPanel.trainingResources', [
+            'trainings' => $paginatedTrainings,
+            'tab' => $request->input('tab', 'materials')
+        ]);
     }
 
     public function evalParticipantForm($training_id)
@@ -750,7 +905,7 @@ class TrainingProfileController extends Controller
         $userId = Auth::id();
 
         // Check if the user is a participant in this training
-        if (!$training->participants()->where('users.id', $userId)->exists()) {
+        if (! $training->participants()->where('users.id', $userId)->exists()) {
             abort(403, 'You are not authorized to evaluate this training.');
         }
 
@@ -762,21 +917,20 @@ class TrainingProfileController extends Controller
 
     public function downloadMaterial(TrainingMaterial $material)
     {
-        if (!$material->file_path) {
+        if (! $material->file_path) {
             return back()->with('error', 'No file available for download.');
         }
 
-        $filePath = storage_path('app/public/' . $material->file_path);
+        $filePath = storage_path('app/public/'.$material->file_path);
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             return back()->with('error', 'File not found.');
         }
 
         return response()->download($filePath);
     }
 
-
-     public function postEvaluation(Request $request, $id)
+    public function postEvaluation(Request $request, $id)
     {
         $training = Training::with('participants')->findOrFail($id);
         $user_id = $request->query('user_id');
@@ -827,6 +981,7 @@ class TrainingProfileController extends Controller
             Log::debug('Validation successful.', $validatedData);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed:', $e->errors());
+
             return response()->json(['success' => false, 'message' => 'Validation failed.', 'errors' => $e->errors()], 422);
         }
 
@@ -834,7 +989,7 @@ class TrainingProfileController extends Controller
         $userId = Auth::id();
 
         // Check if the user is a participant in this training
-        if (!$training->participants()->where('users.id', $userId)->exists()) {
+        if (! $training->participants()->where('users.id', $userId)->exists()) {
             return response()->json(['success' => false, 'message' => 'You are not authorized to evaluate this training.'], 403);
         }
 
@@ -849,17 +1004,17 @@ class TrainingProfileController extends Controller
 
         $detailedParticipantPostEvaluationData['goals'] = $validatedData['goals'];
         for ($i = 1; $i <= 4; $i++) {
-            $learningKey = 'learning' . $i;
+            $learningKey = 'learning'.$i;
             if (is_numeric($validatedData[$learningKey])) {
-                $numericRatings[] = (int)$validatedData[$learningKey];
+                $numericRatings[] = (int) $validatedData[$learningKey];
             }
             $detailedParticipantPostEvaluationData[$learningKey] = $validatedData[$learningKey];
         }
         // Save all performance fields
         for ($i = 1; $i <= 3; $i++) {
-            $performanceKey = 'performance' . $i;
+            $performanceKey = 'performance'.$i;
             if (is_numeric($validatedData[$performanceKey])) {
-                $numericRatings[] = (int)$validatedData[$performanceKey];
+                $numericRatings[] = (int) $validatedData[$performanceKey];
             }
             $detailedParticipantPostEvaluationData[$performanceKey] = $validatedData[$performanceKey];
         }
@@ -891,7 +1046,8 @@ class TrainingProfileController extends Controller
                 'post_rating' => $evaluation->participant_post_rating,
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to save participant post-evaluation for training {$id}, user {$userId}: " . $e->getMessage(), ['exception' => $e]);
+            Log::error("Failed to save participant post-evaluation for training {$id}, user {$userId}: ".$e->getMessage(), ['exception' => $e]);
+
             return response()->json(['success' => false, 'message' => 'Failed to save participant post-evaluation.'], 500);
         }
     }
@@ -900,7 +1056,7 @@ class TrainingProfileController extends Controller
     {
         $training = Training::find($training_id);
 
-        if (!$training) {
+        if (! $training) {
             // For API calls (e.g., pre-eval modal), return JSON. For page redirects, handle in view.
             if (request()->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Training not found.'], 404);
@@ -920,28 +1076,32 @@ class TrainingProfileController extends Controller
             'evaluation' => $evaluation,
             'evaluation_type' => $type,
             'success' => false,
-            'message' => 'No evaluation data found.'
+            'message' => 'No evaluation data found.',
         ];
 
         switch ($type) {
             case 'participant_pre':
                 $data['rating'] = $evaluation ? $evaluation->participant_pre_rating : null;
                 $data['success'] = ($data['rating'] !== null);
+
                 return response()->json($data); // Always JSON for pre-eval modal
             case 'participant_post':
                 $data['rating'] = $evaluation ? $evaluation->participant_post_rating : null;
                 $data['detailed_evaluation'] = $evaluation ? $evaluation->participant_post_evaluation : null; // Retrieve all detailed data
                 $data['success'] = ($data['rating'] !== null);
+
                 // If data exists, or if it's a page load, render the view
                 return view('userPanel.evalParticipantPostView', compact('training', 'data'));
             case 'supervisor_pre':
                 $data['rating'] = $evaluation ? $evaluation->supervisor_pre_rating : null;
                 $data['success'] = ($data['rating'] !== null);
+
                 return response()->json($data); // Always JSON for pre-eval modal
             case 'supervisor_post':
                 $data['rating'] = $evaluation ? $evaluation->supervisor_post_rating : null;
                 $data['detailed_evaluation'] = $evaluation ? $evaluation->supervisor_post_evaluation : null;
                 $data['success'] = ($data['rating'] !== null);
+
                 return view('userPanel.evalSupervisorPostView', compact('training', 'data'));
             default:
                 if (request()->expectsJson()) {
@@ -974,6 +1134,7 @@ class TrainingProfileController extends Controller
             Log::debug('Supervisor post-eval validation successful.', $validatedData);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Supervisor post-eval validation failed:', $e->errors());
+
             return response()->json(['success' => false, 'message' => 'Validation failed.', 'errors' => $e->errors()], 422);
         }
 
@@ -1004,7 +1165,7 @@ class TrainingProfileController extends Controller
         $numericRatings = [];
         foreach (['goals', 'learning1', 'learning2', 'learning3', 'learning4', 'performance1'] as $key) {
             if (is_numeric($validatedData[$key]) && $validatedData[$key] != 5) {
-                $numericRatings[] = (int)$validatedData[$key];
+                $numericRatings[] = (int) $validatedData[$key];
             }
         }
         $averageRating = null;
@@ -1022,7 +1183,8 @@ class TrainingProfileController extends Controller
             // Redirect back with a success message instead of returning JSON
             return redirect()->back()->with('success', 'Supervisor post-evaluation submitted successfully!');
         } catch (\Exception $e) {
-            Log::error("Failed to save supervisor post-evaluation for training {$id}, user {$target_user_id}: " . $e->getMessage(), ['exception' => $e]);
+            Log::error("Failed to save supervisor post-evaluation for training {$id}, user {$target_user_id}: ".$e->getMessage(), ['exception' => $e]);
+
             return redirect()->back()->with('error', 'Failed to save supervisor post-evaluation.');
         }
     }
@@ -1037,9 +1199,9 @@ class TrainingProfileController extends Controller
             })
             ->when($search, function ($q) use ($search) {
                 $q->where('title', 'like', "%$search%")
-                  ->orWhereHas('competency', function ($subQ) use ($search) {
-                      $subQ->where('name', 'like', "%$search%");
-                  });
+                    ->orWhereHas('competency', function ($subQ) use ($search) {
+                        $subQ->where('name', 'like', "%$search%");
+                    });
             })
             ->with(['evaluations' => function ($query) use ($userId) {
                 $query->where('user_id', $userId);
@@ -1074,10 +1236,12 @@ class TrainingProfileController extends Controller
                 if ($year) {
                     $preAvg = round($yearTrainings->avg(function ($t) {
                         $evaluation = $t->evaluations->first();
+
                         return $evaluation ? ($evaluation->participant_pre_rating ?? $evaluation->supervisor_pre_rating) : null;
                     }), 2);
                     $postAvg = round($yearTrainings->avg(function ($t) {
                         $evaluation = $t->evaluations->first();
+
                         return $evaluation ? ($evaluation->participant_post_rating ?? $evaluation->supervisor_post_rating) : null;
                     }), 2);
                     $yearly[$year] = [
@@ -1092,6 +1256,81 @@ class TrainingProfileController extends Controller
         $competencyLabels = Competency::whereIn('id', $competencyIds)->pluck('name', 'id');
 
         return view('userPanel.trainingEffectiveness', compact('trainings', 'competencyCharts', 'competencyLabels'));
+    }
+
+    public function effectivenessUnprogrammed(Request $request)
+    {
+        $userId = Auth::id();
+        $search = $request->input('search');
+        $trainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('participants', function ($q) use ($userId) {
+                        $q->where('users.id', $userId);
+                    });
+            })
+            ->when($search, function ($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                    ->orWhereHas('competency', function ($subQ) use ($search) {
+                        $subQ->where('name', 'like', "%$search%");
+                    });
+            })
+            ->with(['evaluations' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
+            ->paginate(10);
+
+        // Get all competencies used in user's trainings for charts
+        $allUserTrainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('participants', function ($q) use ($userId) {
+                        $q->where('users.id', $userId);
+                    });
+            })
+            ->with(['evaluations' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
+            ->get();
+
+        $competencyIds = $allUserTrainings->pluck('competency_id')->unique()->filter();
+
+        $competencyCharts = [];
+        foreach ($competencyIds as $cid) {
+            $compTrainings = $allUserTrainings->where('competency_id', $cid);
+
+            // Group by year
+            $yearly = [];
+            foreach (
+                $compTrainings->groupBy(function ($t) {
+                    return $t->implementation_date_from
+                        ? date('Y', strtotime($t->implementation_date_from))
+                        : null;
+                }) as $year => $yearTrainings
+            ) {
+                if ($year) {
+                    $preAvg = round($yearTrainings->avg(function ($t) {
+                        $evaluation = $t->evaluations->first();
+
+                        return $evaluation ? ($evaluation->participant_pre_rating ?? $evaluation->supervisor_pre_rating) : null;
+                    }), 2);
+                    $postAvg = round($yearTrainings->avg(function ($t) {
+                        $evaluation = $t->evaluations->first();
+
+                        return $evaluation ? ($evaluation->participant_post_rating ?? $evaluation->supervisor_post_rating) : null;
+                    }), 2);
+                    $yearly[$year] = [
+                        'pre' => $preAvg,
+                        'post' => $postAvg,
+                    ];
+                }
+            }
+            $competencyCharts[$cid] = $yearly;
+        }
+
+        $competencyLabels = Competency::whereIn('id', $competencyIds)->pluck('name', 'id');
+
+        return view('userPanel.trainingEffectivenessUnprogrammed', compact('trainings', 'competencyCharts', 'competencyLabels'));
     }
 
     public function export($id)
@@ -1110,7 +1349,7 @@ class TrainingProfileController extends Controller
                 'competency',
                 'evaluations' => function ($query) use ($userId) {
                     $query->where('user_id', $userId);
-                }
+                },
             ])
             ->orderBy('core_competency')
             ->orderBy('title')
@@ -1120,13 +1359,127 @@ class TrainingProfileController extends Controller
         $groupedTrainings = $trainings->groupBy('core_competency');
 
         $pdf = Pdf::loadView('userPanel.training-export-pdf', compact('groupedTrainings'));
+
         return $pdf->download('my-programmed-trainings.pdf');
     }
+
+    public function userProfileInfo()
+    {
+        $user = Auth::user();
+        $programmedTrainings = Training::where('type', 'Program')
+            ->whereHas('participants', function ($query) use ($user) {
+                $query->where('training_participants.user_id', $user->id);
+            })
+            ->with([
+                'participants' => function ($query) use ($user) {
+                    $query->where('training_participants.user_id', $user->id)->withPivot('participation_type_id');
+                },
+                'competency',
+                'evaluations' => function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                },
+            ])
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
+
+        return view('userPanel.userInfo', compact('user', 'programmedTrainings'));
+    }
+
+    public function userProfileInfoUnprogrammed()
+    {
+        $user = Auth::user();
+        $unprogrammedTrainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('participants', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
+            })
+            ->with(['competency', 'participants'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
+
+        return view('userPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
+    }
+
+    public function uploadUserProfilePicture(Request $request)
+    {
+        try {
+            $request->validate([
+                'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            ]);
+
+            $user = Auth::user();
+
+            // Delete old profile picture if exists
+            if ($user->profile_picture && file_exists(public_path('storage/'.$user->profile_picture))) {
+                unlink(public_path('storage/'.$user->profile_picture));
+            }
+
+            // Store new profile picture
+            $file = $request->file('profile_picture');
+            $filename = 'profile_'.$user->id.'_'.time().'.'.$file->getClientOriginalExtension();
+            $path = $file->storeAs('profile_pictures', $filename, 'public');
+
+            // Update user record
+            $user->profile_picture = $path;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile picture updated successfully!',
+                'image_url' => asset('storage/'.$path),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error uploading profile picture: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function updateUserProfile(Request $request)
+    {
+        try {
+            $request->validate([
+                'salary_grade' => 'nullable|string|max:10',
+                'division' => 'nullable|string|max:255',
+                'position_start_date' => 'nullable|date',
+                'government_start_date' => 'nullable|date',
+                'position' => 'nullable|string|max:255',
+                'superior' => 'nullable|string|max:255',
+                'mid_init' => 'nullable|string|max:1',
+            ]);
+
+            $user = Auth::user();
+
+            // Update only the fields that users are allowed to edit
+            $user->salary_grade = $request->salary_grade;
+            $user->division = $request->division;
+            $user->position_start_date = $request->position_start_date;
+            $user->government_start_date = $request->government_start_date;
+            $user->position = $request->position;
+            $user->superior = $request->superior;
+            $user->mid_init = strtoupper(substr($request->mid_init, 0, 1)); // Ensure only first character is taken and uppercase
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully!',
+                'user' => [
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'mid_init' => $user->mid_init,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating profile: '.$e->getMessage(),
+            ], 500);
+        }
+    }
 }
-
-
-
-
-
-
-

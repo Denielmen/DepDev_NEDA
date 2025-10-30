@@ -122,6 +122,24 @@
             background-color: #dc3545;
             color: white !important;
         }
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }   
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -135,11 +153,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                        <a href="{{ route('user.profile.info') }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -157,7 +185,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.training.profile') }}" class="active"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
             <a href="{{ route('user.tracking') }}"><i class="bi bi-clock-history me-2"></i>Training Tracking & History</a>
             <a href="{{ route('user.training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training Effectiveness</a>
             <a href="{{ route('user.training.resources') }}"><i class="bi bi-archive me-2"></i>Training Resources</a>
@@ -168,32 +196,18 @@
                 <h2 class="details-title">Training Details</h2>
                 <table class="details-table">
                     <tr>
-                        <td class="label">Title/Area:</td>
+                        <td class="label">Title/Subject Area:</td>
                         <td>{{ $training->title ?? '' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Three-Year Period:</td>
+                        <td class="label">Implementation Period:</td>
                         <td>
                             From: {{ $training->period_from ?? 'N/A' }} To: {{ $training->period_to ?? 'N/A' }}
                         </td>
                     </tr>
                     <tr>
-                        <td class="label">Competency:</td>
-                        <td>{{ $training->competency->name ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                         <td class="label">Year of Implementation:</td>
-                         <td>
-                          {{ $training->implementation_date_from ? $training->implementation_date_from->format('Y') : 'N/A' }}
-                         </td>
-                    </tr>
-                    <tr>
-                        <td class="label">Budget (per hour):</td>
-                        <td>{{ $training->budget ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">No. of Hours:</td>
-                        <td>{{ $training->no_of_hours ?? 'N/A' }}</td>
+                        <td class="label">Type:</td>
+                        <td>{{ $training->core_competency ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">User Role:</td>
@@ -214,7 +228,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="label">Learning Service Provider:</td>
+                        <td class="label">Learning Service Provider/Organizer:</td>
                         <td>{{ $training->provider ?? 'N/A' }}</td>
                     </tr>
                     <tr>
@@ -231,19 +245,19 @@
                     </tr>
                     @if($training->type === 'Program')
                     <tr>
-                        <td class="label">Participant Pre Rating:</td>
+                        <td class="label">Learner's Proficiency Pre-Training Level:</td>
                         <td>{{ $evaluation->participant_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Participant Post Rating:</td>
+                        <td class="label">Learner's Proficiency Post-Training Level:</td>
                         <td>{{ $evaluation->participant_post_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Supervisor Pre Rating:</td>
+                        <td class="label">SLearner's Proficiency Pre-Training Level:</td>
                         <td>{{ $evaluation->supervisor_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Supervisor Post Rating:</td>
+                        <td class="label">Learner's Proficiency Post-Training Level:</td>
                         <td>{{ $evaluation->supervisor_post_rating ?? 'N/A' }}</td>
                     </tr>
                     @endif

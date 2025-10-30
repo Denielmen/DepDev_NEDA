@@ -269,6 +269,24 @@
                 gap: 20px;
             }
         }
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }   
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 
@@ -282,12 +300,22 @@
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
-                        {{ auth()->user()->last_name && auth()->user()->first_name ? auth()->user()->last_name . ', ' . auth()->user()->first_name : (auth()->user()->last_name ?? auth()->user()->first_name ?? 'User') }}
+                <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
+                        {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a href="{{ route('user.profile.info') }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -306,7 +334,7 @@
         <!-- Sidebar -->
         <div class="sidebar" style="top: 56px;">
             <a href="{{ route('user.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Training Profile</a>
+            <a href="{{ route('user.training.profile') }}"><i class="bi bi-person-vcard me-2"></i>Individual Training Profile</a>
             <a href="{{ route('user.tracking') }}" class="active"><i class="bi bi-clock-history me-2"></i>Training
                 Tracking & History</a>
             <a href="{{ route('user.training.effectiveness') }}"><i class="bi bi-graph-up me-2"></i>Training

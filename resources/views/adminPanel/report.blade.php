@@ -109,6 +109,26 @@
             color: #fff  !important;
             font-weight: bold;
         }
+         
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -122,11 +142,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                    @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -144,8 +174,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
+        <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
         <a href="{{ route('admin.reports') }}" class="active"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
         <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
@@ -155,11 +185,14 @@
         <div class="content-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="mb-0">Training Plan</h2>
-                <div class="search-box">
-                    <form method="GET" action="{{ route('admin.reports') }}">
-                        <i class="bi bi-search search-icon"></i>
-                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search by Core Competency...">
-                        <button type="submit" style="display: none;"></button>
+                <div class="d-flex align-items-center">
+                    <form method="GET" action="{{ route('admin.reports') }}" class="d-flex align-items-center">
+                        <div class="search-box me-2">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search by Core Competency...">
+                        </div>
+                        <input type="number" name="year" value="{{ $year ?? date('Y') }}" min="2020" max="2100" class="form-control me-2" style="width:100px;" placeholder="Year">
+                        <button type="submit" class="btn btn-primary">Go</button>
                     </form>
                 </div>
             </div>
@@ -169,10 +202,10 @@
                         <tr class="text-center align-middle">
                             <th class="table-header">Training Program</th>
                             <th class="table-header">Competency</th>
-                            <th class="table-header">CY 2025</th>
-                            <th class="table-header">CY 2026</th>
-                            <th class="table-header">CY 2027</th>
                             <th class="table-header">Provider</th>
+                            <th class="table-header">CY {{ $year }}</th>
+                            <th class="table-header">CY {{ $year + 1 }}</th>
+                            <th class="table-header">CY {{ $year + 2 }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -184,22 +217,22 @@
                                 <tr>
                                     <td>{{ $training->title }}</td>
                                     <td>{{ $training->competency->name }}</td>
-                                    <td>
-                                        @foreach($training->participants_2025 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
-                                        @endforeach
-                                    </td>
-                                    <td>
-                                        @foreach($training->participants_2026 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
-                                        @endforeach
-                                    </td>
-                                    <td>
-                                        @foreach($training->participants_2027 ?? [] as $participant)
-                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init }}.<br>
-                                        @endforeach
-                                    </td>
                                     <td>{{ $training->provider }}</td>
+                                    <td>
+                                        @foreach($training->participants_for_years[$year] ?? [] as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach($training->participants_for_years[$year + 1] ?? [] as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach($training->participants_for_years[$year + 2] ?? [] as $participant)
+                                            {{ $loop->iteration }}. {{ $participant->last_name }}, {{ $participant->first_name }} {{ $participant->mid_init ?? '' }}.<br>
+                                        @endforeach
+                                    </td>
                                 </tr>
                             @endforeach
                         @endforeach

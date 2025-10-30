@@ -199,6 +199,73 @@
         .pagination svg {
             display: none;
         }
+        
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 40px 8px 35px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #003366;
+            box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: #666;
+            z-index: 1;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 20%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-search:hover {
+            color: #003366;
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -212,11 +279,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                    @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -235,8 +312,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
+            <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
@@ -244,13 +321,13 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>Training Program</h2>
+                <h2>Training Profile</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="tab-buttons">
-                    <a href="{{ route('admin.training-plan') }}" class="tab-button active">Programmed</a>
-                    <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button">Unprogrammed</a>
+                    <a href="{{ route('admin.training-plan') }}" class="tab-button active">Programmed Trainings</a>
+                    <a href="{{ route('admin.training-plan.unprogrammed') }}" class="tab-button">Completed Training</a>
                 </div>
                 <div class="d-flex align-items-center gap-3">
                     @if(!$isReadOnlyAdmin)
@@ -259,10 +336,20 @@
                         Create New
                     </a>
                     @endif
-                    <a href="{{ route('admin.search.index') }}" class="btn btn-primary">
-                        <i class="bi bi-search"></i>
-                        Advanced Search
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" placeholder="Search trainings..." id="searchInput" value="{{ request('search') ?? '' }}">
+                            @if(request('search'))
+                                <button type="button" class="clear-search" onclick="clearSearch()" title="Clear search">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                            @endif
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="performSearch()" title="Search">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -270,7 +357,8 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Training Title</th>
+                            <th>Training Program/Title/Subject Area</th>
+                            <th>Type</th>
                             <th>Competency</th>
                             <th>Period of Implementation</th>
                             <th>Training Details</th>
@@ -280,6 +368,7 @@
                         @foreach($trainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
+                            <td>{{ $training->core_competency ?? 'N/A' }}</td>
                             <td>{{ $training->competency->name }}</td>
                             <td>{{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}</td>
                             <td>
@@ -365,5 +454,32 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const currentUrl = new URL(window.location);
+            
+            if (searchTerm.trim()) {
+                currentUrl.searchParams.set('search', searchTerm);
+            } else {
+                currentUrl.searchParams.delete('search');
+            }
+            
+            window.location.href = currentUrl.toString();
+        }
+        
+        function clearSearch() {
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.delete('search');
+            window.location.href = currentUrl.toString();
+        }
+        
+        // Handle Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
 </body>
 </html>

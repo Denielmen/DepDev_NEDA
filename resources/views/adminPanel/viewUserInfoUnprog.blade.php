@@ -179,6 +179,26 @@
             color: #6c757d;
             padding: 40px 20px;
         }
+               
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -192,11 +212,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -214,8 +244,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
+            <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
         </div>
@@ -289,8 +319,84 @@
                         <td class="label">Status:</td>
                         <td>{{ $training->status ?? '' }}</td>
                     </tr>
+                    <tr id="pre_rating_row">
+                        <td class="label">Participant Pre-Rating:</td>
+                        <td id="participant_pre_rating_display">{{ $evaluation->participant_pre_rating ?? 'N/A' }}</td>
+                    </tr>
+                    <tr id="post_rating_row">
+                        <td class="label">Participant Post-Rating:</td>
+                        <td id="participant_post_rating_display">{{ $evaluation->participant_post_rating ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Supervisor Pre-Evaluation Rating:</td>
+                        <td id="supervisor_pre_rating_display">{{ $evaluation->supervisor_pre_rating ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Supervisor Post-Evaluation Rating:</td>
+                        <td>{{ $evaluation->supervisor_post_rating ?? 'N/A' }}</td>
+                    </tr>
                 </table>
                 <div class="eval-buttons">
+                    <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }}, {{ $user->id }})">
+                        <i class="bi bi-clipboard-check"></i>
+                        Pre-Eval
+                    </button>
+                    @if($evaluation->supervisor_post_rating)
+                        <span class="btn btn-eval btn-post-eval disabled" style="pointer-events: none; opacity: 0.6;">
+                            <i class="bi bi-clipboard-data"></i>
+                            Post-Eval
+                        </span>
+                    @else
+                        <a href="{{ route('admin.training.post-evaluation.user', ['id' => $training->id, 'user_id' => $user->id]) }}"
+                           class="btn btn-eval btn-post-eval">
+                            <i class="bi bi-clipboard-data"></i>
+                            Post-Eval
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluation Modal -->
+    <div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="evaluationModalLabel">Pre-Evaluation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">D. Learner's Proficiency Level</div>
+                        <div class="card-body p-0">
+                            <div id="currentRatingMsg" class="mb-2 text-primary"></div>
+                            <table class="table table-bordered mb-0">
+                                <tr>
+                                    <td rowspan="2" style="vertical-align: middle; width:60%">
+                                        In a scale 4-1 (4 being the highest), please tick the circle which best describes the proficiency level of your subordinate after participation in this course.
+                                    </td>
+                                    <th class="text-center">1</th>
+                                    <th class="text-center">2</th>
+                                    <th class="text-center">3</th>
+                                    <th class="text-center">4</th>
+                                </tr>
+                                <tr id="rating_inputs">
+                                    <td class="text-center"><input type="radio" name="proficiency_level" value="1" required></td>
+                                    <td class="text-center"><input type="radio" name="proficiency_level" value="2"></td>
+                                    <td class="text-center"><input type="radio" name="proficiency_level" value="3"></td>
+                                    <td class="text-center"><input type="radio" name="proficiency_level" value="4"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <input type="hidden" id="modalTrainingId" value="">
+                    <input type="hidden" id="modalUserId" value="">
+                    @csrf
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submitEvaluationBtn">Submit</button>
                 </div>
             </div>
         </div>
@@ -395,6 +501,107 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Pre-Evaluation Modal Script
+        document.addEventListener('DOMContentLoaded', function () {
+            const evaluationModal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+            const submitEvaluationBtn = document.getElementById('submitEvaluationBtn');
+            const preRatingDisplay = document.getElementById('participant_pre_rating_display');
+            const ratingInputs = document.querySelectorAll('input[name="proficiency_level"]');
+
+            window.showPreEvalModal = function(trainingId, userId) {
+                // Get the current supervisor pre-rating from the table
+                const supervisorPreRatingDisplay = document.getElementById('supervisor_pre_rating_display');
+                const currentRating = supervisorPreRatingDisplay ? supervisorPreRatingDisplay.textContent : 'N/A';
+                document.getElementById('modalTrainingId').value = trainingId;
+                document.getElementById('modalUserId').value = userId;
+
+                // If there's a previous rating, show it and disable inputs
+                if (currentRating && currentRating !== 'N/A') {
+                    ratingInputs.forEach(input => {
+                        input.disabled = true;
+                        if (input.value === currentRating) {
+                            input.checked = true;
+                        }
+                    });
+                    submitEvaluationBtn.disabled = true;
+                    submitEvaluationBtn.style.cursor = 'not-allowed';
+                    // Optionally show a message indicating it's already rated
+                    document.getElementById('currentRatingMsg').textContent = 'This training has already been pre-evaluated by the supervisor.';
+                    document.getElementById('currentRatingMsg').style.display = 'block';
+                } else {
+                    // If no rating yet, enable inputs and submit button
+                    ratingInputs.forEach(input => {
+                        input.disabled = false;
+                        input.checked = false;
+                    });
+                    submitEvaluationBtn.disabled = false;
+                    submitEvaluationBtn.style.cursor = 'pointer';
+                    document.getElementById('currentRatingMsg').style.display = 'none'; // Hide message
+                }
+
+                evaluationModal.show();
+            };
+
+            if (submitEvaluationBtn) {
+                submitEvaluationBtn.addEventListener('click', function () {
+                    const rating = document.querySelector('input[name="proficiency_level"]:checked');
+                    const trainingId = document.getElementById('modalTrainingId').value;
+                    const userId = document.getElementById('modalUserId').value;
+                    const csrfToken = document.querySelector('input[name="_token"]').value;
+
+                    if (!rating || !trainingId || !userId) {
+                        alert('Please select a rating.');
+                        return;
+                    }
+
+                    // Disable inputs and button immediately on submit attempt
+                    ratingInputs.forEach(input => input.disabled = true);
+                    submitEvaluationBtn.disabled = true;
+                    submitEvaluationBtn.style.cursor = 'not-allowed';
+
+                    fetch('{{ route('admin.training.rate', ':id') }}'.replace(':id', trainingId), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            type: 'supervisor_pre',
+                            rating: rating.value,
+                            user_id: userId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Pre-Evaluation submitted successfully!');
+                            evaluationModal.hide();
+                            // Update the display with the new rating
+                            document.getElementById('supervisor_pre_rating_display').textContent = data.supervisor_pre_rating;
+
+                            // Inputs and button are already disabled from the attempt, keep them that way
+
+                        } else {
+                            alert('Error submitting evaluation.' + (data.message ? ': ' + data.message : ''));
+                            // Re-enable inputs and button on failure so user can try again
+                            ratingInputs.forEach(input => input.disabled = false);
+                            submitEvaluationBtn.disabled = false;
+                            submitEvaluationBtn.style.cursor = 'pointer';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while submitting the evaluation.');
+                        // Re-enable inputs and button on error so user can try again
+                        ratingInputs.forEach(input => input.disabled = false);
+                        submitEvaluationBtn.disabled = false;
+                        submitEvaluationBtn.style.cursor = 'pointer';
+                    });
+                });
+            }
+        });
+
         function fixCertificates() {
             if (confirm('This will try to automatically link unlinked certificates to their corresponding trainings. Continue?')) {
                 fetch('{{ route("admin.fixCertificates") }}', {

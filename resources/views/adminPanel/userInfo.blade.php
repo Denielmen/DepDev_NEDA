@@ -334,6 +334,26 @@
             max-width: 100%;
             height: 100% !important;
         }
+            
+        .profile-picture {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #003366;
+            box-shadow: 0 0 0 2px #fff;
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu .bi-person-circle {
+            font-size: 32px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -347,11 +367,21 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        <i class="bi bi-person-circle"></i>
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @else
+                            <i class="bi bi-person-circle"></i>
+                        @endif
                         {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -369,8 +399,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="{{ route('admin.home') }}" ><i class="bi bi-house-door me-2"></i>Home</a>
-        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Program</a>
-        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>List of Employees</a>
+        <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
+        <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employees Information</a>
         <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
         <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
     </div>
@@ -415,7 +445,7 @@
                     </div>
                     <input type="file" id="profilePictureInput" class="avatar-upload-input" accept="image/*" onchange="uploadProfilePicture(this)">
                     <div id="nameDisplay">
-                        <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
+                        <h4>{{ $user->first_name }} {{ $user->mid_init ? $user->mid_init . '.' : '' }} {{ $user->last_name }}</h4>
                     </div>
                     <p class="text-muted mb-0">ID: {{ $user->user_id }}</p>
                     <p class="text-muted mb-0">{{ $user->position }}</p>
@@ -446,9 +476,13 @@
                         @method('PUT')
                         <div id="nameEdit" style="display: none;">
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label">First Name</label>
                                     <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">MI</label>
+                                    <input type="text" class="form-control" name="mid_init" value="{{ $user->mid_init ?? '' }}" maxlength="2" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Last Name</label>
@@ -463,7 +497,12 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Salary Grade</label>
-                                <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
+                                <select class="form-control" name="salary_grade" readonly disabled>
+                                    <option value="">Select Salary Grade</option>
+                                    @for($i = 3; $i <= 28; $i++)
+                                        <option value="{{ $i }}" {{ $user->salary_grade == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
                             </div>
                             <div class="col-md-8">
                                 <!-- Display mode -->
@@ -512,6 +551,8 @@
                                 <div class="years-edit" style="display: none;">
                                     <label class="form-label">Government Start Date</label>
                                     <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date }}" readonly>
+                                    <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -520,7 +561,7 @@
                             <input type="text" class="form-control" name="position" value="{{ $user->position }}" readonly>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Name of Supervisor (Last, First, MI)</label>
+                            <label class="form-label">Name of Immediate Supervisor (Last, First, MI)</label>
                             <input type="text" class="form-control" name="superior" value="{{ $user->superior }}" readonly>
                         </div>
                     </form>
@@ -532,10 +573,10 @@
         <div class="program-tabs">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed</a>
+                    <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed Trainings</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Unprogrammed</a>
+                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Completed Trainings</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#" id="analyticsTab">Analytics</a>
@@ -548,11 +589,11 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Training Title</th>
+                        <th>Training Program/ Title/ Subject Area</th>
+                        <th>Type</th>
                         <th>Competency</th>
                         <th>Period of Implementation</th>
-                        <th>No. of Hours</th>
-                        <th>Provider</th>
+                        <th>Provider/Organizer</th>
                         <th>Status</th>
                         <th>User Role</th>
                         <th>Details</th>
@@ -562,13 +603,15 @@
                     @foreach($programmedTrainings as $training)
                     <tr>
                         <td>{{ $training->title }}</td>
-                        <td>{{ $training->competency->name}}</td>
+                        <td>
+                            {{ $training->core_competency ?? 'N/A' }}
+                        </td>
+                        <td>{{ $training->competency->name ?? 'N/A' }}</td>
                         <td>@if($training->status === 'Implemented' )
                                     {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
                                 @else
                                     {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
                                 @endif</td>
-                        <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>
                             @php
@@ -801,12 +844,26 @@
             inputs.forEach(input => {
                 originalValues[input.name] = input.value;
                 input.removeAttribute('readonly');
+                if (input.name === 'mid_init') {
+                    input.removeAttribute('maxlength');
+                }
             });
+            
             // Handle name inputs
             nameInputs.forEach(input => {
                 originalValues[input.name] = input.value;
                 input.removeAttribute('readonly');
+                if (input.name === 'mid_init') {
+                    input.removeAttribute('maxlength');
+                }
             });
+            
+            // Enable salary grade dropdown
+            const salaryGradeSelect = document.querySelector('select[name="salary_grade"]');
+            if (salaryGradeSelect) {
+                salaryGradeSelect.removeAttribute('readonly');
+                salaryGradeSelect.removeAttribute('disabled');
+            }
             // Show name edit fields and hide display
             nameDisplay.style.display = 'none';
             nameEdit.style.display = 'block';
