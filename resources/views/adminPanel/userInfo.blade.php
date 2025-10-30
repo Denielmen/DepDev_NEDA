@@ -445,7 +445,7 @@
                     </div>
                     <input type="file" id="profilePictureInput" class="avatar-upload-input" accept="image/*" onchange="uploadProfilePicture(this)">
                     <div id="nameDisplay">
-                        <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
+                        <h4>{{ $user->first_name }} {{ $user->mid_init ? $user->mid_init . '.' : '' }} {{ $user->last_name }}</h4>
                     </div>
                     <p class="text-muted mb-0">ID: {{ $user->user_id }}</p>
                     <p class="text-muted mb-0">{{ $user->position }}</p>
@@ -476,9 +476,13 @@
                         @method('PUT')
                         <div id="nameEdit" style="display: none;">
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label">First Name</label>
                                     <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">MI</label>
+                                    <input type="text" class="form-control" name="mid_init" value="{{ $user->mid_init ?? '' }}" maxlength="2" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Middle Name</label>
@@ -497,7 +501,8 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Salary Grade</label>
-                                <select class="form-control" name="salary_grade">
+                                <select class="form-control" name="salary_grade" readonly disabled>
+                                    <option value="">Select Salary Grade</option>
                                     @for($i = 3; $i <= 28; $i++)
                                         <option value="{{ $i }}" {{ $user->salary_grade == $i ? 'selected' : '' }}>{{ $i }}</option>
                                     @endfor
@@ -575,7 +580,7 @@
                     <a class="nav-link active" href="{{ route('admin.participants.info', ['id' => $user->id]) }}">Programmed Trainings</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Trainings Attended</a>
+                    <a class="nav-link" href="{{ route('admin.participants.info.unprogrammed', ['id' => $user->id]) }}">Completed Trainings</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#" id="analyticsTab">Analytics</a>
@@ -588,11 +593,11 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Training Title</th>
+                        <th>Training Program/ Title/ Subject Area</th>
+                        <th>Type</th>
                         <th>Competency</th>
                         <th>Period of Implementation</th>
-                        <th>No. of Hours</th>
-                        <th>Provider</th>
+                        <th>Provider/Organizer</th>
                         <th>Status</th>
                         <th>User Role</th>
                         <th>Details</th>
@@ -602,13 +607,15 @@
                     @foreach($programmedTrainings as $training)
                     <tr>
                         <td>{{ $training->title }}</td>
-                        <td>{{ $training->competency->name}}</td>
+                        <td>
+                            {{ $training->core_competency ?? 'N/A' }}
+                        </td>
+                        <td>{{ $training->competency->name ?? 'N/A' }}</td>
                         <td>@if($training->status === 'Implemented' )
                                     {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
                                 @else
                                     {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
                                 @endif</td>
-                        <td>{{ $training->no_of_hours }}</td>
                         <td>{{ $training->provider }}</td>
                         <td>
                             @php
@@ -841,12 +848,26 @@
             inputs.forEach(input => {
                 originalValues[input.name] = input.value;
                 input.removeAttribute('readonly');
+                if (input.name === 'mid_init') {
+                    input.removeAttribute('maxlength');
+                }
             });
+            
             // Handle name inputs
             nameInputs.forEach(input => {
                 originalValues[input.name] = input.value;
                 input.removeAttribute('readonly');
+                if (input.name === 'mid_init') {
+                    input.removeAttribute('maxlength');
+                }
             });
+            
+            // Enable salary grade dropdown
+            const salaryGradeSelect = document.querySelector('select[name="salary_grade"]');
+            if (salaryGradeSelect) {
+                salaryGradeSelect.removeAttribute('readonly');
+                salaryGradeSelect.removeAttribute('disabled');
+            }
             // Show name edit fields and hide display
             nameDisplay.style.display = 'none';
             nameEdit.style.display = 'block';
