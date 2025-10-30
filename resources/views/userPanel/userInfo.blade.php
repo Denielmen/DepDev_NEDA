@@ -416,6 +416,10 @@
                                 <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label">Middle Name</label>
+                                <input type="text" class="form-control" name="middle_name" value="{{ $user->middle_name }}" readonly>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Last Name</label>
                                 <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
                             </div>
@@ -427,7 +431,11 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Salary Grade</label>
-                                <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
+                                <select class="form-control" name="salary_grade" disabled>
+    @for($i = 3; $i <= 28; $i++)
+        <option value="{{ $i }}" {{ $user->salary_grade == $i ? 'selected' : '' }}>{{ $i }}</option>
+    @endfor
+</select>
                             </div>
                             <div class="col-md-8">
                                 <label class="form-label">Division/Unit</label>
@@ -447,12 +455,24 @@
                             <div class="col-md-6">
                                 <label class="form-label">Position Start Date</label>
                                 <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('Y-m-d') : '' }}" readonly>
-                                <small class="text-muted">{{ $user->getFormattedYearsInPosition() }}</small>
+                                <small class="text-muted">
+                                    @if($user->position_start_date)
+                                        {{ $user->getFormattedYearsInPosition() }} in current position
+                                    @else
+                                        Position start date not set
+                                    @endif
+                                </small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Government Start Date</label>
                                 <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('Y-m-d') : '' }}" readonly>
-                                <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
+                                <small class="text-muted">
+                                    @if($user->government_start_date)
+                                        {{ $user->getFormattedYearsInGovernment() }} in government service
+                                    @else
+                                        Government start date not set
+                                    @endif
+                                </small>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -460,7 +480,7 @@
                             <input type="text" class="form-control" name="position" value="{{ $user->position }}" readonly>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Name of Supervisor (Last, First, MI)</label>
+                            <label class="form-label">Name of Immediate Supervisor (Last, First, MI)</label>
                             <input type="text" class="form-control" name="superior" value="{{ $user->superior }}" readonly>
                         </div>
                     </form>
