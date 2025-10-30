@@ -364,7 +364,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
             <a href="{{ route('admin.participants') }}" class="active"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
@@ -379,7 +379,7 @@
                 </div>
             @endif
             <div class="list-title">
-                <h2>List of Employees</h2>
+                <h2>Employees Information</h2>
                 @if((isset($positionFilter) && $positionFilter !== 'all') || (isset($searchQuery) && trim($searchQuery) !== ''))
                     <div class="alert alert-info mt-2 mb-0">
                         <i class="bi bi-filter"></i>

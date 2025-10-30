@@ -330,7 +330,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
@@ -339,7 +339,7 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-header">
-                <h2>Completed Trainings</h2>
+                <h2>Training Profile</h2>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -368,9 +368,10 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Training Title</th>
+                            <th>Training Program/Title/Subject Area</th>
+                            <th>Type</th>
                             <th>Competency</th>
-                            <th>Period of Implementation</th>
+                            <th>Inclusive Dates of Attendance</th>
                             <th>Training Details</th>
                         </tr>
                     </thead>
@@ -378,6 +379,7 @@
                     @foreach($trainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
+                            <td>{{ $training->core_competency ?? 'N/A' }}</td>
                             <td>{{ $training->competency->name }}</td>
                             <td>@if($training->implementation_date_from && $training->implementation_date_to)
                                     {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}

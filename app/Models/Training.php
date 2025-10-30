@@ -46,6 +46,17 @@ class Training extends Model
         'participant_post_evaluation' => 'array'
     ];
 
+    /**
+     * Get all materials for the training.
+     */
+    public function materials()
+    {
+        return $this->hasMany(TrainingMaterial::class);
+    }
+
+    /**
+     * Get the competency that owns the training.
+     */
     public function competency()
     {
         return $this->belongsTo(Competency::class)->withDefault();
