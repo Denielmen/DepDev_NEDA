@@ -368,9 +368,9 @@
                         @csrf
                         <div class="row">
                             <div class="col-md-6 form-group">
-                                <label class="form-label">Programmed Training Title/Subject Area:</label>
+                                <label class="form-label">Related Programmed Traings, if any:</label>
                                 <select id="alignedTraining" name="courseTitle" class="form-control" required>
-                                    <option value="" disabled selected>Select programmed training title / Subject Area</option>
+                                    <option value="" disabled selected>Select from list of programmed training activity</option>
                                     @foreach ($programmedTrainings as $training)
                                         @php
                                             $evaluation = $training->evaluations->first();
@@ -388,7 +388,7 @@
                             </div>
 
                             <div class="col-md-6 form-group">
-                                <label class="form-label">Title of the Training:</label>
+                                <label class="form-label">Title of the Training Attended:</label>
                                 <input type="text" class="form-control" name="training_title" required>
                             </div>
                         </div>

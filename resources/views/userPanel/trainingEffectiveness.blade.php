@@ -290,6 +290,12 @@
             background-color: #003366;
             color: white;
         }
+        .table td:nth-child(1) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     </style>
 </head>
 
@@ -351,12 +357,12 @@
 
                 <h2 class="resources-title">Training Effectiveness</h2>
                 
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <!-- <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="tab-buttons">
                         <a href="{{ route('user.training.effectiveness') }}" class="tab-button active">Programmed Trainings</a>
                         <a href="{{ route('user.training.effectiveness.unprogrammed') }}" class="tab-button">Completed Trainings</a>
                     </div>
-                </div>
+                </div> -->
 
                 <div class="form-container">
                     <!-- Trainings Table -->
@@ -365,13 +371,7 @@
                             <thead class="table-primary">
                                 <tr>
                                     <th class="text-center align-middle">Training Programmed/Title/Subject Area</th>
-                                    <th class="text-center">
-                                        <div>Learner's Pre-Training Proficiency Level</div>
-                                        <div class="d-flex">
-                                            <div class="text-center flex-grow-1 border-end">User</div>
-                                            <div class="text-center flex-grow-1">Supervisor</div>
-                                        </div>
-                                    </th>
+                                    <th class="text-center">Learner's Pre-Training Proficiency Level</th>
                                     <th class="text-center">
                                         <div>Learner's Post-Training Proficiency Level</div>
                                         <div class="d-flex">
@@ -379,7 +379,6 @@
                                             <div class="text-center flex-grow-1">Supervisor</div>
                                         </div>
                                     </th>
-                                    <th class="text-center">Average Rating</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -400,33 +399,19 @@
                                     @endphp
                                     <tr>
                                         <td class="align-middle text-center">{{ $training->title }}</td>
-                                        <td class="p-0">
-                                            <div class="d-flex w-100">
-                                                <div class="text-center flex-grow-1 p-1 border-end d-flex align-items-center justify-content-center" style="min-height: 40px; width: 50%;">
-                                                    @if($isParticipantPreEvaluated)
-                                                        {{ $evaluation->participant_pre_rating }}
-                                                    @else
-                                                        <a href="#" class="btn btn-success btn-sm {!! $preButtonClass !!}"
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target="#preEvaluationModal" 
-                                                            data-training-id="{{ $training->id }}" 
-                                                            data-evaluation-type="participant_pre"
-                                                            {!! $activePreButtonAttributes !!}>
-                                                            Evaluate
-                                                        </a>
-                                                    @endif
-                                                </div>
-                                                <div class="text-center flex-grow-1 p-1 d-flex align-items-center justify-content-center" style="min-height: 40px; width: 50%;">
-                                                    @php
-                                                        $isSupervisorPreEvaluated = $evaluation && $evaluation->supervisor_pre_rating !== null;
-                                                    @endphp
-                                                    @if($isSupervisorPreEvaluated)
-                                                        {{ $evaluation->supervisor_pre_rating }}
-                                                    @else
-                                                        <span class="text-info">Pending</span>
-                                                    @endif
-                                                </div>
-                                            </div>
+                                        <td class="text-center">
+                                            @if($isParticipantPreEvaluated)
+                                                {{ $evaluation->participant_pre_rating }}
+                                            @else
+                                                <a href="#" class="btn btn-success btn-sm {!! $preButtonClass !!}"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#preEvaluationModal" 
+                                                    data-training-id="{{ $training->id }}" 
+                                                    data-evaluation-type="participant_pre"
+                                                    {!! $activePreButtonAttributes !!}> 
+                                                    Evaluate
+                                                </a>
+                                            @endif
                                         </td>
                                         <td class="p-0">
                                             <div class="d-flex w-100">
@@ -447,22 +432,8 @@
                                                     @endphp
                                                     @if($isSupervisorPostEvaluated)
                                                         {{ $evaluation->supervisor_post_rating }}
-                                                    @else
-                                                        <span class="text-info">Pending</span>
                                                     @endif
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center">
-                                                @if($isParticipantPreEvaluated && $isParticipantPostEvaluated)
-                                                    @php
-                                                        $averageRating = ($evaluation->participant_pre_rating + $evaluation->participant_post_rating) / 2;
-                                                    @endphp
-                                                    {{ number_format($averageRating, 1) }}
-                                                @else
-                                                    <span class="text-info">Pending</span>
-                                                @endif
                                             </div>
                                         </td>
                                     </tr>

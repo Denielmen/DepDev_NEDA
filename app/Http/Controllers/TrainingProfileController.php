@@ -1193,20 +1193,34 @@ class TrainingProfileController extends Controller
     {
         $userId = Auth::id();
         $search = $request->input('search');
-        $trainings = Training::where('type', 'Program')
-            ->whereHas('participants', function ($q) use ($userId) {
-                $q->where('users.id', $userId);
-            })
-            ->when($search, function ($q) use ($search) {
-                $q->where('title', 'like', "%$search%")
-                    ->orWhereHas('competency', function ($subQ) use ($search) {
-                        $subQ->where('name', 'like', "%$search%");
-                    });
-            })
-            ->with(['evaluations' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])
-            ->paginate(10);
+        
+        // Combine programmed and unprogrammed trainings
+        $query = Training::where(function ($q) use ($userId) {
+            $q->where('type', 'Program')
+                ->whereHas('participants', function ($subQ) use ($userId) {
+                    $subQ->where('users.id', $userId);
+                })
+                ->orWhere(function ($q2) use ($userId) {
+                    $q2->where('type', 'Unprogrammed')
+                        ->where(function ($q3) use ($userId) {
+                            $q3->where('user_id', $userId)
+                                ->orWhereHas('participants', function ($subQ) use ($userId) {
+                                    $subQ->where('users.id', $userId);
+                                });
+                        });
+                });
+        })
+        ->when($search, function ($q) use ($search) {
+            $q->where('title', 'like', "%$search%")
+                ->orWhereHas('competency', function ($subQ) use ($search) {
+                    $subQ->where('name', 'like', "%$search%");
+                });
+        })
+        ->with(['evaluations' => function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        }]);
+        
+        $trainings = $query->paginate(15);
 
         // Get all competencies used in user's trainings for charts
         $allUserTrainings = Training::where('type', 'Program')

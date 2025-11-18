@@ -420,12 +420,16 @@
                     </div>
                     <div>
                         <label for="sort-by" class="me-2">Sort by</label>
-                        <select id="sort-by" class="form-select" style="width: 200px; display: inline-block;" onchange="sortUsers();">
-                            <option value="all" {{ (!isset($positionFilter) || $positionFilter === 'all') ? 'selected' : '' }}>All Positions</option>
-                            @foreach($positions as $position)
-                                <option value="{{ $position }}" {{ (isset($positionFilter) && $positionFilter === $position) ? 'selected' : '' }}>{{ $position }}</option>
-                            @endforeach
-                        </select>
+                        <div style="position: relative; display: inline-block; width: 200px;">
+                            <input type="text" id="sort-by-search" class="form-control" placeholder="Search positions..." style="width: 200px;" autocomplete="off">
+                            <select id="sort-by" class="form-select" style="width: 200px; display: none; position: absolute; top: 0; left: 0;" onchange="sortUsers();">
+                                <option value="all" {{ (!isset($positionFilter) || $positionFilter === 'all') ? 'selected' : '' }}></option>
+                                @foreach($positions as $position)
+                                    <option value="{{ $position }}" {{ (isset($positionFilter) && $positionFilter === $position) ? 'selected' : '' }}>{{ $position }}</option>
+                                @endforeach
+                            </select>
+                            <div id="sort-by-dropdown" class="position-absolute bg-white border rounded mt-1" style="width: 200px; max-height: 200px; overflow-y: auto; display: none; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="table-container">
@@ -602,6 +606,68 @@
             } catch (error) {
                 console.error('Error in sortUsers:', error);
             }
+        }
+
+        // Initialize searchable position dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('sort-by-search');
+            const dropdown = document.getElementById('sort-by-dropdown');
+            const select = document.getElementById('sort-by');
+
+            if (!searchInput || !dropdown || !select) return;
+
+            // Get all options from select
+            const options = Array.from(select.options).map(opt => ({
+                value: opt.value,
+                text: opt.text
+            }));
+
+            function renderDropdown(filter = '') {
+                const filtered = options.filter(opt => 
+                    opt.text.toLowerCase().includes(filter.toLowerCase())
+                );
+
+                dropdown.innerHTML = filtered.map(opt => `
+                    <div class="p-2" style="cursor: pointer; border-bottom: 1px solid #f0f0f0; hover-background: #f5f5f5;" 
+                         onclick="selectPosition('${opt.value}', '${opt.text}')">
+                        ${opt.text}
+                    </div>
+                `).join('');
+            }
+
+            searchInput.addEventListener('focus', function() {
+                renderDropdown(searchInput.value);
+                dropdown.style.display = 'block';
+            });
+
+            searchInput.addEventListener('input', function() {
+                renderDropdown(searchInput.value);
+                dropdown.style.display = 'block';
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target !== searchInput && e.target !== dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Display current selection
+            const currentValue = select.value;
+            const currentOption = options.find(opt => opt.value === currentValue);
+            if (currentOption) {
+                searchInput.value = currentOption.text;
+            }
+        });
+
+        function selectPosition(value, text) {
+            const select = document.getElementById('sort-by');
+            const searchInput = document.getElementById('sort-by-search');
+            const dropdown = document.getElementById('sort-by-dropdown');
+
+            select.value = value;
+            searchInput.value = text;
+            dropdown.style.display = 'none';
+            sortUsers();
         }
     </script>
 </body>

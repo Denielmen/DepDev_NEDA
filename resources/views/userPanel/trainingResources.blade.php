@@ -250,55 +250,43 @@
                     <div class="tab-content" id="resourceTabsContent">
                         <!-- Materials Tab -->
                         <div class="tab-pane fade{{ request()->get('tab', 'materials') == 'materials' ? ' show active' : '' }}" id="materials" role="tabpanel" aria-labelledby="materials-tab">
-                    <div class="accordion" id="trainingsAccordion">
-                        @forelse($trainings as $index => $trainingData)
-                            @php
-                                $training = $trainingData['training'];
-                                $materials = $trainingData['materials'];
-                                $links = $trainingData['links'];
-                                $certificates = $trainingData['certificates'];
-                                $hasMaterials = $materials->isNotEmpty();
-                                $hasLinks = $links->isNotEmpty();
-                                $hasCertificates = $certificates->isNotEmpty();
-                            @endphp
-                            
-                            <div class="accordion-item mb-3">
-                                <h2 class="accordion-header" id="heading{{ $index }}">
-                                    <button class="accordion-button {{ $index > 0 ? 'collapsed' : '' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
-                                        {{ $training->title }}
-                                    </button>
-                                </h2>
-                                <div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="heading{{ $index }}" data-bs-parent="#trainingsAccordion">
-                                    <div class="accordion-body p-0">
-                                        <!-- Materials Section -->
-                                        @if($hasMaterials)
-                                            <div class="p-3 border-bottom">
-                                                <h6 class="fw-bold">
-                                                    <i class="bi bi-file-earmark-text me-2"></i>Materials
-                                                    <span class="badge bg-secondary ms-2">{{ count($materials) }}</span>
-                                                </h6>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm table-hover">
+                            <div class="accordion" id="materialsAccordion">
+                                @forelse($trainings as $item)
+                                    @php
+                                        $training = $item['training'];
+                                        $materials = $item['materials'];
+                                    @endphp
+                                    @if($materials->isNotEmpty())
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $training->id }}" aria-expanded="false" aria-controls="collapse{{ $training->id }}">
+                                                    <strong>{{ $training->title }}</strong> <span class="badge bg-primary ms-2">{{ $materials->count() }} Material(s)</span>
+                                                </button>
+                                            </h2>
+                                            <div id="collapse{{ $training->id }}" class="accordion-collapse collapse" data-bs-parent="#materialsAccordion">
+                                                <div class="accordion-body p-0">
+                                                    <table class="table table-hover mb-0">
                                                         <thead>
                                                             <tr>
-                                                                <th>Title</th>
-                                                                <th>Competency</th>
-                                                                <th>Source</th>
-                                                                <th>Date</th>
-                                                                <th>Actions</th>
+                                                                <th class="text-center">Material Title</th>
+                                                                <th class="text-center">Source</th>
+                                                                <th class="text-center">Date Uploaded</th>
+                                                                <th class="text-center">Action</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @foreach($materials as $material)
                                                                 <tr>
-                                                                    <td>{{ $material->title }}</td>
-                                                                    <td>{{ $material->competency?->name ?? 'N/A' }}</td>
-                                                                    <td>{{ $material->source ?? 'N/A' }}</td>
-                                                                    <td>{{ $material->created_at->format('M d, Y') }}</td>
-                                                                    <td>
-                                                                        <a href="{{ route('user.training_materials.download', $material) }}" class="btn btn-sm btn-outline-primary">
-                                                                            <i class="bi bi-download"></i> Download
-                                                                        </a>
+                                                                    <td class="text-center">{{ $material->title }}</td>
+                                                                    <td class="text-center">{{ $material->source }}</td>
+                                                                    <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
+                                                                    <td class="text-center">
+                                                                        <button class="btn btn-primary btn-sm me-1"
+                                                                            @if (!$material->file_path) disabled @endif
+                                                                            onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                                                            title="@if (!$material->file_path) No file available @endif">
+                                                                            <i class="fas fa-download"></i> Download
+                                                                        </button>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -306,71 +294,109 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                        @endif
-
-                                        <!-- Links Section -->
-                                        @if($hasLinks)
-                                            <div class="p-3 border-bottom">
-                                                <h6 class="fw-bold">
-                                                    <i class="bi bi-link-45deg me-2"></i>Links
-                                                    <span class="badge bg-secondary ms-2">{{ count($links) }}</span>
-                                                </h6>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm table-hover">
+                                        </div>
+                                    @endif
+                                @empty
+                                    <div class="alert alert-info text-center">
+                                        No materials found.
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                        <!-- Links Tab -->
+                        <div class="tab-pane fade{{ request()->get('tab') == 'links' ? ' show active' : '' }}" id="links" role="tabpanel" aria-labelledby="links-tab">
+                            <div class="accordion" id="linksAccordion">
+                                @forelse($trainings as $item)
+                                    @php
+                                        $training = $item['training'];
+                                        $links = $item['links'];
+                                    @endphp
+                                    @if($links->isNotEmpty())
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLink{{ $training->id }}" aria-expanded="false" aria-controls="collapseLink{{ $training->id }}">
+                                                    <strong>{{ $training->title }}</strong> <span class="badge bg-primary ms-2">{{ $links->count() }} Link(s)</span>
+                                                </button>
+                                            </h2>
+                                            <div id="collapseLink{{ $training->id }}" class="accordion-collapse collapse" data-bs-parent="#linksAccordion">
+                                                <div class="accordion-body p-0">
+                                                    <table class="table table-hover mb-0">
                                                         <thead>
                                                             <tr>
-                                                                <th>Title</th>
-                                                                <th>Competency</th>
-                                                                <th>Link</th>
-                                                                <th>Date</th>
+                                                                <th class="text-center">Link Title</th>
+                                                                <th class="text-center">Source</th>
+                                                                <th class="text-center">Date Added</th>
+                                                                <th class="text-center">Action</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @foreach($links as $link)
                                                                 <tr>
-                                                                    <td>{{ $link->title }}</td>
-                                                                    <td>{{ $link->competency?->name ?? 'N/A' }}</td>
-                                                                    <td>
-                                                                        <a href="{{ $link->link }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                                            <i class="bi bi-box-arrow-up-right"></i> Open
-                                                                        </a>
+                                                                    <td class="text-center">{{ $link->title }}</td>
+                                                                    <td class="text-center">{{ $link->source }}</td>
+                                                                    <td class="text-center">{{ $link->created_at->format('Y-m-d') }}</td>
+                                                                    <td class="text-center">
+                                                                        <button class="btn btn-info btn-sm"
+                                                                            @if (!$link->link) disabled @endif
+                                                                            onclick="@if ($link->link) window.open('{{ $link->link }}', '_blank') @else alert('There\'s no link pasted.') @endif"
+                                                                            title="@if (!$link->link) No link available @endif">
+                                                                            <i class="fas fa-external-link-alt"></i> Open Link
+                                                                        </button>
                                                                     </td>
-                                                                    <td>{{ $link->created_at->format('M d, Y') }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
                                             </div>
-                                        @endif
-
-                                        <!-- Certificates Section -->
-                                        @if($hasCertificates)
-                                            <div class="p-3">
-                                                <h6 class="fw-bold">
-                                                    <i class="bi bi-award me-2"></i>Certificates
-                                                    <span class="badge bg-secondary ms-2">{{ count($certificates) }}</span>
-                                                </h6>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm table-hover">
+                                        </div>
+                                    @endif
+                                @empty
+                                    <div class="alert alert-info text-center">
+                                        No links found.
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                        <!-- Certificates Tab -->
+                        <div class="tab-pane fade{{ request()->get('tab') == 'certificates' ? ' show active' : '' }}" id="certificates" role="tabpanel" aria-labelledby="certificates-tab">
+                            <div class="accordion" id="certificatesAccordion">
+                                @forelse($trainings as $item)
+                                    @php
+                                        $training = $item['training'];
+                                        $certificates = $item['certificates'];
+                                    @endphp
+                                    @if($certificates->isNotEmpty())
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCert{{ $training->id }}" aria-expanded="false" aria-controls="collapseCert{{ $training->id }}">
+                                                    <strong>{{ $training->title }}</strong> <span class="badge bg-primary ms-2">{{ $certificates->count() }} Certificate(s)</span>
+                                                </button>
+                                            </h2>
+                                            <div id="collapseCert{{ $training->id }}" class="accordion-collapse collapse" data-bs-parent="#certificatesAccordion">
+                                                <div class="accordion-body p-0">
+                                                    <table class="table table-hover mb-0">
                                                         <thead>
                                                             <tr>
-                                                                <th>Title</th>
-                                                                <th>Competency</th>
-                                                                <th>Date Issued</th>
-                                                                <th>Actions</th>
+                                                                <th class="text-center">Certificate Title</th>
+                                                                <th class="text-center">Source</th>
+                                                                <th class="text-center">Date Uploaded</th>
+                                                                <th class="text-center">Action</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @foreach($certificates as $certificate)
                                                                 <tr>
-                                                                    <td>{{ $certificate->title }}</td>
-                                                                    <td>{{ $certificate->competency?->name ?? 'N/A' }}</td>
-                                                                    <td>{{ $certificate->created_at->format('M d, Y') }}</td>
-                                                                    <td>
-                                                                        <a href="{{ route('user.training_materials.download', $certificate) }}" class="btn btn-sm btn-outline-primary">
-                                                                            <i class="bi bi-download"></i> Download
-                                                                        </a>
+                                                                    <td class="text-center">{{ $certificate->title }}</td>
+                                                                    <td class="text-center">{{ $certificate->source }}</td>
+                                                                    <td class="text-center">{{ $certificate->created_at->format('Y-m-d') }}</td>
+                                                                    <td class="text-center">
+                                                                        <button class="btn btn-primary btn-sm"
+                                                                            @if (!$certificate->file_path) disabled @endif
+                                                                            onclick="@if ($certificate->file_path) window.location.href = '{{ route('user.training_materials.download', $certificate->id) }}' @else alert('There\'s no file uploaded.') @endif"
+                                                                            title="@if (!$certificate->file_path) No file available @endif">
+                                                                            <i class="fas fa-download"></i> Download
+                                                                        </button>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -378,40 +404,19 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                        @endif
-                                        
-                                        <!-- Edit Button -->
-                                        <div class="p-3 border-top text-end">
-                                            @if($training->type === 'Program')
-                                                <a href="{{ route('user.tracking', ['training_id' => $training->id]) }}" class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-pencil-square me-1"></i> Edit Training Details
-                                                </a>
-                                            @else
-                                                <a href="{{ route('user.training.profile.unprogram.edit', $training->id) }}" class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-pencil-square me-1"></i> Edit Training Details
-                                                </a>
-                                            @endif
                                         </div>
+                                    @endif
+                                @empty
+                                    <div class="alert alert-info text-center">
+                                        No certificates found.
                                     </div>
-                                </div>
+                                @endforelse
                             </div>
-                        @empty
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle me-2"></i> No training resources found.
-                            </div>
-                        @endforelse
-                    </div>
-
-                    <!-- Pagination -->
-                    @if($trainings->hasPages())
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $trainings->withQueryString()->links() }}
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

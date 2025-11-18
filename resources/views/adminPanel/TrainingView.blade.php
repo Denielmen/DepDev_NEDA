@@ -254,8 +254,12 @@
                     <h2 class="details-title">Training Details</h2>
                     <table class="details-table">
                         <tr>
-                            <td class="label">Title/Area:</td>
+                            <td class="label">Title/Subject Area:</td>
                             <td>{{ $training->title ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Type:</td>
+                            <td>{{ $training->core_competency ?? '' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Competency:</td>

@@ -104,9 +104,15 @@ class AdminController extends Controller
         $query = Training::with(['competency'])
             ->where('type', 'Program');
 
-        // Add search functionality for core competency
+        // Add search functionality for title, competency, and core competency
         if ($search) {
-            $query->where('core_competency', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('core_competency', 'like', "%{$search}%")
+                  ->orWhereHas('competency', function ($subQ) use ($search) {
+                      $subQ->where('name', 'like', "%{$search}%");
+                  });
+            });
         }
 
         $allTrainings = $query->orderBy('core_competency')->get();

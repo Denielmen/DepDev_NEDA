@@ -200,14 +200,18 @@
                         <td>{{ $training->title ?? '' }}</td>
                     </tr>
                     <tr>
+                        <td class="label">Type:</td>
+                        <td>{{ $training->core_competency ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Competency:</td>
+                        <td>{{ $training->competency->name ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
                         <td class="label">Implementation Period:</td>
                         <td>
                             From: {{ $training->period_from ?? 'N/A' }} To: {{ $training->period_to ?? 'N/A' }}
                         </td>
-                    </tr>
-                    <tr>
-                        <td class="label">Type:</td>
-                        <td>{{ $training->core_competency ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <td class="label">User Role:</td>
@@ -252,10 +256,10 @@
                         <td class="label">Learner's Proficiency Post-Training Level:</td>
                         <td>{{ $evaluation->participant_post_rating ?? 'N/A' }}</td>
                     </tr>
-                    <tr>
-                        <td class="label">SLearner's Proficiency Pre-Training Level:</td>
+                    <!-- <tr>
+                        <td class="label">Learner's Proficiency Pre-Training Level:</td>
                         <td>{{ $evaluation->supervisor_pre_rating ?? 'N/A' }}</td>
-                    </tr>
+                    </tr> -->
                     <tr>
                         <td class="label">Learner's Proficiency Post-Training Level:</td>
                         <td>{{ $evaluation->supervisor_post_rating ?? 'N/A' }}</td>

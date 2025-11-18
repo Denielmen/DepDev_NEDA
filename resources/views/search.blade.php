@@ -229,7 +229,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}" class="active"><i class="bi bi-search me-2"></i>Search</a>

@@ -98,6 +98,18 @@
         .training-table {
             min-width: 1000px;
         }
+        .training-table td:first-child {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .training-table td:nth-child(2) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .table-header {
             background: #002e67 !important;
             color: #fff !important;
@@ -189,7 +201,7 @@
                     <form method="GET" action="{{ route('admin.reports') }}" class="d-flex align-items-center">
                         <div class="search-box me-2">
                             <i class="bi bi-search search-icon"></i>
-                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search by Core Competency...">
+                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search">
                         </div>
                         <input type="number" name="year" value="{{ $year ?? date('Y') }}" min="2020" max="2100" class="form-control me-2" style="width:100px;" placeholder="Year">
                         <button type="submit" class="btn btn-primary">Go</button>
@@ -200,7 +212,7 @@
                 <table class="table table-bordered align-middle training-table">
                     <thead>
                         <tr class="text-center align-middle">
-                            <th class="table-header">Training Program</th>
+                            <th class="table-header">Training Title/Subject</th>
                             <th class="table-header">Competency</th>
                             <th class="table-header">Provider</th>
                             <th class="table-header">CY {{ $year }}</th>

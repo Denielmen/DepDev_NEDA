@@ -284,8 +284,12 @@
                     <h2 class="details-title">Training Details</h2>
                     <table class="details-table">
                         <tr>
-                            <td class="label">Title/Area:</td>
+                            <td class="label">Title/Subject Area:</td>
                             <td>{{ $training->title ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Type:</td>
+                            <td>{{ $training->core_competency ?? '' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Three-Year Period:</td>
@@ -324,19 +328,19 @@
                             <td>{{ $training->objective ?? '' }}</td>
                         </tr>
                         <tr id="pre_rating_row">
-                            <td class="label">Participant Pre-Rating:</td>
+                            <td class="label">Learner's Proficiency Pre-Training Level:</td>
                             <td id="participant_pre_rating_display">{{ $evaluation->participant_pre_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr id="post_rating_row">
-                            <td class="label">Participant Post-Rating:</td>
+                            <td class="label">Learner's Proficiency Post-Training Level:</td>
                             <td id="participant_post_rating_display">{{ $evaluation->participant_post_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Supervisor Pre-Evaluation Rating:</td>
+                            <td class="label">Learner's Proficiency Pre-Training Level:</td>
                             <td id="supervisor_pre_rating_display">{{ $evaluation->supervisor_pre_rating ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Supervisor Post-Evaluation Rating:</td>
+                            <td class="label">Learner's Proficiency Post-Training Level:</td>
                             <td>{{ $evaluation->supervisor_post_rating ?? 'N/A' }}</td>
                         </tr>
                     </table>
