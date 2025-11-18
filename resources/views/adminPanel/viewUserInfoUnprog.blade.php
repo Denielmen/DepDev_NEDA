@@ -264,8 +264,13 @@
                 <h2 class="details-title">Training Details</h2>
                 <table class="details-table">
                     <tr>
-                        <td class="label">Title/Area:</td>
+                        <td class="label">Title/Subject Area:</td>
                         <td>{{ $training->title ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Type:</td>
+                        <td>{{ $training->core_competency ?? '' }}</td>
+                    </tr>
                     </tr>
                     <tr>
                         <td class="label">Competency:</td>
@@ -320,27 +325,27 @@
                         <td>{{ $training->status ?? '' }}</td>
                     </tr>
                     <tr id="pre_rating_row">
-                        <td class="label">Participant Pre-Rating:</td>
+                        <td class="label">Learner's Proficiency Pre-Training Level:</td>
                         <td id="participant_pre_rating_display">{{ $evaluation->participant_pre_rating ?? 'N/A' }}</td>
                     </tr>
                     <tr id="post_rating_row">
-                        <td class="label">Participant Post-Rating:</td>
+                        <td class="label">Learner's Proficiency Post-Training Level:</td>
                         <td id="participant_post_rating_display">{{ $evaluation->participant_post_rating ?? 'N/A' }}</td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                         <td class="label">Supervisor Pre-Evaluation Rating:</td>
                         <td id="supervisor_pre_rating_display">{{ $evaluation->supervisor_pre_rating ?? 'N/A' }}</td>
-                    </tr>
+                    </tr> -->
                     <tr>
-                        <td class="label">Supervisor Post-Evaluation Rating:</td>
+                        <td class="label">Learner's Proficiency Post-Training Level::</td>
                         <td>{{ $evaluation->supervisor_post_rating ?? 'N/A' }}</td>
                     </tr>
                 </table>
                 <div class="eval-buttons">
-                    <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }}, {{ $user->id }})">
+                    <!-- <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }}, {{ $user->id }})">
                         <i class="bi bi-clipboard-check"></i>
                         Pre-Eval
-                    </button>
+                    </button> -->
                     @if($evaluation->supervisor_post_rating)
                         <span class="btn btn-eval btn-post-eval disabled" style="pointer-events: none; opacity: 0.6;">
                             <i class="bi bi-clipboard-data"></i>

@@ -94,6 +94,10 @@
             background-color: white;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .training-table table {
+            min-width: 100%;
         }
         .training-table th {
             background-color: #003366;
@@ -104,6 +108,12 @@
         .training-table td {
             padding: 12px 15px;
             vertical-align: middle;
+        }
+        .training-table td:first-child {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .training-table tr:nth-child(even) {
             background-color: #f8f9fa;

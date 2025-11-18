@@ -154,8 +154,26 @@
         .table th:nth-child(1), .table td:nth-child(1) {
             min-width: 250px;
         }
+        .table td:nth-child(1) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .table th:nth-child(2), .table td:nth-child(2) {
             min-width: 250px;
+        }
+        .table td:nth-child(2) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .table td:nth-child(5) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .table th:nth-child(3), .table td:nth-child(3),
         .table th:nth-child(4), .table td:nth-child(4),
@@ -513,8 +531,7 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Training Program/ Title/ Subject Area</th>
-                            <th>Type</th>
+                            <th>Training Title/Subject</th>
                             <th>Competency</th>
                             <th>Inclusive Dates of Attendance</th>
                             <th>Provider/Organizer</th>

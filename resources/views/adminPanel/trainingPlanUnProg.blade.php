@@ -112,6 +112,10 @@
             background-color: white;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .training-table table {
+            min-width: 100%;
         }
         .training-table th {
             background-color: #003366;
@@ -122,6 +126,15 @@
         .training-table td {
             padding: 12px 15px;
             vertical-align: middle;
+        }
+        .training-table td:first-child {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .training-table td:last-child {
+            white-space: nowrap;
         }
         .training-table tr:nth-child(even) {
             background-color: #f8f9fa;
@@ -368,7 +381,7 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Training Program/Title/Subject Area</th>
+                            <th>Training Title</th>
                             <th>Type</th>
                             <th>Competency</th>
                             <th>Inclusive Dates of Attendance</th>
@@ -379,7 +392,7 @@
                     @foreach($trainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
-                            <td>{{ $training->core_competency ?? 'N/A' }}</td>
+                            <td>{{ $training->core_competency }}</td>
                             <td>{{ $training->competency->name }}</td>
                             <td>@if($training->implementation_date_from && $training->implementation_date_to)
                                     {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}

@@ -201,10 +201,10 @@
 
                     {{-- Core Competency Field --}}
                     <div class="form-group row mb-3">
-                        <label for="core_competency" class="col-md-4 col-form-label text-md-right">{{ __('Classification ') }}<span class="dot">*</span></label>
+                        <label for="core_competency" class="col-md-4 col-form-label text-md-right">{{ __('Type ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <select class="form-control @error('core_competency') is-invalid @enderror" id="core_competency" name="core_competency" required onchange="toggleCoreCompetencyInput()">
-                                <option value="">--Select Classification--</option>
+                                <option value="">-- Select Type --</option>
                                 <option value="Foundational/Mandatory" {{ old('core_competency') == 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
                                 <option value="Competency Enhancement" {{ old('core_competency') == 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
                                 <option value="Leadership/Executive Development" {{ old('core_competency') == 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
@@ -223,7 +223,7 @@
                     </div>
 
                     <div class="form-group row mb-3">
-                        <label for="title" class="col-md-4 col-form-label text-md-right">{{ __('Title/Area ') }}<span class="dot">*</span></label>
+                        <label for="title" class="col-md-4 col-form-label text-md-right">{{ __('Title/Subject Area ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <input id="title" type="text" class="form-control @error('title') is-invalid @enderror" name="title" value="{{ old('title') }}" required autocomplete="title" autofocus>
                             @error('title')
@@ -237,15 +237,20 @@
                     <div class="form-group row mb-3">
                         <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
-                            <select id="competency" class="form-control @error('competency_id') is-invalid @enderror" name="competency_id" required onchange="toggleCompetencyInput()">
-                                <option value="">Select Competency</option>
-                                @foreach($competencies as $competency)
-                                    <option value="{{ $competency->id }}" {{ old('competency_id') == $competency->id ? 'selected' : '' }}>
-                                        {{ $competency->name }}
-                                    </option>
-                                @endforeach
-                                <option value="others" {{ old('competency_id') == 'others' ? 'selected' : '' }}>Others</option>
-                            </select>
+                            <div class="position-relative">
+                                <input type="text" id="competencySearch" class="form-control" placeholder="Search or select competency..." autocomplete="off">
+                                <div id="competencyDropdown" class="dropdown-menu w-100" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 300px; overflow-y: auto; z-index: 1000;">
+                                    @foreach($competencies as $competency)
+                                        <a class="dropdown-item competency-option" href="#" data-value="{{ $competency->id }}" data-text="{{ $competency->name }}">
+                                            {{ $competency->name }}
+                                        </a>
+                                    @endforeach
+                                    <a class="dropdown-item competency-option" href="#" data-value="others" data-text="Others">
+                                        Others
+                                    </a>
+                                </div>
+                            </div>
+                            <input type="hidden" id="competency" name="competency_id" value="{{ old('competency_id') }}" required>
                             <input type="text" class="form-control mt-2 @error('competency_input') is-invalid @enderror"
                                 id="competency_input" name="competency_input"
                                 placeholder="Enter custom competency" value="{{ old('competency_input') }}" style="display: none;">
@@ -855,9 +860,16 @@
                 fetch(`{{ route('admin.getParticipants') }}?all=true&search=${encodeURIComponent(search)}`)
                     .then(response => response.json())
                     .then(data => {
-                        // Add all participants to global selection
+                        // Add all participants to global selection and set default participation type
                         data.users.forEach(user => {
                             globalSelectedParticipants.add(user.id.toString());
+                            
+                            // Set default participation type to "Participant" (first type in the list)
+                            if (data.participation_types && data.participation_types.length > 0) {
+                                const defaultType = data.participation_types.find(type => type.name.toLowerCase() === 'participant') || data.participation_types[0];
+                                localStorage.setItem(`participationType_${user.id}`, defaultType.id);
+                                console.log(`Set default participation type ${defaultType.id} for user ${user.id}`);
+                            }
                         });
 
                         // Update current page checkboxes
@@ -1393,23 +1405,73 @@
         }
 
         function toggleCompetencyInput() {
-            const competencySelect = document.getElementById('competency');
+            const competencyHidden = document.getElementById('competency');
             const competencyInput = document.getElementById('competency_input');
 
-            if (competencySelect.value === 'others') {
-                competencySelect.style.display = 'none';
+            if (competencyHidden.value === 'others') {
                 competencyInput.style.display = 'block';
                 competencyInput.required = true;
                 competencyInput.focus();
             } else {
-                competencySelect.style.display = 'block';
                 competencyInput.style.display = 'none';
                 competencyInput.required = false;
             }
         }
 
-        // Call on page load to set initial state
+        // Competency search functionality
         document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('competencySearch');
+            const dropdown = document.getElementById('competencyDropdown');
+            const competencyHidden = document.getElementById('competency');
+            const options = document.querySelectorAll('.competency-option');
+
+            // Show dropdown on focus
+            searchInput.addEventListener('focus', function() {
+                dropdown.style.display = 'block';
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== searchInput && e.target !== dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                options.forEach(option => {
+                    const text = option.getAttribute('data-text').toLowerCase();
+                    if (text.includes(filter)) {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+            });
+
+            // Select option
+            options.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const value = this.getAttribute('data-value');
+                    const text = this.getAttribute('data-text');
+                    
+                    competencyHidden.value = value;
+                    searchInput.value = text;
+                    dropdown.style.display = 'none';
+                    toggleCompetencyInput();
+                });
+            });
+
+            // Set initial display text if value exists
+            if (competencyHidden.value) {
+                const selectedOption = document.querySelector(`.competency-option[data-value="${competencyHidden.value}"]`);
+                if (selectedOption) {
+                    searchInput.value = selectedOption.getAttribute('data-text');
+                }
+            }
+
             toggleCoreCompetencyInput();
             toggleCompetencyInput();
         });

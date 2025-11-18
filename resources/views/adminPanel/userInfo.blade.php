@@ -152,8 +152,17 @@
         .table th:nth-child(1), .table td:nth-child(1) {
             min-width: 270px; /* Training Title */
         }
+        .table td:nth-child(1) {
+            max-width: 270px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .table th:nth-child(2), .table td:nth-child(2) {
             min-width: 250px; /* Competency */
+             overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .table th:nth-child(3), .table td:nth-child(3) {
             min-width: 150px; /* Period of Implementation */
@@ -333,6 +342,10 @@
         .chart-wrapper canvas {
             max-width: 100%;
             height: 100% !important;
+        }
+        
+        .chart-wrapper {
+            overflow-x: auto;
         }
             
         .profile-picture {
@@ -530,29 +543,27 @@
                             <div class="col-md-6">
                                 <!-- Display mode -->
                                 <div class="years-display">
-                                    <label class="form-label">Years in Position</label>
+                                    <label class="form-label">Start Date in Position</label>
                                     <input type="text" class="form-control" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('m/d/Y') : '' }}" readonly>
                                     <small class="text-muted">{{ $user->getFormattedYearsInPosition() }}</small>
                                 </div>
                                 <!-- Edit mode -->
                                 <div class="years-edit" style="display: none;">
-                                    <label class="form-label">Position Start Date</label>
-                                    <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date }}" readonly>
+                                    <label class="form-label">Start Date in Position</label>
+                                    <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date ? $user->position_start_date->format('Y-m-d') : '' }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <!-- Display mode -->
                                 <div class="years-display">
-                                    <label class="form-label">Years in Government</label>
+                                    <label class="form-label">Start Date in Government</label>
                                     <input type="text" class="form-control" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('m/d/Y') : '' }}" readonly>
                                     <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
                                 </div>
                                 <!-- Edit mode -->
                                 <div class="years-edit" style="display: none;">
-                                    <label class="form-label">Government Start Date</label>
-                                    <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date }}" readonly>
-                                    <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
-                                    
+                                    <label class="form-label">Start Date in Government</label>
+                                    <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date ? $user->government_start_date->format('Y-m-d') : '' }}">
                                 </div>
                             </div>
                         </div>
@@ -589,8 +600,7 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Training Program/ Title/ Subject Area</th>
-                        <th>Type</th>
+                        <th>Training Title/Subject</th>
                         <th>Competency</th>
                         <th>Period of Implementation</th>
                         <th>Provider/Organizer</th>
@@ -1162,7 +1172,14 @@
                                     ticks: {
                                         color: '#666',
                                         maxRotation: 45,
-                                        minRotation: 0
+                                        minRotation: 0,
+                                        callback: function(value) {
+                                            // Truncate long labels to 30 characters
+                                            if (value.length > 20) {
+                                                return value.substring(0, 30) + '...';
+                                            }
+                                            return value;
+                                        }
                                     }
                                 },
                                 y: {

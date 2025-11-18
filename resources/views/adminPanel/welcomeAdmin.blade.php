@@ -120,7 +120,7 @@
             margin-right: 0;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
             gap: 30px;
         }
 
@@ -134,10 +134,10 @@
         } */
         .flex {
             display: flex;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: stretch;
             gap: 30px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             width: 100%;
         }
 
@@ -310,8 +310,8 @@
                     <div class="col-md-4">
                         <div class="card text-center">
                             <a href="{{ route('admin.participants')}}" class="text-decoration-none">
-                                <h5>Employees Information</h5>
-                                <p>List and Profile of Employee.</p>
+                                <h5>Employee's Information</h5>
+                                <p>List and Profile of Employees</p>
                             </a>
                         </div>
                     </div>
@@ -322,7 +322,7 @@
                         <div class="card text-center">
                             <a href="{{ route('admin.reports')}}" class="text-decoration-none">
                                 <h5>Training Plan</h5>
-                                <p>Consolidated 3-years List of Programmed training activity.</p>
+                                <p>Consolidated List of Trainings Programmed for 3 - years.</p>
                             </a>
                         </div>
                     </div>

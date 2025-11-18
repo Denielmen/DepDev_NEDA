@@ -105,6 +105,18 @@
             padding: 12px 15px;
             vertical-align: middle;
         }
+        .training-table td:nth-child(1) {
+            max-width: 270px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .training-table td:nth-child(5) {
+            max-width: 270px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .training-table tr:nth-child(even) {
             background-color: #f8f9fa;
         }
@@ -253,7 +265,7 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Programmed/Title/Subject Area</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title/Subject</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Type</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Inclusive Date's of Attendance</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Number of Hours</th>
@@ -265,7 +277,7 @@
                         @foreach($trainings as $training)
                         <tr>
                             <td class="text-center">{{ $training->title }}</td>
-                            <td class="text-center">{{ $training->competency->name }}</td>
+                            <td class="text-center">{{ $training->core_competency  }}</td>
                             <td class="text-center">
                                 @if($training->implementation_date_from && $training->implementation_date_to)
                                     {{ $training->implementation_date_from->format('d/m/Y') }} - {{ $training->implementation_date_to->format('d/m/Y') }}

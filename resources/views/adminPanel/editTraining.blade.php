@@ -160,7 +160,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{{ route('admin.home') }}"><i class="bi bi-house-door me-2"></i>Home</a>
-            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Office Training Profile</a>
+            <a href="{{ route('admin.training-plan') }}" class="active"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
             <a href="{{ route('admin.search.index') }}"><i class="bi bi-search me-2"></i>Search</a>
@@ -180,19 +180,22 @@
                     <input type="hidden" name="id" value="{{ $training->id }}">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="title" class="form-label">Title/Area:</label>
+                            <label for="title" class="form-label">Title/Subject Area:</label>
                             <input type="text" class="form-control" id="title" name="title" value="{{ $training->title }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="core_competency" class="form-label">Classification:</label>
-                            <select class="form-control" id="core_competency" name="core_competency" required>
+                            <label for="core_competency" class="form-label">Type:</label>
+                            <select class="form-control" id="core_competency" name="core_competency" required onchange="toggleCoreCompetencyInputEdit()">
                                 <option value="">Select Core Competency...</option>
                                 <option value="Foundational/Mandatory" {{ $training->core_competency === 'Foundational/Mandatory' ? 'selected' : '' }}>Foundational/Mandatory</option>
                                 <option value="Competency Enhancement" {{ $training->core_competency === 'Competency Enhancement' ? 'selected' : '' }}>Competency Enhancement</option>
                                 <option value="Leadership/Executive Development" {{ $training->core_competency === 'Leadership/Executive Development' ? 'selected' : '' }}>Leadership/Executive Development</option>
                                 <option value="Gender and Development (GAD)-Related" {{ $training->core_competency === 'Gender and Development (GAD)-Related' ? 'selected' : '' }}>Gender and Development (GAD)-Related</option>
-                                <option value="Others" {{ $training->core_competency === 'Others' ? 'selected' : '' }}>Others</option>
+                                <option value="Others" {{ !in_array($training->core_competency, ['Foundational/Mandatory', 'Competency Enhancement', 'Leadership/Executive Development', 'Gender and Development (GAD)-Related', '']) ? 'selected' : '' }}>Others</option>
                             </select>
+                            <input type="text" class="form-control mt-2"
+                                id="core_competency_input_edit" name="core_competency_input"
+                                placeholder="Enter core competency" value="{{ $training->core_competency && !in_array($training->core_competency, ['Foundational/Mandatory', 'Competency Enhancement', 'Leadership/Executive Development', 'Gender and Development (GAD)-Related', 'Others', '']) ? $training->core_competency : '' }}" style="display: none;">
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -1055,6 +1058,25 @@
 
         });
 
+        // Function to toggle core competency input field
+        function toggleCoreCompetencyInputEdit() {
+            const coreCompetencySelect = document.getElementById('core_competency');
+            const coreCompetencyInput = document.getElementById('core_competency_input_edit');
+
+            if (coreCompetencySelect && coreCompetencyInput) {
+                if (coreCompetencySelect.value === 'Others') {
+                    coreCompetencySelect.style.display = 'none';
+                    coreCompetencyInput.style.display = 'block';
+                    coreCompetencyInput.required = true;
+                    coreCompetencyInput.focus();
+                } else {
+                    coreCompetencySelect.style.display = 'block';
+                    coreCompetencyInput.style.display = 'none';
+                    coreCompetencyInput.required = false;
+                }
+            }
+        }
+
         // Function to toggle competency input field - moved outside DOMContentLoaded
         function toggleCompetencyInputEdit() {
             const competencySelect = document.getElementById('competency');
@@ -1077,6 +1099,7 @@
         // Call on page load to set initial state
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
+                toggleCoreCompetencyInputEdit();
                 toggleCompetencyInputEdit();
             }, 100);
         });

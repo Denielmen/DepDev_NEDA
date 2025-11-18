@@ -110,6 +110,12 @@
             padding: 12px 15px;
             vertical-align: middle;
         }
+        .training-table td:nth-child(1) {
+            max-width: 270px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .training-table tr:nth-child(even) {
             background-color: #f8f9fa;
         }
@@ -273,7 +279,7 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Programmed/Title/Subject Area</th>
+                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Training Title/Subject</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Type</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Period of Implementation</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider/Organizer</th>
