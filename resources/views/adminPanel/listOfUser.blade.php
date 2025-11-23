@@ -170,6 +170,18 @@
             vertical-align: middle;
             border-bottom: 1px solid #dee2e6;
         }
+        .table-container td:nth-child(4) {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .table-container td:nth-child(5) {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .table-container tr:nth-child(even) {
             background-color: #f8f9fa;
         }
