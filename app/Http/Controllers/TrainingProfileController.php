@@ -1524,4 +1524,6 @@ class TrainingProfileController extends Controller
             ], 500);
         }
     }
+
+    
 }

@@ -156,4 +156,14 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+    
+    public function getProfilePictureUrlAttribute()
+    {
+    if ($this->profile_picture) {
+        return asset('storage/' . $this->profile_picture);
+    }
+    return asset('images/default-avatar.png'); // Default image if no picture is set
+}
+
+    
 }
