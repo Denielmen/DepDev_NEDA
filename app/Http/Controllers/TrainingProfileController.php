@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TrainingsExport;
+use App\Exports\UserTrainingsExport;
 use App\Models\Competency;
 use App\Models\ParticipationType;
 use App\Models\Training;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TrainingProfileController extends Controller
 {
@@ -1375,6 +1378,31 @@ class TrainingProfileController extends Controller
         $pdf = Pdf::loadView('userPanel.training-export-pdf', compact('groupedTrainings'));
 
         return $pdf->download('my-programmed-trainings.pdf');
+    }
+
+    public function exportExcel($id)
+    {
+        $userId = Auth::id();
+
+        // Use the same logic as the program() method to get programmed trainings
+        $trainings = Training::where('type', 'Program')
+            ->whereHas('participants', function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            })
+            ->with([
+                'participants' => function ($query) use ($userId) {
+                    $query->where('users.id', $userId);
+                },
+                'competency',
+                'evaluations' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                },
+            ])
+            ->orderBy('core_competency')
+            ->orderBy('title')
+            ->get();
+
+        return Excel::download(new UserTrainingsExport($trainings), 'my-programmed-trainings.xlsx');
     }
 
     public function userProfileInfo()
