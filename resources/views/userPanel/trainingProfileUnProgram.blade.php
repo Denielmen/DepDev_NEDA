@@ -55,9 +55,13 @@
             font-weight: bold;
         }
         .main-content {
-            flex-grow: 1;
-            padding: 20px;  
             margin-left: 270px;
+            margin-top: 56px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            background-color: rgb(187, 219, 252);
+            padding: 20px;
+            width: calc(100vw - 270px);
         }
         .content-header {
             background-color: #e7f1ff;
@@ -106,7 +110,7 @@
             vertical-align: middle;
         }
         .training-table td:nth-child(1) {
-            max-width: 270px;
+            max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -175,12 +179,16 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
-                DEPDEV Region VII Learning and Development Database System
-            </a>
+    <nav class="navbar navbar-expand-lg shadow-sm" style="background-color: #fff; position: fixed; top: 0; left: 0; width: 100%; z-index: 1040;">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="/images/DEPDev_logo.png" alt="NEDA Logo" style="height: 30px; margin-right: 10px;">
+                    <span style="color: #003366; font-size: 1rem; font-weight: bold;">
+                        DEPDEV Region VII Learning and Development Database System
+                    </span>
+                </a>
+            </div>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
@@ -189,7 +197,7 @@
                         @else
                             <i class="bi bi-person-circle"></i>
                         @endif
-                        {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
+                       {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">

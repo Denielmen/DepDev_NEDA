@@ -95,6 +95,9 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training/{id}/export', [TrainingProfileController::class, 'export'])
         ->name('user.training.export');
 
+    Route::get('/training/{id}/export-excel', [TrainingProfileController::class, 'exportExcel'])
+        ->name('user.training.export-excel');
+
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
         ->name('user.training.rate.participant');
 
@@ -210,7 +213,7 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
             })
             ->with(['competency', 'participants'])
             ->orderBy('created_at', 'desc')
-            ->paginate(5); // Show 10 trainings per page
+            ->paginate(15); // Show 10 trainings per page
         return view('adminPanel.userInfoUnprog', compact('user', 'unprogrammedTrainings'));
     })->name('admin.participants.info.unprogrammed');
 

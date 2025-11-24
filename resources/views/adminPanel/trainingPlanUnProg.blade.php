@@ -133,6 +133,18 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .training-table td:nth-child(2) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .training-table td:nth-child(3) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .training-table td:last-child {
             white-space: nowrap;
         }

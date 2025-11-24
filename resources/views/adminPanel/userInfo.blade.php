@@ -159,28 +159,49 @@
             white-space: nowrap;
         }
         .table th:nth-child(2), .table td:nth-child(2) {
-            min-width: 250px; /* Competency */
+            min-width: 250px; /* type */
              overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
         .table th:nth-child(3), .table td:nth-child(3) {
-            min-width: 150px; /* Period of Implementation */
+            min-width: 250px; /* Competency */
+        }
+        .table td:nth-child(3) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .table th:nth-child(4), .table td:nth-child(4) {
-            min-width: 100px; /* No. of Hours */
+            min-width: 150px; /* No. of Hours */
         }
         .table th:nth-child(5), .table td:nth-child(5) {
-            min-width: 150px; /* Provider */
+            min-width: 100px; /* period of implimintation */
         }
         .table th:nth-child(6), .table td:nth-child(6) {
-            min-width: 200px; /* Status */
+            min-width: 150px; /* Provider  */
+        }
+        .table td:nth-child(5) {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .table th:nth-child(7), .table td:nth-child(7) {
-            min-width: 200px; /* User Role */
+            min-width: 200px; /* Status */
+        }
+        .table td:nth-child(6) {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .table th:nth-child(8), .table td:nth-child(8) {
-            min-width: 100px; /* Details */
+            min-width: 200px; /* user role */
+        }
+        .table th:nth-child(9), .table td:nth-child(9) {
+            min-width: 100px; /* details */
         }
         .program-tabs {
             margin-bottom: 5px;
@@ -601,6 +622,7 @@
                 <thead>
                     <tr>
                         <th>Training Title/Subject</th>
+                        <th>Type</th>
                         <th>Competency</th>
                         <th>Period of Implementation</th>
                         <th>Provider/Organizer</th>

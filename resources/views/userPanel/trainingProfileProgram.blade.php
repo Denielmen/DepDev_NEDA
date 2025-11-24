@@ -116,6 +116,18 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .training-table td:nth-child(2) {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .training-table td:nth-child(3) {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .training-table tr:nth-child(even) {
             background-color: #f8f9fa;
         }
@@ -352,9 +364,12 @@
                 </div>
             </div>
             @if($trainings->count())
-                <div class="d-flex justify-content-end mt-3 mb-3">
+                <div class="d-flex justify-content-end mt-3 mb-3 gap-2">
                     <a href="{{ route('user.training.export', $trainings->first()->id) }}" class="btn btn-info">
-                        <i class="bi bi-download me-2"></i>Export
+                        <i class="bi bi-download me-2"></i>Export PDF
+                    </a>
+                    <a href="{{ route('user.training.export-excel', $trainings->first()->id) }}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
                     </a>
                 </div>  
             @endif

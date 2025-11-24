@@ -532,6 +532,7 @@
                     <thead>
                         <tr>
                             <th>Training Title/Subject</th>
+                            <th>Type</th>
                             <th>Competency</th>
                             <th>Inclusive Dates of Attendance</th>
                             <th>Provider/Organizer</th>
