@@ -244,6 +244,16 @@ class TrainingProfileController extends Controller
                     'disk' => 'public',
                     'visibility' => 'public',
                 ]);
+
+                // Skip if identical material already exists
+                $exists = \App\Models\TrainingMaterial::where('training_id', $training->id)
+                    ->where('type', 'material')
+                    ->where('file_path', $filePath)
+                    ->exists();
+                if ($exists) {
+                    continue;
+                }
+
                 \App\Models\TrainingMaterial::create([
                     'title' => $training->title,
                     'competency_id' => $training->competency_id,
@@ -300,17 +310,24 @@ class TrainingProfileController extends Controller
                         // Create a more descriptive title with original filename
                         $title = $training->title . ' Certificate - ' . $originalName;
                         
-                        // Create the certificate record
-                        \App\Models\TrainingMaterial::create([
-                            'title' => $title,
-                            'competency_id' => $training->competency_id,
-                            'user_id' => Auth::id(),
-                            'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
-                            'file_path' => $storedPath,
-                            'link' => null,
-                            'type' => 'certificate',
-                            'training_id' => $training->id,
-                        ]);
+                        // Skip if identical certificate already exists
+                        $existsCert = \App\Models\TrainingMaterial::where('training_id', $training->id)
+                            ->where('type', 'certificate')
+                            ->where('file_path', $storedPath)
+                            ->exists();
+                        if (!$existsCert) {
+                            // Create the certificate record
+                            \App\Models\TrainingMaterial::create([
+                                'title' => $title,
+                                'competency_id' => $training->competency_id,
+                                'user_id' => Auth::id(),
+                                'source' => Auth::user()->first_name.' '.Auth::user()->last_name,
+                                'file_path' => $storedPath,
+                                'link' => null,
+                                'type' => 'certificate',
+                                'training_id' => $training->id,
+                            ]);
+                        }
                     }
                 } else {
                     // Log error if file upload fails
@@ -534,59 +551,48 @@ class TrainingProfileController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'competency_id' => 'required',
-            'competency_input' => 'required_if:competency_id,others|nullable|string|max:255',
-            'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
-            'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
-            'period_from' => 'required|integer|digits:4',
-            'period_to' => 'required|integer|digits:4|gte:period_from',
-            'implementation_date_from' => 'nullable|date',
-            'implementation_date_to' => 'nullable|date',
-            'no_of_hours' => 'nullable|numeric',
-            'budget' => 'nullable|numeric',
-            'provider' => 'nullable|string|max:255',
-            'dev_target' => 'nullable|string',
-            'performance_goal' => 'nullable|string',
-            'objective' => 'nullable|string',
-            'type' => 'required|in:Program,Unprogrammed',
-            'participants' => 'required|array|min:1',
-            'participants.*' => 'exists:users,id',
-            'participation_types' => 'required|array',
-            'participant_years' => 'required|array',
-        ]);
-
-        // Handle custom competency
-        if ($validated['competency_id'] === 'others') {
-            // Check if competency already exists
-            $existingCompetency = Competency::where('name', $validated['competency_input'])->first();
-
-            if ($existingCompetency) {
-                $competencyId = $existingCompetency->id;
-            } else {
-                // Create new competency
-                $newCompetency = Competency::create([
-                    'name' => $validated['competency_input'],
-                    'description' => 'Custom competency created by user',
-                ]);
-                $competencyId = $newCompetency->id;
-            }
-        } else {
-            $competencyId = $validated['competency_id'];
-        }
-
-        foreach ($validated['participants'] as $participantId) {
-            if (
-                ! isset($validated['participation_types'][$participantId]) ||
-                ! ParticipationType::find($validated['participation_types'][$participantId])
-            ) {
-                return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
-            }
-        }
-
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
+
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'competency_id' => 'required',
+                'competency_input' => 'required_if:competency_id,others|nullable|string|max:255',
+                'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
+                'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
+                'period_from' => 'required|integer|digits:4',
+                'period_to' => 'required|integer|digits:4|gte:period_from',
+                'implementation_date_from' => 'nullable|date',
+                'implementation_date_to' => 'nullable|date',
+                'no_of_hours' => 'nullable|numeric',
+                'budget' => 'nullable|numeric',
+                'provider' => 'nullable|string|max:255',
+                'dev_target' => 'nullable|string',
+                'performance_goal' => 'nullable|string',
+                'objective' => 'nullable|string',
+                'type' => 'required|in:Program,Unprogrammed',
+                'participants' => 'required|array|min:1',
+                'participants.*' => 'exists:users,id',
+                'participation_types' => 'required|array',
+                'participant_years' => 'required|array',
+                'participant_years.*' => 'nullable|integer|min:2000|max:2100',
+            ]);
+
+            // Resolve competency ID (handle "others")
+            $competencyId = $validated['competency_id'];
+            if ($competencyId === 'others') {
+                $existingCompetency = Competency::where('name', $validated['competency_input'])->first();
+                if ($existingCompetency) {
+                    $competencyId = $existingCompetency->id;
+                } else {
+                    $competencyId = Competency::create([
+                        'name' => $validated['competency_input'],
+                        'description' => 'Custom competency created by user',
+                    ])->id;
+                }
+            }
+
+            // Create training
             $training = Training::create([
                 'title' => $validated['title'],
                 'competency_id' => $competencyId,
@@ -605,19 +611,28 @@ class TrainingProfileController extends Controller
                 'status' => 'Not Yet Implemented',
             ]);
 
+            // Attach participants with sanitized year
             foreach ($validated['participants'] as $participantId) {
+                if (! isset($validated['participation_types'][$participantId])) {
+                    return back()->withInput()->withErrors(['participants' => 'All participants must have a valid participation type.']);
+                }
+
+                $rawYear = $validated['participant_years'][$participantId] ?? $validated['period_from'];
+                $yearInt = is_numeric($rawYear) ? (int) $rawYear : (int) $validated['period_from'];
+                if ($yearInt < 2000 || $yearInt > 2100) {
+                    $yearInt = (int) $validated['period_from'];
+                }
+
                 $training->participants()->attach($participantId, [
-                    'year' => $validated['participant_years'][$participantId] ?? $validated['period_from'],
+                    'year' => $yearInt,
                     'participation_type_id' => $validated['participation_types'][$participantId],
                 ]);
             }
 
             DB::commit();
-
             return redirect()->route('admin.training-plan')->with('success', 'Training created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-
             return back()->withInput()->withErrors(['error' => 'Failed to create training: '.$e->getMessage()]);
         }
     }
@@ -805,7 +820,7 @@ class TrainingProfileController extends Controller
             if ($tab === 'materials') {
                 $q->where('type', 'material')->whereNotNull('file_path');
             } elseif ($tab === 'links') {
-                $q->where('type', 'material')->whereNotNull('link');
+                $q->where('type', 'link')->whereNotNull('link');
             } else { // certificates
                 $q->where('type', 'certificate')->where('user_id', $userId);
             }
@@ -835,7 +850,7 @@ class TrainingProfileController extends Controller
             if ($tab === 'materials') {
                 $q->where('type', 'material')->whereNotNull('file_path');
             } elseif ($tab === 'links') {
-                $q->where('type', 'material')->whereNotNull('link');
+                $q->where('type', 'link')->whereNotNull('link');
             } else { // certificates
                 $q->where('type', 'certificate')->where('user_id', $userId);
             }
@@ -1403,6 +1418,53 @@ class TrainingProfileController extends Controller
             ->get();
 
         return Excel::download(new UserTrainingsExport($trainings), 'my-programmed-trainings.xlsx');
+    }
+
+    public function exportCompleted($id)
+    {
+        $userId = Auth::id();
+
+        // Fetch user's completed (unprogrammed) trainings, same scope as userProfileInfoUnprogrammed
+        $trainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('participants', function ($q) use ($userId) {
+                        $q->where('users.id', $userId);
+                    });
+            })
+            ->with(['competency', 'participants' => function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            }])
+            ->orderBy('core_competency')
+            ->orderBy('title')
+            ->get();
+
+        $groupedTrainings = $trainings->groupBy('core_competency');
+
+        $pdf = Pdf::loadView('userPanel.training-export-pdf', compact('groupedTrainings'));
+
+        return $pdf->download('my-completed-trainings.pdf');
+    }
+
+    public function exportCompletedExcel($id)
+    {
+        $userId = Auth::id();
+
+        $trainings = Training::where('type', 'Unprogrammed')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('participants', function ($q) use ($userId) {
+                        $q->where('users.id', $userId);
+                    });
+            })
+            ->with(['competency', 'participants' => function ($q) use ($userId) {
+                $q->where('users.id', $userId);
+            }])
+            ->orderBy('core_competency')
+            ->orderBy('title')
+            ->get();
+
+        return Excel::download(new UserTrainingsExport($trainings), 'my-completed-trainings.xlsx');
     }
 
     public function userProfileInfo()

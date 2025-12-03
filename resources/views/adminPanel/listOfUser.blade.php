@@ -463,7 +463,7 @@
                                     <span class="status-text">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                                 </td>
                                 <td>{{ $user->user_id }}</td>
-                                <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init }}.</td>
+                                <td>{{ $user->last_name }}, {{ $user->first_name }} {{ $user->mid_init ? $user->mid_init . '.' : '' }}</td>
                                 <td>{{ $user->position }}</td>
                                 <td>
                                     <a href="{{ route('admin.participants.info', ['id' => $user->id]) }}" class="action-btn view">

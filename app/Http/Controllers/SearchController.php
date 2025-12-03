@@ -158,37 +158,54 @@ class SearchController extends Controller
             $results = $results->concat($trainings);
         }
 
-        // Search training materials
+        // Search training materials grouped by training
         if (in_array('Training Material', $types)) {
-            $materials = TrainingMaterial::query()
-                ->when($query, function ($q) use ($query) {
-                    $q->where(function ($q) use ($query) {
-                        $q->where('title', 'like', "%{$query}%")
-                            ->orWhereHas('competency', function ($subQ) use ($query) {
-                                $subQ->where('name', 'like', "%{$query}%");
-                            })
-                            ->orWhereHas('training', function ($subQ) use ($query) {
-                                $subQ->where('title', 'like', "%{$query}%");
-                            });
-                    });
-                })
-                ->when($competencies, function ($q) use ($competencies) {
-                    $q->whereIn('competency_id', $competencies);
-                })
-                ->where('type', 'material')
-                ->when($materialType === 'material', function ($q) {
-                    $q->whereNotNull('file_path');
-                })
-                ->when($materialType === 'link', function ($q) {
-                    $q->whereNotNull('link');
-                })
-                ->paginate(30);
-            $materials->getCollection()->transform(function ($material) {
-                $material->search_type = 'training_material';
+            // Build a trainings query constrained by the selected material type
+            $trainingsQuery = Training::query()
+                ->whereHas('materials', function ($q) use ($materialType, $query, $competencies) {
+                    // Apply material-type-specific constraints
+                    if ($materialType === 'material') {
+                        $q->where('type', 'material')->whereNotNull('file_path');
+                    } elseif ($materialType === 'link') {
+                        $q->where('type', 'link')->whereNotNull('link');
+                    } elseif ($materialType === 'certificate') {
+                        $q->where('type', 'certificate')->whereNotNull('file_path');
+                    } else {
+                        $q->whereIn('type', ['material', 'link', 'certificate']);
+                    }
 
-                return $material;
+                    // Keyword filter on material title or competency
+                    if ($query) {
+                        $q->where(function ($inner) use ($query) {
+                            $inner->where('title', 'like', "%{$query}%");
+                        });
+                    }
+
+                    if (!empty($competencies)) {
+                        $q->whereIn('competency_id', $competencies);
+                    }
+                })
+                // Also allow keyword on training title
+                ->when($query, function ($q) use ($query) {
+                    $q->where('title', 'like', "%{$query}%");
+                })
+                ->with(['materials' => function ($q) use ($materialType) {
+                    if ($materialType === 'material') {
+                        $q->where('type', 'material')->whereNotNull('file_path');
+                    } elseif ($materialType === 'link') {
+                        $q->where('type', 'link')->whereNotNull('link');
+                    } elseif ($materialType === 'certificate') {
+                        $q->where('type', 'certificate')->whereNotNull('file_path');
+                    } else {
+                        $q->whereIn('type', ['material', 'link', 'certificate']);
+                    }
+                }, 'materials.user', 'materials.competency']);
+
+            $results = $trainingsQuery->paginate(30);
+            $results->getCollection()->transform(function ($training) {
+                $training->search_type = 'training_material_group';
+                return $training;
             });
-            $results = $materials;
         }
 
         // Get all data needed for the view
@@ -306,7 +323,8 @@ class SearchController extends Controller
         }
 
         if ($format === 'pdf') {
-            $pdf = PDF::loadView('search.pdf', compact('results'));
+            $pdf = PDF::loadView('search.pdf', compact('results'))
+                ->setPaper('a4', 'landscape');
 
             return $pdf->download('search-results.pdf');
         } elseif ($format === 'excel') {

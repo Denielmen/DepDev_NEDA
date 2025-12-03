@@ -98,6 +98,12 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training/{id}/export-excel', [TrainingProfileController::class, 'exportExcel'])
         ->name('user.training.export-excel');
 
+    // Completed Trainings exports
+    Route::get('/training/completed/{id}/export', [TrainingProfileController::class, 'exportCompleted'])
+        ->name('user.training.completed.export');
+    Route::get('/training/completed/{id}/export-excel', [TrainingProfileController::class, 'exportCompletedExcel'])
+        ->name('user.training.completed.export-excel');
+
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
         ->name('user.training.rate.participant');
 
