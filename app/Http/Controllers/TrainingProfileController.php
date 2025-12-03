@@ -93,26 +93,54 @@ class TrainingProfileController extends Controller
         $sort = $request->input('sort');
         $order = $request->input('order', 'asc');
 
-        $trainingsQuery = Training::where('type', 'Unprogrammed')
+        // Base query for unprogrammed trainings
+        $unprogrammedQuery = Training::where('type', 'Unprogrammed')
             ->where(function ($query) use ($userId) {
                 $query->where('user_id', $userId)
                     ->orWhereHas('participants', function ($q) use ($userId) {
                         $q->where('users.id', $userId);
                     });
-            })
-            ->when($search, function ($q) use ($search) {
-                $q->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%$search%")
-                        ->orWhereHas('competency', function ($subQ) use ($search) {
-                            $subQ->where('name', 'like', "%$search%");
-                        });
-                });
-            })
+            });
+
+        // Query for implemented programmed trainings
+        $programmedQuery = Training::where('type', 'Program')
+            ->where('status', 'Implemented')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('participants', function ($q) use ($userId) {
+                        $q->where('users.id', $userId);
+                    });
+            });
+
+        // Apply search to both queries
+        if ($search) {
+            $searchTerm = "%$search%";
+            $unprogrammedQuery->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', $searchTerm)
+                    ->orWhereHas('competency', function ($subQ) use ($searchTerm) {
+                        $subQ->where('name', 'like', $searchTerm);
+                    });
+            });
+            
+            $programmedQuery->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', $searchTerm)
+                    ->orWhereHas('competency', function ($subQ) use ($searchTerm) {
+                        $subQ->where('name', 'like', $searchTerm);
+                    });
+            });
+        }
+
+        // Combine both queries using union
+        $trainingsQuery = $unprogrammedQuery->union($programmedQuery);
+
+        // Create a new query from the union to apply sorting and pagination
+        $trainingsQuery = Training::select('*')
+            ->fromSub($trainingsQuery, 'combined_trainings')
             ->with(['participants' => function ($query) use ($userId) {
                 $query->where('users.id', $userId);
             }]);
 
-        // Sorting logic
+        // Apply sorting
         if ($sort === 'title') {
             $trainingsQuery->orderBy('title', $order);
         } elseif ($sort === 'created_at') {

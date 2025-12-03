@@ -284,6 +284,8 @@
                                     {{ request('material_type') == 'material' ? 'selected' : '' }}>Material</option>
                                 <option value="link" {{ request('material_type') == 'link' ? 'selected' : '' }}>Link
                                 </option>
+                                <option value="certificate" {{ request('material_type') == 'certificate' ? 'selected' : '' }}>Certificate
+                                </option>
                             </select>
                         </div>
                         <!-- Additional Filters -->
@@ -519,7 +521,7 @@
                                             </td>
                                             <td>
                                                 @if ($result->file_path)
-                                                    <a href="{{ asset($result->file_path) }}" download class="btn btn-sm btn-info">Download</a>
+                                                    <a href="{{ route('user.training_materials.download', $result) }}" class="btn btn-sm btn-info">Download</a>
                                                 @elseif ($result->link)
                                                     <a href="{{ $result->link }}" target="_blank" class="btn btn-sm btn-primary">Open Link</a>
                                                 @else

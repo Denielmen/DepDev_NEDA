@@ -321,6 +321,16 @@
                     {{ $trainings->links('pagination::bootstrap-5') }}
                 </div>
             </div>
+            @if($trainings->count())
+                <div class="d-flex justify-content-end mt-3 mb-3 gap-2">
+                    <a href="{{ route('user.training.export', $trainings->first()->id) }}" class="btn" style="background-color: #003366; color: white; border-color: #003366;">
+                        <i class="bi bi-download me-2"></i>Export PDF
+                    </a>
+                    <a href="{{ route('user.training.export-excel', $trainings->first()->id) }}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
+                    </a>
+                </div>  
+            @endif
         </div>
     </div>
 

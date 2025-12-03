@@ -137,8 +137,11 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
     //         return view('userPanel.welcomeUser');
     //     })->name('user.home');
 
-    // Training Plan routes
+    // Search Trainings
+    Route::get('/search-trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'searchTrainings'])
+        ->name('admin.search-trainings');
 
+    // Training Plan routes
     Route::get('training-plan/unprogrammed', [TrainingProfileController::class, 'trainingPlanUnprogrammed'])->name('admin.training-plan.unprogrammed');
 
     Route::get('training-plan/create', [TrainingProfileController::class, 'create'])->name('admin.training-plan.create');
@@ -148,6 +151,10 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
         ->name('admin.training-plan.edit');
     Route::put('/training-plan/{training}', [TrainingProfileController::class, 'update'])
         ->name('admin.training-plan.update');
+        
+    // Training Resources
+    Route::get('/training-resources', [\App\Http\Controllers\Admin\TrainingController::class, 'resources'])
+        ->name('admin.training-resources');
     Route::delete('/training-plan/{training}/participant/{user}', [TrainingProfileController::class, 'removeParticipant'])
         ->name('admin.training-plan.remove-participant');
     Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])
