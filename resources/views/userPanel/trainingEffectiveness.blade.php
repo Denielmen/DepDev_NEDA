@@ -397,7 +397,7 @@
                                         $postButtonAttributes = $isParticipantPostEvaluated ? 'data-bs-toggle=tooltip data-bs-placement=top title="You have already completed your post-evaluation."' : '';
                                         $activePostButtonAttributes = $isParticipantPostEvaluated ? '' : 'data-bs-toggle=tooltip data-bs-placement=top title="You can only evaluate this training once."';
                                     @endphp
-                                    <tr>
+                                    <tr data-training-id="{{ $training->id }}">
                                         <td class="align-middle text-center">{{ $training->title }}</td>
                                         <td class="text-center">
                                             @if($isParticipantPreEvaluated)
@@ -688,39 +688,20 @@
                                 alert(data.message); // Show success message
                                 bootstrap.Modal.getInstance(preEvaluationModal).hide(); // Close modal
 
-                                // Update the table row dynamically
+                                // Update the table row dynamically (no full page refresh)
                                 const row = document.querySelector(`tr[data-training-id="${trainingId}"]`);
                                 if (row) {
-                                    // Assuming the order of columns is consistent
-                                    // Training Title, Status, Pre-Evaluation Rating, Post-Evaluation Rating, Average, Evaluation, View Evaluations
-                                    const preRatingCell = row.children[
-                                        2]; // Index 2 for Pre-Evaluation Rating
-                                    const postRatingCell = row.children[
-                                        3]; // Index 3 for Post-Evaluation Rating
-                                    const averageCell = row.children[4]; // Index 4 for Average
+                                    // Column 1: Title, Column 2: Pre (text or button), Column 3: Post (User/Supervisor split)
+                                    const preCell = row.querySelector('td:nth-child(2)');
+                                    const postUserCell = row.querySelector('td:nth-child(3) > div > div.border-end');
 
-                                    if (type === 'participant_pre') {
-                                        preRatingCell.textContent = data.pre_rating !== null ? data
-                                            .pre_rating : 'Empty';
-                                    } else if (type === 'participant_post') {
-                                        postRatingCell.textContent = data.post_rating !== null ? data
-                                            .post_rating : 'Empty';
+                                    if (type === 'participant_pre' && preCell) {
+                                        // Replace cell content with the new rating
+                                        preCell.textContent = (data.pre_rating !== null) ? `${data.pre_rating}` : 'Empty';
                                     }
 
-                                    // Recalculate and update Average if both are available
-                                    const currentPre = parseFloat(preRatingCell.textContent) || 0;
-                                    const currentPost = parseFloat(postRatingCell.textContent) || 0;
-
-                                    if (preRatingCell.textContent !== 'Empty' && postRatingCell
-                                        .textContent !== 'Empty') {
-                                        averageCell.textContent = ((currentPre + currentPost) / 2).toFixed(
-                                            2);
-                                    } else if (preRatingCell.textContent !== 'Empty') {
-                                        averageCell.textContent = currentPre.toFixed(2);
-                                    } else if (postRatingCell.textContent !== 'Empty') {
-                                        averageCell.textContent = currentPost.toFixed(2);
-                                    } else {
-                                        averageCell.textContent = 'Empty';
+                                    if (type === 'participant_post' && postUserCell) {
+                                        postUserCell.textContent = (data.post_rating !== null) ? `${data.post_rating}` : 'Empty';
                                     }
                                 }
                             } else {

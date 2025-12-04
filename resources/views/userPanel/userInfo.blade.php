@@ -371,7 +371,7 @@
             <div class="col-md-4">
                 <div class="user-info-card text-center">
                     <div class="user-avatar" onclick="document.getElementById('profilePictureInput').click()" title="Click to upload profile picture">
-                        @if($user->profile_picture && file_exists(public_path('storage/' . $user->profile_picture)))
+                        @if($user->profile_picture)
                             <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" id="profileImage">
                         @else
                             <i class="bi bi-person-circle" id="defaultIcon"></i>
