@@ -848,7 +848,8 @@ class TrainingProfileController extends Controller
             if ($tab === 'materials') {
                 $q->where('type', 'material')->whereNotNull('file_path');
             } elseif ($tab === 'links') {
-                $q->where('type', 'link')->whereNotNull('link');
+                // Make sure to include both 'link' type and non-empty link field
+                $q->where('type', 'link')->whereNotNull('link')->where('link', '!=', '');
             } else { // certificates
                 $q->where('type', 'certificate')->where('user_id', $userId);
             }
@@ -892,7 +893,7 @@ class TrainingProfileController extends Controller
             });
             
             $links = $training->materials->filter(function($item) use ($tab) {
-                return $tab === 'links' && $item->type === 'link' && $item->link;
+                return $tab === 'links' && $item->type === 'link' && !empty($item->link);
             });
             
             $certificates = $training->materials->filter(function($item) use ($tab, $userId) {

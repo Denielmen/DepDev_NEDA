@@ -167,7 +167,7 @@ class SearchController extends Controller
                     if ($materialType === 'material') {
                         $q->where('type', 'material')->whereNotNull('file_path');
                     } elseif ($materialType === 'link') {
-                        $q->where('type', 'link')->whereNotNull('link');
+                        $q->where('type', 'link')->whereNotNull('link')->where('link', '!=', '');
                     } elseif ($materialType === 'certificate') {
                         $q->where('type', 'certificate')->whereNotNull('file_path');
                     } else {
@@ -193,7 +193,7 @@ class SearchController extends Controller
                     if ($materialType === 'material') {
                         $q->where('type', 'material')->whereNotNull('file_path');
                     } elseif ($materialType === 'link') {
-                        $q->where('type', 'link')->whereNotNull('link');
+                        $q->where('type', 'link')->whereNotNull('link')->where('link', '!=', '');
                     } elseif ($materialType === 'certificate') {
                         $q->where('type', 'certificate')->whereNotNull('file_path');
                     } else {

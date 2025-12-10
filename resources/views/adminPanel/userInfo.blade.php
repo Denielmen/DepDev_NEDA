@@ -531,7 +531,11 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Salary Grade</label>
-                                <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
+                                <select class="form-control" name="salary_grade" readonly>
+                                    @for($i = 3; $i <= 28; $i++)
+                                        <option value="{{ $i }}" {{ $user->salary_grade == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
                             </div>
                             <div class="col-md-8">
                                 <!-- Display mode -->

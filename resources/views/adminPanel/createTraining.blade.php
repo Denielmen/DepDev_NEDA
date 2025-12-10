@@ -238,7 +238,9 @@
                         <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <div class="position-relative">
-                                <input type="text" id="competencySearch" class="form-control" placeholder="Search or select competency..." autocomplete="off">
+                                <input type="text" id="competencySearch" class="form-control @error('competency_id') is-invalid @enderror" 
+                                    placeholder="Search or select competency..." autocomplete="off" 
+                                    value="{{ old('competency_input') ?: ($competencies->find(old('competency_id'))->name ?? '') }}">
                                 <div id="competencyDropdown" class="dropdown-menu w-100" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 300px; overflow-y: auto; z-index: 1000;">
                                     @foreach($competencies as $competency)
                                         <a class="dropdown-item competency-option" href="#" data-value="{{ $competency->id }}" data-text="{{ $competency->name }}">
@@ -253,7 +255,9 @@
                             <input type="hidden" id="competency" name="competency_id" value="{{ old('competency_id') }}" required>
                             <input type="text" class="form-control mt-2 @error('competency_input') is-invalid @enderror"
                                 id="competency_input" name="competency_input"
-                                placeholder="Enter custom competency" value="{{ old('competency_input') }}" style="display: none;">
+                                placeholder="Please specify the competency" 
+                                value="{{ old('competency_input') }}" 
+                                style="display: {{ old('competency_id') === 'others' ? 'block' : 'none' }};">
                             @error('competency_id')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -389,23 +393,6 @@
                         </div>
                     </div>
 
-                    <div class="form-group row mb-3">
-                        <label for="resource_persons" class="col-md-4 col-form-label text-md-right">{{ __('Resource Speaker') }}</label>
-                        <div class="col-md-6">
-                            <div id="selectedResourcePersons" class="mb-2">
-                                <!-- Selected resource persons will be displayed here -->
-                            </div>
-                            <select id="resource_persons" class="form-control @error('resource_persons') is-invalid @enderror" name="resource_persons[]" multiple style="display: none;">
-                                {{-- Options are added via JavaScript --}}
-                            </select>
-                             @error('resource_persons')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                    </div>
-
                     <div class="text-end">
                         <a href="{{ route('admin.training-plan') }}" class="btn btn-secondary me-2">Cancel</a>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#participantModal">Add Participant</button>
@@ -529,6 +516,97 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const competencySearch = document.getElementById('competencySearch');
+            const competencyDropdown = document.getElementById('competencyDropdown');
+            const competencyInput = document.getElementById('competency_input');
+            const competencyHidden = document.getElementById('competency');
+            const competencyOptions = document.querySelectorAll('.competency-option');
+
+            // Toggle dropdown when clicking the search input
+            competencySearch.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (competencyDropdown.style.display === 'none' || !competencyDropdown.style.display) {
+                    competencyDropdown.style.display = 'block';
+                } else {
+                    competencyDropdown.style.display = 'none';
+                }
+            });
+
+            // Handle option selection
+            competencyOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const value = this.getAttribute('data-value');
+                    const text = this.getAttribute('data-text');
+
+                    if (value === 'others') {
+                        // Show the custom input field and hide the dropdown
+                        competencySearch.style.display = 'none';
+                        competencyInput.style.display = 'block';
+                        competencyInput.required = true;
+                        competencyHidden.value = 'others';
+                        competencyInput.focus();
+                    } else {
+                        // Set the selected competency
+                        competencySearch.value = text;
+                        competencyHidden.value = value;
+                        competencyInput.style.display = 'none';
+                        competencyInput.required = false;
+                        competencyInput.value = ''; // Clear custom input when selecting from dropdown
+                    }
+                    competencyDropdown.style.display = 'none';
+                });
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function() {
+                competencyDropdown.style.display = 'none';
+            });
+
+            // Prevent dropdown from closing when clicking inside it
+            competencyDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Filter options when typing
+            competencySearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const options = competencyDropdown.querySelectorAll('.competency-option');
+                
+                options.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    if (text.includes(searchTerm) || searchTerm === '') {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+            });
+
+            // Handle custom input blur
+            competencyInput.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    // If custom input is empty, show the dropdown again
+                    this.style.display = 'none';
+                    competencySearch.style.display = 'block';
+                    competencySearch.value = '';
+                    competencyHidden.value = '';
+                    competencyInput.required = false;
+                } else {
+                    // Update the search input with the custom value for display
+                    competencySearch.value = this.value;
+                }
+            });
+
+            // Initialize form with existing values if any
+            if (competencyInput.value) {
+                competencySearch.style.display = 'none';
+                competencyInput.style.display = 'block';
+            }
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const participantsSelect = document.getElementById('participants');
