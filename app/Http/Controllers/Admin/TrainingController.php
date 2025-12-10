@@ -18,7 +18,17 @@ class TrainingController extends Controller
 
     public function unprogrammed()
     {
-        $trainings = Training::where('type', 'Unprogrammed')->get();
+        $trainings = Training::where(function ($query) {
+                $query->where('type', 'Unprogrammed');
+            })
+            ->orWhere(function ($query) {
+                $query->where('type', 'Program')
+                      ->where('status', 'Implemented');
+            })
+            ->with(['competency', 'participants'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
         return view('adminPanel.trainingPlanUnProg', compact('trainings'));
     }
 
