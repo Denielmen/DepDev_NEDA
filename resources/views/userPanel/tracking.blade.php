@@ -406,15 +406,22 @@
                             </div>
                             <div class="col-md-8 form-group">
                                 <label class="form-label">Competency:</label>
-                                <select id="competency" name="competency_id" class="form-control" required onchange="toggleCompetencyInput()">
-                                    <option value="" disabled selected>Select Competency</option>
-                                    @foreach ($competencies as $competency)
-                                        <option value="{{ $competency->id }}">{{ $competency->name }}</option>
-                                    @endforeach
-                                    <option value="others">Others</option>
-                                </select>
+                                <div class="position-relative">
+                                    <input type="text" id="competencySearch" class="form-control" placeholder="Search, select, or type competency..." autocomplete="off">
+                                    <div id="competencyDropdown" class="dropdown-menu w-100" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 300px; overflow-y: auto; z-index: 1000; background: white; border: 1px solid #ced4da; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        @foreach($competencies as $competency)
+                                            <a class="dropdown-item competency-option" href="#" data-value="{{ $competency->id }}" data-text="{{ $competency->name }}">
+                                                {{ $competency->name }}
+                                            </a>
+                                        @endforeach
+                                        <a class="dropdown-item competency-option" href="#" data-value="others" data-text="Others">
+                                            Others
+                                        </a>
+                                    </div>
+                                </div>
                                 <input type="text" class="form-control mt-2" id="competency_input" name="competency_input"
                                     placeholder="Enter custom competency" style="display: none;">
+                                <input type="hidden" id="competency_id" name="competency_id" value="">
                             </div>
                             <div class="col-md-3 form-group">
                                 <label class="form-label">Role:</label>
@@ -512,7 +519,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const alignedTrainingSelect = document.getElementById('alignedTraining');
             const trainingTitleInput = document.querySelector('input[name="training_title"]');
-            const competencySelect = document.getElementById('competency');
+            const competencySearch = document.getElementById('competencySearch');
+            const competencyHidden = document.getElementById('competency_id');
             const roleSelect = document.getElementById('role');
             const noOfHoursInput = document.querySelector('input[name="no_of_hours"]');
             const expensesInput = document.querySelector('input[name="expenses"]');
@@ -558,6 +566,9 @@
             alignedTrainingSelect.addEventListener('change', function() {
                 const selectedTrainingId = this.value;
                 const coreCompetencySelect = document.getElementById('core_competency');
+                const competencySearch = document.getElementById('competencySearch');
+                const competencyHidden = document.getElementById('competency_id');
+                const competencyInput = document.getElementById('competency_input');
 
                 console.log('Selected Training ID:', selectedTrainingId);
                 console.log('Available trainings:', trainings);
@@ -565,7 +576,8 @@
                 if (selectedTrainingId === 'other') {
                     // Clear fields for "Other" selection
                     trainingTitleInput.value = '';
-                    competencySelect.value = '';
+                    competencySearch.value = '';
+                    competencyHidden.value = '';
                     coreCompetencySelect.value = '';
                     roleSelect.value = '';
                     noOfHoursInput.value = '';
@@ -575,8 +587,7 @@
                     dateToInput.value = '';
 
                     // Reset competency input visibility
-                    const competencyInput = document.getElementById('competency_input');
-                    competencySelect.style.display = 'block';
+                    competencySearch.style.display = 'block';
                     competencyInput.style.display = 'none';
                     competencyInput.required = false;
                     competencyInput.value = '';
@@ -601,25 +612,24 @@
                     trainingTitleInput.value = selectedTraining.title || '';
 
                     // Set competency and reset input visibility
-                    const competencyInput = document.getElementById('competency_input');
-
                     if (selectedTraining.competency_id) {
                         // Check if the competency exists in the dropdown
-                        const competencyOption = competencySelect.querySelector(`option[value="${selectedTraining.competency_id}"]`);
+                        const competencyOption = document.querySelector(`.competency-option[data-value="${selectedTraining.competency_id}"]`);
 
                         if (competencyOption) {
-                            // Standard competency - show dropdown and select it
-                            competencySelect.style.display = 'block';
+                            // Standard competency - show search input and set values
+                            competencySearch.style.display = 'block';
                             competencyInput.style.display = 'none';
                             competencyInput.required = false;
-                            competencySelect.value = selectedTraining.competency_id;
+                            competencySearch.value = competencyOption.dataset.text;
+                            competencyHidden.value = selectedTraining.competency_id;
                         } else if (selectedTraining.competency && selectedTraining.competency.name) {
                             // Custom competency - show input field with the competency name
-                            competencySelect.style.display = 'none';
+                            competencySearch.style.display = 'none';
                             competencyInput.style.display = 'block';
                             competencyInput.required = true;
                             competencyInput.value = selectedTraining.competency.name;
-                            competencySelect.value = 'others';
+                            competencyHidden.value = 'others';
                         }
                     }
 
@@ -677,18 +687,80 @@
                 }
             });
 
-            // Function to toggle competency input field
-            window.toggleCompetencyInput = function() {
-                const competencySelect = document.getElementById('competency');
-                const competencyInput = document.getElementById('competency_input');
+            // Competency search functionality
+            const competencyOptions = document.querySelectorAll('.competency-option');
 
-                if (competencySelect.value === 'others') {
-                    competencySelect.style.display = 'none';
+            // Show dropdown when search input is focused
+            competencySearch.addEventListener('focus', function() {
+                competencyDropdown.style.display = 'block';
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!competencySearch.contains(e.target) && !competencyDropdown.contains(e.target)) {
+                    competencyDropdown.style.display = 'none';
+                }
+            });
+
+            // Filter options based on search input
+            competencySearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                competencyOptions.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+            });
+
+            // Handle option selection
+            competencyOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const value = this.dataset.value;
+                    const text = this.dataset.text;
+                    
+                    // Get elements locally to avoid scope issues
+                    const searchInput = document.getElementById('competencySearch');
+                    const dropdown = document.getElementById('competencyDropdown');
+                    const customInput = document.getElementById('competency_input');
+                    const hiddenInput = document.getElementById('competency_id');
+                    
+                    searchInput.value = text;
+                    hiddenInput.value = value;
+                    dropdown.style.display = 'none';
+                    
+                    // Handle "Others" selection
+                    if (value === 'others') {
+                        searchInput.style.display = 'none';
+                        customInput.style.display = 'block';
+                        customInput.required = true;
+                        customInput.focus();
+                        customInput.value = ''; // Clear any previous value
+                    } else {
+                        searchInput.style.display = 'block';
+                        customInput.style.display = 'none';
+                        customInput.required = false;
+                        customInput.value = '';
+                    }
+                });
+            });
+
+            // Function to toggle competency input field (for backward compatibility)
+            window.toggleCompetencyInput = function() {
+                const competencySearch = document.getElementById('competencySearch');
+                const competencyInput = document.getElementById('competency_input');
+                const competencyHidden = document.getElementById('competency_id');
+
+                if (competencyHidden.value === 'others') {
+                    competencySearch.style.display = 'none';
                     competencyInput.style.display = 'block';
                     competencyInput.required = true;
                     competencyInput.focus();
                 } else {
-                    competencySelect.style.display = 'block';
+                    competencySearch.style.display = 'block';
                     competencyInput.style.display = 'none';
                     competencyInput.required = false;
                 }
@@ -835,6 +907,46 @@
                 linkMaterialsInput.focus();
                 uploadMaterialsInput.style.display = 'none';
             });
+
+            // Handle link input and display preview
+            let linkPreviewContainer = null;
+            
+            linkMaterialsInput.addEventListener('input', function() {
+                const linkValue = this.value.trim();
+                
+                if (linkValue) {
+                    // Create or update link preview
+                    if (!linkPreviewContainer) {
+                        linkPreviewContainer = document.createElement('div');
+                        linkPreviewContainer.className = 'mt-3';
+                        linkPreviewContainer.id = 'linkPreviewContainer';
+                        filePreview.parentNode.insertBefore(linkPreviewContainer, filePreview.nextSibling);
+                    }
+                    
+                    linkPreviewContainer.innerHTML = `
+                        <div style="display: flex; align-items: center; margin-bottom: 10px; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; background: #f8f9fa;">
+                            <i class="bi bi-link-45deg me-2" style="font-size: 1.2rem; color: #003366;"></i>
+                            <a href="${linkValue}" target="_blank" style="color: #003366; text-decoration: none; margin-right: 10px;">${linkValue}</a>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeLink()">Remove</button>
+                        </div>
+                    `;
+                } else {
+                    // Remove preview if link is empty
+                    if (linkPreviewContainer) {
+                        linkPreviewContainer.remove();
+                        linkPreviewContainer = null;
+                    }
+                }
+            });
+
+            // Function to remove link
+            window.removeLink = function() {
+                linkMaterialsInput.value = '';
+                if (linkPreviewContainer) {
+                    linkPreviewContainer.remove();
+                    linkPreviewContainer = null;
+                }
+            };
 
             // Optionally, hide link input when user selects a file
             uploadMaterialsInput.addEventListener('change', function() {
