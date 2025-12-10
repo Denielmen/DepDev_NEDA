@@ -13,17 +13,19 @@ class ParticipationTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('participation_types')->insert([
-            [
-                'name' => 'Participant',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Resource Speaker',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        $types = [
+            'Participant',
+            'Resource Speaker',
+        ];
+
+        foreach ($types as $type) {
+            DB::table('participation_types')->updateOrCreate(
+                ['name' => $type],
+                [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
     }
 }
