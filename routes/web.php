@@ -95,6 +95,12 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training/{id}/export', [TrainingProfileController::class, 'export'])
         ->name('user.training.export');
 
+    Route::get('/training/{id}/export-unprogrammed', [TrainingProfileController::class, 'exportUnprogrammed'])
+        ->name('user.training.export-unprogrammed');
+
+    Route::get('/training/{id}/export-excel-unprogrammed', [TrainingProfileController::class, 'exportExcelUnprogrammed'])
+        ->name('user.training.export-excel-unprogrammed');
+
     Route::get('/training/{id}/export-excel', [TrainingProfileController::class, 'exportExcel'])
         ->name('user.training.export-excel');
 
@@ -204,12 +210,13 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
 
     Route::get('/participants/{id}/unprogrammed', function ($id) {
         $user = \App\Models\User::findOrFail($id);
-        $unprogrammedTrainings = \App\Models\Training::where('type', 'Unprogrammed')
-            ->where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                    ->orWhereHas('participants', function ($q) use ($user) {
-                        $q->where('users.id', $user->id);
-                    });
+        $unprogrammedTrainings = \App\Models\Training::whereHas('participants', function ($q) use ($user) {
+                $q->where('users.id', $user->id)
+                  ->where('training_participants.status', 'Implemented');
+            })
+            ->orWhere(function ($query) use ($user) {
+                $query->where('type', 'Unprogrammed')
+                      ->where('user_id', $user->id);
             })
             ->with(['competency', 'participants'])
             ->orderBy('created_at', 'desc')
