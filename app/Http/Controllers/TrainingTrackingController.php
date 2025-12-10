@@ -119,7 +119,9 @@ class TrainingTrackingController extends Controller
             ]);
             $training->participants()->attach(Auth::id(), [
                 'participation_type_id' => $request->input('participation_type_id'),
-                'year' => date('Y')
+                'year' => date('Y'),
+                'type' => 'Unprogrammed',
+                'status' => 'Implemented'
             ]);
         } else {
             $training = Training::find($request->input('courseTitle'));
@@ -128,14 +130,37 @@ class TrainingTrackingController extends Controller
                 $training->implementation_date_from = $request->input('implementation_date_from');
                 $training->core_competency = $coreCompetency; // Use processed classification
                 $training->implementation_date_to = $request->input('implementation_date_to');
+                // $training->status = 'Implemented'; // Set global status to Implemented
                 $training->save();
-                // Attach participant if not already attached
-                if (!$training->participants()->where('training_participants.user_id', Auth::id())->exists()) {
+                // Update or attach participant with Implemented status
+                $existingParticipant = $training->participants()
+                    ->where('training_participants.user_id', Auth::id())
+                    ->first();
+                    
+                if ($existingParticipant) {
+                    // Update existing participant to Implemented
+                    $training->participants()->updateExistingPivot(Auth::id(), [
+                        'status' => 'Implemented'
+                    ]);
+                } else {
+                    // Attach new participant with Implemented status
                     $training->participants()->attach(Auth::id(), [
                         'participation_type_id' => $request->input('participation_type_id'),
-                        'year' => date('Y')
+                        'year' => date('Y'),
+                        'type' => $training->type,
+                        'status' => 'Implemented'
                     ]);
                 }
+            }
+            
+            // Check if all participants are now Implemented
+            $allParticipantsImplemented = $training->participants()
+                ->where('training_participants.status', '!=', 'Implemented')
+                ->count() === 0;
+                
+            if ($allParticipantsImplemented && $training->participants()->count() > 0) {
+                $training->status = 'Implemented';
+                $training->save();
             }
         }
 
@@ -168,7 +193,7 @@ class TrainingTrackingController extends Controller
                 'source'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
                 'file_path'     => null,
                 'link'          => $request->linkMaterials,
-                'type'          => 'material',
+                'type'          => 'link',
                 'training_id'   => $training->id, // Ensure training_id is set
             ]);
         }
