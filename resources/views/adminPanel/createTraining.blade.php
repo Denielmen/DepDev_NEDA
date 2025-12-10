@@ -238,28 +238,17 @@
                         <label for="competency" class="col-md-4 col-form-label text-md-right">{{ __('Competency ') }}<span class="dot">*</span></label>
                         <div class="col-md-6">
                             <div class="position-relative">
-                                <input type="text" id="competencySearch" class="form-control" placeholder="Search or select competency..." autocomplete="off">
+                                <input type="text" id="competencySearch" class="form-control" placeholder="Search, select, or type competency..." autocomplete="off">
                                 <div id="competencyDropdown" class="dropdown-menu w-100" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 300px; overflow-y: auto; z-index: 1000;">
                                     @foreach($competencies as $competency)
                                         <a class="dropdown-item competency-option" href="#" data-value="{{ $competency->id }}" data-text="{{ $competency->name }}">
                                             {{ $competency->name }}
                                         </a>
                                     @endforeach
-                                    <a class="dropdown-item competency-option" href="#" data-value="others" data-text="Others">
-                                        Others
-                                    </a>
                                 </div>
                             </div>
                             <input type="hidden" id="competency" name="competency_id" value="{{ old('competency_id') }}" required>
-                            <input type="text" class="form-control mt-2 @error('competency_input') is-invalid @enderror"
-                                id="competency_input" name="competency_input"
-                                placeholder="Enter custom competency" value="{{ old('competency_input') }}" style="display: none;">
                             @error('competency_id')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                            @error('competency_input')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
@@ -1327,10 +1316,12 @@
 
                 // Log form data - Keep this, it now reads from the hidden inputs
                 const formData = new FormData(form);
+                const competencyId = formData.get('competency_id');
+                const competencySearchValue = document.getElementById('competencySearch').value;
+                
                 console.log('Form data:', {
                     title: formData.get('title'),
-                    competency_id: formData.get('competency_id') === 'others' ? 'others' : formData.get('competency_id'),
-                    competency_input: formData.get('competency_input'),
+                    competency_id: competencyId === 'custom' ? competencySearchValue : competencyId,
                     core_competency: formData.get('core_competency') === 'Others' ? formData.get('core_competency_input') : formData.get('core_competency'), // Get the correct core competency value
                     period_from: formData.get('period_from'),
                     period_to: formData.get('period_to'),
@@ -1351,6 +1342,11 @@
                             .map(([key, value]) => [key.match(/\[(\d+)\]/)[1], value]) // Corrected regex escaping
                     )
                 });
+
+                // Update the hidden field for form submission
+                if (competencyId === 'custom') {
+                    document.getElementById('competency').value = competencySearchValue;
+                }
 
                 if (isValid) {
                     console.log('Form is valid, submitting...');
@@ -1385,6 +1381,14 @@
             }
         }
 
+        function toggleCompetencyInput() {
+            const competencyHidden = document.getElementById('competency');
+            const competencySearch = document.getElementById('competencySearch');
+
+            // This function is now simplified since we're using the same input field
+            // The logic will be handled in the event listeners
+        }
+
         function toggleCoreCompetencyInput() {
             const coreCompetencySelect = document.getElementById('core_competency');
             const coreCompetencyInput = document.getElementById('core_competency_input');
@@ -1402,20 +1406,6 @@
              // Ensure the correct value is sent in the form based on which element is visible/used
              // This might require updating a hidden field or handling in the form submission logic.
              // The form submission logic already handles this by checking the select value.
-        }
-
-        function toggleCompetencyInput() {
-            const competencyHidden = document.getElementById('competency');
-            const competencyInput = document.getElementById('competency_input');
-
-            if (competencyHidden.value === 'others') {
-                competencyInput.style.display = 'block';
-                competencyInput.required = true;
-                competencyInput.focus();
-            } else {
-                competencyInput.style.display = 'none';
-                competencyInput.required = false;
-            }
         }
 
         // Competency search functionality
@@ -1440,14 +1430,24 @@
             // Search functionality
             searchInput.addEventListener('input', function() {
                 const filter = this.value.toLowerCase();
+                let hasMatch = false;
+                
                 options.forEach(option => {
                     const text = option.getAttribute('data-text').toLowerCase();
                     if (text.includes(filter)) {
                         option.style.display = 'block';
+                        hasMatch = true;
                     } else {
                         option.style.display = 'none';
                     }
                 });
+
+                // If no matches and user typed something, treat as custom input
+                if (!hasMatch && this.value.trim() !== '') {
+                    competencyHidden.value = 'custom';
+                } else if (this.value.trim() === '') {
+                    competencyHidden.value = '';
+                }
             });
 
             // Select option
@@ -1460,20 +1460,44 @@
                     competencyHidden.value = value;
                     searchInput.value = text;
                     dropdown.style.display = 'none';
-                    toggleCompetencyInput();
                 });
+            });
+
+            // Handle blur event to validate custom input
+            searchInput.addEventListener('blur', function() {
+                const inputValue = this.value.trim();
+                
+                // Check if input matches any existing competency
+                let isExistingCompetency = false;
+                options.forEach(option => {
+                    if (option.getAttribute('data-text').toLowerCase() === inputValue.toLowerCase()) {
+                        isExistingCompetency = true;
+                        competencyHidden.value = option.getAttribute('data-value');
+                    }
+                });
+
+                // If not existing and not empty, set as custom
+                if (!isExistingCompetency && inputValue !== '') {
+                    competencyHidden.value = 'custom';
+                } else if (inputValue === '') {
+                    competencyHidden.value = '';
+                }
             });
 
             // Set initial display text if value exists
             if (competencyHidden.value) {
-                const selectedOption = document.querySelector(`.competency-option[data-value="${competencyHidden.value}"]`);
-                if (selectedOption) {
-                    searchInput.value = selectedOption.getAttribute('data-text');
+                if (competencyHidden.value === 'custom') {
+                    // Keep the custom input as is
+                    searchInput.value = searchInput.value || '';
+                } else {
+                    const selectedOption = document.querySelector(`.competency-option[data-value="${competencyHidden.value}"]`);
+                    if (selectedOption) {
+                        searchInput.value = selectedOption.getAttribute('data-text');
+                    }
                 }
             }
 
             toggleCoreCompetencyInput();
-            toggleCompetencyInput();
         });
 
         function searchParticipants() {
