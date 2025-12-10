@@ -365,18 +365,22 @@
                                     <td>{{ $user->division }}</td>
                                     <td>
                                         <select class="form-select participation-type" data-user-id="{{ $user->id }}">
-                                            <option value="">Select Type</option>
                                             @foreach($participationTypes as $type)
-                                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                                <option value="{{ $type->id }}" {{ strtolower($type->name) == 'participant' ? 'selected' : '' }}>{{ $type->name }}</option>
                                             @endforeach
                                         </select>
                                     </td>
                                     <td>
                                         <select class="form-select participant-year" data-user-id="{{ $user->id }}">
-                                            <option value="">Select Year</option>
-                                            <option value="{{ $training->period_from }}">CY-{{ $training->period_from }}</option>
-                                            <option value="{{ $training->period_from+1 }}">CY-{{ $training->period_from+1 }}</option>
-                                            <option value="{{ $training->period_from+2 }}">CY-{{ $training->period_from+2 }}</option>
+                                            @php
+                                                $currentYear = date('Y');
+                                                $periodFrom = $training->period_from;
+                                                // Default to current year if it's within the training period, otherwise default to period_from
+                                                $defaultYear = ($currentYear >= $periodFrom && $currentYear <= $periodFrom + 2) ? $currentYear : $periodFrom;
+                                            @endphp
+                                            <option value="{{ $periodFrom }}" {{ $defaultYear == $periodFrom ? 'selected' : '' }}>CY-{{ $periodFrom }}</option>
+                                            <option value="{{ $periodFrom+1 }}" {{ $defaultYear == $periodFrom + 1 ? 'selected' : '' }}>CY-{{ $periodFrom+1 }}</option>
+                                            <option value="{{ $periodFrom+2 }}" {{ $defaultYear == $periodFrom + 2 ? 'selected' : '' }}>CY-{{ $periodFrom+2 }}</option>
                                         </select>
                                     </td>
                                     <td>
@@ -586,9 +590,19 @@
                 const row = document.createElement('tr');
                 row.className = 'participant-row';
 
-                let participationTypeOptions = '<option value="">Select Type</option>';
+                // Find the "Participant" type ID for default selection
+                const participantType = participationTypes.find(type => type.name.toLowerCase() === 'participant');
+                const defaultTypeId = participantType ? participantType.id : '';
+                
+                // Calculate default year
+                const currentYear = new Date().getFullYear();
+                const periodFrom = {{ $training->period_from }};
+                const defaultYear = (currentYear >= periodFrom && currentYear <= periodFrom + 2) ? currentYear : periodFrom;
+
+                let participationTypeOptions = '';
                 participationTypes.forEach(type => {
-                    participationTypeOptions += `<option value="${type.id}">${type.name}</option>`;
+                    const selected = type.id === defaultTypeId ? 'selected' : '';
+                    participationTypeOptions += `<option value="${type.id}" ${selected}>${type.name}</option>`;
                 });
 
                 row.innerHTML = `
@@ -602,15 +616,14 @@
                     </td>
                     <td>
                         <select class="form-select participant-year" data-user-id="${user.id}">
-                            <option value="">Select Year</option>
-                            <option value="{{ $training->period_from }}">CY-{{ $training->period_from }}</option>
-                            <option value="{{ $training->period_from+1 }}">CY-{{ $training->period_from+1 }}</option>
-                            <option value="{{ $training->period_from+2 }}">CY-{{ $training->period_from+2 }}</option>
+                            <option value="${periodFrom}" ${defaultYear == periodFrom ? 'selected' : ''}>CY-${periodFrom}</option>
+                            <option value="${periodFrom+1}" ${defaultYear == periodFrom + 1 ? 'selected' : ''}>CY-${periodFrom+1}</option>
+                            <option value="${periodFrom+2}" ${defaultYear == periodFrom + 2 ? 'selected' : ''}>CY-${periodFrom+2}</option>
                         </select>
                     </td>
                     <td>
                         <input type="checkbox" class="form-check-input participant-checkbox" data-user-id="${user.id}">
-                    </td>+
+                    </td>
                 `;
 
                 return row;
@@ -907,9 +920,19 @@
 
                             if (visibleParticipationSelect) {
                                 participationTypeId = visibleParticipationSelect.value;
+                            } else {
+                                // Use default participation type (Participant) when not visible
+                                const participantType = data.participation_types.find(type => type.name.toLowerCase() === 'participant');
+                                participationTypeId = participantType ? participantType.id : '';
                             }
+                            
                             if (visibleYearSelect) {
                                 participantYear = visibleYearSelect.value;
+                            } else {
+                                // Use default year when not visible
+                                const currentYear = new Date().getFullYear();
+                                const periodFrom = {{ $training->period_from }};
+                                participantYear = (currentYear >= periodFrom && currentYear <= periodFrom + 2) ? currentYear : periodFrom;
                             }
 
                             // Check if participation type is missing
