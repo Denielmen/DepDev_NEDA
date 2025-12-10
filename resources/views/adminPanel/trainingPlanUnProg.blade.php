@@ -404,7 +404,7 @@
                     @foreach($trainings as $training)
                         <tr>
                             <td>{{ $training->title }}</td>
-                            <td>{{ $training->core_competency }}</td>
+                            <td>{{ $training->type }}</td>
                             <td>{{ $training->competency->name }}</td>
                             <td>@if($training->implementation_date_from && $training->implementation_date_to)
                                     {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
