@@ -276,14 +276,13 @@
                             </div>
                         </div>
                         <!-- Material Type Filter (only for Training Material) -->
-                        <div class="col-md-4 material-type-filter" style="display: none;">
+                        <div class="col-md-3">
                             <label for="material_type" class="form-label">Material Type</label>
-                            <select name="material_type" id="material_type" class="form-select">
+                            <select class="form-select" id="material_type" name="material_type" onchange="this.form.submit()">
                                 <option value="">All Types</option>
-                                <option value="material"
-                                    {{ request('material_type') == 'material' ? 'selected' : '' }}>Material</option>
-                                <option value="link" {{ request('material_type') == 'link' ? 'selected' : '' }}>Link</option>
-                                <option value="certificate" {{ request('material_type') == 'certificate' ? 'selected' : '' }}>Certificate</option>
+                                <option value="material" {{ request('material_type') == 'material' ? 'selected' : '' }}>Materials</option>
+                                <option value="link" {{ request('material_type') == 'link' ? 'selected' : '' }}>Links</option>
+                                <option value="certificate" {{ request('material_type') == 'certificate' ? 'selected' : '' }}>Certificates</option>
                             </select>
                         </div>
                         <!-- Additional Filters -->
@@ -479,68 +478,94 @@
                         </div>
                     </div>
                 @endif
-                <!-- Grouped Training Materials by Training (Accordion) -->
+                <!-- Grouped Training Materials by Training -->
                 @if ($results instanceof \Illuminate\Pagination\LengthAwarePaginator && $results->getCollection()->where('search_type', 'training_material_group')->isNotEmpty())
+                    @php
+                        $selectedType = request('material_type');
+                        $showTabs = empty($selectedType);
+                    @endphp
+                    
                     <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            @php
-                                $mt = request('material_type');
-                                $sectionTitle = $mt === 'link' ? 'Links' : ($mt === 'certificate' ? 'Certificates' : 'Materials');
-                            @endphp
-                            <i class="bi bi-collection me-2"></i>{{ $sectionTitle }}
-                        </div>
-                        <div class="accordion" id="materialsGroupedAccordion">
-                            @foreach ($results as $training)
-                                @if ($training->search_type === 'training_material_group')
-                                    @php $count = $training->materials->count(); @endphp
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header" id="heading-{{ $training->id }}">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $training->id }}" aria-expanded="false" aria-controls="collapse-{{ $training->id }}">
-                                                <strong>{{ $training->title }}</strong>
-                                                <span class="badge bg-light text-dark ms-2">{{ $count }} item(s)</span>
-                                            </button>
-                                        </h2>
-                                        <div id="collapse-{{ $training->id }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $training->id }}" data-bs-parent="#materialsGroupedAccordion">
-                                            <div class="accordion-body p-0">
-                                                <table class="table table-hover mb-0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="text-center">Title</th>
-                                                            <th class="text-center">Type</th>
-                                                            <th class="text-center">Source</th>
-                                                            <th class="text-center">Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($training->materials as $material)
-                                                            <tr>
-                                                                <td class="text-center">{{ $material->title }}</td>
-                                                                <td class="text-center">{{ ucfirst($material->type) }}</td>
-                                                                <td class="text-center">{{ $material->source ?? 'N/A' }}</td>
-                                                                <td class="text-center">
-                                                                    @if ($material->type === 'material' || $material->type === 'certificate')
-                                                                        @if ($material->file_path)
-                                                                            <a href="{{ route('user.training_materials.download', $material->id) }}" class="btn btn-sm btn-info">Download</a>
-                                                                        @else
-                                                                            <span class="text-muted">No file</span>
-                                                                        @endif
-                                                                    @elseif ($material->type === 'link')
-                                                                        @if ($material->link)
-                                                                            <a href="{{ $material->link }}" target="_blank" class="btn btn-sm btn-primary">Open Link</a>
-                                                                        @else
-                                                                            <span class="text-muted">No link</span>
-                                                                        @endif
-                                                                    @endif
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-collection me-2"></i>
+                                @if($showTabs)
+                                    All Types
+                                @else
+                                    {{ ucfirst($selectedType) }}
                                 @endif
-                            @endforeach
+                            </div>
+                        </div>
+                        
+                        @if($showTabs)
+                        <!-- Tabs Navigation (only show when All Types is selected) -->
+                        <ul class="nav nav-tabs" id="materialsTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#materials" type="button" role="tab" aria-controls="materials" 
+                                    aria-selected="true">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Materials
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="links-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#links" type="button" role="tab" 
+                                    aria-controls="links" aria-selected="false">
+                                    <i class="bi bi-link-45deg me-1"></i> Links
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="certificates-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#certificates" type="button" role="tab" 
+                                    aria-controls="certificates" aria-selected="false">
+                                    <i class="bi bi-award me-1"></i> Certificates
+                                </button>
+                            </li>
+                        </ul>
+                        @endif
+                        
+                        <div class="tab-content p-3" id="materialsTabContent">
+                            @if($showTabs)
+                                <!-- Materials Tab (shown when All Types is selected) -->
+                                <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                                    @include('partials.materials_section', [
+                                        'materials' => $results->getCollection()->flatMap->materials->where('type', 'material'),
+                                        'type' => 'material',
+                                        'accordionId' => 'materialsAccordion',
+                                        'emptyMessage' => 'No materials found'
+                                    ])
+                                </div>
+                                
+                                <!-- Links Tab (shown when All Types is selected) -->
+                                <div class="tab-pane fade" id="links" role="tabpanel" aria-labelledby="links-tab">
+                                    @include('partials.materials_section', [
+                                        'materials' => $results->getCollection()->flatMap->materials->where('type', 'link'),
+                                        'type' => 'link',
+                                        'accordionId' => 'linksAccordion',
+                                        'emptyMessage' => 'No links found'
+                                    ])
+                                </div>
+                                
+                                <!-- Certificates Tab (shown when All Types is selected) -->
+                                <div class="tab-pane fade" id="certificates" role="tabpanel" aria-labelledby="certificates-tab">
+                                    @include('partials.materials_section', [
+                                        'materials' => $results->getCollection()->flatMap->materials->where('type', 'certificate'),
+                                        'type' => 'certificate',
+                                        'accordionId' => 'certificatesAccordion',
+                                        'emptyMessage' => 'No certificates found'
+                                    ])
+                                </div>
+                            @else
+                                <!-- Single Type View (when a specific material type is selected) -->
+                                <div class="tab-pane fade show active">
+                                    @include('partials.materials_section', [
+                                        'materials' => $results->getCollection()->flatMap->materials->where('type', $selectedType),
+                                        'type' => $selectedType,
+                                        'accordionId' => 'materialsAccordion',
+                                        'emptyMessage' => 'No ' . $selectedType . ' found'
+                                    ])
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif

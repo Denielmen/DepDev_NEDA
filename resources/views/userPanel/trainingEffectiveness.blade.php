@@ -492,60 +492,71 @@
         <!-- Pre-Evaluation Modal -->
         <div class="modal fade" id="preEvaluationModal" tabindex="-1" aria-labelledby="preEvaluationModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="preEvaluationModalLabel">Pre-Evaluation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="preEvaluationModalLabel">Pre-Training Evaluation Form</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                         <!-- Message area for "No data" -->
-                        <div id="preEvaluationNoDataMessage" class="alert alert-info text-center"
-                            style="display: none;">
+                        <div id="preEvaluationNoDataMessage" class="alert alert-info text-center" style="display: none;">
                             No pre-evaluation data found for this training.
                         </div>
                         <form method="POST" id="preEvaluationForm">
                             @csrf
                             <input type="hidden" name="training_id" id="modalTrainingId">
                             <input type="hidden" name="type" id="modalEvaluationType">
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th colspan="5">D. Learner's Proficiency Level</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 70%;">In a scale 1-4 (4 is being the highest), please
-                                                tick
-                                                the circle which describes the proficiency level of your subordinate
-                                                after participation in this course.</td>
-                                            <td>1</td>
-                                            <td>2</td>
-                                            <td>3</td>
-                                            <td>4</td>
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td><input class="form-check-input" type="radio"
-                                                    name="proficiency_level" id="proficiency1" value="1"></td>
-                                            <td><input class="form-check-input" type="radio"
-                                                    name="proficiency_level" id="proficiency2" value="2"></td>
-                                            <td><input class="form-check-input" type="radio"
-                                                    name="proficiency_level" id="proficiency3" value="3"></td>
-                                            <td><input class="form-check-input" type="radio"
-                                                    name="proficiency_level" id="proficiency4" value="4"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">D. Learner's Proficiency Level</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mb-0" style="table-layout: fixed; width: 100%;">
+                                            <colgroup>
+                                                <col style="width: 60%;">
+                                                <col style="width: 10%;">
+                                                <col style="width: 10%;">
+                                                <col style="width: 10%;">
+                                                <col style="width: 10%;">
+                                            </colgroup>
+                                            <tr>
+                                                <th>In a scale 4-1 (4 being the highest), please tick the circle which best describes your proficiency after your participation in this course.</th>
+                                                <th class="text-center">1</th>
+                                                <th class="text-center">2</th>
+                                                <th class="text-center">3</th>
+                                                <th class="text-center">4</th>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td class="align-middle text-center">
+                                                    <input type="radio" class="form-check-input" name="proficiency_level" id="proficiency1" value="1" required>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <input type="radio" class="form-check-input" name="proficiency_level" id="proficiency2" value="2">
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <input type="radio" class="form-check-input" name="proficiency_level" id="proficiency3" value="3">
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <input type="radio" class="form-check-input" name="proficiency_level" id="proficiency4" value="4">
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" form="preEvaluationForm" class="btn btn-primary"
-                            id="submitPreEvaluation">Submit</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> Close
+                        </button>
+                        <button type="submit" form="preEvaluationForm" class="btn btn-primary" id="submitPreEvaluation">
+                            <i class="bi bi-check-circle me-1"></i> Submit Evaluation
+                        </button>
                     </div>
                 </div>
             </div>
@@ -559,12 +570,16 @@
                 const modalProficiencyRadios = preEvaluationForm.querySelectorAll('input[name="proficiency_level"]');
                 const preEvaluationNoDataMessage = document.getElementById('preEvaluationNoDataMessage');
 
-                // Initialize tooltips
-                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                // Initialize tooltips with better options
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
                 var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl)
-                })
-                console.log(`Initialized ${tooltipList.length} Bootstrap tooltips.`);
+                    return new bootstrap.Tooltip(tooltipTriggerEl, {
+                        container: 'body',
+                        trigger: 'hover',
+                        placement: 'top',
+                        html: true
+                    });
+                });
 
                 preEvaluationModal.addEventListener('show.bs.modal', function(event) {
                     const button = event.relatedTarget;
