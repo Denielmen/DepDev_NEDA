@@ -398,7 +398,7 @@
                     </div>
                     <input type="file" id="profilePictureInput" class="avatar-upload-input" accept="image/*" onchange="uploadProfilePicture(this)">
                     <div id="nameDisplay">
-                        <h4>{{ $user->first_name }} {{ $user->last_name }}</h4>
+                        <h4>{{ $user->first_name }} {{ $user->mid_init ? $user->mid_init . '.' : '' }} {{ $user->last_name }}</h4>
                     </div>
                     <p class="text-muted mb-0">ID: {{ $user->user_id }}</p>
                     <p class="text-muted mb-0">{{ $user->position }}</p>
@@ -427,9 +427,13 @@
                         @method('PUT')
                         <div id="nameEdit" style="display: none;">
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label">First Name</label>
                                     <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">MI</label>
+                                    <input type="text" class="form-control" name="mid_init" value="{{ $user->mid_init ?? '' }}" maxlength="2">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Last Name</label>
@@ -501,7 +505,7 @@
                             <input type="text" class="form-control" name="position" value="{{ $user->position }}" readonly>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Name of Supervisor (Last, First, MI)</label>
+                            <label class="form-label">Name of Immediate Supervisor (Last, First, MI)</label>
                             <input type="text" class="form-control" name="superior" value="{{ $user->superior }}" readonly>
                         </div>
                     </form>

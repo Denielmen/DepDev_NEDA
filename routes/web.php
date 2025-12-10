@@ -98,6 +98,12 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training/{id}/export-excel', [TrainingProfileController::class, 'exportExcel'])
         ->name('user.training.export-excel');
 
+    // Completed Trainings exports
+    Route::get('/training/completed/{id}/export', [TrainingProfileController::class, 'exportCompleted'])
+        ->name('user.training.completed.export');
+    Route::get('/training/completed/{id}/export-excel', [TrainingProfileController::class, 'exportCompletedExcel'])
+        ->name('user.training.completed.export-excel');
+
     Route::post('/training/{id}/rate', [TrainingProfileController::class, 'rateParticipant'])
         ->name('user.training.rate.participant');
 
@@ -137,8 +143,11 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
     //         return view('userPanel.welcomeUser');
     //     })->name('user.home');
 
-    // Training Plan routes
+    // Search Trainings
+    Route::get('/search-trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'searchTrainings'])
+        ->name('admin.search-trainings');
 
+    // Training Plan routes
     Route::get('training-plan/unprogrammed', [TrainingProfileController::class, 'trainingPlanUnprogrammed'])->name('admin.training-plan.unprogrammed');
 
     Route::get('training-plan/create', [TrainingProfileController::class, 'create'])->name('admin.training-plan.create');
@@ -148,6 +157,10 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
         ->name('admin.training-plan.edit');
     Route::put('/training-plan/{training}', [TrainingProfileController::class, 'update'])
         ->name('admin.training-plan.update');
+        
+    // Training Resources
+    Route::get('/training-resources', [\App\Http\Controllers\Admin\TrainingController::class, 'resources'])
+        ->name('admin.training-resources');
     Route::delete('/training-plan/{training}/participant/{user}', [TrainingProfileController::class, 'removeParticipant'])
         ->name('admin.training-plan.remove-participant');
     Route::delete('/training-plan/{training}', [TrainingProfileController::class, 'destroy'])

@@ -300,8 +300,18 @@
                             <td>{{ $training->competency->name ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Year of Implementation:</td>
-                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
+                            <td class="label">Period of Implementation:</td>
+                            <td>
+                                @if($training->implementation_date_from && $training->implementation_date_to)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @elseif($training->implementation_date_from)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }}
+                                @elseif($training->implementation_date_to)
+                                    {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="label">Budget:</td>
@@ -345,10 +355,6 @@
                         </tr>
                     </table>
                     <div class="eval-buttons">
-                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }}, {{ $user->id }})">
-                            <i class="bi bi-clipboard-check"></i>
-                            Pre-Eval
-                        </button>
                         @if($evaluation->supervisor_post_rating)
                             <span class="btn btn-eval btn-post-eval disabled" style="pointer-events: none; opacity: 0.6;">
                                 <i class="bi bi-clipboard-data"></i>
@@ -368,49 +374,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
-    <!-- Evaluation Modal -->
-    <div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="evaluationModalLabel">Pre-Evaluation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card mb-3">
-                        <div class="card-header fw-bold">D. Learner's Proficiency Level</div>
-                        <div class="card-body p-0">
-                            <div id="currentRatingMsg" class="mb-2 text-primary"></div>
-                            <table class="table table-bordered mb-0">
-                                <tr>
-                                    <td rowspan="2" style="vertical-align: middle; width:60%">
-                                        In a scale 4-1 (4 being the highest), please tick the circle which best describes the proficiency level of your subordinate after participation in this course.
-                                    </td>
-                                    <th class="text-center">1</th>
-                                    <th class="text-center">2</th>
-                                    <th class="text-center">3</th>
-                                    <th class="text-center">4</th>
-                                </tr>
-                                <tr id="rating_inputs">
-                                    <td class="text-center"><input type="radio" name="proficiency_level" value="1" required></td>
-                                    <td class="text-center"><input type="radio" name="proficiency_level" value="2"></td>
-                                    <td class="text-center"><input type="radio" name="proficiency_level" value="3"></td>
-                                    <td class="text-center"><input type="radio" name="proficiency_level" value="4"></td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    <input type="hidden" id="modalTrainingId" value="">
-                    <input type="hidden" id="modalUserId" value="">
-                    @csrf
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="submitEvaluationBtn">Submit</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Certificate Modal -->
     <div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
@@ -509,103 +473,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const evaluationModal = new bootstrap.Modal(document.getElementById('evaluationModal'));
-            const submitEvaluationBtn = document.getElementById('submitEvaluationBtn');
-            const preRatingDisplay = document.getElementById('participant_pre_rating_display');
-            const ratingInputs = document.querySelectorAll('input[name="proficiency_level"]');
-
-            window.showPreEvalModal = function(trainingId, userId) {
-                // Get the current supervisor pre-rating from the table
-                const supervisorPreRatingDisplay = document.getElementById('supervisor_pre_rating_display');
-                const currentRating = supervisorPreRatingDisplay ? supervisorPreRatingDisplay.textContent : 'N/A';
-                document.getElementById('modalTrainingId').value = trainingId;
-                document.getElementById('modalUserId').value = userId;
-
-                // If there's a previous rating, show it and disable inputs
-                if (currentRating && currentRating !== 'N/A') {
-                    ratingInputs.forEach(input => {
-                        input.disabled = true;
-                        if (input.value === currentRating) {
-                            input.checked = true;
-                        }
-                    });
-                    submitEvaluationBtn.disabled = true;
-                    submitEvaluationBtn.style.cursor = 'not-allowed';
-                    // Optionally show a message indicating it's already rated
-                    document.getElementById('currentRatingMsg').textContent = 'This training has already been pre-evaluated by the supervisor.';
-                    document.getElementById('currentRatingMsg').style.display = 'block';
-                } else {
-                    // If no rating yet, enable inputs and submit button
-                    ratingInputs.forEach(input => {
-                        input.disabled = false;
-                        input.checked = false;
-                    });
-                    submitEvaluationBtn.disabled = false;
-                    submitEvaluationBtn.style.cursor = 'pointer';
-                    document.getElementById('currentRatingMsg').style.display = 'none'; // Hide message
-                }
-
-                evaluationModal.show();
-            };
-
-            if (submitEvaluationBtn) {
-                submitEvaluationBtn.addEventListener('click', function () {
-                    const rating = document.querySelector('input[name="proficiency_level"]:checked');
-                    const trainingId = document.getElementById('modalTrainingId').value;
-                    const userId = document.getElementById('modalUserId').value;
-                    const csrfToken = document.querySelector('input[name="_token"]').value;
-
-                    if (!rating || !trainingId || !userId) {
-                        alert('Please select a rating.');
-                        return;
-                    }
-
-                    // Disable inputs and button immediately on submit attempt
-                    ratingInputs.forEach(input => input.disabled = true);
-                    submitEvaluationBtn.disabled = true;
-                    submitEvaluationBtn.style.cursor = 'not-allowed';
-
-                    fetch('{{ route('admin.training.rate', ':id') }}'.replace(':id', trainingId), {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({
-                            type: 'supervisor_pre',
-                            rating: rating.value,
-                            user_id: userId
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Pre-Evaluation submitted successfully!');
-                            evaluationModal.hide();
-                            // Update the display with the new rating
-                            document.getElementById('supervisor_pre_rating_display').textContent = data.supervisor_pre_rating;
-
-                            // Inputs and button are already disabled from the attempt, keep them that way
-
-                        } else {
-                            alert('Error submitting evaluation.' + (data.message ? ': ' + data.message : ''));
-                            // Re-enable inputs and button on failure so user can try again
-                            ratingInputs.forEach(input => input.disabled = false);
-                            submitEvaluationBtn.disabled = false;
-                            submitEvaluationBtn.style.cursor = 'pointer';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while submitting the evaluation.');
-                        // Re-enable inputs and button on error so user can try again
-                        ratingInputs.forEach(input => input.disabled = false);
-                        submitEvaluationBtn.disabled = false;
-                        submitEvaluationBtn.style.cursor = 'pointer';
-                    });
-                });
-            }
+            // No Pre-Eval interactions; Post-Eval remains as a link
         });
 
         function fixCertificates() {

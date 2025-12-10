@@ -270,8 +270,18 @@
                             <td> {{ $training->period_from ?? '' }} - {{ $training->period_to ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Year of Implementation:</td>
-                            <td>{{ $training->implementation_date_from ? $training->implementation_date_from->format('m/d/Y') : '' }}</td>
+                            <td class="label">Period of Implementation:</td>
+                            <td>
+                                @if($training->implementation_date_from && $training->implementation_date_to)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @elseif($training->implementation_date_from)
+                                    {{ $training->implementation_date_from->format('m/d/Y') }}
+                                @elseif($training->implementation_date_to)
+                                    {{ $training->implementation_date_to->format('m/d/Y') }}
+                                @else
+                                    
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="label">Budget (per hour):</td>
