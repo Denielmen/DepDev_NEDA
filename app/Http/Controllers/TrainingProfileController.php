@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\TrainingsExport;
 use App\Exports\UserTrainingsExport;
+use App\Exports\UserTrainingsUnprogrammedExport;
 use App\Models\Competency;
 use App\Models\ParticipationType;
 use App\Models\Training;
@@ -93,12 +94,30 @@ class TrainingProfileController extends Controller
         $sort = $request->input('sort');
         $order = $request->input('order', 'asc');
 
-        $trainingsQuery = Training::where('type', 'Unprogrammed')
-            ->where(function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                    ->orWhereHas('participants', function ($q) use ($userId) {
-                        $q->where('users.id', $userId);
+        $trainingsQuery = Training::where(function ($query) use ($userId) {
+                // Include Unprogrammed trainings (original logic)
+                $query->where('type', 'Unprogrammed')
+                    ->where(function ($subQuery) use ($userId) {
+                        $subQuery->where('user_id', $userId)
+                            ->orWhereHas('participants', function ($q) use ($userId) {
+                                $q->where('users.id', $userId);
+                            });
                     });
+                
+                // Also include Program trainings with 'Implemented' status
+                $query->orWhere(function ($subQuery) use ($userId) {
+                    $subQuery->where('type', 'Program')
+                        ->whereHas('participants', function ($q) use ($userId) {
+                            $q->where('users.id', $userId)
+                              ->where('training_participants.status', 'Implemented');
+                        })
+                        ->where(function ($finalQuery) use ($userId) {
+                            $finalQuery->where('user_id', $userId)
+                                ->orWhereHas('participants', function ($q) use ($userId) {
+                                    $q->where('users.id', $userId);
+                                });
+                        });
+                });
             })
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q) use ($search) {
@@ -323,7 +342,7 @@ class TrainingProfileController extends Controller
             }
         }
 
-        return redirect()->route('user.training.resources')
+        return redirect()->route('user.training.profile.unprogram.show', $training->id)
             ->with('success', 'Training updated successfully.');
     }
 
@@ -537,7 +556,6 @@ class TrainingProfileController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'competency_id' => 'required',
-            'competency_input' => 'required_if:competency_id,others|nullable|string|max:255',
             'core_competency' => 'required|string|in:Foundational/Mandatory,Competency Enhancement,Leadership/Executive Development,Gender and Development (GAD)-Related,Others',
             'core_competency_input' => 'required_if:core_competency,Others|nullable|string|max:255',
             'period_from' => 'required|integer|digits:4',
@@ -557,22 +575,26 @@ class TrainingProfileController extends Controller
             'participant_years' => 'required|array',
         ]);
 
-        // Handle custom competency
-        if ($validated['competency_id'] === 'others') {
+        // Handle custom competency - check if competency_id is not an integer (custom input)
+        if (!is_numeric($validated['competency_id'])) {
+            // This is a custom competency input
+            $customCompetencyName = $validated['competency_id'];
+            
             // Check if competency already exists
-            $existingCompetency = Competency::where('name', $validated['competency_input'])->first();
+            $existingCompetency = Competency::where('name', $customCompetencyName)->first();
 
             if ($existingCompetency) {
                 $competencyId = $existingCompetency->id;
             } else {
                 // Create new competency
                 $newCompetency = Competency::create([
-                    'name' => $validated['competency_input'],
+                    'name' => $customCompetencyName,
                     'description' => 'Custom competency created by user',
                 ]);
                 $competencyId = $newCompetency->id;
             }
         } else {
+            // This is an existing competency ID
             $competencyId = $validated['competency_id'];
         }
 
@@ -805,7 +827,7 @@ class TrainingProfileController extends Controller
             if ($tab === 'materials') {
                 $q->where('type', 'material')->whereNotNull('file_path');
             } elseif ($tab === 'links') {
-                $q->where('type', 'material')->whereNotNull('link');
+                $q->where('type', 'link')->whereNotNull('link');
             } else { // certificates
                 $q->where('type', 'certificate')->where('user_id', $userId);
             }
@@ -835,7 +857,7 @@ class TrainingProfileController extends Controller
             if ($tab === 'materials') {
                 $q->where('type', 'material')->whereNotNull('file_path');
             } elseif ($tab === 'links') {
-                $q->where('type', 'material')->whereNotNull('link');
+                $q->where('type', 'link')->whereNotNull('link');
             } else { // certificates
                 $q->where('type', 'certificate')->where('user_id', $userId);
             }
@@ -1378,6 +1400,91 @@ class TrainingProfileController extends Controller
         $pdf = Pdf::loadView('userPanel.training-export-pdf', compact('groupedTrainings'));
 
         return $pdf->download('my-programmed-trainings.pdf');
+    }
+
+    public function exportUnprogrammed($id)
+    {
+        $userId = Auth::id();
+
+        // Use the same logic as the unprogrammed() method to get unprogrammed trainings
+        $trainingsQuery = Training::where(function ($query) use ($userId) {
+                // Include Unprogrammed trainings (original logic)
+                $query->where('type', 'Unprogrammed')
+                    ->where(function ($subQuery) use ($userId) {
+                        $subQuery->where('user_id', $userId)
+                            ->orWhereHas('participants', function ($q) use ($userId) {
+                                $q->where('users.id', $userId);
+                            });
+                    });
+                
+                // Also include Program trainings with 'Implemented' status
+                $query->orWhere(function ($subQuery) use ($userId) {
+                    $subQuery->where('type', 'Program')
+                        ->whereHas('participants', function ($q) use ($userId) {
+                            $q->where('users.id', $userId)
+                              ->where('training_participants.status', 'Implemented');
+                        })
+                        ->where(function ($finalQuery) use ($userId) {
+                            $finalQuery->where('user_id', $userId)
+                                ->orWhereHas('participants', function ($q) use ($userId) {
+                                    $q->where('users.id', $userId);
+                                });
+                        });
+                });
+            })
+            ->with(['participants' => function ($query) use ($userId) {
+                $query->where('users.id', $userId);
+            }])
+            ->orderBy('created_at', 'desc');
+
+        $trainings = $trainingsQuery->get();
+
+        // Group trainings by core competency
+        $groupedTrainings = $trainings->groupBy('core_competency');
+
+        $pdf = Pdf::loadView('userPanel.training-export-pdf-unprogrammed', compact('groupedTrainings'));
+
+        return $pdf->download('my-completed-trainings.pdf');
+    }
+
+    public function exportExcelUnprogrammed($id)
+    {
+        $userId = Auth::id();
+
+        // Use the same logic as the unprogrammed() method to get unprogrammed trainings
+        $trainingsQuery = Training::where(function ($query) use ($userId) {
+                // Include Unprogrammed trainings (original logic)
+                $query->where('type', 'Unprogrammed')
+                    ->where(function ($subQuery) use ($userId) {
+                        $subQuery->where('user_id', $userId)
+                            ->orWhereHas('participants', function ($q) use ($userId) {
+                                $q->where('users.id', $userId);
+                            });
+                    });
+                
+                // Also include Program trainings with 'Implemented' status
+                $query->orWhere(function ($subQuery) use ($userId) {
+                    $subQuery->where('type', 'Program')
+                        ->whereHas('participants', function ($q) use ($userId) {
+                            $q->where('users.id', $userId)
+                              ->where('training_participants.status', 'Implemented');
+                        })
+                        ->where(function ($finalQuery) use ($userId) {
+                            $finalQuery->where('user_id', $userId)
+                                ->orWhereHas('participants', function ($q) use ($userId) {
+                                    $q->where('users.id', $userId);
+                                });
+                        });
+                });
+            })
+            ->with(['participants' => function ($query) use ($userId) {
+                $query->where('users.id', $userId);
+            }])
+            ->orderBy('created_at', 'desc');
+
+        $trainings = $trainingsQuery->get();
+
+        return Excel::download(new UserTrainingsUnprogrammedExport($trainings), 'my-completed-trainings.xlsx');
     }
 
     public function exportExcel($id)
