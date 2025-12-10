@@ -345,10 +345,10 @@
                         </tr>
                     </table>
                     <div class="eval-buttons">
-                        <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }}, {{ $user->id }})">
+                        <!-- <button class="btn btn-eval btn-pre-eval" onclick="showPreEvalModal({{ $training->id }}, {{ $user->id }})">
                             <i class="bi bi-clipboard-check"></i>
                             Pre-Eval
-                        </button>
+                        </button> -->
                         @if($evaluation->supervisor_post_rating)
                             <span class="btn btn-eval btn-post-eval disabled" style="pointer-events: none; opacity: 0.6;">
                                 <i class="bi bi-clipboard-data"></i>
