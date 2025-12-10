@@ -282,8 +282,8 @@
                                 <option value="">All Types</option>
                                 <option value="material"
                                     {{ request('material_type') == 'material' ? 'selected' : '' }}>Material</option>
-                                <option value="link" {{ request('material_type') == 'link' ? 'selected' : '' }}>Link</option>
-                                <option value="certificate" {{ request('material_type') == 'certificate' ? 'selected' : '' }}>Certificate</option>
+                                <option value="link" {{ request('material_type') == 'link' ? 'selected' : '' }}>Link
+                                </option>
                             </select>
                         </div>
                         <!-- Additional Filters -->
@@ -479,71 +479,6 @@
                         </div>
                     </div>
                 @endif
-                <!-- Grouped Training Materials by Training (Accordion) -->
-                @if ($results instanceof \Illuminate\Pagination\LengthAwarePaginator && $results->getCollection()->where('search_type', 'training_material_group')->isNotEmpty())
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            @php
-                                $mt = request('material_type');
-                                $sectionTitle = $mt === 'link' ? 'Links' : ($mt === 'certificate' ? 'Certificates' : 'Materials');
-                            @endphp
-                            <i class="bi bi-collection me-2"></i>{{ $sectionTitle }}
-                        </div>
-                        <div class="accordion" id="materialsGroupedAccordion">
-                            @foreach ($results as $training)
-                                @if ($training->search_type === 'training_material_group')
-                                    @php $count = $training->materials->count(); @endphp
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header" id="heading-{{ $training->id }}">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $training->id }}" aria-expanded="false" aria-controls="collapse-{{ $training->id }}">
-                                                <strong>{{ $training->title }}</strong>
-                                                <span class="badge bg-light text-dark ms-2">{{ $count }} item(s)</span>
-                                            </button>
-                                        </h2>
-                                        <div id="collapse-{{ $training->id }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $training->id }}" data-bs-parent="#materialsGroupedAccordion">
-                                            <div class="accordion-body p-0">
-                                                <table class="table table-hover mb-0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="text-center">Title</th>
-                                                            <th class="text-center">Type</th>
-                                                            <th class="text-center">Source</th>
-                                                            <th class="text-center">Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($training->materials as $material)
-                                                            <tr>
-                                                                <td class="text-center">{{ $material->title }}</td>
-                                                                <td class="text-center">{{ ucfirst($material->type) }}</td>
-                                                                <td class="text-center">{{ $material->source ?? 'N/A' }}</td>
-                                                                <td class="text-center">
-                                                                    @if ($material->type === 'material' || $material->type === 'certificate')
-                                                                        @if ($material->file_path)
-                                                                            <a href="{{ route('user.training_materials.download', $material->id) }}" class="btn btn-sm btn-info">Download</a>
-                                                                        @else
-                                                                            <span class="text-muted">No file</span>
-                                                                        @endif
-                                                                    @elseif ($material->type === 'link')
-                                                                        @if ($material->link)
-                                                                            <a href="{{ $material->link }}" target="_blank" class="btn btn-sm btn-primary">Open Link</a>
-                                                                        @else
-                                                                            <span class="text-muted">No link</span>
-                                                                        @endif
-                                                                    @endif
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
                 <!-- Training Materials Results -->
                 @if ($results->where('search_type', 'training_material')->isNotEmpty())
                     <div class="card mb-3">
@@ -574,19 +509,17 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($result->type === 'material')
+                                                @if ($result->file_path)
                                                     Material
-                                                @elseif ($result->type === 'link')
+                                                @elseif ($result->link)
                                                     Link
-                                                @elseif ($result->type === 'certificate')
-                                                    Certificate
                                                 @else
                                                     N/A
                                                 @endif
                                             </td>
                                             <td>
                                                 @if ($result->file_path)
-                                                    <a href="{{ route('user.training_materials.download', $result->id) }}" class="btn btn-sm btn-info">Download</a>
+                                                    <a href="{{ asset($result->file_path) }}" download class="btn btn-sm btn-info">Download</a>
                                                 @elseif ($result->link)
                                                     <a href="{{ $result->link }}" target="_blank" class="btn btn-sm btn-primary">Open Link</a>
                                                 @else

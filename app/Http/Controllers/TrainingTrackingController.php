@@ -136,38 +136,6 @@ class TrainingTrackingController extends Controller
                         'year' => date('Y')
                     ]);
                 }
-
-                // Duplicate into Completed Trainings (Unprogrammed) for this user if not exists
-                $existingCompleted = Training::where('type', 'Unprogrammed')
-                    ->where('user_id', Auth::id())
-                    ->where('title', $training->title)
-                    ->where('competency_id', $training->competency_id)
-                    ->where('provider', $request->input('provider'))
-                    ->whereDate('implementation_date_from', $request->input('implementation_date_from'))
-                    ->whereDate('implementation_date_to', $request->input('implementation_date_to'))
-                    ->first();
-
-                if (!$existingCompleted) {
-                    $completed = Training::create([
-                        'title' => $training->title,
-                        'competency_id' => $training->competency_id,
-                        'core_competency' => $coreCompetency,
-                        'provider' => $request->input('provider'),
-                        'no_of_hours' => $request->input('no_of_hours'),
-                        'budget' => $request->input('expenses', null),
-                        'type' => 'Unprogrammed',
-                        'status' => 'Implemented',
-                        'implementation_date_from' => $request->input('implementation_date_from'),
-                        'implementation_date_to' => $request->input('implementation_date_to'),
-                        'user_id' => Auth::id(),
-                    ]);
-
-                    // Attach current user to the duplicated completed training
-                    $completed->participants()->attach(Auth::id(), [
-                        'participation_type_id' => $request->input('participation_type_id'),
-                        'year' => date('Y')
-                    ]);
-                }
             }
         }
 
@@ -178,16 +146,6 @@ class TrainingTrackingController extends Controller
                     'disk' => 'public',
                     'visibility' => 'public',
                 ]);
-
-                // Skip if an identical material (same training, type, and file_path) already exists
-                $exists = TrainingMaterial::where('training_id', $training->id)
-                    ->where('type', 'material')
-                    ->where('file_path', $filePath)
-                    ->exists();
-                if ($exists) {
-                    continue;
-                }
-
                 TrainingMaterial::create([
                     'title'         => $training->title,
                     'competency_id' => $training->competency_id,

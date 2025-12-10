@@ -278,8 +278,7 @@
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Inclusive Date's of Attendance</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Number of Hours</th>
                             <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">Provider/Organizer</th>
-                            <th class="text-center" style="background-color: #003366; color: white; border-right: 2px solid white;">User Role</th>
-                            <th class="text-center" style="background-color: #003366; color: white;">Details</th>
+                            <th class="text-center" style="background-color: #003366; color: white;">User Role</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -314,13 +313,6 @@
                                 @endphp
                                 {{ $userRole }}
                             </td>
-                            <td class="text-center">
-                                <div class="d-inline-flex align-items-center gap-2">
-                                    <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-sm btn-primary">
-                                        <i class="bi bi-eye me-1"></i> View
-                                    </a>
-                                </div>
-                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -329,20 +321,9 @@
                     {{ $trainings->links('pagination::bootstrap-5') }}
                 </div>
             </div>
-            @if($trainings->count())
-                <div class="d-flex justify-content-end mt-3 mb-3 gap-2">
-                    <a href="{{ route('user.training.export', $trainings->first()->id) }}" class="btn" style="background-color: #003366; color: white; border-color: #003366;">
-                        <i class="bi bi-download me-2"></i>Export PDF
-                    </a>
-                    <a href="{{ route('user.training.export-excel', $trainings->first()->id) }}" class="btn btn-success">
-                        <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
-                    </a>
-                </div>
-            @endif
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
 </html></html>

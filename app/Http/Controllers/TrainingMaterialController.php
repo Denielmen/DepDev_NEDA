@@ -80,26 +80,12 @@ class TrainingMaterialController extends Controller
             return back()->with('error', 'No file available for download.');
         }
 
-        // Resolve file via the public storage disk
-        $disk = \Illuminate\Support\Facades\Storage::disk('public');
-        $relativePath = $trainingMaterial->file_path;
+        $filePath = storage_path('app/public/' . $trainingMaterial->file_path);
 
-        if (!$disk->exists($relativePath)) {
+        if (!file_exists($filePath)) {
             return back()->with('error', 'File not found.');
         }
 
-        $mime = null;
-        try {
-            $mime = $disk->mimeType($relativePath);
-        } catch (\Throwable $e) {
-            $mime = 'application/octet-stream';
-        }
-
-        $filename = basename($relativePath);
-
-        // Stream the download with proper headers
-        return $disk->download($relativePath, $filename, [
-            'Content-Type' => $mime,
-        ]);
+        return response()->download($filePath);
     }
 }

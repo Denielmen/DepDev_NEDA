@@ -516,7 +516,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">MI</label>
-                                    <input type="text" class="form-control" name="mid_init" value="{{ $user->mid_init ?? '' }}" maxlength="2">
+                                    <input type="text" class="form-control" name="mid_init" value="{{ $user->mid_init ?? '' }}" maxlength="2" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Last Name</label>
@@ -531,7 +531,12 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Salary Grade</label>
-                                <input type="text" class="form-control" name="salary_grade" value="{{ $user->salary_grade }}" readonly>
+                                <select class="form-control" name="salary_grade" readonly disabled>
+                                    <option value="">Select Salary Grade</option>
+                                    @for($i = 3; $i <= 28; $i++)
+                                        <option value="{{ $i }}" {{ $user->salary_grade == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
                             </div>
                             <div class="col-md-8">
                                 <!-- Display mode -->
@@ -559,7 +564,7 @@
                             <div class="col-md-6">
                                 <!-- Display mode -->
                                 <div class="years-display">
-                                    <label class="form-label">Years in Position</label>
+                                    <label class="form-label">Start Date in Position</label>
                                     <input type="text" class="form-control" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('m/d/Y') : '' }}" readonly>
                                     <small class="text-muted">{{ $user->getFormattedYearsInPosition() }}</small>
                                 </div>
@@ -572,7 +577,7 @@
                             <div class="col-md-6">
                                 <!-- Display mode -->
                                 <div class="years-display">
-                                    <label class="form-label">Years in Government</label>
+                                    <label class="form-label">Start Date in Government</label>
                                     <input type="text" class="form-control" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('m/d/Y') : '' }}" readonly>
                                     <small class="text-muted">{{ $user->getFormattedYearsInGovernment() }}</small>
                                 </div>
@@ -618,11 +623,11 @@
                     <tr>
                         <th>Training Title/Subject</th>
                         <th>Type</th>
-                        <th class="text-center">Competency</th>
+                        <th>Competency</th>
                         <th>Period of Implementation</th>
-                        <th class="text-center">Provider/Organizer</th>
+                        <th>Provider/Organizer</th>
                         <th>Status</th>
-                        <th class="text-center">User Role</th>
+                        <th>User Role</th>
                         <th>Details</th>
                     </tr>
                 </thead>
@@ -633,13 +638,13 @@
                         <td>
                             {{ $training->core_competency ?? 'N/A' }}
                         </td>
-                        <td class="text-center">{{ $training->competency->name ?? 'N/A' }}</td>
+                        <td>{{ $training->competency->name ?? 'N/A' }}</td>
                         <td>@if($training->status === 'Implemented' )
                                     {{ $training->implementation_date_to ? \Carbon\Carbon::parse($training->implementation_date_to)->format('m/d/Y') : 'Not set' }}
                                 @else
                                     {{ $training->period_from ?? 'Not set' }} - {{ $training->period_to ?? 'Not set' }}
                                 @endif</td>
-                        <td class="text-center">{{ $training->provider }}</td>
+                        <td>{{ $training->provider }}</td>
                         <td>
                             @php
                                 // Check if this user has completed pre-evaluation for this training
@@ -658,7 +663,7 @@
                             @endphp
                             {{ $userStatus }}
                         </td>
-                        <td class="text-center">
+                        <td>
                             @php
                                 $participationTypeName = 'N/A';
                                 // Find the participant pivot data for the current user in this training
@@ -678,7 +683,7 @@
                             @endphp
                             {{ $participationTypeName }}
                         </td>
-                        <td class="text-center">
+                        <td>
                             <a href="{{ route('admin.viewUserInfo', ['training_id' => $training->id, 'user_id' => $user->id]) }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
