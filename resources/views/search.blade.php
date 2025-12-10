@@ -402,7 +402,7 @@
                                     @foreach ($result->relatedMaterials as $material)
                                     @if ($material->file_path)
                                     {{ $loop->iteration }}.
-                                    <a href="{{ asset($material->file_path) }}" download>
+                                    <a href="{{ route('user.training_materials.download', $material->id) }}" class="text-decoration-none">
                                         {{ $material->title }}
                                     </a><br>
                                     @else
@@ -519,9 +519,17 @@
                                             </td>
                                             <td>
                                                 @if ($result->file_path)
-                                                    <a href="{{ asset($result->file_path) }}" download class="btn btn-sm btn-info">Download</a>
+                                                    <button class="btn btn-primary btn-sm"
+                                                        onclick="window.location.href = '{{ route('user.training_materials.download', $result->id) }}'"
+                                                        title="Download file">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </button>
                                                 @elseif ($result->link)
-                                                    <a href="{{ $result->link }}" target="_blank" class="btn btn-sm btn-primary">Open Link</a>
+                                                    <button class="btn btn-info btn-sm"
+                                                        onclick="window.open('{{ $result->link }}', '_blank')"
+                                                        title="Open link">
+                                                        <i class="fas fa-external-link-alt"></i> Open Link
+                                                    </button>
                                                 @else
                                                     N/A
                                                 @endif
