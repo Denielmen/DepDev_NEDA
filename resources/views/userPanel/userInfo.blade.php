@@ -413,17 +413,17 @@
                         <div class="row mb-3">
                             <div class="col-md-5">
                                 <label class="form-label">First Name</label>
-                                <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}" readonly>
+                                <input type="text" class="form-control" name="first_name" value="{{ $user->first_name }}">
                             </div>
                             <div class="col-md-2 position-relative" style="padding-top: 1.5rem;">
                                 <label class="form-label position-absolute" style="top: 0; left: 50%; transform: translateX(-50%);">MI</label>
                                 <div class="d-flex justify-content-center align-items-end h-100">
-                                    <input type="text" class="form-control text-center p-0" name="mid_init" value="{{ $user->mid_init ? substr($user->mid_init, 0, 1) : '' }}" readonly maxlength="1" style="text-transform: uppercase; width: 80px; font-size: 1rem; height: 37px; line-height: 37px; text-align: center;">
+                                    <input type="text" class="form-control text-center p-0" name="mid_init" value="{{ $user->mid_init ? substr($user->mid_init, 0, 1) : '' }}" maxlength="1" style="text-transform: uppercase; width: 80px; font-size: 1rem; height: 37px; line-height: 37px; text-align: center;" oninput="this.value = this.value.toUpperCase()">
                                 </div>
                             </div>
                             <div class="col-md-5">
                                 <label class="form-label">Last Name</label>
-                                <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}" readonly>
+                                <input type="text" class="form-control" name="last_name" value="{{ $user->last_name }}">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -456,7 +456,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Position Start Date</label>
-                                <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('Y-m-d') : '' }}" readonly>
+                                <input type="date" class="form-control" name="position_start_date" value="{{ $user->position_start_date ? \Carbon\Carbon::parse($user->position_start_date)->format('Y-m-d') : '' }}">
                                 <small class="text-muted">
                                     @if($user->position_start_date)
                                         {{ $user->getFormattedYearsInPosition() }} in current position (since {{ \Carbon\Carbon::parse($user->position_start_date)->format('F j, Y') }})
@@ -467,7 +467,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Government Start Date</label>
-                                <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('Y-m-d') : '' }}" readonly>
+                                <input type="date" class="form-control" name="government_start_date" value="{{ $user->government_start_date ? \Carbon\Carbon::parse($user->government_start_date)->format('Y-m-d') : '' }}">
                                 <small class="text-muted">
                                     @if($user->government_start_date)
                                         {{ $user->getFormattedYearsInGovernment() }} in government service (since {{ \Carbon\Carbon::parse($user->government_start_date)->format('F j, Y') }})
@@ -479,11 +479,11 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Position</label>
-                            <input type="text" class="form-control" name="position" value="{{ $user->position }}" readonly>
+                            <input type="text" class="form-control" name="position" value="{{ $user->position }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Name of Immediate Supervisor (Last, First, MI)</label>
-                            <input type="text" class="form-control" name="superior" value="{{ $user->superior }}" readonly>
+                            <input type="text" class="form-control" name="superior" value="{{ $user->superior }}">
                         </div>
                     </form>
                 </div>
@@ -593,16 +593,17 @@
             function toggleEditMode(isEditing) {
                 const inputs = form.querySelectorAll('input, select');
                 inputs.forEach(input => {
-                    if (input.name === 'first_name' || input.name === 'last_name' || input.name === 'user_id') {
-                        // Keep these fields readonly
-                        input.readOnly = true;
-                        if (input.tagName === 'SELECT') {
-                            input.disabled = true;
-                        }
-                    } else {
+                    // Make all fields editable except user_id
+                    if (input.name !== 'user_id') {
                         input.readOnly = !isEditing;
                         if (input.tagName === 'SELECT') {
                             input.disabled = !isEditing;
+                        }
+                    } else {
+                        // Keep user_id field always read-only
+                        input.readOnly = true;
+                        if (input.tagName === 'SELECT') {
+                            input.disabled = true;
                         }
                     }
                 });

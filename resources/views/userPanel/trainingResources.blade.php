@@ -114,9 +114,38 @@
             padding: 32px;
         }
 
-        .search-bar {
-            max-width: 400px;
-            margin: 0 auto 24px auto;
+        .search-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .resources-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+        
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0,0,0,.125);
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
         }
 
         .table thead th {
@@ -163,6 +192,11 @@
 </head>
 
 <body>
+@php
+    // ensure variables are defined so the view never errors
+    $filter = $filter ?? request()->query('filter', 'all');
+    $user = $user ?? auth()->user();
+@endphp
     <!-- DEPDEV Header Bar -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
@@ -172,18 +206,19 @@
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
+                    @php $user = auth()->user(); @endphp
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        @if(Auth::user()->profile_picture)
-                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @if($user && $user->profile_picture)
+                            <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="profile-picture">
                         @else
                             <i class="bi bi-person-circle"></i>
                         @endif
-                       {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
+                       {{ $user ? ($user->first_name . ' ' . $user->last_name) : '' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                        <a href="{{ route('user.profile.info') }}" class="dropdown-item">
+                        <a href="{{ $user ? route('user.profile.info') : '#' }}" class="dropdown-item">
                                 <i class="bi bi-person-lines-fill me-2"></i> Profile Info
                             </a>
                         </li>
@@ -218,207 +253,454 @@
             <div class="resources-card-wrapper">
                 <div class="resources-card">
                     <div class="d-flex align-items-center mb-3 flex-wrap">
-                        <ul class="nav nav-tabs me-2 mb-0">
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->get('tab', 'materials') == 'materials' ? 'active' : '' }}" href="?tab=materials">Materials</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->get('tab') == 'links' ? 'active' : '' }}" href="?tab=links">Links</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->get('tab') == 'certificates' ? 'active' : '' }}" href="?tab=certificates">Certificates</a>
-                            </li>
-                        </ul>
-                        <div class="dropdown ms-2 mb-0">
-                            <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-funnel-fill me-1"></i> Filter
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                                <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=title&order=asc">Title (A-Z)</a></li>
-                                <li><a class="dropdown-item {{ request('sort') == 'title' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=title&order=desc">Title (Z-A)</a></li>
-                                <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'desc' ? 'active' : '' }}" href="?sort=created_at&order=desc">Date Uploaded (Newest)</a></li>
-                                <li><a class="dropdown-item {{ request('sort') == 'created_at' && request('order') == 'asc' ? 'active' : '' }}" href="?sort=created_at&order=asc">Date Uploaded (Oldest)</a></li>
-                            </ul>
-                        </div>
-                        <form class="search-bar ms-2 flex-grow-1 mb-0" method="GET" style="max-width: 400px;">
-                        <div class="input-group">
-                                <input type="text" class="form-control" name="search" placeholder="Search by title, competency, source, or date..." value="{{ request('search') }}">
-                            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
-                        </div>
-                    </form>
-                    </div>
-                    <div class="tab-content" id="resourceTabsContent">
-                        <!-- Materials Tab -->
-                        <div class="tab-pane fade{{ request()->get('tab', 'materials') == 'materials' ? ' show active' : '' }}" id="materials" role="tabpanel" aria-labelledby="materials-tab">
-                            <div class="accordion" id="materialsAccordion">
-                                @forelse($trainings as $item)
-                                    @php
-                                        $training = $item['training'];
-                                        $materials = $item['materials'];
-                                    @endphp
-                                    @if($materials->isNotEmpty())
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $training->id }}" aria-expanded="false" aria-controls="collapse{{ $training->id }}">
-                                                    <strong>{{ $training->title }}</strong> <span class="badge bg-primary ms-2">{{ $materials->count() }} Material(s)</span>
-                                                </button>
-                                            </h2>
-                                            <div id="collapse{{ $training->id }}" class="accordion-collapse collapse" data-bs-parent="#materialsAccordion">
-                                                <div class="accordion-body p-0">
-                                                    <table class="table table-hover mb-0">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="text-center">Material Title</th>
-                                                                <th class="text-center">Source</th>
-                                                                <th class="text-center">Date Uploaded</th>
-                                                                <th class="text-center">Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($materials as $material)
-                                                                <tr>
-                                                                    <td class="text-center">{{ $material->title }}</td>
-                                                                    <td class="text-center">{{ $material->source }}</td>
-                                                                    <td class="text-center">{{ $material->created_at->format('Y-m-d') }}</td>
-                                                                    <td class="text-center">
-                                                                        <button class="btn btn-primary btn-sm me-1"
-                                                                            @if (!$material->file_path) disabled @endif
-                                                                            onclick="@if ($material->file_path) window.location.href = '{{ route('user.training_materials.download', $material->id) }}' @else alert('There\'s no file uploaded.') @endif"
-                                                                            title="@if (!$material->file_path) No file available @endif">
-                                                                            <i class="fas fa-download"></i> Download
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @empty
-                                    <div class="alert alert-info text-center">
-                                        No materials found.
+                        <div class="search-container w-100 mb-3">
+                            <div class="row g-2">
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="searchInput" placeholder="Search resources..." name="search" value="{{ request('search') }}">
+                                        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                            <i class="bi bi-search"></i> Search
+                                        </button>
                                     </div>
-                                @endforelse
-                            </div>
-                        </div>
-                        <!-- Links Tab -->
-                        <div class="tab-pane fade{{ request()->get('tab') == 'links' ? ' show active' : '' }}" id="links" role="tabpanel" aria-labelledby="links-tab">
-                            <div class="accordion" id="linksAccordion">
-                                @forelse($trainings as $item)
-                                    @php
-                                        $training = $item['training'];
-                                        $links = $item['links'];
-                                    @endphp
-                                    @if($links->isNotEmpty())
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLink{{ $training->id }}" aria-expanded="false" aria-controls="collapseLink{{ $training->id }}">
-                                                    <strong>{{ $training->title }}</strong> <span class="badge bg-primary ms-2">{{ $links->count() }} Link(s)</span>
-                                                </button>
-                                            </h2>
-                                            <div id="collapseLink{{ $training->id }}" class="accordion-collapse collapse" data-bs-parent="#linksAccordion">
-                                                <div class="accordion-body p-0">
-                                                    <table class="table table-hover mb-0">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="text-center">Link Title</th>
-                                                                <th class="text-center">Source</th>
-                                                                <th class="text-center">Date Added</th>
-                                                                <th class="text-center">Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($links as $link)
-                                                                <tr>
-                                                                    <td class="text-center">{{ $link->title }}</td>
-                                                                    <td class="text-center">{{ $link->source }}</td>
-                                                                    <td class="text-center">{{ $link->created_at->format('Y-m-d') }}</td>
-                                                                    <td class="text-center">
-                                                                        <button class="btn btn-info btn-sm"
-                                                                            @if (!$link->link) disabled @endif
-                                                                            onclick="@if ($link->link) window.open('{{ $link->link }}', '_blank') @else alert('There\'s no link pasted.') @endif"
-                                                                            title="@if (!$link->link) No link available @endif">
-                                                                            <i class="fas fa-external-link-alt"></i> Open Link
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @empty
-                                    <div class="alert alert-info text-center">
-                                        No links found.
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="filterMaterials" name="filter_materials" value="1" {{ request('filter_materials') ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="filterMaterials">Training Materials</label>
                                     </div>
-                                @endforelse
-                            </div>
-                        </div>
-                        <!-- Certificates Tab -->
-                        <div class="tab-pane fade{{ request()->get('tab') == 'certificates' ? ' show active' : '' }}" id="certificates" role="tabpanel" aria-labelledby="certificates-tab">
-                            <div class="accordion" id="certificatesAccordion">
-                                @forelse($trainings as $item)
-                                    @php
-                                        $training = $item['training'];
-                                        $certificates = $item['certificates'];
-                                    @endphp
-                                    @if($certificates->isNotEmpty())
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCert{{ $training->id }}" aria-expanded="false" aria-controls="collapseCert{{ $training->id }}">
-                                                    <strong>{{ $training->title }}</strong> <span class="badge bg-primary ms-2">{{ $certificates->count() }} Certificate(s)</span>
-                                                </button>
-                                            </h2>
-                                            <div id="collapseCert{{ $training->id }}" class="accordion-collapse collapse" data-bs-parent="#certificatesAccordion">
-                                                <div class="accordion-body p-0">
-                                                    <table class="table table-hover mb-0">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="text-center">Certificate Title</th>
-                                                                <th class="text-center">Source</th>
-                                                                <th class="text-center">Date Uploaded</th>
-                                                                <th class="text-center">Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($certificates as $certificate)
-                                                                <tr>
-                                                                    <td class="text-center">{{ $certificate->title }}</td>
-                                                                    <td class="text-center">{{ $certificate->source }}</td>
-                                                                    <td class="text-center">{{ $certificate->created_at->format('Y-m-d') }}</td>
-                                                                    <td class="text-center">
-                                                                        <button class="btn btn-primary btn-sm"
-                                                                            @if (!$certificate->file_path) disabled @endif
-                                                                            onclick="@if ($certificate->file_path) window.location.href = '{{ route('user.training_materials.download', $certificate->id) }}' @else alert('There\'s no file uploaded.') @endif"
-                                                                            title="@if (!$certificate->file_path) No file available @endif">
-                                                                            <i class="fas fa-download"></i> Download
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @empty
-                                    <div class="alert alert-info text-center">
-                                        No certificates found.
-                                    </div>
-                                @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="resources-container">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <a href="{{ route('user.training.resources', ['filter' => 'all']) }}" class="btn btn-sm {{ $filter === 'all' ? 'btn-primary' : 'btn-outline-primary' }}">All</a>
+                                <a href="{{ route('user.training.resources', ['filter' => 'materials']) }}" class="btn btn-sm {{ $filter === 'materials' ? 'btn-primary' : 'btn-outline-primary' }}">Materials</a>
+                                <a href="{{ route('user.training.resources', ['filter' => 'links']) }}" class="btn btn-sm {{ $filter === 'links' ? 'btn-primary' : 'btn-outline-primary' }}">Links</a>
+                                <a href="{{ route('user.training.resources', ['filter' => 'certificates']) }}" class="btn btn-sm {{ $filter === 'certificates' ? 'btn-primary' : 'btn-outline-primary' }}">Certificates</a>
+                            </div>
+                            <div>
+                                <!-- Upload/Open modal trigger -->
+                                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addResourceModal">
+                                    <i class="bi bi-plus-lg"></i> Add Resource
+                                </button>
+                            </div>
+                        </div>
+
+                        @if(!empty($trainings) && count($trainings) > 0)
+                            <div class="accordion" id="resourcesAccordion">
+                                @foreach($trainings as $item)
+                                    @php
+                                        $training = $item['training'] ?? $item;
+                                        $materials = collect($item['materials'] ?? [])->where('type','material')->whereNotNull('file_path');
+                                        $links = collect($item['materials'] ?? [])->where('type','link')->whereNotNull('link');
+                                        $certificates = collect($item['materials'] ?? [])->where('type','certificate');
+                                        $total = $materials->count() + $links->count() + $certificates->count();
+                                    @endphp
+
+                                    @if($total === 0)
+                                        @continue
+                                    @endif
+
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading{{ $loop->index }}">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $loop->index }}" aria-expanded="false" aria-controls="collapse{{ $loop->index }}">
+                                                {{ $training->title ?? 'Untitled Training' }}
+                                                <span class="badge bg-primary ms-2">{{ $total }} items</span>
+                                            </button>
+                                        </h2>
+                                        <div id="collapse{{ $loop->index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ $loop->index }}" data-bs-parent="#resourcesAccordion">
+                                            <div class="accordion-body">
+                                                @if(in_array($filter, ['all','materials']) && $materials->count() > 0)
+                                                    <h6 class="text-primary"><i class="bi bi-file-earmark-text me-2"></i>Materials <span class="badge bg-secondary">{{ $materials->count() }}</span></h6>
+                                                    <div class="table-responsive mb-3">
+                                                        <table class="table table-hover">
+                                                            <tbody>
+                                                                @foreach($materials as $material)
+                                                                    <tr>
+                                                                        <td>{{ $material->title ?? 'Untitled Material' }}</td>
+                                                                        <td>{{ optional($material->created_at)->format('M d, Y') }}</td>
+                                                                        <td class="text-end">
+                                                                            <a href="{{ route('user.training_materials.download', $material) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                @endif
+
+                                                @if(in_array($filter, ['all','links']) && $links->count() > 0)
+                                                    <h6 class="text-primary"><i class="bi bi-link-45deg me-2"></i>Links <span class="badge bg-secondary">{{ $links->count() }}</span></h6>
+                                                    <div class="table-responsive mb-3">
+                                                        <table class="table table-hover">
+                                                            <tbody>
+                                                                @foreach($links as $link)
+                                                                    <tr>
+                                                                        <td>{{ $link->title ?? 'Untitled Link' }}</td>
+                                                                        <td>{{ optional($link->created_at)->format('M d, Y') }}</td>
+                                                                        <td class="text-end">
+                                                                            <a href="{{ $link->link }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i> Open Link</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                @endif
+
+                                                @if(in_array($filter, ['all','certificates']) && $certificates->count() > 0)
+                                                    <h6 class="text-primary"><i class="bi bi-award me-2"></i>Certificates <span class="badge bg-secondary">{{ $certificates->count() }}</span></h6>
+                                                    <div class="table-responsive mb-3">
+                                                        <table class="table table-hover">
+                                                            <tbody>
+                                                                @foreach($certificates as $certificate)
+                                                                    <tr>
+                                                                        <td>{{ $certificate->title ?? 'Untitled Certificate' }}</td>
+                                                                        <td>{{ optional($certificate->created_at)->format('M d, Y') }}</td>
+                                                                        <td class="text-end">
+                                                                            @if(!empty($certificate->file_path))
+                                                                                <a href="{{ route('user.training_materials.download', $certificate) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                                                                            @endif
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="alert alert-info text-center">No materials found.</div>
+                        @endif
+                    </div>
+
+                    <!-- Add Resource Modal -->
+                    <div class="modal fade" id="addResourceModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form method="POST" action="{{ route('user.training.resources.store') }}" enctype="multipart/form-data" class="modal-content">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add Resource</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-2">
+                                        <label class="form-label">Training</label>
+                                        <select name="training_id" class="form-select" required>
+                                            @foreach($trainings as $t)
+                                                <option value="{{ $t['training']->id }}">{{ $t['training']->title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Type</label>
+                                        <select name="type" id="resourceType" class="form-select" required>
+                                            <option value="material">Material (file)</option>
+                                            <option value="link">Link (URL)</option>
+                                            <option value="certificate">Certificate (file)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Title</label>
+                                        <input name="title" class="form-control" required>
+                                    </div>
+                                    <div class="mb-2" id="fileInputWrap">
+                                        <label class="form-label">File</label>
+                                        <input type="file" name="file" class="form-control">
+                                    </div>
+                                    <div class="mb-2 d-none" id="linkInputWrap">
+                                        <label class="form-label">Link (URL)</label>
+                                        <input type="url" name="link" class="form-control" placeholder="https://example.com">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const typeSel = document.getElementById('resourceType');
+                            const fileWrap = document.getElementById('fileInputWrap');
+                            const linkWrap = document.getElementById('linkInputWrap');
+
+                            function toggleInputs() {
+                                const v = typeSel.value;
+                                if (v === 'link') {
+                                    linkWrap.classList.remove('d-none');
+                                    fileWrap.classList.add('d-none');
+                                } else {
+                                    linkWrap.classList.add('d-none');
+                                    fileWrap.classList.remove('d-none');
+                                }
+                            }
+                            typeSel.addEventListener('change', toggleInputs);
+                            toggleInputs();
+                        });
+                    </script>
                 </div>
             </div>
+
+            @php
+                // Ensure $filter is defined (fallback to query param or 'all')
+                $filter = $filter ?? request()->query('filter', 'all');
+            @endphp
+
+            <div class="resources-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <a href="{{ route('user.training.resources', ['filter' => 'all']) }}" class="btn btn-sm {{ $filter === 'all' ? 'btn-primary' : 'btn-outline-primary' }}">All</a>
+                        <a href="{{ route('user.training.resources', ['filter' => 'materials']) }}" class="btn btn-sm {{ $filter === 'materials' ? 'btn-primary' : 'btn-outline-primary' }}">Materials</a>
+                        <a href="{{ route('user.training.resources', ['filter' => 'links']) }}" class="btn btn-sm {{ $filter === 'links' ? 'btn-primary' : 'btn-outline-primary' }}">Links</a>
+                        <a href="{{ route('user.training.resources', ['filter' => 'certificates']) }}" class="btn btn-sm {{ $filter === 'certificates' ? 'btn-primary' : 'btn-outline-primary' }}">Certificates</a>
+                    </div>
+                    <div>
+                        <!-- Upload/Open modal trigger -->
+                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addResourceModal">
+                            <i class="bi bi-plus-lg"></i> Add Resource
+                        </button>
+                    </div>
+                </div>
+
+                @if(!empty($trainings) && count($trainings) > 0)
+                    <div class="accordion" id="resourcesAccordion">
+                        @foreach($trainings as $item)
+                            @php
+                                $training = $item['training'] ?? $item;
+                                $materials = collect($item['materials'] ?? [])->where('type','material')->whereNotNull('file_path');
+                                $links = collect($item['materials'] ?? [])->where('type','link')->whereNotNull('link');
+                                $certificates = collect($item['materials'] ?? [])->where('type','certificate');
+                                $total = $materials->count() + $links->count() + $certificates->count();
+                            @endphp
+
+                            @if($total === 0)
+                                @continue
+                            @endif
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading{{ $loop->index }}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $loop->index }}" aria-expanded="false" aria-controls="collapse{{ $loop->index }}">
+                                        {{ $training->title ?? 'Untitled Training' }}
+                                        <span class="badge bg-primary ms-2">{{ $total }} items</span>
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ $loop->index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ $loop->index }}" data-bs-parent="#resourcesAccordion">
+                                    <div class="accordion-body">
+                                        @if(in_array($filter, ['all','materials']) && $materials->count() > 0)
+                                            <h6 class="text-primary"><i class="bi bi-file-earmark-text me-2"></i>Materials <span class="badge bg-secondary">{{ $materials->count() }}</span></h6>
+                                            <div class="table-responsive mb-3">
+                                                <table class="table table-hover">
+                                                    <tbody>
+                                                        @foreach($materials as $material)
+                                                            <tr>
+                                                                <td>{{ $material->title ?? 'Untitled Material' }}</td>
+                                                                <td>{{ optional($material->created_at)->format('M d, Y') }}</td>
+                                                                <td class="text-end">
+                                                                    <a href="{{ route('user.training_materials.download', $material) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+
+                                        @if(in_array($filter, ['all','links']) && $links->count() > 0)
+                                            <h6 class="text-primary"><i class="bi bi-link-45deg me-2"></i>Links <span class="badge bg-secondary">{{ $links->count() }}</span></h6>
+                                            <div class="table-responsive mb-3">
+                                                <table class="table table-hover">
+                                                    <tbody>
+                                                        @foreach($links as $link)
+                                                            <tr>
+                                                                <td>{{ $link->title ?? 'Untitled Link' }}</td>
+                                                                <td>{{ optional($link->created_at)->format('M d, Y') }}</td>
+                                                                <td class="text-end">
+                                                                    <a href="{{ $link->link }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i> Open Link</a>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+
+                                        @if(in_array($filter, ['all','certificates']) && $certificates->count() > 0)
+                                            <h6 class="text-primary"><i class="bi bi-award me-2"></i>Certificates <span class="badge bg-secondary">{{ $certificates->count() }}</span></h6>
+                                            <div class="table-responsive mb-3">
+                                                <table class="table table-hover">
+                                                    <tbody>
+                                                        @foreach($certificates as $certificate)
+                                                            <tr>
+                                                                <td>{{ $certificate->title ?? 'Untitled Certificate' }}</td>
+                                                                <td>{{ optional($certificate->created_at)->format('M d, Y') }}</td>
+                                                                <td class="text-end">
+                                                                    @if(!empty($certificate->file_path))
+                                                                        <a href="{{ route('user.training_materials.download', $certificate) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="alert alert-info text-center">No materials found.</div>
+                @endif
+            </div>
+
+            <!-- Add Resource Modal -->
+            <div class="modal fade" id="addResourceModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="POST" action="{{ route('user.training.resources.store') }}" enctype="multipart/form-data" class="modal-content">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Resource</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-2">
+                                <label class="form-label">Training</label>
+                                <select name="training_id" class="form-select" required>
+                                    @foreach($trainings as $t)
+                                        <option value="{{ $t['training']->id }}">{{ $t['training']->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Type</label>
+                                <select name="type" id="resourceType" class="form-select" required>
+                                    <option value="material">Material (file)</option>
+                                    <option value="link">Link (URL)</option>
+                                    <option value="certificate">Certificate (file)</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Title</label>
+                                <input name="title" class="form-control" required>
+                            </div>
+                            <div class="mb-2" id="fileInputWrap">
+                                <label class="form-label">File</label>
+                                <input type="file" name="file" class="form-control">
+                            </div>
+                            <div class="mb-2 d-none" id="linkInputWrap">
+                                <label class="form-label">Link (URL)</label>
+                                <input type="url" name="link" class="form-control" placeholder="https://example.com">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const typeSel = document.getElementById('resourceType');
+                    const fileWrap = document.getElementById('fileInputWrap');
+                    const linkWrap = document.getElementById('linkInputWrap');
+
+                    function toggleInputs() {
+                        const v = typeSel.value;
+                        if (v === 'link') {
+                            linkWrap.classList.remove('d-none');
+                            fileWrap.classList.add('d-none');
+                        } else {
+                            linkWrap.classList.add('d-none');
+                            fileWrap.classList.remove('d-none');
+                        }
+                    }
+                    typeSel.addEventListener('change', toggleInputs);
+                    toggleInputs();
+                });
+            </script>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle search form submission
+            const searchForm = document.createElement('form');
+            searchForm.method = 'GET';
+            searchForm.action = window.location.pathname;
+            
+            // Add existing query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.forEach((value, key) => {
+                if (key !== 'search' && key !== 'filter_materials' && key !== 'page') {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    searchForm.appendChild(input);
+                }
+            });
+            
+            // Add search input
+            const searchInput = document.createElement('input');
+            searchInput.type = 'hidden';
+            searchInput.name = 'search';
+            searchForm.appendChild(searchInput);
+            
+            // Add materials filter
+            const materialsFilter = document.createElement('input');
+            materialsFilter.type = 'hidden';
+            materialsFilter.name = 'filter_materials';
+            searchForm.appendChild(materialsFilter);
+            
+            document.body.appendChild(searchForm);
+            
+            // Handle search button click
+            document.getElementById('searchButton').addEventListener('click', function() {
+                const searchValue = document.getElementById('searchInput').value.trim();
+                searchInput.value = searchValue;
+                materialsFilter.value = document.getElementById('filterMaterials').checked ? '1' : '0';
+                searchForm.submit();
+            });
+            
+            // Handle Enter key in search input
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('searchButton').click();
+                }
+            });
+            
+            // Handle filter change
+            document.getElementById('filterMaterials').addEventListener('change', function() {
+                document.getElementById('searchButton').click();
+            });
+            
+            // Auto-expand accordion if there's a search term
+            const searchTerm = '{{ request('search') }}';
+            if (searchTerm) {
+                const accordionButtons = document.querySelectorAll('.accordion-button');
+                accordionButtons.forEach(button => {
+                    button.classList.remove('collapsed');
+                    const target = document.querySelector(button.getAttribute('data-bs-target'));
+                    if (target) {
+                        target.classList.add('show');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -7,9 +7,9 @@ use App\Models\Competency; // Example model
 use App\Models\Training; // Example model
 use App\Models\TrainingMaterial; // Import TrainingMaterial model
 use App\Models\User; // Import Competency modelse PDF;
-use Barryvdh\DomPDF\Facade\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use Illuminate\Http\Request; // Assuming SearchExport is in App\\Exports
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection; // Import Carbon for date formatting
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -208,112 +208,95 @@ class SearchController extends Controller
         ));
     }
 
-    public function export(Request $request, $format)
+    public function export(Request $request)
     {
-        // Get the search results using the same logic as the results method
+        // rebuild results using the same request inputs
+        $results = $this->buildResultsFromRequest($request);
+
+        // debug: optional log to check results count
+        // \Log::debug('Export results count: ' . $results->count());
+
+        $format = $request->query('format', 'pdf');
+
+        if ($format === 'pdf') {
+            $data = ['results' => $results];
+            $pdf = Pdf::loadView('search.pdf', $data)
+                      ->setPaper('a4', 'landscape');
+            return $pdf->download('search-results.pdf');
+        }
+
+        if ($format === 'excel') {
+            // your existing excel export code
+            // return Excel::download(new \App\Exports\SearchExport($results), 'search-results.xlsx');
+            abort(501, 'Excel export not implemented in this snippet.');
+        }
+
+        abort(400, 'Invalid export format');
+    }
+
+    private function buildResultsFromRequest(Request $request): Collection
+    {
         $keyword = $request->input('keyword');
-        $types = $request->input('type', []);
         $year = $request->input('year');
-        $competencies = $request->input('competencies', []);
-        $division = $request->input('division');
-        $position = $request->input('position');
+        $status = $request->input('status');
+        $types = (array) $request->input('type', []);
 
         $results = collect();
 
-        // Search in trainings
-        if (empty($types) || in_array('Training', $types)) {
-            $trainingQuery = Training::query();
-            if ($keyword) {
-                $trainingQuery->where('title', 'like', "%{$keyword}%");
-            }
-            if ($year) {
-                $trainingQuery->whereYear('implementation_date_from', '=', $year);
-            }
-            if (! empty($competencies)) {
-                $trainingQuery->whereIn('competency_id', $competencies);
-            }
-            $trainings = $trainingQuery->with(['competency', 'participants'])->get();
-            foreach ($trainings as $training) {
-                $training->search_type = 'training';
+        // Trainings
+        $trainings = Training::with(['competency', 'participants'])
+            ->when($keyword, fn($q) => $q->where('title', 'like', "%{$keyword}%"))
+            ->when($year, fn($q) => $q->whereYear('date', $year))
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->get();
 
-                // Get the period of implementation dates
-                $periodStart = null;
-                $periodEnd = null;
-
-                if ($training->type === 'Program') {
-                    $periodStart = $training->period_from;
-                    $periodEnd = $training->period_to;
-                } elseif ($training->type === 'Unprogrammed') {
-                    $periodStart = $training->implementation_date_from ? $training->implementation_date_from->format('Y-m-d') : null;
-                    $periodEnd = $training->implementation_date_to ? $training->implementation_date_to->format('Y-m-d') : null;
-                }
-
-                $training->participants = $training->participants->map(function ($participant) use ($periodStart, $periodEnd) {
-                    $participantData = [
-                        'id' => $participant->id,
-                        'name' => $participant->first_name.' '.$participant->last_name,
-                    ];
-
-                    // Add period of implementation if dates are available
-                    if ($periodStart && $periodEnd) {
-                        $participantData['period'] = $periodStart.' - '.$periodEnd;
-                    }
-
-                    return $participantData;
-                });
-
-                $results->push($training);
-            }
+        foreach ($trainings as $t) {
+            if (!empty($types) && !in_array('training', $types)) continue;
+            $results->push((object) [
+                'search_type' => 'training',
+                'title' => $t->title,
+                'competency' => $t->competency ?? null,
+                'participants' => $t->participants ?? null,
+                'status' => $t->status ?? null,
+                'last_modified' => $t->updated_at ?? $t->created_at,
+            ]);
         }
 
-        // Search in users
-        if (empty($types) || in_array('User', $types)) {
-            $userQuery = User::query();
-            if ($keyword) {
-                $userQuery->where(function ($query) use ($keyword) {
-                    $query->where('first_name', 'like', "%{$keyword}%")
-                        ->orWhere('last_name', 'like', "%{$keyword}%")
-                        ->orWhere('mid_init', 'like', "%{$keyword}%");
-                });
-            }
-            if ($division) {
-                $userQuery->where('division', $division);
-            }
-            if ($position) {
-                $userQuery->where('position', $position);
-            }
-            $users = $userQuery->get();
-            foreach ($users as $user) {
-                $user->search_type = 'user';
-                $results->push($user);
-            }
+        // Users
+        $users = User::query()
+            ->when($keyword, fn($q) => $q->where(function($q2) use ($keyword) {
+                $q2->where('first_name', 'like', "%{$keyword}%")
+                   ->orWhere('last_name', 'like', "%{$keyword}%");
+            }))
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->get();
+
+        foreach ($users as $u) {
+            if (!empty($types) && !in_array('user', $types)) continue;
+            $results->push((object) [
+                'search_type' => 'user',
+                'first_name' => $u->first_name,
+                'last_name' => $u->last_name,
+                'position' => $u->position ?? null,
+            ]);
         }
 
-        // Search in training materials
-        if (empty($types) || in_array('Training Material', $types)) {
-            $materialQuery = TrainingMaterial::query();
-            if ($keyword) {
-                $materialQuery->where('title', 'like', "%{$keyword}%");
-            }
-            if (! empty($competencies)) {
-                $materialQuery->whereIn('competency_id', $competencies);
-            }
-            $materials = $materialQuery->with(['competency', 'user'])->get();
-            foreach ($materials as $material) {
-                $material->search_type = 'training_material';
-                $results->push($material);
-            }
+        // Training materials
+        $materials = TrainingMaterial::with(['competency', 'user'])
+            ->when($keyword, fn($q) => $q->where('title', 'like', "%{$keyword}%"))
+            ->get();
+
+        foreach ($materials as $m) {
+            if (!empty($types) && !in_array('training_material', $types)) continue;
+            $results->push((object) [
+                'search_type' => 'training_material',
+                'title' => $m->title,
+                'competency' => $m->competency ?? null,
+                'user' => $m->user ?? null,
+                'last_modified' => $m->updated_at ?? $m->created_at,
+            ]);
         }
 
-        if ($format === 'pdf') {
-            $pdf = PDF::loadView('search.pdf', compact('results'));
-
-            return $pdf->download('search-results.pdf');
-        } elseif ($format === 'excel') {
-            return Excel::download(new SearchExport($results), 'search-results.xlsx');
-        }
-
-        return back()->with('error', 'Invalid export format');
-
+        return $results;
     }
 }

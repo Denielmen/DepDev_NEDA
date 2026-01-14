@@ -83,9 +83,11 @@
         .user-menu {
             display: flex;
             align-items: center;
+            justify-content: center;
             cursor: pointer;
             padding: 5px 10px;
             border-radius: 4px;
+            gap: 8px;
         }
         .user-menu:hover {
             background-color: rgba(0, 0, 0, 0.05);
@@ -155,9 +157,9 @@
                         @if(Auth::user()->profile_picture)
                             <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
                         @else
-                            <i class="bi bi-person-circle"></i>
+                            <i class="bi bi-person-circle" style="font-size: 1.25rem;"></i>
                         @endif
-                        <span class="ms-2 d-none d-md-inline">{{ Auth::user()->name }}</span>
+                        <span class="d-none d-md-inline" style="white-space: nowrap;">{{ Auth::user()->name }}</span>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="{{ route('user.profile.info') }}">

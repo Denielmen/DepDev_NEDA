@@ -238,24 +238,26 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
+            @php $user = auth()->user(); @endphp
+
             <a class="navbar-brand" href="#">
-                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
-               DEPDEV Region VII Learning and Development Database System
+                DEPDEV Region VII Learning and Development Database System
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                        @if(Auth::user()->profile_picture)
-                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                        @if($user && $user->profile_picture)
+                            <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="profile-picture">
                         @else
                             <i class="bi bi-person-circle"></i>
                         @endif
-                        {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
+
+                        {{ $user ? ($user->first_name . ' ' . $user->last_name) : '' }}
                         <i class="bi bi-chevron-down ms-1"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
+                            <a href="{{ $user ? route('admin.participants.info', ['id' => $user->id]) : '#' }}" class="dropdown-item">
                                 <i class="bi bi-person-lines-fill me-2"></i> Profile Info
                             </a>
                         </li>

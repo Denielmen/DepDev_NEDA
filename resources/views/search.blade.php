@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>lnd.dro7.depdev</title>
@@ -182,48 +183,106 @@
             font-size: 32px;
             margin-right: 8px;
         }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            color: #003366;
+            border-bottom: 2px solid #003366;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            background-color: #003366;
+            color: white;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed; /* ensure columns respect widths to avoid huge gaps */
+        }
+        th, td {
+            border: none; /* removed borders from rows and columns */
+            padding: 6px;
+            text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+
+        /* Helpful default widths for common columns to reduce large center gaps.
+           Tweak percentages to taste. */
+        .compact-table th.title { width: 30%; }
+        .compact-table th.participants { width: 30%; }
+        .compact-table th.materials { width: 18%; }
+        .compact-table th.status { width: 10%; }
+        .compact-table th.modified { width: 12%; }
+
+        /* Fallbacks for other tables */
+        .compact-table th.name { width: 40%; }
+        .compact-table th.position { width: 30%; }
+        .compact-table th.division { width: 30%; }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
     </style>
 </head>
-
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="/images/DEPDev_logo.png" alt="NEDA Logo">
-                DEPDEV Region VII Learning and Development Database System
-            </a>
-            <div class="d-flex align-items-center">
-                <div class="dropdown">
-                    <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
-                    @if(Auth::user()->profile_picture)
-                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile Picture" class="profile-picture">
-                        @else
-                            <i class="bi bi-person-circle"></i>
-                        @endif
-                        {{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}
-                        <i class="bi bi-chevron-down ms-1"></i>
-                    </div>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                            <a href="{{ route('admin.participants.info', ['id' => Auth::user()->id]) }}" class="dropdown-item">
-                                <i class="bi bi-person-lines-fill me-2"></i> Profile Info
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item logout-btn">
-                                    <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
+@php $user = auth()->user(); @endphp
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            DEPDEV Region VII Learning and Development Database System
+        </a>
+        <div class="d-flex align-items-center">
+            <div class="dropdown">
+                <div class="user-menu" data-bs-toggle="dropdown" style="cursor:pointer;">
+                    @if($user && $user->profile_picture)
+                        <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                    @else
+                        <i class="bi bi-person-circle"></i>
+                    @endif
+
+                    {{ $user ? ($user->first_name . ' ' . $user->last_name) : '' }}
+                    <i class="bi bi-chevron-down ms-1"></i>
                 </div>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a href="{{ $user ? route('admin.participants.info', ['id' => $user->id]) : '#' }}" class="dropdown-item">
+                            <i class="bi bi-person-lines-fill me-2"></i> Profile Info
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item logout-btn">
+                                <i class="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <div class="d-flex">
         <!-- Sidebar -->
@@ -232,7 +291,10 @@
             <a href="{{ route('admin.training-plan') }}"><i class="bi bi-calendar-check me-2"></i>Training Profile</a>
             <a href="{{ route('admin.participants') }}"><i class="bi bi-people me-2"></i>Employees Information</a>
             <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-text me-2"></i>Training Plan</a>
-            <a href="{{ route('admin.search.index') }}" class="active"><i class="bi bi-search me-2"></i>Search</a>
+            <a href="{{ route('admin.search.index') }}"
+             class="{{ request()->routeIs('admin.search.*') ? 'active' : '' }}">
+                <i class="bi bi-search me-2"></i>Search
+            </a>
         </div>
 
         <!-- Main Content -->
@@ -261,7 +323,7 @@
                                         value="Training"
                                         {{ in_array('Training', request('type', [])) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="type_training">Training</label>
-                                </div>
+                            </div>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" name="type[]" id="type_user"
                                         value="User" {{ in_array('User', request('type', [])) ? 'checked' : '' }}>
@@ -276,7 +338,7 @@
                             </div>
                         </div>
                         <!-- Material Type Filter (only for Training Material) -->
-                        <div class="col-md-4 material-type-filter" style="display: none;">
+                        <div class="col-md-4 material-type-filter material-filter" style="display: none;">
                             <label for="material_type" class="form-label">Material Type</label>
                             <select name="material_type" id="material_type" class="form-select">
                                 <option value="">All Types</option>
@@ -361,7 +423,34 @@
                         </div>
                     </div>
                 </form>
-            </div>
+
+                @if(request()->query())
+<div class="mb-3">
+    @if(request('keyword'))
+        <span class="filter-tag">
+            Keyword: {{ request('keyword') }}
+            <i class="bi bi-x-circle"></i>
+        </span>
+    @endif
+
+    @if(request('year'))
+        <span class="filter-tag">
+            Year: {{ request('year') }}
+            <i class="bi bi-x-circle"></i>
+        </span>
+    @endif
+
+    @if(request('status'))
+        <span class="filter-tag">
+            Status: {{ request('status') }}
+            <i class="bi bi-x-circle"></i>
+        </span>
+    @endif
+</div>
+@endif
+
+
+        
             <!-- Results Section -->
             <div class="results-table">
                 <!-- Results content here -->
@@ -467,8 +556,7 @@
                                     @foreach ($results->where('search_type', 'user') as $index => $result)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $result->last_name . ', ' . $result->first_name . ' ' . $result->mid_init . '.' ?? 'N/A' }}
-                                            </td>
+                                            <td>{{ $result->last_name ? $result->last_name . ', ' . $result->first_name . ' ' . ($result->mid_init ?? '') . '.' : 'N/A' }}</td>
                                             <td>{{ $result->position ?? 'N/A' }}</td>
                                             <td>{{ $result->division ?? 'N/A' }}</td>
                                             </td>
@@ -547,6 +635,16 @@
                     </div>
                 @endif
             </div>
+
+            <!-- Export buttons that include the current query string -->
+            <div class="d-flex gap-2 mb-3">
+                <a href="{{ route('admin.search.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="btn btn-primary btn-sm" target="_blank">
+                    Export PDF
+                </a>
+                <a href="{{ route('admin.search.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="btn btn-success btn-sm">
+                    Export Excel
+                </a>
+            </div>
         </div>
     </div>
     </div>
@@ -558,7 +656,7 @@
                 const selectedTypes = Array.from(document.querySelectorAll('input[name="type[]"]:checked'))
                     .map(cb => cb.value);
                 // Hide all type-specific filters
-                document.querySelectorAll('.training-filter, .user-filter, .material-filter').forEach(
+                document.querySelectorAll('.training-filter, .user-filter, .material-filter, .training-status-filter').forEach(
                     el => {
                         el.style.display = 'none';
                     });
@@ -583,19 +681,27 @@
         });
         // Clear individual filters
         document.querySelectorAll('.filter-tag i').forEach(icon => {
-            icon.addEventListener('click', function() {
-                const filterName = this.parentElement.textContent.split(':')[0].trim().toLowerCase();
-                const input = document.querySelector(`[name="${filterName}"]`);
-                if (input) {
-                    if (input.type === 'checkbox') {
-                        input.checked = false;
-                    } else {
-                        input.value = '';
-                    }
-                    this.closest('form').submit();
-                }
-            });
-        });
+    icon.addEventListener('click', function () {
+        const label = this.parentElement.textContent.toLowerCase();
+
+        const map = {
+            'keyword': 'keyword',
+            'year': 'year',
+            'status': 'status'
+        };
+
+        for (const key in map) {
+            if (label.includes(key)) {
+                const input = document.querySelector(`[name="${map[key]}"]`);
+                if (input) input.value = '';
+            }
+        }
+
+        this.closest('form')?.submit();
+        window.location.href = '{{ route('admin.search.index') }}';
+    });
+});
+
 
         function toggleMaterialTypeFilter() {
             const materialCheckbox = document.getElementById('type_material');

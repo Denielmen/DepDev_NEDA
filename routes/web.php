@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingTrackingController;
 use App\Http\Controllers\TrainingMaterialController;
+use App\Http\Controllers\User\TrainingResourcesController;
 use Illuminate\Support\Facades\Auth;
 //remove lines 48-50 before deployment
 
@@ -56,7 +57,7 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
         ->name('user.training.profile.program');
 
     Route::get('/training-profile/unprogrammed', [TrainingProfileController::class, 'unprogrammed'])
-        ->name('user.training.profile.unprogrammed');
+        ->name('user.training.profile.unprogrammed');  
 
     Route::get('/training-profile/program/{training}', [TrainingProfileController::class, 'show'])
         ->name('user.training.profile.show');
@@ -216,7 +217,7 @@ Route::middleware(['auth', 'readonly.admin'])->prefix('admin')->group(function (
 
     //Search routes
     Route::get('/search', [SearchController::class, 'index'])->name('admin.search.index');
-    Route::get('/search/export/{format}', [SearchController::class, 'export'])->name('search.export');
+    Route::get('/admin/search/export', [SearchController::class, 'export'])->name('admin.search.export');
     Route::get('/search/results', [SearchController::class, 'results'])->name('admin.search.results');
 
     // Profile and user management
@@ -256,3 +257,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+Route::get('/user/training-resources', [TrainingResourcesController::class, 'index'])->name('user.training.resources');
+Route::post('/user/training-resources', [TrainingResourcesController::class, 'store'])->name('user.training.resources.store');
+Route::get('/user/training-materials/{material}/download', [TrainingResourcesController::class, 'download'])->name('user.training_materials.download');

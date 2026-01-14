@@ -126,6 +126,38 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
 
+      public function completedTrainings(Request $request)
+   {
+    $userId = Auth::id();
+    $search = $request->input('search');
+    $sort = $request->input('sort');
+    $order = $request->input('order', 'desc');
+
+    $trainingsQuery = Training::where('status', 'Implemented')
+        ->where(function($query) use ($userId) {
+            $query->whereHas('participants', function($q) use ($userId) {
+                    $q->where('users.id', $userId);
+                })
+                ->orWhere('user_id', $userId);
+        });
+
+    if ($search) {
+        $trainingsQuery->where(function($q) use ($search) {
+            $q->where('title', 'like', "%$search%")
+              ->orWhere('core_competency', 'like', "%$search%");
+        });
+    }
+
+    $trainings = $trainingsQuery->orderBy('created_at', 'desc')
+                              ->paginate(30);
+    $participationTypes = ParticipationType::all()->keyBy('id');
+
+    return view('userPanel.trainingProfileCompleted', compact(
+        'trainings',
+        'participationTypes'
+    ));
+}
+
     public function show(Training $training)
     {
         $userId = Auth::id();
