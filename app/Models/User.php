@@ -19,6 +19,7 @@ class User extends Authenticatable
         'mid_init',
         'position',
         'position_start_date',
+        'years_in_csc',
         'government_start_date',
         'division',
         'salary_grade',

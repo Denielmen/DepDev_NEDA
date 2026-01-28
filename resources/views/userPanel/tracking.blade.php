@@ -436,7 +436,7 @@
                         <div class="row">
                             <div class="col-md-4 form-group">
                                 <label class="form-label">No. of Hours:</label>
-                                <input type="number" class="form-control" name="no_of_hours" placeholder="hours"
+                                <input type="number" step="any" min="0" class="form-control" name="no_of_hours" placeholder="hours"
                                     required>
                             </div>
                             <div class="col-md-4 form-group">

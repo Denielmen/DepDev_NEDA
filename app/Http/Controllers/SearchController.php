@@ -175,12 +175,28 @@ class SearchController extends Controller
                 ->when($competencies, function ($q) use ($competencies) {
                     $q->whereIn('competency_id', $competencies);
                 })
-                ->where('type', 'material')
                 ->when($materialType === 'material', function ($q) {
-                    $q->whereNotNull('file_path');
+                    $q->whereNotNull('file_path')
+                      ->where(function($subQ) {
+                          $subQ->where('type', 'material')
+                                ->orWhere('type', 'certificate');
+                      });
                 })
                 ->when($materialType === 'link', function ($q) {
                     $q->whereNotNull('link');
+                })
+                ->when($materialType === 'certificate', function ($q) {
+                    $q->where(function($subQ) {
+                        $subQ->where('type', 'certificate')
+                              ->orWhere('title', 'like', '%certificate%');
+                    });
+                })
+                ->when(empty($materialType), function ($q) {
+                    // When no specific type selected, include all materials
+                    $q->where(function($subQ) {
+                        $subQ->whereNotNull('file_path')
+                              ->orWhereNotNull('link');
+                    });
                 })
                 ->paginate(30);
             $materials->getCollection()->transform(function ($material) {
@@ -217,6 +233,7 @@ class SearchController extends Controller
         $competencies = $request->input('competencies', []);
         $division = $request->input('division');
         $position = $request->input('position');
+        $materialType = $request->input('material_type');
 
         $results = collect();
 
@@ -298,6 +315,22 @@ class SearchController extends Controller
             if (! empty($competencies)) {
                 $materialQuery->whereIn('competency_id', $competencies);
             }
+            if (! empty($materialType)) {
+                if ($materialType === 'material') {
+                    $materialQuery->whereNotNull('file_path')
+                        ->where(function($subQ) {
+                            $subQ->where('type', 'material')
+                                  ->orWhere('type', 'certificate');
+                        });
+                } elseif ($materialType === 'link') {
+                    $materialQuery->whereNotNull('link');
+                } elseif ($materialType === 'certificate') {
+                    $materialQuery->where(function($subQ) {
+                        $subQ->where('type', 'certificate')
+                              ->orWhere('title', 'like', '%certificate%');
+                    });
+                }
+            }
             $materials = $materialQuery->with(['competency', 'user'])->get();
             foreach ($materials as $material) {
                 $material->search_type = 'training_material';
@@ -306,8 +339,9 @@ class SearchController extends Controller
         }
 
         if ($format === 'pdf') {
-            $pdf = PDF::loadView('search.pdf', compact('results'));
-
+            $pdf = app('dompdf.wrapper');
+            $pdf->loadView('search.pdf', compact('results'))
+                 ->setPaper('a4', 'landscape');
             return $pdf->download('search-results.pdf');
         } elseif ($format === 'excel') {
             return Excel::download(new SearchExport($results), 'search-results.xlsx');

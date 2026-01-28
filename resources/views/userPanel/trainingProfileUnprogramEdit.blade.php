@@ -113,7 +113,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label">No. of Hours</label>
-                            <input type="number" name="no_of_hours" class="form-control" value="{{ old('no_of_hours', $training->no_of_hours) }}">
+                            <input type="number" step="any" min="0" name="no_of_hours" class="form-control" value="{{ old('no_of_hours', $training->no_of_hours) }}">
                         </div>
 
                         <div class="col-md-6">

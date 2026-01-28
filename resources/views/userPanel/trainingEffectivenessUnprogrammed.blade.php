@@ -522,7 +522,7 @@
         <!-- Pre-Evaluation Modal -->
         <div class="modal fade" id="preEvaluationModal" tabindex="-1" aria-labelledby="preEvaluationModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="preEvaluationModalLabel">Pre-Evaluation</h5>
@@ -534,7 +534,7 @@
                             style="display: none;">
                             No pre-evaluation data found for this training.
                         </div>
-                        <form method="POST" id="preEvaluationForm">
+                        <form method="POST" id="preEvaluationForm" action="#">
                             @csrf
                             <input type="hidden" name="training_id" id="modalTrainingId">
                             <input type="hidden" name="type" id="modalEvaluationType">
@@ -547,25 +547,27 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td style="width: 70%;">In a scale 1-4 (4 is being the highest), please
-                                                tick
-                                                the circle which describes the proficiency level of your subordinate
-                                                after participation in this course.</td>
-                                            <td>1</td>
-                                            <td>2</td>
-                                            <td>3</td>
-                                            <td>4</td>
+                                            <td colspan="5" style="padding: 15px; text-align: left; white-space: normal; word-wrap: break-word; line-height: 1.5;">
+                                                <strong>In a scale 1-4 (4 is being the highest), please tick the circle which describes the proficiency level of your subordinate after participation in this course.</strong>
+                                            </td>
                                         </tr>
                                         <tr>
+                                            <td style="text-align: center; font-weight: bold;">1</td>
+                                            <td style="text-align: center; font-weight: bold;">2</td>
+                                            <td style="text-align: center; font-weight: bold;">3</td>
+                                            <td style="text-align: center; font-weight: bold;">4</td>
                                             <td></td>
-                                            <td><input class="form-check-input" type="radio"
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: center;"><input class="form-check-input" type="radio"
                                                     name="proficiency_level" id="proficiency1" value="1"></td>
-                                            <td><input class="form-check-input" type="radio"
+                                            <td style="text-align: center;"><input class="form-check-input" type="radio"
                                                     name="proficiency_level" id="proficiency2" value="2"></td>
-                                            <td><input class="form-check-input" type="radio"
+                                            <td style="text-align: center;"><input class="form-check-input" type="radio"
                                                     name="proficiency_level" id="proficiency3" value="3"></td>
-                                            <td><input class="form-check-input" type="radio"
+                                            <td style="text-align: center;"><input class="form-check-input" type="radio"
                                                     name="proficiency_level" id="proficiency4" value="4"></td>
+                                            <td></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -617,7 +619,7 @@
                         // Submission mode: enable inputs
                         submitPreEvaluationButton.style.display = 'block';
                         modalProficiencyRadios.forEach(radio => radio.disabled = false);
-                        preEvaluationForm.action = `/user/training/${trainingId}/rate`;
+                        preEvaluationForm.action = `/user/training/${trainingId}/submit-pre-evaluation`;
                     }
                     console.log('Form action set to:', preEvaluationForm.action); // Debugging line
                 });

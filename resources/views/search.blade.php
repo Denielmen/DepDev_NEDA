@@ -284,6 +284,8 @@
                                     {{ request('material_type') == 'material' ? 'selected' : '' }}>Material</option>
                                 <option value="link" {{ request('material_type') == 'link' ? 'selected' : '' }}>Link
                                 </option>
+                                <option value="certificate" {{ request('material_type') == 'certificate' ? 'selected' : '' }}>Certificate
+                                </option>
                             </select>
                         </div>
                         <!-- Additional Filters -->
@@ -401,12 +403,30 @@
                                     @if ($result->relatedMaterials && $result->relatedMaterials->isNotEmpty())
                                     @foreach ($result->relatedMaterials as $material)
                                     @if ($material->file_path)
-                                    {{ $loop->iteration }}.
-                                    <a href="{{ route('user.training_materials.download', $material->id) }}" class="text-decoration-none">
-                                        {{ $material->title }}
-                                    </a><br>
+                                        {{ $loop->iteration }}. 
+                                        <a href="{{ route('user.training_materials.download', $material->id) }}" 
+                                           class="text-decoration-none" 
+                                           style="color: #87CEEB; font-weight: 500;"
+                                           title="Download material">
+                                            Material
+                                        </a><br>
+                                    @elseif ($material->link)
+                                        {{ $loop->iteration }}. 
+                                        <a href="{{ $material->link }}" 
+                                           target="_blank"
+                                           class="text-decoration-none" 
+                                           style="color: #87CEEB; font-weight: 500;"
+                                           title="Open link">
+                                            Link
+                                        </a><br>
                                     @else
-                                    {{ $material->title }} (No file available)<br>
+                                        {{ $loop->iteration }}. 
+                                        <a href="{{ route('user.training_materials.download', $material->id) }}" 
+                                           class="text-decoration-none" 
+                                           style="color: #87CEEB; font-weight: 500;"
+                                           title="Download certificate">
+                                            Certificate
+                                        </a><br>
                                     @endif
                                     @endforeach
                                     @else
@@ -481,65 +501,128 @@
                 @endif
                 <!-- Training Materials Results -->
                 @if ($results->where('search_type', 'training_material')->isNotEmpty())
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <i class="bi bi-file-earmark-text me-2"></i>Training Materials Found
+                    @php
+                        $materialResults = $results->where('search_type', 'training_material');
+                        $selectedMaterialType = request('material_type', '');
+                        
+                        // Filter materials based on selected type
+                        if ($selectedMaterialType == 'material') {
+                            $materials = $materialResults->where('file_path', '!=', '')->where('file_path', '!=', null)
+                                ->filter(function($item) {
+                                    return stripos($item->title ?? '', 'certificate') === false;
+                                });
+                            $links = collect([]);
+                            $certificates = collect([]);
+                        } elseif ($selectedMaterialType == 'link') {
+                            $materials = collect([]);
+                            $links = $materialResults->where('link', '!=', '')->where('link', '!=', null);
+                            $certificates = collect([]);
+                        } elseif ($selectedMaterialType == 'certificate') {
+                            $materials = collect([]);
+                            $links = collect([]);
+                            // Certificates are materials with "certificate" in the title or type
+                            $certificates = $materialResults->filter(function($item) {
+                                return stripos($item->title ?? '', 'certificate') !== false || 
+                                       stripos($item->type ?? '', 'certificate') !== false;
+                            });
+                        } else {
+                            // All types - separate into three groups
+                            $materials = $materialResults->where('file_path', '!=', '')->where('file_path', '!=', null)
+                                ->filter(function($item) {
+                                    return stripos($item->title ?? '', 'certificate') === false;
+                                });
+                            $links = $materialResults->where('link', '!=', '')->where('link', '!=', null);
+                            $certificates = $materialResults->filter(function($item) {
+                                return stripos($item->title ?? '', 'certificate') !== false || 
+                                       stripos($item->type ?? '', 'certificate') !== false;
+                                    });
+                        }
+                    @endphp
+
+                    @if ($selectedMaterialType == '')
+                        <!-- All Types - Show as Tabs -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <i class="bi bi-file-earmark-text me-2"></i>All Types
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="nav nav-tabs" id="materialTabs" role="tablist">
+                                    @if ($materials->isNotEmpty())
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">
+                                                Materials
+                                            </button>
+                                        </li>
+                                    @endif
+                                    @if ($links->isNotEmpty())
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link {{ $materials->isEmpty() ? 'active' : '' }}" id="links-tab" data-bs-toggle="tab" data-bs-target="#links" type="button" role="tab" aria-controls="links" aria-selected="{{ $materials->isEmpty() ? 'true' : 'false' }}">
+                                                Links
+                                            </button>
+                                        </li>
+                                    @endif
+                                    @if ($certificates->isNotEmpty())
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link {{ $materials->isEmpty() && $links->isEmpty() ? 'active' : '' }}" id="certificates-tab" data-bs-toggle="tab" data-bs-target="#certificates" type="button" role="tab" aria-controls="certificates" aria-selected="{{ $materials->isEmpty() && $links->isEmpty() ? 'true' : 'false' }}">
+                                                Certificates
+                                            </button>
+                                        </li>
+                                    @endif
+                                </ul>
+                                <div class="tab-content" id="materialTabsContent">
+                                    @if ($materials->isNotEmpty())
+                                        <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                                            @include('partials.materials_accordion', ['materials' => $materials, 'accordionId' => 'materialsAccordion'])
+                                        </div>
+                                    @endif
+                                    @if ($links->isNotEmpty())
+                                        <div class="tab-pane fade {{ $materials->isEmpty() ? 'show active' : '' }}" id="links" role="tabpanel" aria-labelledby="links-tab">
+                                            @include('partials.materials_accordion', ['materials' => $links, 'accordionId' => 'linksAccordion'])
+                                        </div>
+                                    @endif
+                                    @if ($certificates->isNotEmpty())
+                                        <div class="tab-pane fade {{ $materials->isEmpty() && $links->isEmpty() ? 'show active' : '' }}" id="certificates" role="tabpanel" aria-labelledby="certificates-tab">
+                                            @include('partials.materials_accordion', ['materials' => $certificates, 'accordionId' => 'certificatesAccordion'])
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Title</th>
-                                        <th>Uploader</th>
-                                        <th>Type</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($results->where('search_type', 'training_material') as $index => $result)
-                                        <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $result->title ?? 'N/A' }}</td>
-                                            <td>
-                                                @if ($result->user)
-                                                    {{ $result->user->last_name . ', ' . $result->user->first_name . ' ' . $result->user->mid_init . '.' }}
-                                                @else
-                                                    N/A
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($result->file_path)
-                                                    Material
-                                                @elseif ($result->link)
-                                                    Link
-                                                @else
-                                                    N/A
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($result->file_path)
-                                                    <button class="btn btn-primary btn-sm"
-                                                        onclick="window.location.href = '{{ route('user.training_materials.download', $result->id) }}'"
-                                                        title="Download file">
-                                                        <i class="fas fa-download"></i> Download
-                                                    </button>
-                                                @elseif ($result->link)
-                                                    <button class="btn btn-info btn-sm"
-                                                        onclick="window.open('{{ $result->link }}', '_blank')"
-                                                        title="Open link">
-                                                        <i class="fas fa-external-link-alt"></i> Open Link
-                                                    </button>
-                                                @else
-                                                    N/A
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    @else
+                        <!-- Specific Type Selected - Show Single Section -->
+                        @if ($materials->isNotEmpty())
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Materials Found
+                                </div>
+                                <div class="card-body p-0">
+                                    @include('partials.materials_accordion', ['materials' => $materials, 'accordionId' => 'materialsAccordion'])
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($links->isNotEmpty())
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="bi bi-link-45deg me-2"></i>Links Found
+                                </div>
+                                <div class="card-body p-0">
+                                    @include('partials.materials_accordion', ['materials' => $links, 'accordionId' => 'linksAccordion'])
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($certificates->isNotEmpty())
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="bi bi-award me-2"></i>Certificates Found
+                                </div>
+                                <div class="card-body p-0">
+                                    @include('partials.materials_accordion', ['materials' => $certificates, 'accordionId' => 'certificatesAccordion'])
+                                </div>
+                            </div>
+                        @endif
+                    @endif
                 @endif
                 <!-- No Results Message -->
                 @if ($results->isEmpty())
@@ -610,6 +693,7 @@
             const materialTypeFilter = document.querySelector('.material-type-filter');
             const trainingStatusFilter = document.querySelector('.training-status-filter');
             const trainingCheckbox = document.getElementById('type_training');
+            
             if (materialCheckbox && materialCheckbox.checked) {
                 materialTypeFilter.style.display = '';
                 trainingStatusFilter.style.display = 'none';

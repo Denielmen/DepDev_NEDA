@@ -325,9 +325,17 @@
                                 {{ $userRole }}
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-info btn-sm">
-                                     View
-                                </a>
+                                @if($training->type === 'Program')
+                                    <a href="{{ route('user.training.profile.show', $training->id) }}" class="btn btn-info btn-sm" 
+                                       onclick="this.href='{{ route('user.training.profile.show', $training->id) }}'">
+                                         View
+                                    </a>
+                                @else
+                                    <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-info btn-sm"
+                                       onclick="this.href='{{ route('user.training.profile.unprogram.show', $training->id) }}'">
+                                         View
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

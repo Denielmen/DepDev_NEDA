@@ -300,7 +300,7 @@
                     <div class="form-group row mb-3">
                         <label for="no_of_hours" class="col-md-4 col-form-label text-md-right">{{ __('Total Number of Hours ') }}</label>
                         <div class="col-md-6">
-                            <input id="no_of_hours" type="number" class="form-control @error('no_of_hours') is-invalid @enderror" name="no_of_hours" value="{{ old('no_of_hours') }}">
+                            <input id="no_of_hours" type="number" step="any" min="0" class="form-control @error('no_of_hours') is-invalid @enderror" name="no_of_hours" value="{{ old('no_of_hours') }}">
                             @error('no_of_hours')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -378,26 +378,10 @@
                         </div>
                     </div>
 
-                    <div class="form-group row mb-3">
-                        <label for="resource_persons" class="col-md-4 col-form-label text-md-right">{{ __('Resource Speaker') }}</label>
-                        <div class="col-md-6">
-                            <div id="selectedResourcePersons" class="mb-2">
-                                <!-- Selected resource persons will be displayed here -->
-                            </div>
-                            <select id="resource_persons" class="form-control @error('resource_persons') is-invalid @enderror" name="resource_persons[]" multiple style="display: none;">
-                                {{-- Options are added via JavaScript --}}
-                            </select>
-                             @error('resource_persons')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                    </div>
-
+                    
                     <div class="text-end">
                         <a href="{{ route('admin.training-plan') }}" class="btn btn-secondary me-2">Cancel</a>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#participantModal">Add Participant</button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#participantModal" onclick="console.log('Add Participant button clicked')">Add Participant</button>
                         <button type="submit" class="btn btn-success ms-2">Create Training</button>
                     </div>
                 </form>
@@ -520,14 +504,46 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing participant modal...');
+            
             const participantsSelect = document.getElementById('participants');
             const selectedParticipantsDiv = document.getElementById('selectedParticipants');
             const participantModal = document.getElementById('participantModal');
-            const modal = bootstrap.Modal.getInstance(participantModal) || new bootstrap.Modal(participantModal);
+            
+            console.log('participantModal element:', participantModal);
+            
+            let modal; // Declare modal in broader scope
+            if (participantModal) {
+                try {
+                    modal = bootstrap.Modal.getInstance(participantModal) || new bootstrap.Modal(participantModal);
+                    console.log('Modal initialized successfully:', modal);
+                } catch (error) {
+                    console.error('Error initializing modal:', error);
+                }
+            } else {
+                console.error('participantModal element not found!');
+            }
+            
             const form = document.getElementById('trainingForm');
             const addSelectedParticipantsBtn = document.getElementById('addSelectedParticipantsBtn');
             const selectAllCheckbox = document.getElementById('selectAllParticipants');
             const removeAllSelectionBtn = document.getElementById('removeAllSelectionBtn');
+            
+            console.log('Elements found:', {
+                participantsSelect: !!participantsSelect,
+                selectedParticipantsDiv: !!selectedParticipantsDiv,
+                form: !!form,
+                addSelectedParticipantsBtn: !!addSelectedParticipantsBtn,
+                selectAllCheckbox: !!selectAllCheckbox,
+                removeAllSelectionBtn: !!removeAllSelectionBtn
+            });
+            
+            // Add a test function to open modal manually
+            window.testModal = function() {
+                console.log('Testing modal open...');
+                const testModal = new bootstrap.Modal(document.getElementById('participantModal'));
+                testModal.show();
+            };
             
             // Track already added participants
             let addedParticipants = new Set();
@@ -609,7 +625,17 @@
                 tableBody.style.opacity = '0.5';
 
                 fetch(`{{ route('admin.getParticipants') }}?page=${page}&search=${encodeURIComponent(search)}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response headers:', response.headers);
+                        if (response.status === 401) {
+                            throw new Error('Authentication failed. Please log in again.');
+                        }
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         console.log(`Loading page ${page} with ${data.users.length} users. Global selection has ${globalSelectedParticipants.size} participants.`);
 
@@ -662,9 +688,11 @@
                     })
                     .catch(error => {
                         console.error('Error loading participants:', error);
+                        console.error('Error details:', error.message);
+                        console.error('Error stack:', error.stack);
                         loading.style.display = 'none';
                         tableBody.style.opacity = '1';
-                        alert('Error loading participants. Please try again.');
+                        alert('Error loading participants: ' + error.message + '. Please try again.');
                     });
             }
 
@@ -847,7 +875,16 @@
                 // Fetch all participants (without pagination)
                 const search = document.getElementById('participantSearch').value;
                 fetch(`{{ route('admin.getParticipants') }}?all=true&search=${encodeURIComponent(search)}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Global fetch response status:', response.status);
+                        if (response.status === 401) {
+                            throw new Error('Authentication failed. Please log in again.');
+                        }
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         // Add all participants to global selection and set default participation type
                         data.users.forEach(user => {
@@ -872,8 +909,10 @@
                     })
                     .catch(error => {
                         console.error('Error selecting all participants:', error);
+                        console.error('Error details:', error.message);
+                        console.error('Error stack:', error.stack);
                         loading.style.display = 'none';
-                        alert('Error selecting all participants. Please try again.');
+                        alert('Error selecting all participants: ' + error.message + '. Please try again.');
                     });
             }
 
@@ -1017,7 +1056,7 @@
                     
                     // Check if participant is already displayed to avoid duplicates
                     const existingParticipant = selectedParticipantsDiv.querySelector(`[data-user-id="${participant.id}"]`) || 
-                                               selectedResourcePersonsDiv.querySelector(`[data-user-id="${participant.id}"]`);
+                                               (selectedResourcePersonsDiv ? selectedResourcePersonsDiv.querySelector(`[data-user-id="${participant.id}"]`) : null);
                     if (!existingParticipant) {
                         // Check if participation type is "Participant" - add to participants section
                         // Otherwise add to resource persons section
@@ -1025,7 +1064,9 @@
                         if (participant.participation_type_name.toLowerCase() === 'participant') {
                             selectedParticipantsDiv.appendChild(participantDiv);
                         } else {
-                            selectedResourcePersonsDiv.appendChild(participantDiv);
+                            if (selectedResourcePersonsDiv) {
+                                selectedResourcePersonsDiv.appendChild(participantDiv);
+                            }
                         }
                     }
                 });
@@ -1047,7 +1088,16 @@
                 // Get all participants data to validate selections
                 const search = document.getElementById('participantSearch').value;
                 fetch(`{{ route('admin.getParticipants') }}?all=true&search=${encodeURIComponent(search)}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Update global selection response status:', response.status);
+                        if (response.status === 401) {
+                            throw new Error('Authentication failed. Please log in again.');
+                        }
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         const selectedUsers = data.users.filter(user => globalSelectedParticipants.has(user.id.toString()));
                         const missingParticipationTypes = [];
@@ -1145,7 +1195,7 @@
                             
                             // Check if participant is already displayed to avoid duplicates
                             const existingParticipant = selectedParticipantsDiv.querySelector(`[data-user-id="${participant.id}"]`) || 
-                                                       selectedResourcePersonsDiv.querySelector(`[data-user-id="${participant.id}"]`);
+                                                       (selectedResourcePersonsDiv ? selectedResourcePersonsDiv.querySelector(`[data-user-id="${participant.id}"]`) : null);
                             if (!existingParticipant) {
                                 // Check if participation type is "Participant" - add to participants section
                                 // Otherwise add to resource persons section
@@ -1153,7 +1203,9 @@
                                 if (participant.participation_type_name.toLowerCase() === 'participant') {
                                     selectedParticipantsDiv.appendChild(participantDiv);
                                 } else {
-                                    selectedResourcePersonsDiv.appendChild(participantDiv);
+                                    if (selectedResourcePersonsDiv) {
+                                        selectedResourcePersonsDiv.appendChild(participantDiv);
+                                    }
                                 }
                             }
                         });
@@ -1170,8 +1222,11 @@
                     })
                     .catch(error => {
                         console.error('Error processing participants:', error);
+                        console.error('Error details:', error.message);
+                        console.error('Error stack:', error.stack);
+                        console.error('Error response:', error.response);
                         loading.style.display = 'none';
-                        alert('Error processing participants. Please try again.');
+                        alert('Error processing participants: ' + error.message + '. Please try again.');
                     });
             }
 
@@ -1237,7 +1292,8 @@
 
             // Add event listener for resource persons section
             const selectedResourcePersonsDiv = document.getElementById('selectedResourcePersons');
-            selectedResourcePersonsDiv.addEventListener('click', function(e) {
+            if (selectedResourcePersonsDiv) {
+                selectedResourcePersonsDiv.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-participant')) {
                     const button = e.target.closest('.remove-participant');
                     const userId = button.dataset.userId;
@@ -1282,6 +1338,7 @@
                     console.log('Current selected participants:', Array.from(form.querySelectorAll('input[name="participants[]"]')).map(input => input.value));
                 }
             });
+            } // End of selectedResourcePersonsDiv check
 
             // Form validation and submission - Keep this, ensure it reads from the hidden inputs
             form.addEventListener('submit', function(e) {

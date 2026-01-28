@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('profile_picture')->nullable()->after('email_verified_at');
+        Schema::table('training_participants', function (Blueprint $table) {
+            $table->string('status')->nullable()->after('year');
+            $table->string('type')->nullable()->after('status');
         });
     }
 
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('profile_picture');
+        Schema::table('training_participants', function (Blueprint $table) {
+            $table->dropColumn(['status', 'type']);
         });
     }
 };

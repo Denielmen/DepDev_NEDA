@@ -504,7 +504,7 @@
                             style="display: none;">
                             No pre-evaluation data found for this training.
                         </div>
-                        <form method="POST" id="preEvaluationForm">
+                        <form method="POST" id="preEvaluationForm" action="#">
                             @csrf
                             <input type="hidden" name="training_id" id="modalTrainingId">
                             <input type="hidden" name="type" id="modalEvaluationType">
@@ -587,7 +587,9 @@
                         // Submission mode: enable inputs
                         submitPreEvaluationButton.style.display = 'block';
                         modalProficiencyRadios.forEach(radio => radio.disabled = false);
-                        preEvaluationForm.action = `/user/training/${trainingId}/rate`;
+                        preEvaluationForm.action = `/user/training/${trainingId}/submit-pre-evaluation`;
+                        preEvaluationNoDataMessage.style.display = 'none';
+                        preEvaluationForm.style.display = 'block';
                     }
                     console.log('Form action set to:', preEvaluationForm.action); // Debugging line
                 });

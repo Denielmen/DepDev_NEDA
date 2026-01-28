@@ -114,6 +114,10 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::post('/training/{id}/submit-participant-evaluation', [TrainingProfileController::class, 'submitParticipantEvaluation'])
         ->name('user.training.submit.participant.evaluation');
 
+    // Route for submitting pre-evaluation
+    Route::post('/training/{id}/submit-pre-evaluation', [TrainingProfileController::class, 'submitPreEvaluation'])
+        ->name('user.training.submit.pre.evaluation');
+
     // Route for viewing evaluations
     Route::get('/evaluation/view/{training_id}/{type}', [TrainingProfileController::class, 'viewEvaluationData'])
         ->name('user.evaluation.view');

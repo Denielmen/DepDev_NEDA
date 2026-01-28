@@ -50,7 +50,7 @@ class TrainingController extends Controller
             'implementation_date_from' => 'required|date',
             'implementation_date_to' => 'required|date',
             'budget' => 'nullable|numeric',
-            'no_of_hours' => 'nullable|integer',
+            'no_of_hours' => 'nullable|numeric',
             'superior' => 'nullable|string|max:255',
             'provider' => 'nullable|string|max:255',
             'dev_target' => 'nullable|string',

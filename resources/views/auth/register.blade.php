@@ -210,6 +210,29 @@
                 <!-- Registration Form -->
                 <form method="POST" action="{{ route('register') }}">
                     @csrf
+                    
+                    <!-- Error Messages -->
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    
+                    @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                    
+                    @if(session('status'))
+                        <div class="alert alert-success">
+                            {{ session('status') }}
+                        </div>
+                    @endif
 
                     <!-- Name Fields -->
                     <div class="row mb-3">
@@ -403,7 +426,7 @@
                     yearsInput.value = years; // Keep the hidden field as just years for backend
                 } else {
                     yearsDisplay.textContent = '0 months';
-                    yearsInput.value = '';
+                    yearsInput.value = '0';
                 }
             }
 

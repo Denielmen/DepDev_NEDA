@@ -979,6 +979,63 @@ class TrainingProfileController extends Controller
         return view('adminPanel.post_eval', compact('training', 'user_id', 'evaluation'));
     }
 
+    public function submitPreEvaluation(Request $request, $id)
+    {
+        Log::info('submitPreEvaluation method called', [
+            'training_id' => $id,
+            'user_id' => Auth::id(),
+            'authenticated' => Auth::check(),
+            'request_all' => $request->all()
+        ]);
+
+        Log::info('Pre-evaluation submission attempt', [
+            'training_id' => $id,
+            'user_id' => Auth::id(),
+            'request_data' => $request->all()
+        ]);
+
+        try {
+            $validatedData = $request->validate([
+                'training_id' => 'required|exists:trainings,id',
+                'type' => 'required|in:participant_pre,supervisor_pre',
+                'rating' => 'required|integer|min:1|max:4',
+            ]);
+
+            $training = Training::findOrFail($id);
+            $userId = Auth::id();
+
+            // Check if the user is a participant in this training
+            if (! $training->participants()->where('users.id', $userId)->exists()) {
+                return response()->json(['success' => false, 'message' => 'You are not authorized to evaluate this training.'], 403);
+            }
+
+            // Get or create evaluation record for this training-user combination
+            $evaluation = \App\Models\TrainingEvaluation::getOrCreate($id, $userId);
+
+            // Update the appropriate pre-evaluation rating
+            if ($validatedData['type'] === 'participant_pre') {
+                $evaluation->participant_pre_rating = $validatedData['rating'];
+            } elseif ($validatedData['type'] === 'supervisor_pre') {
+                $evaluation->supervisor_pre_rating = $validatedData['rating'];
+            }
+
+            $evaluation->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pre-evaluation submitted successfully!',
+                'pre_rating' => $evaluation->participant_pre_rating,
+                'post_rating' => $evaluation->participant_post_rating,
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['success' => false, 'message' => 'Validation failed.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            \Log::error('Pre-evaluation submission error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred while submitting the pre-evaluation.'], 500);
+        }
+    }
+
     public function submitParticipantEvaluation(Request $request, $id)
     {
         Log::info('Participant Evaluation Submission Request Received', $request->all());
