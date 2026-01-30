@@ -1,4 +1,13 @@
-*
-!private/
-!public/
-!.gitignore
+.env
+/vendor
+/node_modules
+!adminPanel/
+!lang/
+!resources/views/
+!auth/
+!userPanel/
+!layouts/
+!components/
+!training/
+!profile/
+!search/
