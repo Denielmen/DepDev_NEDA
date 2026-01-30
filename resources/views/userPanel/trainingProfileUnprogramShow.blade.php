@@ -131,6 +131,77 @@
             font-size: 32px;
             margin-right: 8px;
         }
+        .training-info {
+            margin: 20px 0;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 200px;
+        }
+        .info-value {
+            color: #212529;
+            margin-left: 10px;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        .btn-back {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 1.2;
+            height: 40px;
+            min-width: 80px;
+            box-sizing: border-box;
+        }
+        .btn-back:hover {
+            background-color: #004080;
+            color: white;
+        }
+        .btn-edit {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 1.2;
+            height: 40px;
+            min-width: 80px;
+            box-sizing: border-box;
+        }
+        .btn-edit:hover {
+            background-color: #0056b3;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -175,18 +246,16 @@
             </div>
             <div class="details-card">
                 <h2 class="details-title">Training Details</h2>
-                <table class="details-table">
-                    <tr>
-                        <td class="label">Title/Area:</td>
-                        <td>{{ $training->title ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Competency:</td>
-                        <td>{{ $training->competency->name ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">User Role:</td>
-                        <td>
+                
+                <div class="training-info">
+                    <div class="info-item">
+                        <span class="info-label">Competency:</span>
+                        <span class="info-value">{{ $training->competency->name ?? '' }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">User Role:</span>
+                        <span class="info-value">
                             @php
                                 $currentUser = Auth::user();
                                 $userRole = 'N/A';
@@ -199,15 +268,17 @@
                                 }
                             @endphp
                             {{ $userRole }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">No. of Hours:</td>
-                        <td>{{ $training->no_of_hours ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Date of Attendance:</td>
-                        <td>
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">No. of Hours:</span>
+                        <span class="info-value">{{ $training->no_of_hours ?? '' }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Date of Attendance:</span>
+                        <span class="info-value">
                             @if($training->implementation_date_from && $training->implementation_date_to)
                                 {{ $training->implementation_date_from->format('m/d/Y') }} - {{ $training->implementation_date_to->format('m/d/Y') }}
                             @elseif($training->implementation_date_from)
@@ -217,25 +288,28 @@
                             @else
                                 N/A
                             @endif
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">Learning Service Provider:</td>
-                        <td>{{ $training->provider ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Status:</td>
-                        <td>{{ $training->status ?? '' }}</td>
-                    </tr>
-                </table>
-                @if(Auth::id() === ($training->user_id ?? null))
-                <div class="d-flex justify-content-end mt-3">
-                    <a href="{{ route('user.training.profile.unprogram.edit', $training->id) }}" class="btn btn-primary" style="background-color:#0d6efd;border:none;">
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Learning Service Provider:</span>
+                        <span class="info-value">{{ $training->provider ?? '' }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value">{{ $training->status ?? '' }}</span>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    @if(Auth::id() === ($training->user_id ?? null))
+                    <a href="{{ route('user.training.profile.unprogram.edit', $training->id) }}" class="btn btn-edit">
                         <i class="bi bi-pencil-square"></i>
                         Edit
                     </a>
+                    @endif
                 </div>
-                @endif
             </div>
         </div>
     </div>
