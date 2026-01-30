@@ -1,4 +1,5 @@
 /.env
 /node_modules
-/vendor
-/public/storage
+
+!resources/views/
+
