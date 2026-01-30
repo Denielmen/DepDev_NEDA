@@ -93,7 +93,8 @@ class TrainingController extends Controller
             $participationTypeId = $request->participation_types[$participantId] ?? null;
             if ($participationTypeId) {
                 $training->participants()->attach($participantId, [
-                    'participation_type_id' => $participationTypeId
+                    'participation_type_id' => $participationTypeId,
+                    'status' => 'Implemented'
                 ]);
             }
         }
