@@ -266,6 +266,17 @@
                     </tr>
                     @endif
                 </table>
+                
+                <!-- Edit Button for Program Trainings -->
+                @if(Auth::check())
+                <div class="d-flex justify-content-end mt-3">
+                    <button class="btn btn-primary" style="background-color:#0d6efd;border:none;" onclick="alert('Edit functionality for Program trainings coming soon!')">
+                        <i class="bi bi-pencil-square"></i>
+                        Edit
+                    </button>
+                </div>
+                @endif
+                
                 <div class="btn-row">
                     <a href="{{ route('user.training.profile.program') }}" class="btn btn-back">Back</a>
                 </div>
