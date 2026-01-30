@@ -1,4 +1,13 @@
-/.env
-/node_modules
+.env
 /vendor
-/public/storage
+/node_modules
+!adminPanel/
+!lang/
+!resources/views/
+!auth/
+!userPanel/
+!layouts/
+!components/
+!training/
+!profile/
+!search/
