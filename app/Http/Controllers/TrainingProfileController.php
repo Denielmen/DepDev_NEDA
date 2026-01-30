@@ -148,7 +148,7 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingProfileUnProgram', compact('trainings', 'participationTypes'));
     }
 
-    public function show(Training $training)
+    public function show(Training $training, Request $request)
     {
         $userId = Auth::id();
 
@@ -157,21 +157,29 @@ class TrainingProfileController extends Controller
             abort(403, 'You are not authorized to view this training.');
         }
 
+        // Check if this is being viewed from the Completed trainings section
+        $fromCompleted = $request->get('from_completed') === 'true' || 
+                        str_contains($request->header('referer', ''), 'unprogrammed');
+        
+        if ($fromCompleted && $training->type === 'Program') {
+            // Show Unprogrammed-style details for Program trainings when viewed from Completed section
+            $participationTypes = ParticipationType::all()->keyBy('id');
+            return view('userPanel.trainingProfileUnprogramShow', compact('training', 'participationTypes'));
+        }
+
         // Force a fresh reload of the participants relationship
         $training->refresh();
 
         // Eager load the participants relationship with their pivot data
         $training->load(['participants' => function ($query) {
             $query->orderBy('last_name')->orderBy('first_name');
-        }, 'competency']);
+        }]);
 
-        // Get or create evaluation record for this training-user combination
-        $evaluation = \App\Models\TrainingEvaluation::getOrCreate($training->id, $userId);
-
-        // Get participation types for display
+        // Get participation types for the original Program view
         $participationTypes = ParticipationType::all()->keyBy('id');
 
-        return view('userPanel.trainingProfileShow', compact('training', 'participationTypes', 'evaluation'));
+        // Show original Program-style details
+        return view('userPanel.trainingProfileShow', compact('training', 'participationTypes'));
     }
 
     public function adminShow(Training $training)
@@ -198,13 +206,22 @@ class TrainingProfileController extends Controller
         return view('userPanel.trainingProfileUnprogramShow', compact('training'));
     }
 
+    public function showCompleted(Training $training)
+    {
+        // Show Program training with Unprogrammed-style details when viewed from Completed section
+        return view('userPanel.trainingProfileUnprogramShow', compact('training'));
+    }
+
     public function editUnprogrammed($id)
     {
         $training = Training::where('type', 'Unprogrammed')->findOrFail($id);
-        // Ensure only owner can edit
-        if (Auth::id() !== $training->user_id) {
+        $userId = Auth::id();
+        
+        // Allow owners or participants to edit
+        if ($userId !== $training->user_id && !$training->participants()->where('users.id', $userId)->exists()) {
             abort(403, 'You are not authorized to edit this training.');
         }
+        
         $competencies = Competency::orderBy('name')->get();
         $participationTypes = ParticipationType::all();
 
@@ -214,7 +231,10 @@ class TrainingProfileController extends Controller
     public function updateUnprogrammed(Request $request, $id)
     {
         $training = Training::where('type', 'Unprogrammed')->findOrFail($id);
-        if (Auth::id() !== $training->user_id) {
+        $userId = Auth::id();
+        
+        // Allow owners or participants to update
+        if ($userId !== $training->user_id && !$training->participants()->where('users.id', $userId)->exists()) {
             abort(403, 'You are not authorized to update this training.');
         }
 
@@ -343,6 +363,53 @@ class TrainingProfileController extends Controller
         }
 
         return redirect()->route('user.training.profile.unprogram.show', $training->id)
+            ->with('success', 'Training updated successfully.');
+    }
+
+    public function editProgram(Training $training)
+    {
+        $userId = Auth::id();
+
+        // Check if the user is a participant in this training
+        if (! $training->participants()->where('users.id', $userId)->exists()) {
+            abort(403, 'You are not authorized to edit this training.');
+        }
+
+        $competencies = Competency::orderBy('name')->get();
+        $participationTypes = ParticipationType::all();
+
+        return view('userPanel.trainingProfileProgramEdit', compact('training', 'competencies', 'participationTypes'));
+    }
+
+    public function updateProgram(Request $request, Training $training)
+    {
+        $userId = Auth::id();
+
+        // Check if the user is a participant in this training
+        if (! $training->participants()->where('users.id', $userId)->exists()) {
+            abort(403, 'You are not authorized to update this training.');
+        }
+
+        $validated = $request->validate([
+            'participation_type_id' => 'required|exists:participation_types,id',
+            'no_of_hours' => 'nullable|numeric',
+            'implementation_date_from' => 'nullable|date',
+            'implementation_date_to' => 'nullable|date|after_or_equal:implementation_date_from',
+        ]);
+
+        // Update current user's participation details
+        $training->participants()->updateExistingPivot($userId, [
+            'participation_type_id' => $validated['participation_type_id'],
+        ]);
+
+        // Update training details
+        $training->update([
+            'no_of_hours' => $validated['no_of_hours'] ?? $training->no_of_hours,
+            'implementation_date_from' => $validated['implementation_date_from'] ?? $training->implementation_date_from,
+            'implementation_date_to' => $validated['implementation_date_to'] ?? $training->implementation_date_to,
+        ]);
+
+        return redirect()->route('user.training.profile.show', $training->id)
             ->with('success', 'Training updated successfully.');
     }
 

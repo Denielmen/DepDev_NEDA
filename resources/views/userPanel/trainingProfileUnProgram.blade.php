@@ -326,13 +326,11 @@
                             </td>
                             <td class="text-center">
                                 @if($training->type === 'Program')
-                                    <a href="{{ route('user.training.profile.show', $training->id) }}" class="btn btn-info btn-sm" 
-                                       onclick="this.href='{{ route('user.training.profile.show', $training->id) }}'">
+                                    <a href="{{ route('user.training.profile.show', $training->id) }}?from_completed=true" class="btn btn-info btn-sm">
                                          View
                                     </a>
                                 @else
-                                    <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-info btn-sm"
-                                       onclick="this.href='{{ route('user.training.profile.unprogram.show', $training->id) }}'">
+                                    <a href="{{ route('user.training.profile.unprogram.show', $training->id) }}" class="btn btn-info btn-sm">
                                          View
                                     </a>
                                 @endif

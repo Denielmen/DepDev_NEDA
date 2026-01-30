@@ -61,6 +61,12 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/training-profile/program/{training}', [TrainingProfileController::class, 'show'])
         ->name('user.training.profile.show');
 
+    Route::get('/training-profile/program/{training}/edit', [TrainingProfileController::class, 'editProgram'])
+        ->name('user.training.profile.program.edit');
+
+    Route::put('/training-profile/program/{training}', [TrainingProfileController::class, 'updateProgram'])
+        ->name('user.training.profile.program.update');
+
     Route::get('/training-profile/unprogrammed/{id}', [TrainingProfileController::class, 'showUnprogrammed'])
         ->name('user.training.profile.unprogram.show');
 

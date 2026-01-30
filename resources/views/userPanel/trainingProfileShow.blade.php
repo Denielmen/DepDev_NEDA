@@ -92,24 +92,55 @@
         .details-table tr:last-child td {
             border-bottom: none;
         }
-        .btn-back, .btn-eval {
-            background-color: #003366;
-            color: #fff;
-            border: none;
-            padding: 8px 32px;
-            border-radius: 4px;
-            font-weight: 500;
-            margin-top: 24px;
-            text-decoration: none;
-        }
-        .btn-back:hover, .btn-eval:hover {
-            background-color: #004080;
-            color: #fff;
-        }
-        .btn-row {
+        .action-buttons {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        .btn-back {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 1.2;
+            height: 40px;
+            min-width: 80px;
+            box-sizing: border-box;
+        }
+        .btn-back:hover {
+            background-color: #004080;
+            color: white;
+        }
+        .btn-edit {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 1.2;
+            height: 40px;
+            min-width: 80px;
+            box-sizing: border-box;
+        }
+        .btn-edit:hover {
+            background-color: #0056b3;
+            color: white;
         }
         .dropdown-item {
             padding: 0.5rem 1rem;
@@ -267,18 +298,11 @@
                     @endif
                 </table>
                 
-                <!-- Edit Button for Program Trainings -->
-                @if(Auth::check())
-                <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-primary" style="background-color:#0d6efd;border:none;" onclick="alert('Edit functionality for Program trainings coming soon!')">
-                        <i class="bi bi-pencil-square"></i>
-                        Edit
-                    </button>
-                </div>
-                @endif
-                
-                <div class="btn-row">
-                    <a href="{{ route('user.training.profile.program') }}" class="btn btn-back">Back</a>
+                <div class="action-buttons">
+                    <a href="{{ route('user.training.profile.program') }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i>
+                        Back
+                    </a>
                 </div>
             </div>
         </div>
