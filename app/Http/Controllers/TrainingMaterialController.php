@@ -80,12 +80,40 @@ class TrainingMaterialController extends Controller
             return back()->with('error', 'No file available for download.');
         }
 
+        // Check if the file exists in the current year's directory
+        $currentYear = date('Y');
         $filePath = storage_path('app/public/' . $trainingMaterial->file_path);
-
+        
+        // If file doesn't exist, check if it's in a previous year's directory
         if (!file_exists($filePath)) {
-            return back()->with('error', 'File not found.');
+            // Extract the filename from the path
+            $filename = basename($trainingMaterial->file_path);
+            
+            // Check previous years (up to 5 years back)
+            for ($year = $currentYear - 1; $year >= $currentYear - 5; $year--) {
+                $yearPath = str_replace("/$currentYear/", "/$year/", $trainingMaterial->file_path);
+                $testPath = storage_path('app/public/' . $yearPath);
+                
+                if (file_exists($testPath)) {
+                    $filePath = $testPath;
+                    break;
+                }
+            }
+            
+            // If still not found, return error
+            if (!file_exists($filePath)) {
+                return back()->with('error', 'File not found. Please contact support if this issue persists.');
+            }
         }
 
-        return response()->download($filePath);
+        $headers = [
+            'Content-Type' => mime_content_type($filePath),
+            'Content-Disposition' => 'attachment; filename="' . basename($filePath) . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0'
+        ];
+
+        return response()->download($filePath, basename($filePath), $headers);
     }
 }
