@@ -82,9 +82,16 @@ class TrainingController extends Controller
             $competencyId = $request->competency_id;
         }
 
-        // Prepare training data with the correct competency_id
+        // Prepare training data with the correct competency_id and status
         $trainingData = $request->all();
         $trainingData['competency_id'] = $competencyId;
+        
+        // Set status based on training type
+        if ($request->type === 'Program') {
+            $trainingData['status'] = 'Not Yet Implemented';
+        } else {
+            $trainingData['status'] = 'Implemented';
+        }
 
         $training = Training::create($trainingData);
 

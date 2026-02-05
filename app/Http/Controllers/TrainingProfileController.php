@@ -467,6 +467,7 @@ class TrainingProfileController extends Controller
                             $training->participants()->attach($userId, [
                                 'participation_type_id' => $participationTypeId,
                                 'year' => $year,
+                                'status' => 'Implemented'
                             ]);
                         }
                     }
@@ -631,6 +632,7 @@ class TrainingProfileController extends Controller
                 $training->participants()->attach($participantId, [
                     'year' => $validated['participant_years'][$participantId] ?? $validated['period_from'],
                     'participation_type_id' => $validated['participation_types'][$participantId],
+                    'status' => 'Not Yet Implemented'
                 ]);
             }
 
@@ -710,6 +712,7 @@ class TrainingProfileController extends Controller
         $training->participants()->attach($request->user_id, [
             'participation_type_id' => $request->participation_type_id,
             'year' => $request->year,
+            'status' => 'Not Yet Implemented'
         ]);
 
         return back()->with('success', 'Participant added successfully.');
